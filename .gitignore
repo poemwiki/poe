@@ -14,6 +14,8 @@ yarn-error.log
 /_ide_helper.php
 .phpunit.result.cache
 .env
+.env.production
 .env.backup
 .phpunit.result.cache
 fields_sample.json
+/public/*
