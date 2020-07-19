@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreatePoemRequest;
 use App\Http\Requests\UpdatePoemRequest;
+use App\Models\Language;
 use App\Repositories\PoemRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
@@ -81,7 +82,7 @@ class PoemController extends AppBaseController
             return redirect(route('poems.index'));
         }
 
-        return view('poems.show')->with('poem', $poem);
+        return view('poems.show')->with('poem', $poem)->with('content', $poem->content->content);
     }
 
     /**
@@ -101,7 +102,15 @@ class PoemController extends AppBaseController
             return redirect(route('poems.index'));
         }
 
-        return view('poems.edit')->with('poem', $poem);
+        $langs = Language::select(['id', 'name_cn'])->get()->toArray();
+        $langList = [];
+        foreach ($langs as $value) {
+            $langList[$value['id']] = $value['name_cn'];
+        };
+//        var_dump($langList);die;
+
+        return view('poems.edit')->with('poem', $poem)
+          ->with('langList', $langList);
     }
 
     /**

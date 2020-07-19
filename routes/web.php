@@ -49,3 +49,6 @@ Route::get('/home', 'HomeController@index')->middleware('verified');
 
 Route::resource('poems', 'PoemController');
 
+
+
+Route::resource('languages', 'LanguageController');

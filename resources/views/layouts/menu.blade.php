@@ -18,3 +18,9 @@
     </a>
 </li>
 
+<li class="nav-item {{ Request::is('languages*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('languages.index') }}">
+        <i class="nav-icon icon-cursor"></i>
+        <span>Languages</span>
+    </a>
+</li>

@@ -42,8 +42,8 @@
 
 <!-- Poem Field -->
 <div class="form-group">
-    {!! Form::label('poem', 'Poem:') !!}
-    <p>{{ $poem->poem }}</p>
+    {!! Form::label('content', '内容:') !!}
+    <p>{{ $content }}</p>
 </div>
 
 <!-- Length Field -->

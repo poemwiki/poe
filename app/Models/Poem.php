@@ -169,8 +169,8 @@ class Poem extends Model
     protected $casts = [
         'id' => 'integer',
         'title' => 'string',
-        'language' => 'boolean',
-        'is_original' => 'boolean',
+        'language' => 'integer',
+        'is_original' => 'integer',
         'poet' => 'string',
         'poet_cn' => 'string',
         'bedtime_post_id' => 'integer',
@@ -184,8 +184,9 @@ class Poem extends Model
         'date' => 'string',
         'dynasty' => 'string',
         'nation' => 'string',
-        'need_confirm' => 'boolean',
-        'is_lock' => 'boolean'
+        'need_confirm' => 'integer',
+        'is_lock' => 'boolean',
+        'content_id' => 'integer'
     ];
 
     /**
@@ -194,9 +195,9 @@ class Poem extends Model
      * @var array
      */
     public static $rules = [
-        'updated_at' => 'required',
-        'created_at' => 'required',
-        'is_lock' => 'required'
+//        'updated_at' => 'required',
+//        'created_at' => 'required',
+//        'is_lock' => 'required'
     ];
 
     public static function noSpace($str) {
@@ -208,6 +209,20 @@ class Poem extends Model
 
     public static function contentHash($str) {
         return hash('sha256', self::pureStr($str));
+    }
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     **/
+    public function language() {
+        return $this->belongsTo(\App\Models\Language::class, 'id', 'language');
+    }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\hasOne
+     **/
+    public function content() {
+        return $this->hasOne(\App\Models\Content::class, 'id', 'content_id');
     }
 
 }

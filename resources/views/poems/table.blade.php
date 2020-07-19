@@ -29,7 +29,7 @@
                 <td>{{ $poem->translator }}</td>
                 <td>{{ $poem->dynasty }}</td>
                 <td>{{ $poem->nation }}</td>
-                <td>{{ $poem->need_confirm == 1 || $poem->need_confirm == null ? '待审' : '已审'  }}</td>
+                <td>{{ $poem->need_confirm == 1 || $poem->need_confirm === null ? '待审' : '已审'  }}</td>
                 <td>
                     {!! Form::open(['route' => ['poems.destroy', $poem->id], 'method' => 'delete']) !!}
                     <div class='btn-group'>

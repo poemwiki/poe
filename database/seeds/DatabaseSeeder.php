@@ -12,21 +12,22 @@ class DatabaseSeeder extends Seeder
      * @return void
      */
     public function run() {
-        $poems = Poem::with('content');
-        var_dump(count($poems));
-        die;
+        $poems = Poem::all();
 
         foreach($poems as $poem) {
-//            break;
 //            if($poem->id == 1) continue;
             $hash = Poem::contentHash($poem->poem);
-            Content::create([
+            $content = Content::create([
                 'entry_id' => $poem->id,
                 'type' => 0,
                 'content' => $poem->poem,
                 'hash' => $hash,
                 'new_hash' => $hash
             ]);
+
+            $poem->content_id = $content->id;
+            $poem->save();
+//            break;
         }
     }
 }
