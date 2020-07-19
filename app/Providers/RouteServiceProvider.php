@@ -25,6 +25,7 @@ class RouteServiceProvider extends ServiceProvider
     public const INDEX = '/';
     public const LOGIN = '/login';
     public const REGISTER = '/register';
+    public const EDIT = '/poems';
     public const ASK_INVITE_CODE = '/get-invite-code';
 
     /**

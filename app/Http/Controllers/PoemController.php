@@ -30,7 +30,7 @@ class PoemController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $poems = $this->poemRepository->all();
+        $poems = $this->poemRepository->paginate(15, ['id', 'title', 'poet', 'poet_cn', 'length', 'translator', 'dynasty', 'nation', 'language', 'is_original', 'need_confirm']);
 
         return view('poems.index')
             ->with('poems', $poems);

@@ -1,22 +1,38 @@
 <!-- Title Field -->
 <div class="form-group col-sm-6">
-    {!! Form::label('title', 'Title:') !!}
+    {!! Form::label('title', '标题:') !!}
     {!! Form::text('title', null, ['class' => 'form-control']) !!}
 </div>
 
 <!-- Language Field -->
 <div class="form-group col-sm-6">
-    {!! Form::label('language', 'Language:') !!}
+    {!! Form::label('language', '语言:') !!}
     <label class="checkbox-inline">
         {!! Form::hidden('language', 0) !!}
-        {!! Form::checkbox('language', '1', null) !!}
+        {!! Form::select('language', [
+        '汉语',
+        '英语',
+        '德语',
+        '法语',
+        '意大利语',
+        '西班牙语',
+        '日语',
+        '韩语',
+        '希腊语',
+        '俄语',
+        '葡萄牙语',
+        '波兰语',
+        '瑞典语',
+        '印度语',
+        '阿拉伯语'
+        ], null) !!}
     </label>
 </div>
 
 
 <!-- Is Original Field -->
 <div class="form-group col-sm-6">
-    {!! Form::label('is_original', 'Is Original:') !!}
+    {!! Form::label('is_original', '类型:') !!}
     <label class="checkbox-inline">
         {!! Form::hidden('is_original', 0) !!}
         {!! Form::checkbox('is_original', '1', null) !!}

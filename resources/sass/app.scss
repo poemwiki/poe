@@ -1,8 +1,16 @@
 // Fonts
-@import url('https://fonts.googleapis.com/css?family=Nunito');
+@import url('https://unpkg.com/element-ui/lib/theme-chalk/index.css');
+@import url('./NunitoFont.css');
 
 // Variables
 @import 'variables';
 
 // Bootstrap
 @import '~bootstrap/scss/bootstrap';
+
+
+main {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}

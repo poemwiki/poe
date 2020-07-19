@@ -2,48 +2,34 @@
     <table class="table table-striped" id="poems-table">
         <thead>
             <tr>
-                <th>Title</th>
-        <th>Language</th>
-        <th>Is Original</th>
-        <th>Poet</th>
-        <th>Poet Cn</th>
-        <th>Bedtime Post Id</th>
-        <th>Bedtime Post Title</th>
-        <th>Poem</th>
-        <th>Length</th>
-        <th>Translator</th>
-        <th>From</th>
-        <th>Year</th>
-        <th>Month</th>
-        <th>Date</th>
-        <th>Dynasty</th>
-        <th>Nation</th>
-        <th>Need Confirm</th>
-        <th>Is Lock</th>
-                <th colspan="3">Action</th>
+                <th>ID</th>
+                <th>标题</th>
+                {{--<th>语言</th>--}}
+                <th colspan="2">类型</th>
+                <th>作者</th>
+                <th>作者中文名</th>
+                <th>内容长度</th>
+                <th>译者</th>
+                <th>朝代</th>
+                <th>国家</th>
+                <th>审核状态</th>
+                <th colspan="3">操作</th>
             </tr>
         </thead>
         <tbody>
         @foreach($poems as $poem)
             <tr>
+                <td><b>{{ $poem->id }}</b></td>
                 <td>{{ $poem->title }}</td>
-            <td>{{ $poem->language }}</td>
-            <td>{{ $poem->is_original }}</td>
-            <td>{{ $poem->poet }}</td>
-            <td>{{ $poem->poet_cn }}</td>
-            <td>{{ $poem->bedtime_post_id }}</td>
-            <td>{{ $poem->bedtime_post_title }}</td>
-            <td>{{ $poem->poem }}</td>
-            <td>{{ $poem->length }}</td>
-            <td>{{ $poem->translator }}</td>
-            <td>{{ $poem->from }}</td>
-            <td>{{ $poem->year }}</td>
-            <td>{{ $poem->month }}</td>
-            <td>{{ $poem->date }}</td>
-            <td>{{ $poem->dynasty }}</td>
-            <td>{{ $poem->nation }}</td>
-            <td>{{ $poem->need_confirm }}</td>
-            <td>{{ $poem->is_lock }}</td>
+                {{--<td>{{ $poem->language }}</td>--}}
+                <td colspan="2">{{ $poem->is_original == 0 ? '译作' : '原作' }}</td>
+                <td>{{ $poem->poet }}</td>
+                <td>{{ $poem->poet_cn }}</td>
+                <td>{{ $poem->length }}</td>
+                <td>{{ $poem->translator }}</td>
+                <td>{{ $poem->dynasty }}</td>
+                <td>{{ $poem->nation }}</td>
+                <td>{{ $poem->need_confirm == 1 || $poem->need_confirm == null ? '待审' : '已审'  }}</td>
                 <td>
                     {!! Form::open(['route' => ['poems.destroy', $poem->id], 'method' => 'delete']) !!}
                     <div class='btn-group'>
@@ -57,4 +43,5 @@
         @endforeach
         </tbody>
     </table>
+    {{ $poems->links() }}
 </div>

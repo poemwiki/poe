@@ -3,19 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>{{config('app.name')}}</title>
-    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="shortcut icon" href="/icon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    @include('layouts.icon')
 
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="/vendor/Nunito.css" rel="stylesheet">
 
     <!-- Styles -->
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <?php
     $user = Auth::user();
@@ -50,8 +47,10 @@
 
                     @if (!\App\Http\Middleware\CheckInviteCode::isInviteCodeLimited($inviteCode) && $user->email_verified_at)
                         <li class="nav-item d-md-down-none mr-4">
-                            <input id="invite_link" class="d-none" type="text" value="{{ url('/register?invite_code_from=' . $inviteCode) }}">
-                            <a class="text-primary nav-link" href="#" onclick="event.preventDefault();  copyInviteLink()">@lang('Copy my invite link')</a>
+                            <button type="button" id="copy"
+                                    data-clipboard-text="{{ url('/register?invite_code_from=' . $inviteCode) }}"
+                                    data-placement="bottom"
+                                    class="text-primary nav-link">@lang('Copy my invite link')</button>
                         </li>
                     @endif
 
@@ -79,20 +78,20 @@
     </nav>
 
     <div class="sidebar">
-        <nav class="sidebar-nav">
-            <ul class="nav">
-                <li class="nav-item active open">
-                    <a class="nav-link active" href="http://pwiki.lol:8881/contents">
-                        <i class="fa fa-file-text" aria-hidden="true"></i>
-                        <span>诗歌</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        <button class="sidebar-minimizer brand-minimizer" type="button"></button>
+        {{--<nav class="sidebar-nav">--}}
+            {{--<ul class="nav">--}}
+                {{--<li class="nav-item active open">--}}
+                    {{--<a class="nav-link active" href="http://pwiki.lol:8881/contents">--}}
+                        {{--<i class="fa fa-file-text" aria-hidden="true"></i>--}}
+                        {{--<span>诗歌</span>--}}
+                    {{--</a>--}}
+                {{--</li>--}}
+            {{--</ul>--}}
+        {{--</nav>--}}
+        {{--<button class="sidebar-minimizer brand-minimizer" type="button"></button>--}}
     </div>
 
-    <main class="py-4">
+    <main>
         @yield('content')
     </main>
 
@@ -103,5 +102,6 @@
         </div>
     </footer>
 </div>
+
 </body>
 </html>

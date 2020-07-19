@@ -18,4 +18,5 @@ yarn-error.log
 .env.backup
 .phpunit.result.cache
 fields_sample.json
-/public/*
+/public/css
+/public/js
