@@ -200,6 +200,22 @@ class Poem extends Model
 //        'is_lock' => 'required'
     ];
 
+    public static function boot()
+    {
+        parent::boot();
+
+        self::creating(function($model){
+            $model->length = grapheme_strlen($model->poem);
+        });
+
+
+        self::updating(function($model){
+            $model->length = grapheme_strlen($model->poem);
+        });
+    }
+
+
+
     public static function noSpace($str) {
         return preg_replace("#\s+#u", '', $str);
     }

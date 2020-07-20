@@ -45,7 +45,7 @@ class Language extends Model
     use SoftDeletes;
 
     public $table = 'language';
-    
+
 
     protected $dates = ['deleted_at'];
 
@@ -73,7 +73,7 @@ class Language extends Model
      * @var array
      */
     public static $rules = [
-        
+
     ];
 
     /**
@@ -82,5 +82,14 @@ class Language extends Model
     public function poems()
     {
         return $this->hasMany(\App\Models\Poem::class, 'language', 'id');
+    }
+
+    public static function listAll() {
+        $langs = self::select(['id', 'name_cn'])->get()->toArray();
+        $langList = [];
+        foreach ($langs as $value) {
+            $langList[$value['id']] = $value['name_cn'];
+        };
+        return $langList;
     }
 }

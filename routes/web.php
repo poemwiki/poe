@@ -52,3 +52,6 @@ Route::resource('poems', 'PoemController');
 
 
 Route::resource('languages', 'LanguageController');
+
+
+Route::resource('bot', 'BotController');

@@ -1,31 +1,43 @@
 <!-- Title Field -->
 <div class="form-group">
-    {!! Form::label('title', 'Title:') !!}
     <p>{{ $poem->title }}</p>
+</div>
+
+<!-- Poem Field -->
+<div class="form-group">
+    <pre>{{ $poem->poem }}
+
+
+作者 / {{ $poem->poet }}
+    </pre>
+</div>
+<br>
+<br>
+@if(Route::currentRouteName() === 'poems.show' && $poem->bedtime_post_id)
+    <!-- Bedtime Post Id Field -->
+    <div class="form-group">
+        {!! Form::label('bedtime_post_id', '读睡博客链接') !!}
+        <a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}"> {{ $poem->bedtime_post_title }}</a>
+    </div>
+@endif
+
+
+<!-- Poet Cn Field -->
+<div class="form-group">
+    {!! Form::label('poet_cn', 'Poet Cn:') !!}
+    <p>{{ $poem->poet_cn }}</p>
 </div>
 
 <!-- Language Field -->
 <div class="form-group">
     {!! Form::label('language', 'Language:') !!}
-    <p>{{ $poem->language }}</p>
+    <p>{{ $langList[$poem->language] }}</p>
 </div>
 
 <!-- Is Original Field -->
 <div class="form-group">
     {!! Form::label('is_original', 'Is Original:') !!}
     <p>{{ $poem->is_original }}</p>
-</div>
-
-<!-- Poet Field -->
-<div class="form-group">
-    {!! Form::label('poet', 'Poet:') !!}
-    <p>{{ $poem->poet }}</p>
-</div>
-
-<!-- Poet Cn Field -->
-<div class="form-group">
-    {!! Form::label('poet_cn', 'Poet Cn:') !!}
-    <p>{{ $poem->poet_cn }}</p>
 </div>
 
 <!-- Bedtime Post Id Field -->
@@ -40,11 +52,6 @@
     <p>{{ $poem->bedtime_post_title }}</p>
 </div>
 
-<!-- Poem Field -->
-<div class="form-group">
-    {!! Form::label('content', '内容:') !!}
-    <p>{{ $content }}</p>
-</div>
 
 <!-- Length Field -->
 <div class="form-group">

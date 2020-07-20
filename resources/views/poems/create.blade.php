@@ -20,7 +20,7 @@
                             <div class="card-body">
                                 {!! Form::open(['route' => 'poems.store']) !!}
 
-                                   @include('poems.fields')
+                                   @include('poems.create_fields')
 
                                 {!! Form::close() !!}
                             </div>

@@ -1,27 +1,20 @@
 <!-- Title Field -->
 <div class="form-group col-sm-6">
-    {!! Form::label('title', '标题:') !!}
+    {!! Form::label('title', '*标题:') !!}
     {!! Form::text('title', null, ['class' => 'form-control']) !!}
 </div>
 
-@if(Route::currentRouteName() === 'poems.edit' && $poem->bedtime_post_id)
-    <!-- Bedtime Post Id Field -->
-    <div class="form-group col-sm-6">
-        {!! Form::label('bedtime_post_id', '读睡博客链接') !!}
-        <a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}"> {{ $poem->bedtime_post_title }}</a>
-    </div>
-@endif
 
 <!-- Poem Field -->
 <div class="form-group col-sm-6 col-lg-6">
-    {!! Form::label('poem', '内容:') !!}
+    {!! Form::label('poem', '*内容:') !!}
     {!! Form::textarea('poem', null, ['class' => 'form-control']) !!}
 </div>
 
 
 <!-- Poet Field -->
 <div class="form-group col-sm-6">
-    {!! Form::label('poet', '作者:') !!}
+    {!! Form::label('poet', '*作者:') !!}
     {!! Form::text('poet', null, ['class' => 'form-control']) !!}
 </div>
 
@@ -33,21 +26,27 @@
 
 <!-- Language Field -->
 <div class="form-group col-sm-6">
-    {!! Form::label('language', '语言:') !!}
+    {!! Form::label('language', '*语言:') !!}
     <label class="checkbox-inline">
-        {!! Form::hidden('language', 0) !!}
-        {!! Form::select('language', $langList, $poem->language) !!}
+        {!! Form::hidden('language') !!}
+        {!! Form::select('language', $langList, 1) !!}
     </label>
 </div>
 
 
 <!-- Is Original Field -->
 <div class="form-group col-sm-6">
-    {!! Form::label('is_original', '类型:') !!}
+    {!! Form::label('is_original', '*类型:') !!}
     <label class="checkbox-inline">
-        {!! Form::hidden('is_original', $poem->is_original) !!}
-        {!! Form::select('is_original', [0 => '译作', 1=>'原作'], $poem->is_original) !!}
+        {!! Form::hidden('is_original') !!}
+        {!! Form::select('is_original', [0 => '译作', 1=>'原作'], '1') !!}
     </label>
+</div>
+
+<!-- Bedtime Post Id Field -->
+<div class="form-group col-sm-6">
+    {!! Form::label('bedtime_post_id', '读睡博客ID') !!}
+    {!! Form::text('bedtime_post_id', null, ['class' => 'form-control']) !!}
 </div>
 
 
@@ -95,10 +94,10 @@
 
 <!-- Need Confirm Field -->
 <div class="form-group col-sm-6">
-    {!! Form::label('need_confirm', '审核状态:') !!}
+    {!! Form::label('need_confirm', '*审核状态:') !!}
     <label class="checkbox-inline">
-        {!! Form::hidden('need_confirm', $poem->need_confirm) !!}
-        {!! Form::select('need_confirm', [0=>"已审", 1=>"待审"], $poem->need_confirm) !!}
+        {!! Form::hidden('need_confirm') !!}
+        {!! Form::select('need_confirm', [0=>"已审", 1=>"待审"], '1') !!}
     </label>
 </div>
 

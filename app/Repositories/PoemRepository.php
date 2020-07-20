@@ -54,4 +54,19 @@ class PoemRepository extends BaseRepository
     {
         return Poem::class;
     }
+
+
+    /**
+     * Paginate records for scaffold.
+     *
+     * @param int $perPage
+     * @param array $columns
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function listAll($perPage, $order, $direction, $columns = ['*'])
+    {
+        $query = $this->allQuery()->orderBy($order, $direction);
+
+        return $query->paginate($perPage, $columns);
+    }
 }

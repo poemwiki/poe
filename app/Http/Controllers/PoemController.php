@@ -16,8 +16,7 @@ class PoemController extends AppBaseController
     /** @var  PoemRepository */
     private $poemRepository;
 
-    public function __construct(PoemRepository $poemRepo)
-    {
+    public function __construct(PoemRepository $poemRepo) {
         $this->middleware('auth');
         $this->poemRepository = $poemRepo;
     }
@@ -31,7 +30,8 @@ class PoemController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $poems = $this->poemRepository->paginate(15, ['id', 'title', 'poet', 'poet_cn', 'length', 'translator', 'dynasty', 'nation', 'language', 'is_original', 'need_confirm']);
+        $poems = $this->poemRepository->listAll(15, 'updated_at', 'desc',
+            ['id', 'title', 'poet', 'poet_cn', 'length', 'translator', 'dynasty', 'nation', 'language', 'is_original', 'need_confirm']);
 
         return view('poems.index')
             ->with('poems', $poems);
@@ -44,7 +44,8 @@ class PoemController extends AppBaseController
      */
     public function create()
     {
-        return view('poems.create');
+        return view('poems.create')
+            ->with('langList', Language::listAll());
     }
 
     /**
@@ -82,7 +83,8 @@ class PoemController extends AppBaseController
             return redirect(route('poems.index'));
         }
 
-        return view('poems.show')->with('poem', $poem)->with('content', $poem->content->content);
+        return view('poems.show')->with('poem', $poem)
+            ->with('langList', Language::listAll());
     }
 
     /**
@@ -102,15 +104,8 @@ class PoemController extends AppBaseController
             return redirect(route('poems.index'));
         }
 
-        $langs = Language::select(['id', 'name_cn'])->get()->toArray();
-        $langList = [];
-        foreach ($langs as $value) {
-            $langList[$value['id']] = $value['name_cn'];
-        };
-//        var_dump($langList);die;
-
         return view('poems.edit')->with('poem', $poem)
-          ->with('langList', $langList);
+          ->with('langList', Language::listAll());
     }
 
     /**
