@@ -20,3 +20,5 @@ yarn-error.log
 fields_sample.json
 /public/css
 /public/js
+/public/img/avatars/*
+/public/vendor/swaggervel/*
