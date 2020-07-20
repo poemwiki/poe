@@ -165,8 +165,8 @@ return [
         /*
          * Package Service Providers...
          */
-	    \InfyOm\GeneratorBuilder\GeneratorBuilderServiceProvider::class,
-        \InfyOm\CoreUITemplates\CoreUITemplatesServiceProvider::class,
+//	    \InfyOm\GeneratorBuilder\GeneratorBuilderServiceProvider::class,
+//        \InfyOm\CoreUITemplates\CoreUITemplatesServiceProvider::class,
 //        Yajra\DataTables\DataTablesServiceProvider::class,
 
 
