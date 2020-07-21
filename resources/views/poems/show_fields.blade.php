@@ -14,11 +14,10 @@
 <br>
 <br>
 @if(Route::currentRouteName() === 'poems.show' && $poem->bedtime_post_id)
-    <!-- Bedtime Post Id Field -->
-    <div class="form-group">
-        {!! Form::label('bedtime_post_id', '读睡博客链接') !!}
-        <a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}"> {{ $poem->bedtime_post_title }}</a>
-    </div>
+<!-- Bedtime Post Id Field -->
+<div class="form-group">
+    <a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">{!! Form::label('bedtime_post_id', '读睡博客链接') !!} {{ $poem->bedtime_post_title }}</a>
+</div>
 @endif
 
 
