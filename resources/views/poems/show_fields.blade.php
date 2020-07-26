@@ -30,7 +30,7 @@
 <!-- Language Field -->
 <div class="form-group">
     {!! Form::label('language', 'Language:') !!}
-    <p>{{ $langList[$poem->language] }}</p>
+    <p>{{ $poem->language===null ? '待定' : $langList[$poem->language] }}</p>
 </div>
 
 <!-- Is Original Field -->

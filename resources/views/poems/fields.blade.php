@@ -7,7 +7,7 @@
 @if(Route::currentRouteName() === 'poems.edit' && $poem->bedtime_post_id)
 <!-- Bedtime Post Id Field -->
 <div class="form-group col-sm-6">
-    <a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">{!! Form::label('bedtime_post_id', '读睡博客链接') !!}  {{ $poem->bedtime_post_title }}</a>
+    <a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">读睡博客链接{{ '：' . $poem->bedtime_post_title }}</a>
 </div>
 @endif
 
