@@ -17,7 +17,7 @@
                 color: #636b6f;
                 font-family: 'Nunito', sans-serif;
                 font-weight: 200;
-                height: 100vh;
+                height: 100%;
                 margin: 0;
             }
 
@@ -46,7 +46,7 @@
             }
 
             .title {
-                font-size: 84px;
+                font-size: 4rem;
             }
 
             .links > a {
@@ -84,6 +84,7 @@
                 <div class="title m-b-md">
                     PoemWiki
                 </div>
+
 
                 <div class="links">
                     <a href="/#">关于</a>

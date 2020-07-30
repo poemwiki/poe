@@ -165,9 +165,6 @@ return [
         /*
          * Package Service Providers...
          */
-//	    \InfyOm\GeneratorBuilder\GeneratorBuilderServiceProvider::class,
-//        \InfyOm\CoreUITemplates\CoreUITemplatesServiceProvider::class,
-//        Yajra\DataTables\DataTablesServiceProvider::class,
 
 
         /*
@@ -232,8 +229,7 @@ return [
         'View'         => Illuminate\Support\Facades\View::class,
         'Form'         => Collective\Html\FormFacade::class,
         'Html'         => Collective\Html\HtmlFacade::class,
-        'Flash'        => Laracasts\Flash\Flash::class,
-        'DataTables' => Yajra\DataTables\Facades\DataTables::class,
+        'Flash'        => Laracasts\Flash\Flash::class
     ],
 
 ];

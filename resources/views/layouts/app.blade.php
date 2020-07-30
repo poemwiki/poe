@@ -8,22 +8,11 @@
 
 
     <!-- Scripts -->
-    <script>
-        (function(d) {
-            var config = {
-                    kitId: 'vqw8ekp',
-                    scriptTimeout: 3000,
-                    async: true
-                },
-                h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
-        })(document);
-    </script>
-
     <script src="{{ asset('js/app.js') }}" defer></script>
 
 
     <!-- Styles -->
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <?php
     $user = Auth::user();

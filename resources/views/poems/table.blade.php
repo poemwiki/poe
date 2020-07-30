@@ -31,11 +31,11 @@
                 <td>{{ $poem->nation }}</td>
                 <td>{{ $poem->need_confirm == 1 || $poem->need_confirm === null ? '待审' : '已审'  }}</td>
                 <td>
-                    {!! Form::open(['route' => ['poems.destroy', $poem->id], 'method' => 'delete']) !!}
+                    {!! Form::open(['route' => ['poems.destroy', $poem->id], 'method' => 'delete', 'class' => 'operation']) !!}
                     <div class='btn-group'>
-                        <a href="{{ route('poems.show', [$poem->id]) }}" class='btn btn-ghost-success'><i class="fa fa-eye"></i></a>
-                        <a href="{{ route('poems.edit', [$poem->id]) }}" class='btn btn-ghost-info'><i class="fa fa-edit"></i></a>
-                        {!! Form::button('<i class="fa fa-trash"></i>', ['type' => 'submit', 'class' => 'btn btn-ghost-danger', 'onclick' => "return confirm('Are you sure?')"]) !!}
+                        <a href="{{ $poem->getUrl() }}" target="_blank" class='btn btn-ghost-success no-vertical-padding'><i class="fa fa-eye"></i></a>
+                        <a href="{{ route('poems.edit', [$poem->id]) }}" class='btn btn-ghost-info no-vertical-padding'><i class="fa fa-edit"></i></a>
+                        {!! Form::button('<i class="fa fa-trash"></i>', ['type' => 'submit', 'class' => 'btn btn-ghost-danger no-vertical-padding', 'onclick' => "return confirm('Are you sure?')"]) !!}
                     </div>
                     {!! Form::close() !!}
                 </td>

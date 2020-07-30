@@ -36,6 +36,11 @@ return [
     */
 
     'guards' => [
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admin_users',
+        ],
+
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
@@ -66,6 +71,12 @@ return [
     */
 
     'providers' => [
+        'admin_users' => [
+            'driver' => 'eloquent',
+            'model' => Brackets\AdminAuth\Models\AdminUser::class,
+//            'model' => App\User::class,
+        ],
+
         'users' => [
             'driver' => 'eloquent',
             'model' => App\User::class,
@@ -93,6 +104,12 @@ return [
     */
 
     'passwords' => [
+        'admin_users' => [
+            'provider' => 'admin_users',
+            'table' => 'admin_password_resets',
+            'expire' => 60,
+        ],
+
         'users' => [
             'provider' => 'users',
             'table' => 'password_resets',

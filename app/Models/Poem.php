@@ -213,11 +213,15 @@ class Poem extends Model
 
 
         self::updating(function($model){
+            $model->poem = self::trimSpaces($model->poem);
             $model->length = grapheme_strlen($model->poem);
         });
     }
 
 
+    public static function trimSpaces($str) {
+        return preg_replace('#^\s+|\s+$#u', '', $str);
+    }
 
     public static function noSpace($str) {
         return preg_replace("#\s+#u", '', $str);

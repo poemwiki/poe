@@ -6,7 +6,7 @@
     </ol>
     <div class="container-fluid">
         <div class="animated fadeIn">
-             @include('flash::message')
+{{--             @include('flash::message')--}}
              <div class="row">
                  <div class="col-lg-12">
                      <div class="card">
@@ -18,7 +18,7 @@
                          <div class="card-body">
                              @include('poems.table')
                               <div class="pull-right mr-3">
-                                     
+
                               </div>
                          </div>
                      </div>

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\DataTables\LanguageDataTable;
 use App\Http\Requests;
 use App\Http\Requests\CreateLanguageRequest;
 use App\Http\Requests\UpdateLanguageRequest;
@@ -21,16 +20,6 @@ class LanguageController extends AppBaseController
         $this->languageRepository = $languageRepo;
     }
 
-    /**
-     * Display a listing of the Language.
-     *
-     * @param LanguageDataTable $languageDataTable
-     * @return Response
-     */
-    public function index(LanguageDataTable $languageDataTable)
-    {
-        return $languageDataTable->render('languages.index');
-    }
 
     /**
      * Show the form for creating a new Language.
