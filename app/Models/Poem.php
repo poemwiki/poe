@@ -132,6 +132,9 @@ class Poem extends Model
 
     public $table = 'poem';
 
+    const FAKEID_KEY = 'PoemWikikiWmeoP'; // Symmetric-key for xor
+    const FAKEID_SPARSE = 96969696969;
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
@@ -239,6 +242,25 @@ class Poem extends Model
      **/
     public function content() {
         return $this->hasOne(\App\Models\Content::class, 'id', 'content_id');
+    }
+
+    /**
+     * @return string A xor encrypted string
+     */
+    public function getFakeId() {
+        return base64_encode(($this->id * self::FAKEID_SPARSE) ^ mb_ord(self::FAKEID_KEY));
+    }
+
+    /**
+     * @param $fakeId
+     * @return float|int The decrypted id of poem
+     */
+    public static function getIdFromFakeId($fakeId) {
+        return (base64_decode($fakeId) ^ mb_ord(self::FAKEID_KEY)) / self::FAKEID_SPARSE;
+    }
+
+    public function getUrl() {
+        return app('url')->route('posts.show', [$this->getFakeId()]);
     }
 
 }
