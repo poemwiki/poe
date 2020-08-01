@@ -1,136 +1,15 @@
 <?php
 
 namespace App\Models;
+use App\Models\Content;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * @SWG\Definition(
- *      definition="Poem",
- *      required={"updated_at", "created_at", "is_lock"},
- *      @SWG\Property(
- *          property="id",
- *          description="id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="title",
- *          description="title",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="language",
- *          description="language",
- *          type="boolean"
- *      ),
- *      @SWG\Property(
- *          property="is_original",
- *          description="is_original",
- *          type="boolean"
- *      ),
- *      @SWG\Property(
- *          property="poet",
- *          description="poet",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="poet_cn",
- *          description="poet_cn",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="bedtime_post_id",
- *          description="bedtime_post_id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="bedtime_post_title",
- *          description="bedtime_post_title",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="poem",
- *          description="poem",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="length",
- *          description="length",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="translator",
- *          description="translator",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="from",
- *          description="from",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="year",
- *          description="year",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="month",
- *          description="month",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="date",
- *          description="date",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="dynasty",
- *          description="dynasty",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="nation",
- *          description="nation",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="updated_at",
- *          description="updated_at",
- *          type="string",
- *          format="date-time"
- *      ),
- *      @SWG\Property(
- *          property="created_at",
- *          description="created_at",
- *          type="string",
- *          format="date-time"
- *      ),
- *      @SWG\Property(
- *          property="need_confirm",
- *          description="need_confirm",
- *          type="boolean"
- *      ),
- *      @SWG\Property(
- *          property="is_lock",
- *          description="is_lock",
- *          type="boolean"
- *      )
- * )
- */
-
-/**
- * Class Poem
- * @package App\Models
- */
 class Poem extends Model
 {
     use SoftDeletes;
-
-    public $table = 'poem';
+    protected $table = 'poem';
 
     const FAKEID_KEY = 'PoemWikikiWmeoP'; // Symmetric-key for xor
     const FAKEID_SPARSE = 96969696969;
@@ -138,12 +17,7 @@ class Poem extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-
-    protected $dates = ['deleted_at'];
-
-
-
-    public $fillable = [
+    protected $fillable = [
         'title',
         'language',
         'is_original',
@@ -161,7 +35,9 @@ class Poem extends Model
         'dynasty',
         'nation',
         'need_confirm',
-        'is_lock'
+        'is_lock',
+        'content_id',
+
     ];
 
     /**
@@ -192,29 +68,72 @@ class Poem extends Model
         'content_id' => 'integer'
     ];
 
+
+    protected $dates = [
+        'updated_at',
+        'created_at',
+        'deleted_at'
+    ];
+
     /**
      * Validation rules
      *
      * @var array
      */
     public static $rules = [
-//        'updated_at' => 'required',
-//        'created_at' => 'required',
-//        'is_lock' => 'required'
+        //        'updated_at' => 'required',
+        //        'created_at' => 'required',
+        //        'is_lock' => 'required'
     ];
 
-    public static function boot()
-    {
+    protected $appends = ['resource_url'];
+
+    /* ************************ ACCESSOR ************************* */
+
+    public function getResourceUrlAttribute() {
+        return url('/admin/poems/'.$this->getKey());
+    }
+
+    public static function boot() {
         parent::boot();
 
+        // TODO check if created same poem by hash
         self::creating(function($model){
+            $model->poem = self::trimTailSpaces($model->poem);
             $model->length = grapheme_strlen($model->poem);
+
+            $hash = self::contentHash($model->poem);
+            $fullHash = self::contentFullHash($model->poem);
+            $content = Content::create([
+                'entry_id' => $model->id,
+                'type' => 0,
+                'content' => $model->poem,
+                'hash' => $hash,
+                'new_hash' => $hash,
+                'full_hash' => $fullHash
+            ]);
+
+            $model->content_id = $content->id;
         });
 
-
         self::updating(function($model){
-            $model->poem = self::trimSpaces($model->poem);
+            $model->poem = self::trimTailSpaces($model->poem);
             $model->length = grapheme_strlen($model->poem);
+
+            $fullHash = self::contentFullHash($model->poem);
+            if($fullHash !== $model->content->fullHash) {
+                // need update content
+                $hash = self::contentHash($model->poem);
+                $content = Content::create([
+                    'entry_id' => $model->id,
+                    'type' => 0,
+                    'content' => $model->poem,
+                    'hash' => $hash,
+                    'new_hash' => $hash,
+                    'full_hash' => $fullHash
+                ]);
+                $model->content_id = $content->id;
+            }
         });
     }
 
@@ -222,16 +141,25 @@ class Poem extends Model
     public static function trimSpaces($str) {
         return preg_replace('#^\s+|\s+$#u', '', $str);
     }
+    public static function trimTailSpaces($str) {
+        return preg_replace('#\s+$#u', '', $str);
+    }
 
     public static function noSpace($str) {
         return preg_replace("#\s+#u", '', $str);
     }
+    public static function noPunct($str) {
+        return preg_replace("##[[:punct:]]+#u", '', $str);
+    }
     public static function pureStr($str) {
-        return preg_replace("#[[:punct:]]+#u", '', self::noSpace($str));
+        return self::noPunct(self::noSpace($str));
     }
 
     public static function contentHash($str) {
         return hash('sha256', self::pureStr($str));
+    }
+    public static function contentFullHash($str) {
+        return hash('sha256', $str);
     }
 
 
