@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
      *
      * @return void
      */
-    public function run() {
+    public function runHash() {
         $poems = Poem::all();
 
         foreach($poems as $poem) {
@@ -28,6 +28,15 @@ class DatabaseSeeder extends Seeder
             $poem->content_id = $content->id;
             $poem->save();
 //            break;
+        }
+    }
+    public function run() {
+        $contents = Content::all();
+
+        foreach($contents as $p) {
+            $hash = Poem::contentFullHash($p->content);
+            $p->fullHash = $hash;
+            $p->save();
         }
     }
 }

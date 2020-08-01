@@ -29,6 +29,7 @@
         "laravelcollective/html": "^6.1"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.3",
         "barryvdh/laravel-ide-helper": "^2.7",
         "brackets/admin-generator": "^5.1",
         "facade/ignition": "^2.0",

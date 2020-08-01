@@ -51,3 +51,19 @@ Route::resource('poems', 'PoemController');
 Route::resource('posts', 'PostController');
 
 Route::resource('bot', 'BotController');
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('Admin')->name('admin/')->group(static function() {
+        Route::prefix('poems')->name('poems/')->group(static function() {
+            Route::get('/',                                             'PoemController@index')->name('index');
+            Route::get('/create',                                       'PoemController@create')->name('create');
+            Route::post('/',                                            'PoemController@store')->name('store');
+            Route::get('/{poem}/edit',                                  'PoemController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'PoemController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{poem}',                                      'PoemController@update')->name('update');
+            Route::delete('/{poem}',                                    'PoemController@destroy')->name('destroy');
+        });
+    });
+});

@@ -1,12 +1,27 @@
 //@import url('https://unpkg.com/element-ui/lib/theme-chalk/index.css');
 // Fonts
-@import url('./NunitoFont.css');
+@import url('./MajorMonoDisplayFont.css');
 
 // Variables
 @import 'variables';
 
 @import '~bootstrap/scss/bootstrap-reboot';
 
+a {
+  color: #111;
+}
+a:hover{
+  color: #333;
+}
+.no-select {
+  user-select: none;
+}
+
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 
 .no-vertical-padding {
   padding-top: 0;
@@ -24,29 +39,38 @@
 }
 
 html, body {
-  background-color: #fff;
-  color: #636b6f;
-  font-family: sans-serif;
-  font-weight: 300;
-  height: 100%;
+  color: #111;
+  font-family: $font-family-sans-serif;
+  font-weight: lighter;
+  min-height: 100%;
   margin: 0;
+  //background-color: rgba(255, 41, 65, 0.08);
+  //animation: fadein 2s ease;
 }
 
 
 
 .top-right {
   position: fixed;
-  right: 1em;
-  top: 1.4em;
+  right: 0;
+  top: 0;
   z-index: 1;
+  background-color: rgba(0, 0, 0, 0.57);
   a.site-name {
-    color: #000;
-    padding: 0 1em;
-    font-family: "Nunito", sans-serif;
-    font-size: 13px;
-    font-weight: 600;
+    display: block;
+    padding: 0 .5em;
+    color: #fff;
+    font-family: 'Major Mono Display', monospace, sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
     letter-spacing: .1rem;
     text-decoration: none;
+    white-space: pre-line;
+    text-align: center;
+    &:hover {
+      text-decoration: none;
+      animation: fadein 2s ease;
+    }
   }
 }
 
@@ -55,19 +79,57 @@ html, body {
   position: relative;
 }
 main {
-  width: 80%;
+  min-width: 90%;
   height: 100%;
   overflow: auto;
-  padding: 2em 0;
-  color: #111;
+  padding: 2em 1em;
+  //color: #fff;
+
+  a{
+    text-decoration:none;
+    transition: all .13s linear;
+  }
+
+  .edit{
+    display: block;
+    position: fixed;
+    bottom: 1em;
+    right: 1em;
+    &:hover{
+      text-decoration: none;
+    }
+  }
 
   .title {
-    font-size: 1rem;
+    font-size: 1.5rem;
     font-weight: 400;
+    //animation: fadein 2s ease;
+    vertical-align: unset;
+    &:before {
+      content: '▍';
+      vertical-align: unset;
+      //opacity: 1;
+      color: rgba(255, 255, 255, 0);
+      color: var(--main-color);
+      animation: fadein 5s ease;
+    }
   }
 
   pre{
-    font-size: 1rem;
+    font-size: 1.1rem;
     line-height: 2;
+    animation: fadein 2s ease;
+  }
+
+  .side {
+    a:hover {
+      text-decoration: none;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.0) 50%, #000000 50%) repeat-x 0 1.0em;
+      background-size: .1em .1em;
+    }
+    .side-title {
+      color: #777;
+      font-weight: normal;
+    }
   }
 }

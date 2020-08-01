@@ -69,4 +69,29 @@ class PoemRepository extends BaseRepository
 
         return $query->paginate($perPage, $columns);
     }
+
+    /**
+     * @param int $num
+     * @return mixed
+     * @TODO optimize sql by :
+     * SELECT r1.id
+    FROM poem AS r1
+    JOIN
+    (SELECT CEIL(RAND() *
+    (SELECT MAX(id)
+    FROM poem)) AS id)
+    AS r2
+    WHERE r1.id >= r2.id AND r1.deleted_at is NULL
+    ORDER BY r1.id ASC
+    LIMIT 1
+     */
+    public function random($num = 1) {
+        $query = $this->model->newQuery();
+
+        return $query->select('id')
+            ->whereRaw('`deleted_at` is null')
+            ->inRandomOrder()
+            ->limit($num) // here is yours limit
+            ->get();
+    }
 }

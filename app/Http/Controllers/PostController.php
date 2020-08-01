@@ -27,9 +27,10 @@ class PostController extends AppBaseController
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function show($fakeId)
-    {
+    public function show($fakeId) {
         $poem = $this->poemRepository->find(Poem::getIdFromFakeId($fakeId));
+        $randomPoem = $this->poemRepository->random()->first();
+//        dd($randomPoem);
 
         if (empty($poem)) {
             Flash::error('Poem not found');
@@ -37,6 +38,14 @@ class PostController extends AppBaseController
             return redirect(route(''));
         }
 
-        return view('posts.show')->with('poem', $poem);
+        return view('posts.show')->with([
+            'poem' => $poem,
+            'randomPoemUrl' => $randomPoem->getUrl(),
+            'fakeId' => $fakeId
+        ]);
+    }
+
+    public function edit() {
+
     }
 }

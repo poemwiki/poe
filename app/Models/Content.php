@@ -71,14 +71,12 @@ class Content extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-
     protected $dates = ['deleted_at'];
-
-
 
     public $fillable = [
         'hash',
         'new_hash',
+        'full_hash',
         'type',
         'entry_id',
         'content'
@@ -93,6 +91,7 @@ class Content extends Model
         'id' => 'integer',
         'hash' => 'string',
         'new_hash' => 'string',
+        'full_hash' => 'string',
         'type' => 'integer',
         'entry_id' => 'integer',
         'content' => 'string'
@@ -106,6 +105,7 @@ class Content extends Model
     public static $rules = [
         'hash' => 'required',
         'new_hash' => 'required',
+        'full_hash' => 'required',
         'type' => 'required',
         'entry_id' => 'required',
         'content' => 'required'
