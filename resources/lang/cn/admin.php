@@ -8,6 +8,7 @@ return [
             'index' => '诗歌',
             'create' => '添加诗歌',
             'edit' => '编辑',
+            'operation' => '操作'
         ],
 
         'columns' => [

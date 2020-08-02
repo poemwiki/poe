@@ -7,7 +7,7 @@
                      <div class="col-lg-12">
                          <div class="card">
                              <div class="card-body">
-                                 @include('posts.show_fields')
+                                 @include('poems.show_fields')
                              </div>
                          </div>
                      </div>

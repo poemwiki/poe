@@ -94,4 +94,9 @@ class PoemRepository extends BaseRepository
             ->limit($num) // here is yours limit
             ->get();
     }
+
+    public function getPoemFromFakeId($fakeId){
+        $id = Poem::getIdFromFakeId($fakeId);
+        return $id === false ? null : $this->find($id);
+    }
 }

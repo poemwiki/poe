@@ -47,8 +47,6 @@ Auth::routes(['verify' => true]);
 
 Route::get('/home', 'HomeController@index')->middleware('verified');
 
-Route::resource('poems', 'PoemController');
-Route::resource('posts', 'PostController');
 
 Route::resource('bot', 'BotController');
 
@@ -66,4 +64,14 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::delete('/{poem}',                                    'PoemController@destroy')->name('destroy');
         });
     });
+});
+
+//Route::resource('poems', 'PoemController');
+Route::prefix('poems')->name('poems/')->group(static function() {
+    Route::get('/search',      'PoemController@index')->name('index');
+    Route::get('/create',      'PoemController@create')->name('create');
+    Route::post('/',           'PoemController@store')->name('store');
+    Route::get('/edit/{fakeId}', 'PoemController@edit')->name('edit');
+    Route::post('/update/{fakeId}',     'PoemController@update')->name('update');
+    Route::get('/{fakeId}',    'PoemController@show')->name('show');
 });

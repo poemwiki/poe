@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Admin\Poem\IndexPoem;
 use App\Http\Requests\CreatePoemRequest;
 use App\Http\Requests\UpdatePoemRequest;
 use App\Models\Poem;
 use App\Repositories\PoemRepository;
 use App\Http\Controllers\AppBaseController;
+use Brackets\AdminListing\Facades\AdminListing;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Response;
 use Flash;
 
@@ -20,30 +24,40 @@ class PostController extends AppBaseController
         $this->poemRepository = $poemRepo;
     }
 
+
+
     /**
-     * Display the specified Poem.
-     *
-     * @param int $fakeId
-     *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * Display a listing of the resource.
+     * @TODO this should be a search page
+     * @param IndexPoem $request
+     * @return array|Factory|View
      */
-    public function show($fakeId) {
-        $poem = $this->poemRepository->find(Poem::getIdFromFakeId($fakeId));
-        $randomPoem = $this->poemRepository->random()->first();
-//        dd($randomPoem);
+    public function index(IndexPoem $request) {
+        // create and AdminListing instance for a specific model and
+        $data = AdminListing::create(Poem::class)->processRequestAndGet(
+        // pass the request with params
+            $request,
 
-        if (empty($poem)) {
-            Flash::error('Poem not found');
+            // set columns to query
+            ['id', 'title', 'language', 'is_original', 'poet', 'poet_cn', 'bedtime_post_id', 'bedtime_post_title', 'length', 'translator', 'from', 'year', 'month', 'date', 'dynasty', 'nation', 'need_confirm', 'is_lock', 'content_id'],
 
-            return redirect(route(''));
+            // set columns to searchIn
+            ['id', 'title', 'poet', 'poet_cn', 'bedtime_post_title', 'poem', 'translator', 'from', 'year', 'month', 'date', 'dynasty', 'nation']
+        );
+
+        if ($request->ajax()) {
+            if ($request->has('bulk')) {
+                return [
+                    'bulkItems' => $data->pluck('id')
+                ];
+            }
+            return ['data' => $data];
         }
 
-        return view('posts.show')->with([
-            'poem' => $poem,
-            'randomPoemUrl' => $randomPoem->getUrl(),
-            'fakeId' => $fakeId
-        ]);
+        return view('admin.poem.index', ['data' => $data]);
     }
+
+
 
     public function edit() {
 

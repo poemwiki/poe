@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     @include('layouts.icon')
 
-    <title>{{config('app.name')}}</title>
+    <title>@yield('title') - {{config('app.name')}}</title>
 
     <!-- Fonts -->
     <link href="{{ asset('css/post.css') }}" rel="stylesheet">

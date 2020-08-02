@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\Poem;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +16,7 @@ class StorePoem extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('admin.poem.create');
+        return Gate::allows('admin.poem.create') || Gate::allows('web.poems.edit', Auth::user());
     }
 
     /**
@@ -31,10 +32,10 @@ class StorePoem extends FormRequest
             'is_original' => ['nullable', 'boolean'],
             'poet' => ['nullable', 'string'],
             'poet_cn' => ['nullable', 'string'],
-            'bedtime_post_id' => ['nullable', 'string'],
+            'bedtime_post_id' => ['nullable', 'integer'],
             'bedtime_post_title' => ['nullable', 'string'],
             'poem' => ['nullable', 'string'],
-            'length' => ['nullable', 'string'],
+            'length' => ['nullable', 'integer'],
             'translator' => ['nullable', 'string'],
             'from' => ['nullable', 'string'],
             'year' => ['nullable', 'string'],
@@ -45,7 +46,7 @@ class StorePoem extends FormRequest
             'need_confirm' => ['nullable', 'boolean'],
             'is_lock' => ['required', 'boolean'],
             'content_id' => ['nullable', 'integer'],
-            
+
         ];
     }
 

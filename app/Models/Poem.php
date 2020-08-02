@@ -119,8 +119,8 @@ class Poem extends Model
         self::updating(function($model){
             $model->poem = self::trimTailSpaces($model->poem);
             $model->length = grapheme_strlen($model->poem);
-
             $fullHash = self::contentFullHash($model->poem);
+
             if($fullHash !== $model->content->fullHash) {
                 // need update content
                 $hash = self::contentHash($model->poem);
@@ -149,7 +149,7 @@ class Poem extends Model
         return preg_replace("#\s+#u", '', $str);
     }
     public static function noPunct($str) {
-        return preg_replace("##[[:punct:]]+#u", '', $str);
+        return preg_replace("#[[:punct:]]+#u", '', $str);
     }
     public static function pureStr($str) {
         return self::noPunct(self::noSpace($str));
@@ -182,17 +182,27 @@ class Poem extends Model
     public function getFakeId() {
         return base64_encode(($this->id * self::FAKEID_SPARSE) ^ mb_ord(self::FAKEID_KEY));
     }
+    /**
+     * @return string A xor encrypted string
+     */
+    public static function fakeId($id) {
+        return base64_encode(($id * self::FAKEID_SPARSE) ^ mb_ord(self::FAKEID_KEY));
+    }
 
     /**
      * @param $fakeId
-     * @return float|int The decrypted id of poem
+     * @return false|int The decrypted id of poem
      */
     public static function getIdFromFakeId($fakeId) {
-        return (base64_decode($fakeId) ^ mb_ord(self::FAKEID_KEY)) / self::FAKEID_SPARSE;
+        $decoded = base64_decode($fakeId);
+        if(!is_numeric($decoded)) {
+            return false;
+        }
+        return ($decoded ^ mb_ord(self::FAKEID_KEY)) / self::FAKEID_SPARSE;
     }
 
     public function getUrl() {
-        return app('url')->route('posts.show', [$this->getFakeId()]);
+        return app('url')->route('poems/show', [$this->getFakeId()]);
     }
 
 }

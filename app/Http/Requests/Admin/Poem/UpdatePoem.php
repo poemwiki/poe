@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\Poem;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +16,7 @@ class UpdatePoem extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('admin.poem.edit', $this->poem);
+        return Gate::allows('admin.poem.edit', $this->poem) || Gate::allows('web.poems.edit', Auth::user());
     }
 
     /**
@@ -26,15 +27,16 @@ class UpdatePoem extends FormRequest
     public function rules(): array
     {
         return [
+            'id' => ['integer'],
             'title' => ['nullable', 'string'],
             'language' => ['nullable', 'boolean'],
             'is_original' => ['nullable', 'boolean'],
             'poet' => ['nullable', 'string'],
             'poet_cn' => ['nullable', 'string'],
-            'bedtime_post_id' => ['nullable', 'string'],
+            'bedtime_post_id' => ['nullable', 'integer'],
             'bedtime_post_title' => ['nullable', 'string'],
             'poem' => ['nullable', 'string'],
-            'length' => ['nullable', 'string'],
+            'length' => ['nullable', 'integer'],
             'translator' => ['nullable', 'string'],
             'from' => ['nullable', 'string'],
             'year' => ['nullable', 'string'],
@@ -45,7 +47,7 @@ class UpdatePoem extends FormRequest
             'need_confirm' => ['nullable', 'boolean'],
             'is_lock' => ['sometimes', 'boolean'],
             'content_id' => ['nullable', 'integer'],
-            
+
         ];
     }
 
