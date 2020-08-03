@@ -67,7 +67,7 @@ $fullContent = implode("\n", $parts);
 @endif
 
 
-<script src="{{ asset('js/color-hash.js') }}"></script>
+<script src="{{ asset('js/lib/color-hash.js') }}"></script>
 <script>
     var colorHash = new ColorHash({lightness: 0.6, saturation: 0.86});
     var mainColor = colorHash.hex('{{ $poem->title }}'); // '#8796c5'

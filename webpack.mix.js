@@ -32,6 +32,8 @@ mix.js('resources/js/app.js', 'public/js')
 mix.js(['resources/js/admin/admin.js'], 'public/js')
     .sass('resources/sass/admin/admin.scss', 'public/css');
 
+mix.copyDirectory('resources/js/lib', 'public/js/lib');
+
 if (mix.inProduction()) {
     mix.version();
 }
