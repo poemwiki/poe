@@ -1,6 +1,6 @@
 <?php
 
-return [
+$config = [
 
     /*
     |--------------------------------------------------------------------------
@@ -165,7 +165,6 @@ return [
         /*
          * Package Service Providers...
          */
-        Barryvdh\Debugbar\ServiceProvider::class,
 
 
         /*
@@ -234,3 +233,9 @@ return [
     ],
 
 ];
+
+if($config['env'] === 'local') {
+    $config['providers'][] = Barryvdh\Debugbar\ServiceProvider::class;
+}
+
+return $config;
