@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>{{config('app.name')}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    @include('layouts.icon')
+@include('layouts.icon')
+@include('layouts.analyze')
 
 
     <!-- Scripts -->
@@ -25,7 +26,7 @@
     <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url('/') }}">
-                {{ config('app.name', 'Laravel') }}
+                {{ config('app.name', 'PoemWiki') }}
 
                 <a class="navbar-brand" href="#">
                     <img class="navbar-brand-full" src="/icon.svg" width="30" height="30"
