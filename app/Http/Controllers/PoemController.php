@@ -52,6 +52,16 @@ class PoemController extends Controller
         ]);
     }
 
+    public function random() {
+        $randomPoems = $this->poemRepository->random(2)->all();
+
+        return view('poems.show')->with([
+            'poem' => $randomPoems[0]->first(),
+            'randomPoemUrl' => $randomPoems[1]->getUrl(),
+            'fakeId' => $randomPoems[0]->first()->getFakeId()
+        ]);
+    }
+
     /**
      * Show the form for creating a new resource.
      *

@@ -68,6 +68,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 
 //Route::resource('poems', 'PoemController');
 Route::prefix('poems')->name('poems/')->group(static function() {
+    Route::get('/random',      'PoemController@random')->name('random');
     Route::get('/search',      'PoemController@index')->name('index');
     Route::get('/create',      'PoemController@create')->name('create');
     Route::post('/',           'PoemController@store')->name('store');

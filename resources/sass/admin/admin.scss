@@ -35,7 +35,14 @@
 .CodeMirror {
   border: 1px solid #eee;
   height: auto!important;
+  .CodeMirror-linenumber {
+    line-height: 2.5;
+    font-size: 0.8rem;
+    color: #cecece;
+  }
 }
+
+
 #poem {
   border: 1px solid #b9c8de;
   pre{
