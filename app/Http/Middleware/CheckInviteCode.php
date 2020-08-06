@@ -26,6 +26,9 @@ class CheckInviteCode
     }
 
     public static function isInviteCodeLimited($code) {
+        if(!config('invite_limited')) {
+            return false;
+        }
         $user = User::select(['id', 'invite_max'])->where('invite_code', $code)->first();
         if(!$user) return true;
 

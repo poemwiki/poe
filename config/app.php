@@ -232,6 +232,8 @@ $config = [
         'Flash'        => Laracasts\Flash\Flash::class
     ],
 
+    'invite_limited' => env('INVITE_LIMITED', false)
+
 ];
 
 if($config['env'] === 'local') {
