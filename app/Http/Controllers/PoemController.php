@@ -53,12 +53,12 @@ class PoemController extends Controller
     }
 
     public function random() {
-        $randomPoems = $this->poemRepository->random(2)->all();
+        $randomPoems = $this->poemRepository->random(2)->get();
 
         return view('poems.show')->with([
-            'poem' => $randomPoems[0]->first(),
+            'poem' => $randomPoems->first(),
             'randomPoemUrl' => $randomPoems[1]->getUrl(),
-            'fakeId' => $randomPoems[0]->first()->getFakeId()
+            'fakeId' => $randomPoems->first()->getFakeId()
         ]);
     }
 

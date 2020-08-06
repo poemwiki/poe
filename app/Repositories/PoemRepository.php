@@ -88,11 +88,10 @@ class PoemRepository extends BaseRepository
     public function random($num = 1) {
         $query = $this->model->newQuery();
 
-        return $query->select('id')
+        return $query->select()
             ->whereRaw('`deleted_at` is null')
             ->inRandomOrder()
-            ->limit($num) // here is yours limit
-            ->get();
+            ->limit($num); // here is yours limit
     }
 
     public function getPoemFromFakeId($fakeId){
