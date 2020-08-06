@@ -42,8 +42,6 @@ html, body {
   //animation: fadein 2s ease;
 }
 
-
-
 .top-right {
   position: fixed;
   right: 0;
@@ -94,18 +92,20 @@ main.post {
     }
   }
 
-  .title {
-    font-size: 1.5rem;
-    font-weight: 400;
-    //animation: fadein 2s ease;
-    vertical-align: unset;
-    &:before {
-      content: '▍';
+  header{
+    .title {
+      font-size: 1.5rem;
+      font-weight: 400;
+      //animation: fadein 2s ease;
       vertical-align: unset;
-      //opacity: 1;
-      color: rgba(255, 255, 255, 0);
-      color: var(--main-color);
-      animation: fadein 5s ease;
+      &:before {
+        content: '▍';
+        vertical-align: unset;
+        //opacity: 1;
+        color: rgba(255, 255, 255, 0);
+        color: var(--main-color);
+        animation: fadein 5s ease;
+      }
     }
   }
 
@@ -115,7 +115,14 @@ main.post {
     animation: fadein 2s ease;
   }
 
+  footer{
+    font-weight: 300;
+    line-height: 1em;
+    margin-top: 2.5rem;
+  }
+
   .side {
+    margin-top: 3rem;
     a:hover {
       text-decoration: none;
       background: linear-gradient(to bottom, rgba(0, 0, 0, 0.0) 50%, #000000 50%) repeat-x 0 1.0em;

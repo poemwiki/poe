@@ -70,7 +70,9 @@
             @if (Route::has('login'))
                 <div class="top-right links">
                     @auth
-                        <a href="{{ url('/poems') }}">编辑入口</a>
+                        <div class="top-right links no-select">
+                            <a class="site-name" href="{{route('poems/random')}}">POEM&#0010;Wiki</a>
+                        </div>
                     @else
                         <a href="{{ route('login') }}">@lang('Login')</a>
 

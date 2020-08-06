@@ -176,6 +176,10 @@ class Poem extends Model
         return $this->hasOne(\App\Models\Content::class, 'id', 'content_id');
     }
 
+    public function wx() {
+        return $this->hasMany(\App\Models\WxPost::class, 'poem_id', 'id');
+    }
+
     /**
      * @return string A xor encrypted string
      */

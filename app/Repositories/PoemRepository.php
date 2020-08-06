@@ -50,8 +50,7 @@ class PoemRepository extends BaseRepository
     /**
      * Configure the Model
      **/
-    public function model()
-    {
+    public function model() {
         return Poem::class;
     }
 
@@ -63,8 +62,7 @@ class PoemRepository extends BaseRepository
      * @param array $columns
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function listAll($perPage, $order, $direction, $columns = ['*'])
-    {
+    public function listAll($perPage, $order, $direction, $columns = ['*']) {
         $query = $this->allQuery()->orderBy($order, $direction);
 
         return $query->paginate($perPage, $columns);
@@ -88,7 +86,7 @@ class PoemRepository extends BaseRepository
     public function random($num = 1) {
         $query = $this->model->newQuery();
 
-        return $query->select()
+        return $query->select()->with('wx')
             ->whereRaw('`deleted_at` is null')
             ->inRandomOrder()
             ->limit($num); // here is yours limit

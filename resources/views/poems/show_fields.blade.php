@@ -6,20 +6,18 @@ $nation = $poem->dynasty
 
 $writer = $poem->poet_cn
     ? '作者 / '. $nation . $poem->poet_cn
-    : ($poem->poet ? $poem->poet : '');
+    : ($poem->poet ? '<i>'.$poem->poet.'</i>' : '');
 
 $from = $poem->from
     ? '选自 / '. $poem->from
     : null;
 
-$parts = [
-    $poem->poem."\n",
-    $writer
-];
-if($poem->year) array_push($parts, $poem->year);
-if($poem->translator) array_push($parts, '翻译 / '.trim($poem->translator));
+$translator = $poem->translator ? '翻译 / '.trim($poem->translator) : '';
 
-$fullContent = implode("\n", $parts);
+//dd($poem->wxPost);
+$wxPost = $poem->wx ? $poem->wx->first() : null;
+//$wxPost = null;
+//dd($wxPost->first()->toArray());
 ?>
 @section('title', $poem->title)
 @section('author', $poem->poet)
@@ -39,24 +37,37 @@ $fullContent = implode("\n", $parts);
 </svg></a>
             </p>
         </header>
-        <pre class="poem-content font-song no-select">{{ $fullContent }}</pre>
+        <pre class="poem-content font-song no-select">{{ $poem->poem }}</pre>
         <footer class="poem-info">
-            <p class="poem-writer"></p>
-            <p class="poem-from"></p>
+            <p class="poem-writer">{!!$writer!!}</p>
+            <p class="poem-translator">{{$translator}}</p>
+            <p class="poem-year">{{$poem->year}}</p>
+            <p class="poem-from">{{$from}}</p>
         </footer>
     </article>
 </section>
 
-<br>
+
 @if($poem->bedtime_post_id)
 <!-- Bedtime Post Id Field -->
-<div class="side">
+<section class="side">
     <h4 class="side-title">荐诗</h4>
     <hr>
-    @if($poem->bedtime_post_title)读首诗再睡觉：<a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">{{ $poem->bedtime_post_title }}</a>
-    @else<a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">读睡博客荐诗</a>
-    @endif
-</div>
+    <ol>
+        @if($wxPost)
+            @if($wxPost->link && $wxPost->title)
+                <li>读首诗再睡觉公众号：<a target="_blank" href="{{ $wxPost->link }}">{{ $wxPost->title }}</a></li>
+            @elseif($wxPost->link)<li><a target="_blank" href="{{ $wxPost->link }}"> 读首诗再睡觉公众号</a></li>
+            @endif
+        @endif
+
+        @if($poem->bedtime_post_title)<li>读睡博客存档：<a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">{{ $poem->bedtime_post_title }}</a></li>
+        @else<li>><a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">读睡博客存档</a></li
+        @endif
+    </ol>
+
+
+</section>
 @endif
 
 
