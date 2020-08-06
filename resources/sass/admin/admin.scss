@@ -7,6 +7,7 @@
 // Your own, project specific styles
 @import "styles/index";
 @import "../MajorMonoDisplayFont.css";
+@import "../_variables";
 .logo {
   font-family: "Major Mono Display", monospace, sans-serif;
   color: #000;
@@ -21,4 +22,25 @@
   display: inline-block;
   vertical-align: text-bottom;
   zoom: 1.6;
+}
+.col-form-label{
+  color: $mutedText;
+  font-weight: bold;
+}
+.form-control {
+  background-position-x: 97%;
+  background-position-y: 0.5rem;
+  color: #111;
+}
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto!important;
+}
+#poem {
+  border: 1px solid #b9c8de;
+  pre{
+    font-size: .8rem;
+    line-height: 2;
+    font-family: $font-family-serif;
+  }
 }

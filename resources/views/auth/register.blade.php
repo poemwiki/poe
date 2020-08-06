@@ -29,7 +29,7 @@
                     <form method="post" action="{{ url('/register/?invite_code_from='.app('request')->input('invite_code_from')) }}">
                         @csrf
                         <h1>@lang('Register')</h1>
-                        <p class="text-muted">{{ App\User::inviteFromStr(app('request')->input('invite_code_from')) }} 邀请您注册 <b><a target="_blank" href="/">PoemWiki</a></b></p>
+                        <p class="text-muted">{{ config('invite_limited') ? App\User::inviteFromStr(app('request')->input('invite_code_from')) : '' }} 邀请您注册 <b><a target="_blank" href="/">PoemWiki</a></b></p>
                         <p class="text-muted">@lang('Create your account')</p>
                         @if (count($errors))
                             <p class="font-weight-bold text-danger">提交失败</p>

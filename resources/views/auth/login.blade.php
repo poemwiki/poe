@@ -13,7 +13,7 @@
     <meta name="keyword" content="poem,poetry,poet,诗，诗歌，诗人">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@coreui/coreui@2.1.16/dist/css/coreui.min.css" integrity="sha256-lvsgjUQT72IM3r+HhRaDv7v2h6LS1707C13IAid9vwo=" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/simple-line-icons.min.css">
+    <link rel="stylesheet" href="/css/vendor/simple-line-icons.min.css">
 
 </head>
 <body class="app flex-row align-items-center">
@@ -23,7 +23,7 @@
             <div class="card-group">
                 <div class="card p-4">
                     <div class="card-body">
-                        <form method="post" action="{{ url('/login') }}">
+                        <form method="post" action="{{ route('login', ['ref' => request()->input('ref', '')]) }}">
                             @csrf
                             <h1>登录</h1>
                             <p class="text-muted">登录到 PoemWiki</p>
@@ -67,7 +67,7 @@
                         </form>
                     </div>
                 </div>
-                <div class="card text-white bg-primary py-5 d-md-down-none">
+                <div class="card text-white bg-primary py-5">
                     <div class="card-body text-center">
                         <div>
                             <h2>注册</h2>

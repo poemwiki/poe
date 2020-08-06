@@ -1,6 +1,7 @@
 @extends('layouts.form')
 
 @section('title', trans('admin.poem.actions.edit'))
+@section('poemTitle', $poem->title)
 
 @section('body')
 
@@ -8,13 +9,12 @@
         <div class="card">
 
             <poem-form
-                :action="'{{ route('poems/update', [$poem->getFakeId(), ]) }}'"
+                :action="'{{ route('poems/update', [$poem->getFakeId()]) }}'"
                 :data="{{ $poem->toJson() }}"
                 v-cloak
                 inline-template>
 
                 <form class="form-horizontal form-edit" method="post" @submit.prevent="onSubmit" :action="action" novalidate>
-
 
                     <div class="card-header">
                         <i class="fa fa-pencil"></i> {{ trans('admin.poem.actions.edit', ['name' => $poem->title]) }}

@@ -11,7 +11,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- TODO translatable suffix --}}
-    <title>@yield('title', 'Craftable') - {{ trans('brackets/admin-ui::admin.page_title_suffix') }}</title>
+    <title>@yield('title', 'PoemWiki') - @yield('poemTitle') - {{config('app.name')}}</title>
 
     @include('brackets/admin-ui::admin.partials.main-styles')
 
@@ -24,24 +24,17 @@
     <button class="navbar-toggler sidebar-toggler d-lg-none" type="button" data-toggle="sidebar-show">
         <span class="navbar-toggler-icon"></span>
     </button>
-    @if(View::exists('admin.layout.logo'))
-        @include('admin.layout.logo')
-    @endif
+    @include('admin.layout.logo')
+
     <ul class="nav navbar-nav ml-auto">
         <li class="nav-item dropdown">
             <a role="button" class="dropdown-toggle nav-link">
                 <span>
-
-
                     <span class="hidden-md-down">{{ Auth::user()->name }}</span>
-
-
                 </span>
                 <span class="caret"></span>
             </a>
-            @if(View::exists('admin.layout.profile-dropdown'))
-                @include('admin.layout.profile-dropdown')
-            @endif
+            @include('layouts.profile-dropdown')
         </li>
     </ul>
 </header>
