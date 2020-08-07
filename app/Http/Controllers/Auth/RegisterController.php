@@ -68,8 +68,8 @@ class RegisterController extends Controller
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'invite_code' => hash('crc32', sha1($inviter->id . $data['email'])),
-            'invited_by' => $inviter->id,
+            'invite_code' => hash('crc32', sha1(($inviter ? $inviter->id : 2) . $data['email'])),
+            'invited_by' => $inviter ? $inviter->id : 2,
             'password' => Hash::make($data['password']),
         ]);
     }
