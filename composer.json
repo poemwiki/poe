@@ -15,7 +15,6 @@
     "license": "MIT",
     "require": {
         "php": "^7.2.5",
-        "algolia/scout-extended": "^1.9",
         "appointer/swaggervel": "dev-master",
         "brackets/craftable": "^5.1",
         "doctrine/dbal": "~2.3",
