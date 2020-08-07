@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreatePoemRequest;
 use App\Http\Requests\UpdatePoemRequest;
 use App\Models\Language;
+use App\Models\Poem;
 use App\Repositories\PoemRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
@@ -122,10 +123,13 @@ SQL
                     ? '作者 / '. $nation . $post->poet_cn
                     : ($post->poet ? $post->poet : '');
 
+                $wikiLink = route('poems/show', Poem::fakeId($post->id));
+
                 $parts = [
                     '▍ '.$post->title."\n",
                     $content."\n",
-                    $writer
+                    $writer,
+                    $wikiLink
                 ];
                 if($post->year) array_push($parts, $post->year);
                 if($post->translator) array_push($parts, '翻译 / '.trim($post->translator));
