@@ -129,11 +129,11 @@ SQL
                     '▍ '.$post->title."\n",
                     $content."\n",
                     $writer,
-                    $wikiLink
                 ];
                 if($post->year) array_push($parts, $post->year);
                 if($post->translator) array_push($parts, '翻译 / '.trim($post->translator));
                 if(!empty($wxPost) && isset($wxPost['recommender'])) array_push($pars,'评论 / '.$wxPost['recommender']);
+                array_push($parts, $wikiLink);
 
                 $poem = implode("\n", $parts);
 
