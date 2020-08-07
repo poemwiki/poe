@@ -12,7 +12,7 @@
     <meta name="description" content="PoemWiki">
     <meta name="keyword" content="poem,poetry,poet,诗，诗歌，诗人">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@coreui/coreui@2.1.16/dist/css/coreui.min.css" integrity="sha256-lvsgjUQT72IM3r+HhRaDv7v2h6LS1707C13IAid9vwo=" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/vendor/coreui.min.css">
     <link rel="stylesheet" href="/css/vendor/simple-line-icons.min.css">
 
 </head>
