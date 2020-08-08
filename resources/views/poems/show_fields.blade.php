@@ -51,7 +51,7 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
 @if($poem->bedtime_post_id)
 <!-- Bedtime Post Id Field -->
 <section class="side">
-    <h4 class="side-title">荐诗</h4>
+    <h4 class="side-title">评论</h4>
     <hr>
     <ol>
         @if($wxPost)
