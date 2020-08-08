@@ -123,7 +123,7 @@ SQL
                     ? '作者 / '. $nation . $post->poet_cn
                     : ($post->poet ? $post->poet : '');
 
-                $wikiLink = route('poems/show', Poem::fakeId($post->id));
+                $wikiLink = "\n诗歌维基：" . route('poems/show', Poem::fakeId($post->id));
 
                 $parts = [
                     '▍ '.$post->title."\n",
