@@ -206,7 +206,7 @@ class Poem extends Model
     }
 
     public function getUrl() {
-        return app('url')->route('poems/show', [$this->getFakeId()]);
+        return route('p/show', ['fakeId' => $this->getFakeId()]);
     }
 
 }
