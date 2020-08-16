@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="PoemWiki,@yield('author')">
     <meta name="description" content="PoemWiki">
-    <meta name="keyword" content="poem,poetry,poet,诗,诗歌诗人,@yield('author'),@yield('title')">
+    <meta name="keyword" content="@yield('title'),@yield('author'),poem,poetry,poet,诗,诗歌,诗人">
     @include('layouts.icon')
     @include('layouts.analyze')
 

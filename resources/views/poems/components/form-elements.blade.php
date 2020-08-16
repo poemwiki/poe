@@ -3,7 +3,7 @@
     <label for="title" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.title') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
-        <input type="text" v-model="form.title" v-validate="''" @input="validate($event)" class="form-control"
+        <input type="text" v-model="form.title" v-validate="'required'" @input="validate($event)" class="form-control"
                :class="{'form-control-danger': errors.has('title'), 'form-control-success': fields.title && fields.title.valid}"
                id="title" name="title" placeholder="">
         <div v-if="errors.has('title')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('title') }}
@@ -19,7 +19,7 @@
         <div>
 {{--            <textarea class="form-control" v-model="form.poem" v-validate="''" id="poem" name="poem"></textarea>--}}
             <codemirror
-                v-validate="''" id="poem" name="poem"
+                v-validate="'required'" id="poem" name="poem"
                 class=""
                 ref="cmEditor"
                 :value="form.poem"
@@ -38,7 +38,7 @@
     <label for="poet_cn" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.poet_cn') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
-        <input type="text" v-model="form.poet_cn" v-validate="''" @input="validate($event)" class="form-control"
+        <input type="text" v-model="form.poet_cn" v-validate="'required'" @input="validate($event)" class="form-control"
                :class="{'form-control-danger': errors.has('poet_cn'), 'form-control-success': fields.poet_cn && fields.poet_cn.valid}"
                id="poet_cn" name="poet_cn" placeholder="">
         <div v-if="errors.has('poet_cn')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('poet_cn')
@@ -52,7 +52,7 @@
     <label for="poet" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.poet') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
-        <input type="text" v-model="form.poet" v-validate="''" @input="validate($event)" class="form-control"
+        <input type="text" v-model="form.poet" v-validate="'required'" @input="validate($event)" class="form-control"
                :class="{'form-control-danger': errors.has('poet'), 'form-control-success': fields.poet && fields.poet.valid}"
                id="poet" name="poet" placeholder="">
         <div v-if="errors.has('poet')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('poet') }}</div>
@@ -117,7 +117,7 @@
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
         <select class="form-control"
                 :class="{'form-control-danger': errors.has('is_original'), 'form-control-success': fields.is_original && fields.is_original.valid}"
-                id="is_original" v-model="form.is_original" v-validate="''" data-vv-name="is_original"
+                id="is_original" v-model="form.is_original" v-validate="'required'" data-vv-name="is_original"
                 name="is_original_fake_element">
             <option value="1"
                     :selected="form.isoriginal==1">{{ trans('admin.poem.is_original_enum.original') }}</option>
@@ -153,7 +153,7 @@
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
         <select class="form-control"
                 :class="{'form-control-danger': errors.has('language'), 'form-control-success': fields.language && fields.language.valid}"
-                id="language" v-model="form.language" v-validate="''" data-vv-name="language"
+                id="language" v-model="form.language" v-validate="'required'" data-vv-name="language"
                 name="language_fake_element">
             @foreach($languageList as $lang)
                 <option value="{{$lang->id}}" :selected="form.language=={{$lang->id}}">{{ $lang->name }}</option>
@@ -195,7 +195,7 @@
     </div>
 </div>
 
-<div class="hidden form-group row"
+<div class="form-group row hidden"
      :class="{'has-danger': errors.has('length'), 'has-success': fields.length && fields.length.valid }">
     <label for="length" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.length') }}</label>

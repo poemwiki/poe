@@ -14,13 +14,10 @@ $from = $poem->from
 
 $translator = $poem->translator ? '翻译 / '.trim($poem->translator) : '';
 
-//dd($poem->wxPost);
 $wxPost = $poem->wx ? $poem->wx->first() : null;
-//$wxPost = null;
-//dd($wxPost->first()->toArray());
 ?>
-@section('title', $poem->title)
-@section('author', $poem->poet)
+@section('title'){{$poem->title}}@endsection
+@section('author'){{$poem->poet.($poem->poet ? ',' : '').$poem->poet_cn}}@endsection
 
 
 <section>
