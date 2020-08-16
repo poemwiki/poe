@@ -81,6 +81,8 @@ class Poem extends Model
      * @var array
      */
     public static $rules = [
+        'title' => 'required',
+        'poet' => 'required',
         //        'updated_at' => 'required',
         //        'created_at' => 'required',
         //        'is_lock' => 'required'
@@ -133,6 +135,7 @@ class Poem extends Model
                     'full_hash' => $fullHash
                 ]);
                 $model->content_id = $content->id;
+                $model->need_confirm = 0;
             }
         });
     }
@@ -166,8 +169,8 @@ class Poem extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo
      **/
-    public function language() {
-        return $this->belongsTo(\App\Models\Language::class, 'id', 'language');
+    public function lang() {
+        return $this->belongsTo(\App\Models\Language::class, 'language', 'id');
     }
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasOne
