@@ -45,15 +45,12 @@ Vue.component('poem-form', {
   },
 
   methods: {
-    onCmReady(cm) {
-      console.log('the editor is readied!', cm);
+    onCmInput(newContent) {
+      this.form.poem = newContent;
     },
-    onCmFocus(cm) {
-      console.log('the editor is focused!', cm);
-    },
-    onCmCodeChange(newCode) {
-      console.log('this is new code', newCode);
-      this.form.poem = newCode;
+    onCmCodeChange() {
+      console.log('content: ', this.form.poem);
+      this.$validator.validate('poem', this.form.poem);
     }
   },
   computed: {

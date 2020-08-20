@@ -26,6 +26,12 @@
 .col-form-label{
   color: $mutedText;
   font-weight: bold;
+  &.required:before{
+    content: '*';
+    vertical-align: middle;
+    padding-right: .2em;
+    color: $red;
+  }
 }
 .form-control {
   background-position-x: 97%;

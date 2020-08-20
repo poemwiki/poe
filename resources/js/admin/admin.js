@@ -5,7 +5,8 @@ import flatPickr from 'vue-flatpickr-component';
 import VueQuillEditor from 'vue-quill-editor';
 import Notifications from 'vue-notification';
 import Multiselect from 'vue-multiselect';
-import VeeValidate from 'vee-validate';
+import VeeValidate, { Validator } from 'vee-validate';
+import zh_CN from "vee-validate/dist/locale/zh_CN";
 import 'flatpickr/dist/flatpickr.css';
 import VueCookie from 'vue-cookie';
 import { Admin } from 'craftable';
@@ -19,6 +20,8 @@ import 'craftable/dist/ui';
 
 Vue.component('multiselect', Multiselect);
 Vue.use(VeeValidate, {strict: true});
+Validator.localize("zh_CN", zh_CN);
+
 Vue.component('datetime', flatPickr);
 Vue.use(VModal, { dialog: true, dynamic: true, injectModalsContainer: true });
 Vue.use(VueQuillEditor);
