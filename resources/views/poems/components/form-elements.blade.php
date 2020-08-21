@@ -191,7 +191,7 @@
             @endforeach
         </select>
         <input type="hidden" name="language" :value="form.language">
-        <div v-if="errors.has('is_original')" class="form-control-feedback form-text" v-cloak>@{{
+        <div v-if="errors.has('language')" class="form-control-feedback form-text" v-cloak>@{{
             errors.first('language') }}
         </div>
     </div>

@@ -20,6 +20,10 @@ import 'craftable/dist/ui';
 
 Vue.component('multiselect', Multiselect);
 Vue.use(VeeValidate, {strict: true});
+
+zh_CN.messages.required = function(n) {
+  return n+"是必填的";
+};
 Validator.localize("zh_CN", zh_CN);
 
 Vue.component('datetime', flatPickr);
