@@ -1,0 +1,23 @@
+.top-right {
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.57);
+  a.site-name {
+    display: block;
+    padding: 0 .5em;
+    color: #fff;
+    font-family: 'Major Mono Display', monospace, sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    letter-spacing: .1rem;
+    text-decoration: none;
+    white-space: pre-line;
+    text-align: center;
+    &:hover {
+      text-decoration: none;
+      animation: fadein 2s ease;
+    }
+  }
+}

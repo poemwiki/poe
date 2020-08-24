@@ -1,4 +1,5 @@
 // Fonts
+@import url('./MajorMonoDisplayFont.css');
 @import url('./NunitoFont.css');
 
 // Variables
@@ -6,6 +7,7 @@
 
 // Bootstrap
 @import '~bootstrap/scss/bootstrap';
+@import 'menu';
 
 .no-vertical-padding {
   padding-top: 0;
