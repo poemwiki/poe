@@ -45,6 +45,16 @@ Vue.component('poem-form', {
   },
 
   methods: {
+    onSuccess: function onSuccess(data) {
+      this.submiting = false;
+      if (data.code === 0) {
+        this.$notify({
+          type: 'success',
+          title: '操作成功',
+          text: '您的修改已提交。'
+        });
+      }
+    },
     onCmInput(newContent) {
       this.form.poem = newContent;
     },

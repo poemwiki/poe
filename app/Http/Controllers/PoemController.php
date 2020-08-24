@@ -125,10 +125,8 @@ class PoemController extends Controller
      * @return array|RedirectResponse|Redirector
      */
     public function update($fakeId, UpdatePoem $request) {
-//        dd($fakeId, $request);die;
         // Sanitize input
         $sanitized = $request->getSanitized();
-//        $sanitized['id'] = $request->get('id');
 
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
         if (empty($poem)) {
@@ -136,11 +134,10 @@ class PoemController extends Controller
         }
         // Update changed values Poem
         $this->poemRepository->update($sanitized, $poem->id);
-//        dd($sanitized);die;
 
         if ($request->ajax()) {
             return [
-                'redirect' => route('poems/edit', Poem::fakeId($request->get('id'))),
+                'code' => 0,
                 'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
             ];
         }
