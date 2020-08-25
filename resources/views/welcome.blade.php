@@ -36,12 +36,6 @@
                 position: relative;
             }
 
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
-
             .content {
                 text-align: center;
             }
@@ -68,11 +62,9 @@
     <body>
         <div class="flex-center position-ref full-height">
             @if (Route::has('login'))
-                <div class="top-right links">
+                <div class="top-right links no-select">
                     @auth
-                        <div class="top-right links no-select">
-                            <a class="site-name" href="{{route('poems/random')}}">POEM&#0010;Wiki</a>
-                        </div>
+                        <a class="site-name" href="{{route('poems/random')}}">POEM&#0010;Wiki</a>
                     @else
                         <a href="{{ route('login') }}">@lang('Login')</a>
 
