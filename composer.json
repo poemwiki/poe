@@ -1,21 +1,22 @@
 {
-    "name": "laravel/laravel",
+    "name": "ray7551/poem-wiki",
     "type": "project",
-    "description": "The Laravel Framework.",
+    "description": "The PoemWiki website.",
     "keywords": [
         "framework",
         "laravel"
     ],
     "repositories": [
-        {
-            "type": "vcs",
-            "url":  "git@github.com:InfyOmLabs/swaggervel.git"
-        }
+      {
+        "type": "vcs",
+        "url":  "https://github.com/ray7551/admin-translations.git"
+      }
     ],
     "license": "MIT",
     "require": {
         "php": "^7.2.5",
         "brackets/craftable": "^5.1",
+        "brackets/admin-translations": "dev-fix-dash-locale",
         "doctrine/dbal": "~2.3",
         "fideloper/proxy": "^4.2",
         "fruitcake/laravel-cors": "^1.0",
