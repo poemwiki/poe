@@ -25,7 +25,7 @@ class CreateAdminUsersTable extends Migration
 
                 $table->boolean('activated')->default(false);
                 $table->boolean('forbidden')->default(false);
-                $table->string('language', 2)->default('en');
+                $table->string('language', 32)->default('en');
 
                 $table->softDeletes();
                 $table->timestamps();
