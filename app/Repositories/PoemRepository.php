@@ -83,10 +83,8 @@ class PoemRepository extends BaseRepository
     ORDER BY r1.id ASC
     LIMIT 1
      */
-    public function random($num = 1) {
-        $query = $this->model->newQuery();
-
-        return $query->select()->with('wx')
+    public static function random($num = 1) {
+        return Poem::select()->with('wx')
             ->whereRaw('`deleted_at` is null')
             ->inRandomOrder()
             ->limit($num); // here is yours limit

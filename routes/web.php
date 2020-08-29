@@ -1,5 +1,6 @@
 <?php
 
+use App\Repositories\PoemRepository;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,7 +15,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome', [
+        'poemUrl' => PoemRepository::random()->get()[0]->getUrl()
+    ]);
 });
 
 Auth::routes(['verify' => true]);

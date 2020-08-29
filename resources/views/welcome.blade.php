@@ -64,7 +64,7 @@
             @if (Route::has('login'))
                 <div class="top-right links no-select">
                     @auth
-                        <a class="site-name" href="{{route('poems/random')}}">POEM&#0010;Wiki</a>
+                        <a class="site-name" href="{{ $poemUrl }}">POEM&#0010;Wiki</a>
                     @else
                         <a href="{{ route('login') }}">@lang('Login')</a>
 
