@@ -3,16 +3,11 @@
 $nation = $poem->dynasty
     ? "[$poem->dynasty] "
     : ($poem->nation ? "[$poem->nation] " : '');
+// @TODO poet page url
+$author = '<address><a href="#" itemprop="author" class="poem-writer">' . ($poem->poet_cn ?? $poem->poet) . '</a></address>';
+$authorLine = $nation . $author;
 
-$writer = $poem->poet_cn
-    ? '作者 / '. $nation . $poem->poet_cn
-    : ($poem->poet ? '<i>'.$poem->poet.'</i>' : '');
-
-$from = $poem->from
-    ? '选自 / '. $poem->from
-    : null;
-
-$translator = $poem->translator ? '翻译 / '.trim($poem->translator) : '';
+$translator = $poem->translator ? trim($poem->translator) : '';
 
 $wxPost = $poem->wx ? $poem->wx->first() : null;
 ?>
@@ -20,11 +15,35 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
 @section('author'){{$poem->poet.($poem->poet ? ',' : '').$poem->poet_cn}}@endsection
 
 
-<section>
-    <article class="poem">
-        <header>
-            <p class="title font-song no-select" id="title">{{ $poem->title }}
-                <a class="edit" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}" title="编辑"><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="height: 1em;
+<section class="poem" itemscope itemtype="http://schema.org/Article" itemid="{{ $poem->getUrl() }}">
+    <article>
+        <h1 class="title font-song no-select" itemprop="name" id="title">{{ $poem->title }}</h1>
+        <pre class="poem-content font-song no-select" itemprop="poem" lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
+        <dl class="poem-info">
+            <dt>@lang('admin.poem.columns.poet')</dt><dd>{!!$author!!}</dd>
+            @if($poem->translator)
+            <dt>@lang('admin.poem.columns.translator')</dt><dd itemprop="translator" class="poem-translator">{{$translator}}</dd>
+            @endif
+            @if($poem->year)
+            <dt>@lang('admin.poem.columns.year')</dt><dd itemprop="dateCreated" class="poem-year">{{$poem->year}}</dd>
+            @endif
+            @if($poem->from)
+            <dt>@lang('admin.poem.columns.from')</dt><dd itemprop="isPartOf" class="poem-from">{{$poem->from}}</dd>
+            @endif
+        </dl>
+        <a class="edit btn" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">报错/编辑</a>
+        @if(!$poem->is_original && !$poem->original_poem)
+{{--        <a class="edit" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">添加原作</a>--}}
+        @endif
+    </article>
+</section>
+
+
+@if($poem->bedtime_post_id)
+<!-- Bedtime Post Id Field -->
+<section class="review">
+    <h4>评论
+        <a class="add-comment btn no-bg" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}" title="编辑"><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="height: 1.4em;
     vertical-align: baseline;" xml:space="preserve"><g><path d="M446.029,0L130.498,267.303l-20.33,66.646c-8.624,7.369-19.857,11.39-32.017,11.391c-4.776,0-9.583-0.622-14.293-1.848
 			l-14.438-3.761L0,512l172.268-49.421l-3.759-14.438c-4.454-17.1-0.883-34.137,9.54-46.309l66.648-20.331L512,65.971L446.029,0z
 			 M136.351,441.068l-61.413,17.618l42.732-42.732L96.045,394.33l-42.731,42.732l17.627-61.444c2.401,0.202,4.807,0.303,7.21,0.303
@@ -32,24 +51,7 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
 			l-33.079-33.078l10.109-33.14l56.109,56.109L173.977,371.102z M235.003,345.632l-68.636-68.636l46.828-39.671l61.478,61.478
         L235.003,345.632z M236.61,217.492L444.314,41.535l26.152,26.152L294.509,275.391L236.61,217.492z"/></g>
 </svg></a>
-            </p>
-        </header>
-        <pre class="poem-content font-song no-select">{{ $poem->poem }}</pre>
-        <footer class="poem-info">
-            <p class="poem-writer">{!!$writer!!}</p>
-            <p class="poem-translator">{{$translator}}</p>
-            <p class="poem-year">{{$poem->year}}</p>
-            <p class="poem-from">{{$from}}</p>
-        </footer>
-    </article>
-</section>
-
-
-@if($poem->bedtime_post_id)
-<!-- Bedtime Post Id Field -->
-<section class="side">
-    <h4 class="side-title">评论</h4>
-    <hr>
+    </h4>
     <ol>
         @if($wxPost)
             @if($wxPost->link && $wxPost->title)

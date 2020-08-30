@@ -1,19 +1,40 @@
+@import 'variables';
+@import '~bootstrap/scss/bootstrap-reboot';
 //@import url('https://unpkg.com/element-ui/lib/theme-chalk/index.css');
 // Fonts
 @import url('./MajorMonoDisplayFont.css');
 
-// Variables
-@import 'variables';
-
-@import '~bootstrap/scss/bootstrap-reboot';
 @import 'menu';
 
 a {
-  color: #111;
+  color: $blue;
+  &:hover{
+    text-decoration: none;
+    color: $white;
+    background-color: $blue;
+  }
+
+  &.no-bg{
+    background: none;
+    &:hover{
+      background: none;
+    }
+  }
+
+  &.fancy-underline{
+    text-decoration:none;
+    transition: all .13s linear;
+    &:hover {
+      text-decoration: none;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.0) 50%, #000000 50%) repeat-x 0 1.0em;
+      background-size: .1em .1em;
+    }
+  }
 }
-a:hover{
-  color: #333;
+.btn {
+  font-size: .86rem;
 }
+
 .no-select {
   user-select: none;
 }
@@ -34,7 +55,7 @@ a:hover{
 }
 
 html, body {
-  color: #111;
+  color: $default-text-color;
   font-family: $font-family-sans-serif;
   font-weight: lighter;
   min-height: 100%;
@@ -54,22 +75,7 @@ main.post {
   padding: 2em 1em;
   //color: #fff;
 
-  a{
-    text-decoration:none;
-    transition: all .13s linear;
-  }
-
-  .edit{
-    display: block;
-    position: fixed;
-    bottom: 1em;
-    right: 1em;
-    &:hover{
-      text-decoration: none;
-    }
-  }
-
-  header{
+  article{
     .title {
       font-size: 1.5rem;
       font-weight: 400;
@@ -84,30 +90,58 @@ main.post {
         animation: fadein 5s ease;
       }
     }
-  }
 
-  pre{
-    font-size: 1.1rem;
-    line-height: 2;
-    animation: fadein 2s ease;
-  }
-
-  footer{
-    font-weight: 300;
-    line-height: 1em;
-    margin-top: 2.5rem;
-  }
-
-  .side {
-    margin-top: 3rem;
-    a:hover {
-      text-decoration: none;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.0) 50%, #000000 50%) repeat-x 0 1.0em;
-      background-size: .1em .1em;
+    pre{
+      font-size: 1.1rem;
+      line-height: 2;
+      animation: fadein 2s ease;
     }
-    .side-title {
-      color: #777;
-      font-weight: normal;
+
+    dl.poem-info{
+      line-height: 1em;
+      margin-top: 2rem;
+      font-weight: 300;
+      dt,dd{
+        display: inline;
+        line-height: 2;
+      }
+      dt{
+        color: $gray;
+        font-weight: 300;
+        &:before{
+          content: "";
+          display: block;
+        }
+      }
+      dd{
+        &:before{
+          content: "";
+          display: inline-block;
+          width: 1em;
+        }
+        >*{
+          display: inline;
+        }
+      }
+    }
+
+  }
+
+
+  .review {
+    margin-top: 3rem;
+    >h4 {
+      color: $gray;
+      font-weight: 300;
+      position: relative;
+      border-bottom: 1px solid $gray;
+
+      .add-comment{
+        display: block;
+        position: absolute;
+        bottom: 0;
+        right: 1em;
+      }
     }
   }
 }
