@@ -9,6 +9,10 @@ $authorLine = $nation . $author;
 
 $translator = $poem->translator ? trim($poem->translator) : '';
 
+$softWrap = max(array_map(function($line) {
+    return grapheme_strlen($line);
+}, explode("\n", $poem->poem))) >= config('app.soft_wrap_length');
+
 $wxPost = $poem->wx ? $poem->wx->first() : null;
 ?>
 @section('title'){{$poem->title}}@endsection
@@ -18,9 +22,9 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
 <section class="poem" itemscope itemtype="http://schema.org/Article" itemid="{{ $poem->getUrl() }}">
     <article>
         <h1 class="title font-song no-select" itemprop="name" id="title">{{ $poem->title }}</h1>
-        <pre class="poem-content font-song no-select" itemprop="poem" lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
+        <pre class="poem-content font-song no-select {{$softWrap ? 'soft-wrap' : ''}}" itemprop="poem" lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
         <dl class="poem-info">
-            <dt>@lang('admin.poem.columns.poet')</dt><dd>{!!$author!!}</dd>
+            <dt>@lang('admin.poem.columns.poet')</dt><dd>{!!$authorLine!!}</dd>
             @if($poem->translator)
             <dt>@lang('admin.poem.columns.translator')</dt><dd itemprop="translator" class="poem-translator">{{$translator}}</dd>
             @endif
@@ -35,6 +39,10 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
         @if(!$poem->is_original && !$poem->original_poem)
 {{--        <a class="edit" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">添加原作</a>--}}
         @endif
+
+        <ol class="contribution">
+            <li>初次上传：{{$poem->contributions[0] ?? '新星'}}</li>
+        </ol>
     </article>
 </section>
 

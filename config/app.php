@@ -232,7 +232,9 @@ $config = [
         'Flash'        => Laracasts\Flash\Flash::class
     ],
 
-    'invite_limited' => env('INVITE_LIMITED', false)
+    'invite_limited' => env('INVITE_LIMITED', false),
+
+    'soft_wrap_length' => 30
 
 ];
 

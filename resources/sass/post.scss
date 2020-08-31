@@ -32,11 +32,17 @@ a {
   }
 }
 .btn {
-  font-size: .86rem;
+  font-size: $font-size-sm;
+  display: inline-block;
 }
 
 .no-select {
   user-select: none;
+}
+
+.soft-wrap {
+  white-space: normal;
+  text-align: justify;
 }
 
 
@@ -100,7 +106,7 @@ main.post {
 
     dl.poem-info{
       line-height: 1em;
-      margin-top: 2rem;
+      margin: 2rem 0 0;
       font-weight: 300;
       dt,dd{
         display: inline;
@@ -126,6 +132,15 @@ main.post {
       }
     }
 
+    .btn.edit{
+      line-height: 1.2em;
+    }
+    ol.contribution {
+      list-style: none;
+      padding-left: 0;
+      font-size: $font-size-sm;
+      color: $gray;
+    }
   }
 
 
