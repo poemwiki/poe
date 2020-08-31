@@ -41,7 +41,7 @@ a {
 }
 
 .soft-wrap {
-  white-space: normal;
+  white-space: pre-wrap;
   text-align: justify;
 }
 
@@ -83,7 +83,7 @@ main.post {
 
   article{
     .title {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 400;
       //animation: fadein 2s ease;
       vertical-align: unset;
@@ -99,10 +99,14 @@ main.post {
     }
 
     pre{
-      font-size: 1.1rem;
+      font-size: 1rem;
       line-height: 2;
       animation: fadein 2s ease;
+      @include media-breakpoint-up(md) {
+        font-size: 1.2rem;
+      }
     }
+
 
     dl.poem-info{
       line-height: 1em;

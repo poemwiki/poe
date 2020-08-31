@@ -9,9 +9,10 @@ $authorLine = $nation . $author;
 
 $translator = $poem->translator ? trim($poem->translator) : '';
 
-$softWrap = max(array_map(function($line) {
+$maxLength = max(array_map(function($line) {
     return grapheme_strlen($line);
-}, explode("\n", $poem->poem))) >= config('app.soft_wrap_length');
+}, explode("\n", $poem->poem)));
+$softWrap = $maxLength >= config('app.soft_wrap_length');
 
 $wxPost = $poem->wx ? $poem->wx->first() : null;
 ?>
