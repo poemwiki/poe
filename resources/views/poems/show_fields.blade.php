@@ -49,6 +49,10 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
                 @else
                     <dt><a href="{{$poem->originalPoem->getUrl()}}">{{$poem->originalPoem->lang->name ?? trans('admin.poem.is_original_enum.original')}}</a></dt><dd>{{$poem->originalPoem->poet}}</dd>
                 @endif
+            @elseif($poem->translatedPoems)
+                @foreach($poem->translatedPoems as $t)
+                <dt><a href="{{$t->getUrl()}}">{{$t->lang->name ?? trans('admin.poem.columns.translator')}}</a></dt><dd>{{$t->translator}}</dd>
+                @endforeach
             @endif
         </dl>
 
