@@ -36,14 +36,22 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
             <dt>@lang('admin.poem.columns.from')</dt><dd itemprop="isPartOf" class="poem-from">{{$poem->from}}</dd>
             @endif
         </dl>
-        <a class="edit btn" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">报错/编辑</a>
-        @if(!$poem->is_original && !$poem->original_poem)
-{{--        <a class="edit" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">添加原作</a>--}}
-        @endif
-
+        <a class="edit btn" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
         <ol class="contribution">
             <li>初次上传：{{$poem->contributions[0] ?? '新星'}}</li>
         </ol>
+
+        <dl class="poem-info" title="@lang('original work')">
+            <dt>其他版本</dt>
+            @if(!$poem->is_original)
+                @if(!$poem->originalPoem)
+                    <dt>@lang('poem.no original work related')</dt><dd><a class="" href="{{ Auth::check() ? route('poems/create', ['ref' => $fakeId]) : route('login', ['ref' => route('poems/create', ['ref' => $fakeId], false)]) }}">@lang('poem.add original work')</a></dd>
+                @else
+                    <dt><a href="{{$poem->originalPoem->getUrl()}}">{{$poem->originalPoem->lang->name ?? trans('admin.poem.is_original_enum.original')}}</a></dt><dd>{{$poem->originalPoem->poet}}</dd>
+                @endif
+            @endif
+        </dl>
+
     </article>
 </section>
 

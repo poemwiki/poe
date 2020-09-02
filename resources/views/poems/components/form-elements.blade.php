@@ -186,9 +186,9 @@
                 v-validate="'required'"
                 data-vv-as="{{ trans('admin.poem.columns.language') }}" data-vv-name="language"
                 name="language_fake_element">
-            @foreach($languageList as $lang)
-                <option value="{{$lang->id}}" :selected="form.language=={{$lang->id}}">{{ $lang->name }}</option>
-            @endforeach
+        @foreach($languageList as $lang)
+            <option value="{{$lang->id}}" :selected="form.language=={{$lang->id}}">{{ $lang->name }}</option>
+        @endforeach
         </select>
         <input type="hidden" name="language" :value="form.language">
         <div v-if="errors.has('language')" class="form-control-feedback form-text" v-cloak>@{{

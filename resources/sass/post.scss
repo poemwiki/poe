@@ -34,6 +34,8 @@ a {
 .btn {
   font-size: $font-size-sm;
   display: inline-block;
+  margin-right: 1em;
+  line-height: 1.2em;
 }
 
 .no-select {
@@ -136,9 +138,6 @@ main.post {
       }
     }
 
-    .btn.edit{
-      line-height: 1.2em;
-    }
     ol.contribution {
       list-style: none;
       padding-left: 0;

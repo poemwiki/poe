@@ -37,7 +37,6 @@ class Poem extends Model
         'need_confirm',
         'is_lock',
         'content_id',
-
     ];
 
     /**
@@ -65,7 +64,8 @@ class Poem extends Model
         'nation' => 'string',
         'need_confirm' => 'integer',
         'is_lock' => 'boolean',
-        'content_id' => 'integer'
+        'content_id' => 'integer',
+        'original_id' => 'integer'
     ];
 
 
@@ -171,6 +171,12 @@ class Poem extends Model
      **/
     public function lang() {
         return $this->belongsTo(\App\Models\Language::class, 'language', 'id');
+    }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     **/
+    public function originalPoem() {
+        return $this->belongsTo(\App\Models\Poem::class, 'original_id', 'id');
     }
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasOne
