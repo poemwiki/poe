@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Poem;
 
+use App\Models\Language;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -29,7 +30,7 @@ class UpdatePoem extends FormRequest
         return [
             'id' => ['integer'],
             'title' => ['nullable', 'string'],
-            'language' => ['nullable', 'boolean'],
+            'language' => Rule::in(Language::ids()),
             'is_original' => ['nullable', 'boolean'],
             'poet' => ['nullable', 'string'],
             'poet_cn' => ['nullable', 'string'],
