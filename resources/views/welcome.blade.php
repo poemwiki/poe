@@ -21,6 +21,9 @@
                 height: 100%;
                 margin: 0;
             }
+            a:hover{
+                text-decoration: none;
+            }
 
             .full-height {
                 height: 100vh;
@@ -77,7 +80,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    PoemWiki
+                    <a href="{{ $poemUrl }}">PoemWiki</a>
                 </div>
 
 
