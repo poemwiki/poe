@@ -64,9 +64,23 @@ class PoemController extends Controller
      * @return Factory|View
      */
     public function create() {
-//        $this->authorize('admin.poem.create');
+        $user = Auth::user();
+        $this->authorize('web.poems.create');
 
-        return view('admin.poem.create');
+        if($t = request()->get('translated_fake_id')) {
+            $translatedPoem = $this->poemRepository->getPoemFromFakeId($t);
+        }
+        if($o = request()->get('original_fake_id')) {
+            $originalPoem = $this->poemRepository->getPoemFromFakeId($o);
+        }
+
+
+        return view('poems.create', [
+            'userName' => $user->name,
+            'languageList' => Language::all(),
+            'translatedPoem' => $translatedPoem ?? null,
+            'originalPoem' => $originalPoem ?? null
+        ]);
     }
     /**
      * Store a newly created resource in storage.

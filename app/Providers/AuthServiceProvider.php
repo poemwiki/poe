@@ -32,5 +32,8 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('web.poems.edit', function ($user) {
             return $user->id;
         });
+        Gate::define('web.poems.create', function ($user) {
+            return $user->id;
+        });
     }
 }
