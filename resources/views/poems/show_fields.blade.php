@@ -41,19 +41,20 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
             <li>初次上传：{{$poem->contributions[0] ?? '新星'}}</li>
         </ol>
 
-        <dl class="poem-info" title="@lang('original work')">
+        <dl class="poem-info">
             <dt>其他版本</dt>
             @if(!$poem->is_original)
                 @if(!$poem->originalPoem)
-                    <dt>@lang('poem.no original work related')</dt><dd><a class="" href="{{ Auth::check() ? route('poems/create', ['ref' => $fakeId]) : route('login', ['ref' => route('poems/create', ['ref' => $fakeId], false)]) }}">@lang('poem.add original work')</a></dd>
+                    <dt>@lang('poem.no original work related')</dt><dd><a class="" href="{{ Auth::check() ? route('poems/create', ['translated_fake_id' => $fakeId]) : route('login', ['ref' => route('poems/create', ['translated_fake_id' => $fakeId], false)]) }}">@lang('poem.add original work')</a></dd>
                 @else
-                    <dt><a href="{{$poem->originalPoem->getUrl()}}">{{$poem->originalPoem->lang->name ?? trans('admin.poem.is_original_enum.original')}}</a></dt><dd>{{$poem->originalPoem->poet}}</dd>
+                    <dt><a href="{{$poem->originalPoem->getUrl()}}" title="@lang('poem.original work')">{{$poem->originalPoem->lang->name ? $poem->originalPoem->lang->name.'['.trans('poem.original work').']' : trans('poem.original work')}}</a></dt><dd>{{$poem->originalPoem->poet}}</dd>
                 @endif
             @elseif($poem->translatedPoems)
                 @foreach($poem->translatedPoems as $t)
-                <dt><a href="{{$t->getUrl()}}">{{$t->lang->name ?? trans('admin.poem.columns.translator')}}</a></dt><dd>{{$t->translator}}</dd>
+                <dt>{{$t->lang->name ?? trans('poem.')}}</dt><dd><a href="{{$t->getUrl()}}">{{$t->translator}}</a></dd>
                 @endforeach
             @endif
+            <dt><a class="btn" href="{{ Auth::check() ? route('poems/create', ['original_fake_id' => $fakeId]) : route('login', ['ref' => route('poems/create', ['original_fake_id' => $fakeId], false)]) }}">@lang('poem.add another translated version')</a></dt>
         </dl>
 
     </article>
