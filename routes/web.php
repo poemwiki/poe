@@ -74,7 +74,7 @@ Route::prefix('poems')->name('poems/')->group(static function() {
     Route::get('/random',      'PoemController@random')->name('random');
     Route::get('/search',      'PoemController@index')->name('index');
     Route::get('/create',      'PoemController@create')->name('create');
-    Route::post('/',           'PoemController@store')->name('store');
+    Route::post('/store',           'PoemController@store')->name('store');
     Route::get('/edit/{fakeId}', 'PoemController@edit')->name('edit');
     Route::post('/update/{fakeId}',     'PoemController@update')->name('update');
     Route::get('/{fakeId}',    'PoemController@show')->name('show');

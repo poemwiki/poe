@@ -5,7 +5,7 @@
             {{ trans('poem.original work') }}
         </label>
         《<a href="{{$originalPoem->getUrl()}}">{{ $originalPoem->title }}</a>》
-        <input type="hidden" name="oringinal_id" :value="{{$originalPoem->id}}">
+        <input type="hidden" name="original_id" :value="{{$originalPoem->id}}">
     </div>
 @endif
 

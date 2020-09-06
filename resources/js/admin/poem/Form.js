@@ -67,6 +67,9 @@ Vue.component('poem-form', {
           title: '操作成功',
           text: '您的修改已提交。'
         });
+        if(data.redirect){
+          location.href = data.redirect;
+        }
       }
     },
     onCmInput(newContent) {

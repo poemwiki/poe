@@ -10,7 +10,7 @@
                 <div class="card">
 
         <poem-form
-            :action="'{{ url('admin/poems') }}'"
+            :action="'{{ url('poems/store') }}'"
             v-cloak
             inline-template>
 

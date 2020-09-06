@@ -36,7 +36,7 @@ class Poem extends Model
         'nation',
         'need_confirm',
         'is_lock',
-        'content_id',
+        'content_id','original_id'
     ];
 
     /**
@@ -103,7 +103,8 @@ class Poem extends Model
         self::creating(function($model){
             $model->poem = self::trimTailSpaces($model->poem);
             $model->length = grapheme_strlen($model->poem);
-
+        });
+        self::created(function($model){
             $hash = self::contentHash($model->poem);
             $fullHash = self::contentFullHash($model->poem);
             $content = Content::create([
@@ -116,6 +117,7 @@ class Poem extends Model
             ]);
 
             $model->content_id = $content->id;
+            $model->save();
         });
 
         self::updating(function($model){
@@ -183,6 +185,12 @@ class Poem extends Model
      **/
     public function translatedPoems() {
         return $this->hasMany(\App\Models\Poem::class, 'original_id', 'id');
+    }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     **/
+    public function otherTranslatedPoems() {
+        return $this->hasMany(\App\Models\Poem::class, 'original_id', 'original_id');
     }
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasOne

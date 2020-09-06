@@ -17,7 +17,7 @@ class StorePoem extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('admin.poem.create') || Gate::allows('web.poems.edit', Auth::user());
+        return Gate::allows('admin.poem.create') || Gate::allows('web.poems.create', Auth::user());
     }
 
     /**
@@ -45,8 +45,9 @@ class StorePoem extends FormRequest
             'dynasty' => ['nullable', 'string'],
             'nation' => ['nullable', 'string'],
             'need_confirm' => ['nullable', 'boolean'],
-            'is_lock' => ['required', 'boolean'],
+            'is_lock' => ['nullable', 'boolean'],
             'content_id' => ['nullable', 'integer'],
+            'original_id' => ['nullable', 'integer'],
 
         ];
     }

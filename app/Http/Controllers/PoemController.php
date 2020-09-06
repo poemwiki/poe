@@ -96,10 +96,14 @@ class PoemController extends Controller
         $poem = Poem::create($sanitized);
 
         if ($request->ajax()) {
-            return ['redirect' => url('admin/poems'), 'message' => trans('brackets/admin-ui::admin.operation.succeeded')];
+            return [
+                'code' => 0,
+                'redirect' => route('poems/edit', Poem::fakeId($poem->id)),
+                'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
+            ];
         }
 
-        return redirect('admin/poems');
+        return redirect('poems/edit', Poem::fakeId($poem->getFakeId()));
     }
 
     /**
