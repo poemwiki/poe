@@ -31,7 +31,7 @@ Vue.component('poem-form', {
         // need_confirm:  false ,
         // is_lock:  false ,
         // content_id:  '' ,
-
+        original_id: ''
       },
 
       cmOptions: {
@@ -42,6 +42,20 @@ Vue.component('poem-form', {
         // more CodeMirror options...
       }
     }
+  },
+
+  mounted: function() {
+    this.form.poet_cn = this.$el.querySelector('[name="poet_cn"]').getAttribute('value') || this.form.poet_cn;
+    this.form.poet = this.$el.querySelector('[name="poet"]').getAttribute('value') || this.form.poet;
+    this.form.nation = this.$el.querySelector('[name="nation"]').getAttribute('value') || this.form.nation;
+    this.form.dynasty = this.$el.querySelector('[name="dynasty"]').getAttribute('value') || this.form.dynasty;
+    this.form.from = this.$el.querySelector('[name="from"]').getAttribute('value') || this.form.from;
+    this.form.year = this.$el.querySelector('[name="year"]').getAttribute('value') || this.form.year;
+    this.form.is_original = this.$el.querySelector('[name="is_original_fake_element"]').getAttribute('value') || this.form.is_original;
+    this.form.bedtime_post_id = this.$el.querySelector('[name="bedtime_post_id"]').getAttribute('value') || this.form.bedtime_post_id;
+    this.form.bedtime_post_title = this.$el.querySelector('[name="bedtime_post_title"]').getAttribute('value') || this.form.bedtime_post_title;
+    this.form.original_id = this.$el.querySelector('[name="original_id"]').getAttribute('value') || this.form.original_id;
+
   },
 
   methods: {

@@ -1,3 +1,14 @@
+
+@if(isset($originalPoem))
+    <div class="form-check row">
+        <label class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">
+            {{ trans('poem.original work') }}
+        </label>
+        《<a href="{{$originalPoem->getUrl()}}">{{ $originalPoem->title }}</a>》
+        <input type="hidden" name="oringinal_id" :value="{{$originalPoem->id}}">
+    </div>
+@endif
+
 <div class="form-group row"
      :class="{'has-danger': errors.has('title'), 'has-success': fields.title && fields.title.valid }">
     <label for="title" class="col-form-label text-md-right required"
@@ -44,9 +55,11 @@
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.poet_cn') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
         <input type="text" v-model="form.poet_cn"
+               value="{{$originalPoem->poet_cn ?? $translatedPoem->poet_cn ?? ''}}"
                v-validate="''"
                data-vv-as="{{ trans('admin.poem.columns.poet_cn') }}"
-               @input="validate($event)" @blur="validate($event)" class="form-control"
+               @input="validate($event)" @blur="validate($event)"
+               class="form-control"
                :class="{'form-control-danger': errors.has('poet_cn'), 'form-control-success': fields.poet_cn && fields.poet_cn.valid}"
                id="poet_cn" name="poet_cn" placeholder="">
         <div v-if="errors.has('poet_cn')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('poet_cn')
@@ -61,75 +74,13 @@
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.poet') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
         <input type="text" v-model="form.poet"
+               value="{{$originalPoem->poet ?? $translatedPoem->poet ?? ''}}"
                v-validate="'required'"
                data-vv-as="{{ trans('admin.poem.columns.poet') }}"
                @input="validate($event)" @blur="validate($event)" class="form-control"
                :class="{'form-control-danger': errors.has('poet'), 'form-control-success': fields.poet && fields.poet.valid}"
                id="poet" name="poet" placeholder="">
         <div v-if="errors.has('poet')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('poet') }}</div>
-    </div>
-</div>
-
-<div class="form-group row"
-     :class="{'has-danger': errors.has('nation'), 'has-success': fields.nation && fields.nation.valid }">
-    <label for="nation" class="col-form-label text-md-right"
-           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.nation') }}</label>
-    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
-        <input type="text" v-model="form.nation"
-               v-validate="''"
-               data-vv-as="{{ trans('admin.poem.columns.nation') }}"
-               @input="validate($event)" class="form-control"
-               :class="{'form-control-danger': errors.has('nation'), 'form-control-success': fields.nation && fields.nation.valid}"
-               id="nation" name="nation" placeholder="">
-        <div v-if="errors.has('nation')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('nation') }}
-        </div>
-    </div>
-</div>
-
-<div class="form-group row"
-     :class="{'has-danger': errors.has('dynasty'), 'has-success': fields.dynasty && fields.dynasty.valid }">
-    <label for="dynasty" class="col-form-label text-md-right"
-           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.dynasty') }}</label>
-    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
-        <input type="text" v-model="form.dynasty"
-               v-validate="''"
-               data-vv-as="{{ trans('admin.poem.columns.dynasty') }}"
-               @input="validate($event)" class="form-control"
-               :class="{'form-control-danger': errors.has('dynasty'), 'form-control-success': fields.dynasty && fields.dynasty.valid}"
-               id="dynasty" name="dynasty" placeholder="">
-        <div v-if="errors.has('dynasty')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('dynasty')
-            }}
-        </div>
-    </div>
-</div>
-
-<div class="form-group row"
-     :class="{'has-danger': errors.has('from'), 'has-success': fields.from && fields.from.valid }">
-    <label for="from" class="col-form-label text-md-right"
-           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.from') }}</label>
-    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
-        <input type="text" v-model="form.from"
-               v-validate="''"
-               data-vv-as="{{ trans('admin.poem.columns.from') }}"
-               @input="validate($event)" class="form-control"
-               :class="{'form-control-danger': errors.has('from'), 'form-control-success': fields.from && fields.from.valid}"
-               id="from" name="from" placeholder="">
-        <div v-if="errors.has('from')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('from') }}</div>
-    </div>
-</div>
-
-<div class="form-group row"
-     :class="{'has-danger': errors.has('year'), 'has-success': fields.year && fields.year.valid }">
-    <label for="year" class="col-form-label text-md-right"
-           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.year') }}</label>
-    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
-        <input type="text" v-model="form.year"
-               v-validate="''"
-               data-vv-as="{{ trans('admin.poem.columns.year') }}"
-               @input="validate($event)" class="form-control"
-               :class="{'form-control-danger': errors.has('year'), 'form-control-success': fields.year && fields.year.valid}"
-               id="year" name="year" placeholder="">
-        <div v-if="errors.has('year')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('year') }}</div>
     </div>
 </div>
 
@@ -143,12 +94,13 @@
                 id="is_original"
                 v-model="form.is_original"
                 v-validate="'required'"
+                value="{{!empty($originalPoem) ? 0 : (!empty($translatedPoem) ? 1 : '')}}"
                 data-vv-as="{{ trans('admin.poem.columns.is_original') }}" data-vv-name="is_original"
                 name="is_original_fake_element">
             <option value="1"
-                    :selected="form.isoriginal==1">{{ trans('admin.poem.is_original_enum.original') }}</option>
+                    :selected="form.is_original==1">{{ trans('admin.poem.is_original_enum.original') }}</option>
             <option value="0"
-                    :selected="form.isoriginal==0">{{ trans('admin.poem.is_original_enum.translated') }}</option>
+                    :selected="form.is_original==0">{{ trans('admin.poem.is_original_enum.translated') }}</option>
         </select>
         <input type="hidden" name="is_original" :value="form.is_original">
         <div v-if="errors.has('is_original')" class="form-control-feedback form-text" v-cloak>@{{
@@ -186,9 +138,9 @@
                 v-validate="'required'"
                 data-vv-as="{{ trans('admin.poem.columns.language') }}" data-vv-name="language"
                 name="language_fake_element">
-        @foreach($languageList as $lang)
-            <option value="{{$lang->id}}" :selected="form.language=={{$lang->id}}">{{ $lang->name }}</option>
-        @endforeach
+            @foreach($languageList as $lang)
+                <option value="{{$lang->id}}" :selected="form.language=={{$lang->id}}">{{ $lang->name }}</option>
+            @endforeach
         </select>
         <input type="hidden" name="language" :value="form.language">
         <div v-if="errors.has('language')" class="form-control-feedback form-text" v-cloak>@{{
@@ -198,12 +150,81 @@
 </div>
 
 <div class="form-group row"
+     :class="{'has-danger': errors.has('nation'), 'has-success': fields.nation && fields.nation.valid }">
+    <label for="nation" class="col-form-label text-md-right"
+           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.nation') }}</label>
+    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+        <input type="text" v-model="form.nation"
+               v-validate="''"
+               value="{{$originalPoem->nation ?? $translatedPoem->nation ?? ''}}"
+               data-vv-as="{{ trans('admin.poem.columns.nation') }}"
+               @input="validate($event)" class="form-control"
+               :class="{'form-control-danger': errors.has('nation'), 'form-control-success': fields.nation && fields.nation.valid}"
+               id="nation" name="nation" placeholder="">
+        <div v-if="errors.has('nation')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('nation') }}
+        </div>
+    </div>
+</div>
+
+<div class="form-group row"
+     :class="{'has-danger': errors.has('dynasty'), 'has-success': fields.dynasty && fields.dynasty.valid }">
+    <label for="dynasty" class="col-form-label text-md-right"
+           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.dynasty') }}</label>
+    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+        <input type="text" v-model="form.dynasty"
+               v-validate="''"
+               value="{{$originalPoem->dynasty ?? $translatedPoem->dynasty ?? ''}}"
+               data-vv-as="{{ trans('admin.poem.columns.dynasty') }}"
+               @input="validate($event)" class="form-control"
+               :class="{'form-control-danger': errors.has('dynasty'), 'form-control-success': fields.dynasty && fields.dynasty.valid}"
+               id="dynasty" name="dynasty" placeholder="">
+        <div v-if="errors.has('dynasty')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('dynasty')
+            }}
+        </div>
+    </div>
+</div>
+
+<div class="form-group row"
+     :class="{'has-danger': errors.has('from'), 'has-success': fields.from && fields.from.valid }">
+    <label for="from" class="col-form-label text-md-right"
+           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.from') }}</label>
+    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+        <input type="text" v-model="form.from"
+               v-validate="''"
+               value="{{$originalPoem->from ?? $translatedPoem->from ?? ''}}"
+               data-vv-as="{{ trans('admin.poem.columns.from') }}"
+               @input="validate($event)" class="form-control"
+               :class="{'form-control-danger': errors.has('from'), 'form-control-success': fields.from && fields.from.valid}"
+               id="from" name="from" placeholder="">
+        <div v-if="errors.has('from')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('from') }}</div>
+    </div>
+</div>
+
+<div class="form-group row"
+     :class="{'has-danger': errors.has('year'), 'has-success': fields.year && fields.year.valid }">
+    <label for="year" class="col-form-label text-md-right"
+           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.year') }}</label>
+    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+        <input type="text" v-model="form.year"
+               v-validate="''"
+               value="{{$originalPoem->year ?? $translatedPoem->year ?? ''}}"
+               data-vv-as="{{ trans('admin.poem.columns.year') }}"
+               @input="validate($event)" class="form-control"
+               :class="{'form-control-danger': errors.has('year'), 'form-control-success': fields.year && fields.year.valid}"
+               id="year" name="year" placeholder="">
+        <div v-if="errors.has('year')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('year') }}</div>
+    </div>
+</div>
+
+
+<div class="form-group row"
      :class="{'has-danger': errors.has('bedtime_post_id'), 'has-success': fields.bedtime_post_id && fields.bedtime_post_id.valid }">
     <label for="bedtime_post_id" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.bedtime_post_id') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
         <input type="text" v-model="form.bedtime_post_id"
                v-validate="''"
+               value="{{$originalPoem->bedtime_post_id ?? $translatedPoem->bedtime_post_id ?? ''}}"
                data-vv-as="{{ trans('admin.poem.columns.bedtime_post_id') }}"
                @input="validate($event)" class="form-control"
                :class="{'form-control-danger': errors.has('bedtime_post_id'), 'form-control-success': fields.bedtime_post_id && fields.bedtime_post_id.valid}"
@@ -221,6 +242,7 @@
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
         <input type="text" v-model="form.bedtime_post_title"
                v-validate="''"
+               value="{{$originalPoem->bedtime_post_title ?? $translatedPoem->bedtime_post_title ?? ''}}"
                data-vv-as="{{ trans('admin.poem.columns.bedtime_post_title') }}"
                @input="validate($event)"
                class="form-control"
