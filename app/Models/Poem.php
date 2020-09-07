@@ -181,16 +181,19 @@ class Poem extends Model
         return $this->belongsTo(\App\Models\Poem::class, 'original_id', 'id');
     }
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      **/
     public function translatedPoems() {
         return $this->hasMany(\App\Models\Poem::class, 'original_id', 'id');
     }
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\hasMany
      **/
-    public function otherTranslatedPoems() {
+    public function sameTranslatedPoems() {
         return $this->hasMany(\App\Models\Poem::class, 'original_id', 'original_id');
+    }
+    public function otherTranslatedPoems() {
+        return $this->sameTranslatedPoems()->where('id', '<>', $this->id);
     }
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasOne
