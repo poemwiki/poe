@@ -1,4 +1,4 @@
-<a href="{{ url('admin') }}" class="navbar-brand">
+<a href="{{ url('/') }}" class="navbar-brand">
     {{-- You may use plain text as a logo instead of image --}}
 
     <img class="navbar-brand-full" src="/icon.svg" width="30" height="30"
