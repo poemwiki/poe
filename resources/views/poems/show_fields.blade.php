@@ -40,6 +40,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
             @endif
         </dl>
         <a class="edit btn" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
+        <a class="btn" href="{{ Auth::check() ? route('poems/create') : route('login', ['ref' => route('poems/create')]) }}">@lang('poem.add poem')</a>
         <ol class="contribution">
             <li>初次上传：{{$poem->contributions[0] ?? '新星'}}</li>
         </ol>
@@ -66,6 +67,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
             @if($poem->is_original)
             <dt><a class="btn" href="{{ Auth::check() ? $createPageUrl : route('login', ['ref' => $createPageUrl]) }}">@lang('poem.add another translated version')</a></dt>
             @endif
+
         </dl>
 
     </article>
