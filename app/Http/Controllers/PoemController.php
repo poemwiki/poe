@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 
-class PoemController extends Controller
+class PoemController extends AppBaseController
 {
     /** @var  PoemRepository */
     private $poemRepository;
@@ -65,7 +65,12 @@ class PoemController extends Controller
      */
     public function create() {
         $user = Auth::user();
-        $this->authorize('web.poems.create');
+
+        try {
+            $this->authorize('web.poems.create');
+        } catch (AuthorizationException $e) {
+            return redirect(route('login', ['ref' => \URL::current()]));
+        }
 
         if($t = request()->get('translated_fake_id')) {
             $translatedPoem = $this->poemRepository->getPoemFromFakeId($t);
@@ -115,7 +120,12 @@ class PoemController extends Controller
      */
     public function edit($fakeId) {
         $user = Auth::user();
-        $this->authorize('web.poems.edit', $user);
+        try {
+            $this->authorize('web.poems.edit', $user);
+        } catch (AuthorizationException $e) {
+            return redirect(route('login', ['ref' => \URL::current()]));
+        }
+
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
         if (empty($poem)) {
             return redirect(404);
