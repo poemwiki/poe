@@ -25,14 +25,7 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-
-        Gate::define('web.poems.index', function () {
-            return true;
-        });
-        Gate::define('web.poems.edit', function ($user) {
-            return $user->id;
-        });
-        Gate::define('web.poems.create', function ($user) {
+        Gate::define('web.poem.change', function ($user) {
             return $user->id;
         });
     }

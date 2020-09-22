@@ -27,6 +27,7 @@ class PoemController extends AppBaseController
     private $poemRepository;
 
     public function __construct(PoemRepository $poemRepo) {
+        $this->middleware('auth')->except(['show', 'random']);
         $this->poemRepository = $poemRepo;
     }
 
@@ -65,12 +66,6 @@ class PoemController extends AppBaseController
      */
     public function create() {
         $user = Auth::user();
-
-        try {
-            $this->authorize('web.poems.create');
-        } catch (AuthorizationException $e) {
-            return redirect(route('login', ['ref' => \URL::current()]));
-        }
 
         if($t = request()->get('translated_fake_id')) {
             $translatedPoem = $this->poemRepository->getPoemFromFakeId($t);
@@ -120,19 +115,12 @@ class PoemController extends AppBaseController
      */
     public function edit($fakeId) {
         $user = Auth::user();
-        try {
-            $this->authorize('web.poems.edit', $user);
-        } catch (AuthorizationException $e) {
-            return redirect(route('login', ['ref' => \URL::current()]));
-        }
 
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
         if (empty($poem)) {
             return redirect(404);
         }
 
-//        $l = $this->poemRepository->find(2749);
-//        dd($l->getUrl());
         return view('poems.edit', [
             'poem' => $poem,
             'userName' => $user->name,
