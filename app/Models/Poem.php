@@ -5,10 +5,15 @@ use App\Models\Content;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Poem extends Model
 {
     use SoftDeletes;
+    use LogsActivity;
+    protected static $logFillable = true;
+    protected static $logOnlyDirty = true;
+
     protected $table = 'poem';
 
     const FAKEID_KEY = 'PoemWikikiWmeoP'; // Symmetric-key for xor
