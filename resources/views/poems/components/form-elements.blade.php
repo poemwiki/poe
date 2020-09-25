@@ -8,6 +8,9 @@
         <input type="hidden" name="original_id" :value="{{$originalPoem->id}}">
     </div>
 @endif
+@if(isset($translatedPoem))
+    <input type="hidden" name="translated_id" :value="{{$translatedPoem->id}}">
+@endif
 
 <div class="form-group row"
      :class="{'has-danger': errors.has('title'), 'has-success': fields.title && fields.title.valid }">

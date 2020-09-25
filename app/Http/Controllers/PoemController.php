@@ -95,6 +95,14 @@ class PoemController extends AppBaseController
         // Store the Poem
         $poem = Poem::create($sanitized);
 
+        if(isset($sanitized['translated_id'])) {
+            $translatedPoem = Poem::find($sanitized['translated_id']);
+            if($translatedPoem) {
+                $translatedPoem->original_id = $poem->id;
+                $translatedPoem->save();
+            }
+        }
+
         if ($request->ajax()) {
             return [
                 'code' => 0,

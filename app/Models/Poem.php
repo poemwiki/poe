@@ -1,16 +1,17 @@
 <?php
 
 namespace App\Models;
+
 use App\Models\Content;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-class Poem extends Model
-{
+class Poem extends Model {
     use SoftDeletes;
     use LogsActivity;
+
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
 
@@ -21,6 +22,7 @@ class Poem extends Model
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
+
 
     protected $fillable = [
         'title',
@@ -41,7 +43,8 @@ class Poem extends Model
         'nation',
         'need_confirm',
         'is_lock',
-        'content_id','original_id'
+        'content_id',
+        'original_id'
     ];
 
     /**
@@ -98,18 +101,18 @@ class Poem extends Model
     /* ************************ ACCESSOR ************************* */
 
     public function getResourceUrlAttribute() {
-        return url('/admin/poems/'.$this->getKey());
+        return url('/admin/poems/' . $this->getKey());
     }
 
     public static function boot() {
         parent::boot();
 
         // TODO check if created same poem by hash
-        self::creating(function($model){
+        self::creating(function ($model) {
             $model->poem = self::trimTailSpaces($model->poem);
             $model->length = grapheme_strlen($model->poem);
         });
-        self::created(function($model){
+        self::created(function ($model) {
             $hash = self::contentHash($model->poem);
             $fullHash = self::contentFullHash($model->poem);
             $content = Content::create([
@@ -125,12 +128,12 @@ class Poem extends Model
             $model->save();
         });
 
-        self::updating(function($model){
+        self::updating(function ($model) {
             $model->poem = self::trimTailSpaces($model->poem);
             $model->length = grapheme_strlen($model->poem);
             $fullHash = self::contentFullHash($model->poem);
 
-            if($fullHash !== $model->content->fullHash) {
+            if ($fullHash !== $model->content->fullHash) {
                 // need update content
                 $hash = self::contentHash($model->poem);
                 $content = Content::create([
@@ -151,6 +154,7 @@ class Poem extends Model
     public static function trimSpaces($str) {
         return preg_replace('#^\s+|\s+$#u', '', $str);
     }
+
     public static function trimTailSpaces($str) {
         return preg_replace('#\s+$#u', '', $str);
     }
@@ -158,9 +162,11 @@ class Poem extends Model
     public static function noSpace($str) {
         return preg_replace("#\s+#u", '', $str);
     }
+
     public static function noPunct($str) {
         return preg_replace("#[[:punct:]]+#u", '', $str);
     }
+
     public static function pureStr($str) {
         return self::noPunct(self::noSpace($str));
     }
@@ -168,6 +174,7 @@ class Poem extends Model
     public static function contentHash($str) {
         return hash('sha256', self::pureStr($str));
     }
+
     public static function contentFullHash($str) {
         return hash('sha256', $str);
     }
@@ -179,27 +186,32 @@ class Poem extends Model
     public function lang() {
         return $this->belongsTo(\App\Models\Language::class, 'language', 'id');
     }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo
      **/
     public function originalPoem() {
         return $this->belongsTo(\App\Models\Poem::class, 'original_id', 'id');
     }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      **/
     public function translatedPoems() {
         return $this->hasMany(\App\Models\Poem::class, 'original_id', 'id');
     }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasMany
      **/
     public function sameTranslatedPoems() {
         return $this->hasMany(\App\Models\Poem::class, 'original_id', 'original_id');
     }
+
     public function otherTranslatedPoems() {
         return $this->sameTranslatedPoems()->where('id', '<>', $this->id);
     }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasOne
      **/
@@ -217,6 +229,7 @@ class Poem extends Model
     public function getFakeId() {
         return base64_encode(($this->id * self::FAKEID_SPARSE) ^ mb_ord(self::FAKEID_KEY));
     }
+
     /**
      * @return string A xor encrypted string
      */
@@ -230,7 +243,7 @@ class Poem extends Model
      */
     public static function getIdFromFakeId($fakeId) {
         $decoded = base64_decode($fakeId);
-        if(!is_numeric($decoded)) {
+        if (!is_numeric($decoded)) {
             return false;
         }
         return ($decoded ^ mb_ord(self::FAKEID_KEY)) / self::FAKEID_SPARSE;

@@ -48,6 +48,7 @@ class StorePoem extends FormRequest
             'is_lock' => ['nullable', 'boolean'],
             'content_id' => ['nullable', 'integer'],
             'original_id' => ['nullable', 'integer'],
+            'translated_id' => ['nullable', 'integer'],
 
         ];
     }
