@@ -17,7 +17,7 @@ class StorePoem extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('admin.poem.create') || Gate::allows('web.poems.create', Auth::user());
+        return Gate::allows('admin.poem.create') || Gate::allows('web.poem.change', Auth::user());
     }
 
     /**

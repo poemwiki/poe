@@ -17,7 +17,7 @@ class UpdatePoem extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('admin.poem.edit', $this->poem) || Gate::allows('web.poems.edit', Auth::user());
+        return Gate::allows('admin.poem.edit', $this->poem) || Gate::allows('web.poem.change', Auth::user());
     }
 
     /**

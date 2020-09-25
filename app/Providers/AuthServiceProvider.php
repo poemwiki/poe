@@ -26,7 +26,7 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::define('web.poem.change', function ($user) {
-            return $user->id;
+            return isset($user->id);
         });
     }
 }
