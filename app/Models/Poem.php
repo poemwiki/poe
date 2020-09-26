@@ -14,6 +14,7 @@ class Poem extends Model {
 
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
+    protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length'];
 
     protected $table = 'poem';
 
@@ -133,7 +134,7 @@ class Poem extends Model {
             $model->length = grapheme_strlen($model->poem);
             $fullHash = self::contentFullHash($model->poem);
 
-            if ($fullHash !== $model->content->fullHash) {
+            if ($fullHash !== $model->content->full_hash) {
                 // need update content
                 $hash = self::contentHash($model->poem);
                 $content = Content::create([
