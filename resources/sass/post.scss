@@ -37,7 +37,9 @@ a {
   margin-right: 1em;
   line-height: 1.2em;
 }
-
+.hidden {
+  display: none;
+}
 .no-select {
   user-select: none;
 }
@@ -143,6 +145,17 @@ main.post {
       padding-left: 0;
       font-size: $font-size-sm;
       color: $gray;
+      >#folder{
+        display: none;
+      }
+      &.collapsed{
+        .log-middle {
+          display: none;
+        }
+        >#folder{
+          display: inline-block;
+        }
+      }
     }
   }
 

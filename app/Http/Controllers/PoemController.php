@@ -19,6 +19,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Spatie\Activitylog\Models\Activity;
 
 
 class PoemController extends AppBaseController
@@ -46,10 +47,18 @@ class PoemController extends AppBaseController
 
         $randomPoem = $this->poemRepository->random()->first();
 
+        $logs = Activity::where(['subject_type' => 'App\Models\Poem', 'subject_id' => $poem->id])
+            ->orderBy('id', 'desc')
+            ->get();
+        $logsLength = count($logs);
+        // remove the redundant update log after create
+        if($logsLength >= 2) $logs->splice($logsLength-2, 1);
+
         return view('poems.show')->with([
             'poem' => $poem,
             'randomPoemUrl' => $randomPoem->getUrl(),
-            'fakeId' => $fakeId
+            'fakeId' => $fakeId,
+            'logs' => $logs
         ]);
     }
 
