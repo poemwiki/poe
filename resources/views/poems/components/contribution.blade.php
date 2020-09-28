@@ -1,4 +1,4 @@
-<ol id="contribution" class="contribution collapsed">
+<ol class="contribution collapsed">
     @foreach($logs as $key=>$log)
         <li @if($key!==0 && $key!==count($logs)-1)
             class="log-middle"
@@ -30,4 +30,4 @@
             <a id="folder" class="btn">...</a>
         @endif
     @endforeach
-</ol><?php
+</ol>

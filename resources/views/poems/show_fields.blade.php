@@ -43,7 +43,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
         <a class="edit btn" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
         <a class="btn" href="{{ Auth::check() ? route('poems/create') : route('login', ['ref' => route('poems/create')]) }}">@lang('poem.add poem')</a>
         @if(count($logs) >= 2)
-        <ol id="contribution" class="contribution collapsed">
+        <ol class="contribution">
             @php
             $latestLog = $logs[0];
             $initialLog = $logs[count($logs) - 1];
