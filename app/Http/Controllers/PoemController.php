@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Poem\IndexPoem;
 use App\Http\Requests\Admin\Poem\StorePoem;
 use App\Http\Requests\Admin\Poem\UpdatePoem;
+use App\Models\ActivityLog;
 use App\Models\Language;
 use App\Models\Poem;
 use App\Repositories\PoemRepository;
@@ -44,12 +45,7 @@ class PoemController extends AppBaseController
 
         $randomPoem = $this->poemRepository->randomOne();
 
-        $logs = Activity::where(['subject_type' => 'App\Models\Poem', 'subject_id' => $poem->id])
-            ->orderBy('id', 'desc')
-            ->get();
-        $logsLength = count($logs);
-        // remove the redundant update log after create
-        if($logsLength >= 2) $logs->splice($logsLength-2, 1);
+        $logs = ActivityLog::findByPoem($poem);
 
         return view('poems.show')->with([
             'poem' => $poem,
@@ -117,7 +113,7 @@ class PoemController extends AppBaseController
             ];
         }
 
-        return redirect('poems/edit', Poem::getFakeId($poem->getFakeId()));
+        return redirect('poems/edit', $poem->fake_id);
     }
 
     /**
@@ -151,7 +147,8 @@ class PoemController extends AppBaseController
         $sanitized = $request->getSanitized();
 
         // Update changed values Poem
-        $this->poemRepository->update($sanitized, Poem::getIdFromFakeId($fakeId));
+        $id = Poem::getIdFromFakeId($fakeId);
+        $this->poemRepository->update($sanitized, $id);
 
         if ($request->ajax()) {
             return [
@@ -160,7 +157,7 @@ class PoemController extends AppBaseController
             ];
         }
 
-        return redirect('poems/edit', Poem::getFakeId($request->get('id')));
+        return redirect('poems/edit', Poem::getFakeId($id));
     }
 
 }

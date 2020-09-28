@@ -48,8 +48,8 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
             $latestLog = $logs[0];
             $initialLog = $logs[count($logs) - 1];
             @endphp
-            <li>@lang('poem.latest update') {{$latestLog->causer_type === "App\User" ? \App\User::find($latestLog->causer_id)->name : '系统'}}</li>
-            <li>@lang('poem.initial upload') {{$initialLog->causer_type === "App\User" ? \App\User::find($initialLog->causer_id)->name : '系统'}}</li>
+            <li title="{{$latestLog->created_at}}">@lang('poem.latest update') {{$latestLog->causer_type === "App\User" ? \App\User::find($latestLog->causer_id)->name : '系统'}}</li>
+            <li title="{{$initialLog->created_at}}">@lang('poem.initial upload') {{$initialLog->causer_type === "App\User" ? \App\User::find($initialLog->causer_id)->name : '系统'}}</li>
         </ol>
         @endif
 

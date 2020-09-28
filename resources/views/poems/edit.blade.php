@@ -1,5 +1,6 @@
 @extends('layouts.form')
 
+<?php /** @var \App\Models\Poem $poem */ ?>
 @section('title', trans('admin.poem.actions.edit'))
 @section('poemTitle', $poem->title)
 
@@ -9,7 +10,7 @@
         <div class="card">
 
             <poem-form
-                :action="'{{ route('poems/update', [$poem->getFakeId()]) }}'"
+                :action="'{{ route('poems/update', [$poem->fake_id]) }}'"
                 :data="{{ $poem->toJson() }}"
                 v-cloak
                 inline-template>
