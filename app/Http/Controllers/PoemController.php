@@ -41,11 +41,8 @@ class PoemController extends AppBaseController
      */
     public function show($fakeId) {
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
-        if (empty($poem)) {
-            return redirect(404);
-        }
 
-        $randomPoem = $this->poemRepository->random()->first();
+        $randomPoem = $this->poemRepository->randomOne();
 
         $logs = Activity::where(['subject_type' => 'App\Models\Poem', 'subject_id' => $poem->id])
             ->orderBy('id', 'desc')
@@ -56,15 +53,15 @@ class PoemController extends AppBaseController
 
         return view('poems.show')->with([
             'poem' => $poem,
-            'randomPoemUrl' => $randomPoem->getUrl(),
+            'randomPoemUrl' => $randomPoem->url,
             'fakeId' => $fakeId,
             'logs' => $logs
         ]);
     }
 
     public function random() {
-        $randomPoems = $this->poemRepository->random()->get();
-        return redirect($randomPoems[0]->getUrl());
+        $randomPoems = $this->poemRepository->randomOne();
+        return redirect($randomPoems[0]->url);
     }
 
     /**
@@ -115,12 +112,12 @@ class PoemController extends AppBaseController
         if ($request->ajax()) {
             return [
                 'code' => 0,
-                'redirect' => route('poems/edit', Poem::fakeId($poem->id)),
+                'redirect' => route('poems/edit', Poem::getFakeId($poem->id)),
                 'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
             ];
         }
 
-        return redirect('poems/edit', Poem::fakeId($poem->getFakeId()));
+        return redirect('poems/edit', Poem::getFakeId($poem->getFakeId()));
     }
 
     /**
@@ -134,9 +131,6 @@ class PoemController extends AppBaseController
         $user = Auth::user();
 
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
-        if (empty($poem)) {
-            return redirect(404);
-        }
 
         return view('poems.edit', [
             'poem' => $poem,
@@ -156,12 +150,8 @@ class PoemController extends AppBaseController
         // Sanitize input
         $sanitized = $request->getSanitized();
 
-        $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
-        if (empty($poem)) {
-            return redirect(404);
-        }
         // Update changed values Poem
-        $this->poemRepository->update($sanitized, $poem->id);
+        $this->poemRepository->update($sanitized, Poem::getIdFromFakeId($fakeId));
 
         if ($request->ajax()) {
             return [
@@ -170,7 +160,7 @@ class PoemController extends AppBaseController
             ];
         }
 
-        return redirect('poems/edit', Poem::fakeId($request->get('id')));
+        return redirect('poems/edit', Poem::getFakeId($request->get('id')));
     }
 
 }

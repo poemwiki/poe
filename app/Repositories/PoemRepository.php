@@ -85,13 +85,19 @@ class PoemRepository extends BaseRepository
      */
     public static function random($num = 1) {
         return Poem::select()->with('wx')
-            ->whereRaw('`deleted_at` is null')
             ->inRandomOrder()
-            ->limit($num); // here is yours limit
+            ->take($num)->get();
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function randomOne() {
+        return self::random(1)->first();
     }
 
     public function getPoemFromFakeId($fakeId){
         $id = Poem::getIdFromFakeId($fakeId);
-        return $id === false ? null : Poem::find($id);
+        return $id === false ? null : Poem::findOrFail($id);
     }
 }

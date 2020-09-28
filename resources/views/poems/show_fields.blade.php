@@ -1,5 +1,6 @@
 <?php
 
+/** @var \App\Models\Poem $poem */
 $nation = $poem->dynasty
     ? "[$poem->dynasty] "
     : ($poem->nation ? "[$poem->nation] " : '');
@@ -23,7 +24,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
 @section('author'){{$poem->poet.($poem->poet ? ',' : '').$poem->poet_cn}}@endsection
 
 
-<section class="poem" itemscope itemtype="http://schema.org/Article" itemid="{{ $poem->getUrl() }}">
+<section class="poem" itemscope itemtype="http://schema.org/Article" itemid="{{ $poem->url }}">
     <article>
         <h1 class="title font-song no-select" itemprop="name" id="title">{{ $poem->title }}</h1>
         <pre class="poem-content font-song no-select {{$softWrap ? 'soft-wrap' : ''}}" itemprop="poem" lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
@@ -41,6 +42,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
         </dl>
         <a class="edit btn" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
         <a class="btn" href="{{ Auth::check() ? route('poems/create') : route('login', ['ref' => route('poems/create')]) }}">@lang('poem.add poem')</a>
+        @if(count($logs) >= 2)
         <ol id="contribution" class="contribution collapsed">
             @php
             $latestLog = $logs[0];
@@ -49,6 +51,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
             <li>@lang('poem.latest update') {{$latestLog->causer_type === "App\User" ? \App\User::find($latestLog->causer_id)->name : '系统'}}</li>
             <li>@lang('poem.initial upload') {{$initialLog->causer_type === "App\User" ? \App\User::find($initialLog->causer_id)->name : '系统'}}</li>
         </ol>
+        @endif
 
         <dl class="poem-info">
             <dt>其他版本</dt>
@@ -56,16 +59,16 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                 @if(!$poem->originalPoem)
                     <dt>@lang('poem.no original work related')</dt><dd><a class="" href="{{ Auth::check() ? route('poems/create', ['translated_fake_id' => $fakeId]) : route('login', ['ref' => route('poems/create', ['translated_fake_id' => $fakeId], false)]) }}">@lang('poem.add original work')</a></dd>
                 @else
-                    <dt><a href="{{$poem->originalPoem->getUrl()}}" title="@lang('poem.original work')">{{$poem->originalPoem->lang ? $poem->originalPoem->lang->name.'['.trans('poem.original work').']' : trans('poem.original work')}}</a></dt><dd>{{$poem->originalPoem->poet}}</dd>
+                    <dt><a href="{{$poem->originalPoem->url}}" title="@lang('poem.original work')">{{$poem->originalPoem->lang ? $poem->originalPoem->lang->name.'['.trans('poem.original work').']' : trans('poem.original work')}}</a></dt><dd>{{$poem->originalPoem->poet}}</dd>
                 @endif
 
                 @foreach($poem->otherTranslatedPoems()->get() as $t)
-                    <dt>{{$t->lang->name ?? trans('poem.')}}</dt><dd><a href="{{$t->getUrl()}}">{{$t->translator ?? '佚名'}}</a></dd>
+                    <dt>{{$t->lang->name ?? trans('poem.')}}</dt><dd><a href="{{$t->url}}">{{$t->translator ?? '佚名'}}</a></dd>
                 @endforeach
 
             @elseif($poem->translatedPoems)
                 @foreach($poem->translatedPoems as $t)
-                    <dt>{{$t->lang->name ?? trans('poem.')}}</dt><dd><a href="{{$t->getUrl()}}">{{$t->translator ?? '佚名'}}</a></dd>
+                    <dt>{{$t->lang->name ?? trans('poem.')}}</dt><dd><a href="{{$t->url}}">{{$t->translator ?? '佚名'}}</a></dd>
                 @endforeach
             @endif
 
@@ -115,13 +118,4 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
     var colorHash = new ColorHash({lightness: 0.6, saturation: 0.86});
     var mainColor = colorHash.hex('{{ $poem->title }}'); // '#8796c5'
     document.getElementById("title").style.setProperty('--main-color', mainColor);
-
-    var $contribution = document.getElementById("contribution")
-    document.getElementById("folder").addEventListener('click', function() {
-        if($contribution.classList.contains('collapsed')) {
-            $contribution.classList.remove('collapsed');
-        } else {
-            $contribution.classList.add('collapsed');
-        }
-    });
 </script>

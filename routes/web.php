@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome', [
-        'poemUrl' => PoemRepository::random()->get()[0]->getUrl()
+        'poemUrl' => PoemRepository::randomOne()->url
     ]);
 });
 

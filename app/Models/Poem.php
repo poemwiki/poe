@@ -227,14 +227,21 @@ class Poem extends Model {
     /**
      * @return string A xor encrypted string
      */
-    public function getFakeId() {
-        return base64_encode(($this->id * self::FAKEID_SPARSE) ^ mb_ord(self::FAKEID_KEY));
+    public function getFakeIdAttribute() {
+        return self::getFakeId($this->id);
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrlAttribute() {
+        return route('p/show', ['fakeId' => $this->fake_id]);
     }
 
     /**
      * @return string A xor encrypted string
      */
-    public static function fakeId($id) {
+    public static function getFakeId($id) {
         return base64_encode(($id * self::FAKEID_SPARSE) ^ mb_ord(self::FAKEID_KEY));
     }
 
@@ -248,10 +255,6 @@ class Poem extends Model {
             return false;
         }
         return ($decoded ^ mb_ord(self::FAKEID_KEY)) / self::FAKEID_SPARSE;
-    }
-
-    public function getUrl() {
-        return route('p/show', ['fakeId' => $this->getFakeId()]);
     }
 
 }

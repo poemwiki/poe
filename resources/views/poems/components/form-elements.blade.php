@@ -4,7 +4,7 @@
         <label class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">
             {{ trans('poem.original work') }}
         </label>
-        《<a href="{{$originalPoem->getUrl()}}">{{ $originalPoem->title }}</a>》
+        《<a href="{{$originalPoem->url}}">{{ $originalPoem->title }}</a>》
         <input type="hidden" name="original_id" :value="{{$originalPoem->id}}">
     </div>
 @endif
