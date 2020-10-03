@@ -83,3 +83,7 @@ Route::prefix('poems')->name('poems/')->group(static function() {
 Route::prefix('p')->name('p/')->group(static function() {
     Route::get('/{fakeId}',    'PoemController@show')->name('show');
 });
+
+Route::prefix('poet')->name('poet/')->group(static function() {
+    Route::get('/{poetName}',    'PoetController@show')->name('show');
+});

@@ -4,10 +4,6 @@
 $nation = $poem->dynasty
     ? "[$poem->dynasty] "
     : ($poem->nation ? "[$poem->nation] " : '');
-// @TODO poet page url
-// $author = '<address><a href="#" itemprop="author" class="poem-writer">' . ($poem->poet_cn ?? $poem->poet) . '</a></address>';
-$author = '<address itemprop="author" class="poem-writer">' . ($poem->poet_cn ?? $poem->poet) . '</address>';
-$authorLine = $nation . $author;
 
 $translator = $poem->translator ? trim($poem->translator) : '';
 
@@ -29,7 +25,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
         <h1 class="title font-song no-select" itemprop="name" id="title">{{ $poem->title }}</h1>
         <pre class="poem-content font-song no-select {{$softWrap ? 'soft-wrap' : ''}}" itemprop="poem" lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
         <dl class="poem-info">
-            <dt>@lang('admin.poem.columns.poet')</dt><dd>{!!$authorLine!!}</dd>
+            <dt>@lang('admin.poem.columns.poet')</dt><dd>{{$nation}}<address itemprop="author" class="poem-writer"><a href="{{route('poet/show', $poem->poet)}}">{{($poem->poet_cn ?? $poem->poet)}}</a></address></dd>
             @if($poem->translator)
             <dt>@lang('admin.poem.columns.translator')</dt><dd itemprop="translator" class="poem-translator">{{$translator}}</dd>
             @endif
