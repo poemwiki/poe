@@ -6,6 +6,9 @@
 
 @import 'menu';
 
+ol{
+  list-style-type: disc;
+}
 a {
   color: $blue;
   &:hover{
@@ -154,6 +157,12 @@ main.post {
         }
         >#folder{
           display: inline-block;
+        }
+      }
+      a{
+        color: unset;
+        &:hover{
+          background-color: unset;
         }
       }
     }

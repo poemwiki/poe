@@ -55,6 +55,17 @@ class PoemController extends AppBaseController
         ]);
     }
 
+    public function showContributions($fakeId) {
+        $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
+        $logs = ActivityLog::findByPoem($poem);
+
+        return view('poems.contribution')->with([
+            'poem' => $poem,
+            'randomPoemUrl' => '/',
+            'logs' => $logs
+        ]);
+    }
+
     public function random() {
         $randomPoems = $this->poemRepository->randomOne();
         return redirect($randomPoems[0]->url);

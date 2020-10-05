@@ -78,6 +78,7 @@ Route::prefix('poems')->name('poems/')->group(static function() {
     Route::get('/edit/{fakeId}', 'PoemController@edit')->name('edit');
     Route::post('/update/{fakeId}',     'PoemController@update')->name('update');
     Route::get('/{fakeId}',    'PoemController@show')->name('show');
+    Route::get('/contribution/{fakeId}',    'PoemController@showContributions')->name('contribution');
 });
 
 Route::prefix('p')->name('p/')->group(static function() {
