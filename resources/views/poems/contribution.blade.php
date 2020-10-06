@@ -41,5 +41,9 @@
             @endif
         </li>
     @endforeach
+
+    @if(count($logs)<=1)
+        <li title="{{$poem->created_at}}">@lang('poem.initial upload') PoemWiki</li>
+    @endif
 </ol>
 @endsection

@@ -38,16 +38,18 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
         </dl>
         <a class="edit btn" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
         <a class="btn" href="{{ Auth::check() ? route('poems/create') : route('login', ['ref' => route('poems/create')]) }}">@lang('poem.add poem')</a>
-        @if(count($logs) >= 1)
         <ol class="contribution">
+        @if(count($logs) >= 1)
             @php
             $latestLog = $logs[0];
             $initialLog = $logs[count($logs) - 1];
             @endphp
             <li title="{{$latestLog->created_at}}"><a href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update') {{$latestLog->causer_type === "App\User" ? \App\User::find($latestLog->causer_id)->name : '系统'}}</a></li>
             <li title="{{$initialLog->created_at}}"><a href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') {{$initialLog->causer_type === "App\User" ? \App\User::find($initialLog->causer_id)->name : '系统'}}</a></li>
-        </ol>
+        @else
+            <li title="{{$poem->created_at}}"><a href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') PoemWiki</a></li>
         @endif
+        </ol>
 
         <dl class="poem-info">
             <dt>其他版本</dt>
