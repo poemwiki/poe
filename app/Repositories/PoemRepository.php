@@ -98,6 +98,6 @@ class PoemRepository extends BaseRepository
 
     public function getPoemFromFakeId($fakeId){
         $id = Poem::getIdFromFakeId($fakeId);
-        return $id === false ? null : Poem::findOrFail($id);
+        return Poem::findOrFail($id);
     }
 }

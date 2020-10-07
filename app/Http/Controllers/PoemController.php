@@ -33,16 +33,7 @@ class PoemController extends AppBaseController
         $this->poemRepository = $poemRepo;
     }
 
-    /**
-     * Display the specified Poem.
-     *
-     * @param int $fakeId
-     *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
-     */
-    public function show($fakeId) {
-        $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
-
+    private function _poem(Poem $poem){
         $randomPoem = $this->poemRepository->randomOne();
 
         $logs = ActivityLog::findByPoem($poem);
@@ -50,9 +41,24 @@ class PoemController extends AppBaseController
         return view('poems.show')->with([
             'poem' => $poem,
             'randomPoemUrl' => $randomPoem->url,
-            'fakeId' => $fakeId,
+            'fakeId' => $poem->fake_id,
             'logs' => $logs
         ]);
+    }
+    /**
+     * Display the specified Poem.
+     *
+     * @param String $fakeId
+     *
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function show(String $fakeId) {
+        $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
+        return $this->_poem($poem);
+    }
+    public function showPoem(Int $id){
+        $poem = Poem::findOrFail($id);
+        return $this->_poem($poem);
     }
 
     public function showContributions($fakeId) {

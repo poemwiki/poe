@@ -40,6 +40,7 @@ Route::get('/home', 'HomeController@index')->middleware('verified');
 //    '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@generateFromFile'
 //)->name('io_generator_builder_generate_from_file');
 
+
 Route::resource('contents', 'contentController');
 Auth::routes();
 
@@ -88,3 +89,5 @@ Route::prefix('p')->name('p/')->group(static function() {
 Route::prefix('poet')->name('poet/')->group(static function() {
     Route::get('/{poetName}',    'PoetController@show')->name('show');
 });
+
+Route::get('/{id}', 'PoemController@showPoem')->name('poem');
