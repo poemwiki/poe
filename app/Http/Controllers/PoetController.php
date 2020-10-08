@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Poem;
 use App\Repositories\PoemRepository;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 
 class PoetController extends AppBaseController {
@@ -22,7 +23,10 @@ class PoetController extends AppBaseController {
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function show($poetName) {
-        $poems = Poem::where(['poet' => $poetName])->get();
+        $poems = Poem::where(['poet' => $poetName])->orWhere(['poet_cn' => $poetName])->get();
+        if(count($poems) <= 0){
+            throw new ModelNotFoundException();
+        }
 
         // get desc from wikidata
         $poetDesc = '';

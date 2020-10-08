@@ -11,7 +11,7 @@
         <p class="hidden">简介：{{$poetDesc}}</p>
 
 
-        <h2>{{$poetName}} 的诗歌</h2>
+        <h2>{{$poems[0]->poet_cn ? $poems[0]->poet_cn . ($poems[0]->poet_cn === $poems[0]->poet ? '' : '（'.$poems[0]->poet.'）') : $poems[0]->poet}} 的诗歌</h2>
         <ul>
         @foreach($poems as $poem)
             <li><a target="_blank" href="{{$poem->url}}">{{$poem->title}}</a></li>
