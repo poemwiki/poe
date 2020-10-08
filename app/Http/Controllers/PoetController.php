@@ -23,6 +23,7 @@ class PoetController extends AppBaseController {
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function show($poetName) {
+        // TODO after created Poet table and model, this should be changed to get poem from poet_id
         $poems = Poem::where(['poet' => $poetName])->orWhere(['poet_cn' => $poetName])->get();
         if(count($poems) <= 0){
             throw new ModelNotFoundException();
