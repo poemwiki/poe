@@ -61,7 +61,7 @@ class BotController extends AppBaseController
         WHERE ';
             foreach ($keyword as $idx => $word) {
                 $sql .= "(`poem` like :keyword1_$idx OR `title` like :keyword2_$idx
-        OR `poet` like :keyword3_$idx OR `translator` like :keyword4_$idx) AND";
+        OR `poet` like :keyword3_$idx OR `poet_cn` like :keyword4_$idx OR `translator` like :keyword5_$idx) AND";
             }
             $sql = trim($sql, 'AND') . ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR`need_confirm`<>1)
         ORDER BY `selected_count`,`last_selected_time`,length(`poem`) limit 0,1';
@@ -73,6 +73,7 @@ class BotController extends AppBaseController
                 $q->bindValue(":keyword2_$idx", "%$word%", PDO::PARAM_STR);
                 $q->bindValue(":keyword3_$idx", "%$word%", PDO::PARAM_STR);
                 $q->bindValue(":keyword4_$idx", "%$word%", PDO::PARAM_STR);
+                $q->bindValue(":keyword5_$idx", "%$word%", PDO::PARAM_STR);
             }
 
         } else {
@@ -83,7 +84,7 @@ class BotController extends AppBaseController
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
         WHERE (`poem` like :keyword1 OR `title` like :keyword2
-        OR `poet` like :keyword3 OR `translator` like :keyword4) AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1)
+        OR `poet` like :keyword3 OR `poet_cn` like :keyword4 OR `translator` like :keyword5) AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1)
         ORDER BY `selected_count`,`last_selected_time`,length(`poem`) limit 0,1
 SQL
             );
@@ -92,6 +93,7 @@ SQL
             $q->bindValue(':keyword2', $keyword, PDO::PARAM_STR);
             $q->bindValue(':keyword3', $keyword, PDO::PARAM_STR);
             $q->bindValue(':keyword4', $keyword, PDO::PARAM_STR);
+            $q->bindValue(':keyword5', $keyword, PDO::PARAM_STR);
         }
 
         $q->bindValue(':chatroomId', $chatroom, PDO::PARAM_STR);
