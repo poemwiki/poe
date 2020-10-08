@@ -25,7 +25,16 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
         <h1 class="title font-song no-select" itemprop="name" id="title">{{ $poem->title }}</h1>
         <pre class="poem-content font-song no-select {{$softWrap ? 'soft-wrap' : ''}}" itemprop="poem" lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
         <dl class="poem-info">
-            <dt>@lang('admin.poem.columns.poet')</dt><dd>{{$nation}}<address itemprop="author" class="poem-writer"><a href="{{route('poet/show', $poem->poet)}}">{{($poem->poet_cn ?? $poem->poet)}}</a></address></dd>
+            <dt>@lang('admin.poem.columns.poet')</dt><dd>{{$nation}}<address itemprop="author" class="poem-writer">
+                    <a href="{{route('poet/show', $poem->poet)}}">
+                        @if($poem->poet_cn)
+                            {{$poem->poet_cn}}@if($poem->poet_cn !== $poem->poet)（{{$poem->poet}}）@endif
+                        @else
+                            {{$poem->poet}}
+                        @endif
+                    </a>
+                </address>
+            </dd>
             @if($poem->translator)
             <dt>@lang('admin.poem.columns.translator')</dt><dd itemprop="translator" class="poem-translator">{{$translator}}</dd>
             @endif
@@ -41,11 +50,12 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
         <ol class="contribution">
         @if(count($logs) >= 1)
             @php
+            //dd($logs);
             $latestLog = $logs[0];
             $initialLog = $logs[count($logs) - 1];
             @endphp
-            <li title="{{$latestLog->created_at}}"><a href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update') {{$latestLog->causer_type === "App\User" ? \App\User::find($latestLog->causer_id)->name : '系统'}}</a></li>
-            <li title="{{$initialLog->created_at}}"><a href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') {{$initialLog->causer_type === "App\User" ? \App\User::find($initialLog->causer_id)->name : '系统'}}</a></li>
+            <li title="{{$latestLog->created_at}}"><a href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update') {{$latestLog->causer_type === "App\User" ? \App\User::find($latestLog->causer_id)->name : 'PoemWiki'}}</a></li>
+            <li title="{{$initialLog->created_at}}"><a href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') {{($initialLog->description === 'created') ? \App\User::find($initialLog->causer_id)->name : 'PoemWiki'}}</a></li>
         @else
             <li title="{{$poem->created_at}}"><a href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') PoemWiki</a></li>
         @endif
