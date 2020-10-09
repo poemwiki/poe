@@ -22,7 +22,7 @@
 
             @if($log->description === 'updated')
                 @foreach($props as $prop)
-                    @if($prop === 'content_id')
+                    @if($prop === 'content_id' or $prop === 'need_confirm')
                         @continue
                     @endif
                     <br>
@@ -42,7 +42,7 @@
         </li>
     @endforeach
 
-    @if(count($logs)<=1)
+    @if(count($logs)<1 or $logs[0]->description === 'updated')
         <li title="{{$poem->created_at}}">@lang('poem.initial upload') PoemWiki</li>
     @endif
 </ol>
