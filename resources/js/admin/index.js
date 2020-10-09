@@ -1,1 +1,2 @@
 import './poem';
+import './score';

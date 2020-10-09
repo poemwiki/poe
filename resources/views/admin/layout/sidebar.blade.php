@@ -3,6 +3,7 @@
         <ul class="nav">
             <li class="nav-title">{{ trans('brackets/admin-ui::admin.sidebar.content') }}</li>
             <li class="nav-item"><a class="nav-link" href="{{ url('admin/poems') }}"><i class="nav-icon icon-book-open"></i> {{ trans('admin.poem.title') }}</a></li>
+           <li class="nav-item"><a class="nav-link" href="{{ url('admin/scores') }}"><i class="nav-icon icon-globe"></i> {{ trans('admin.score.title') }}</a></li>
            {{-- Do not delete me :) I'm used for auto-generation menu items --}}
 
             <li class="nav-title">{{ trans('brackets/admin-ui::admin.sidebar.settings') }}</li>

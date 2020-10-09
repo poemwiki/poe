@@ -20,6 +20,7 @@ class CreateScoreTable extends Migration {
             $table->float('factor')->default(1);
             $table->timestamps();
             $table->index('poem_id');
+            $table->softDeletes();
         });
     }
 

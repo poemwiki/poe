@@ -29,3 +29,17 @@ $factory->define(App\Models\Poem::class, static function (Faker\Generator $faker
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\Score::class, static function (Faker\Generator $faker) {
+    return [
+        'content_id' => $faker->sentence,
+        'created_at' => $faker->dateTime,
+        'factor' => $faker->randomFloat,
+        'poem_id' => $faker->sentence,
+        'score' => $faker->boolean(),
+        'updated_at' => $faker->dateTime,
+        'user_id' => $faker->sentence,
+        
+        
+    ];
+});

@@ -91,3 +91,19 @@ Route::prefix('poet')->name('poet/')->group(static function() {
 });
 
 Route::get('/{id}', 'PoemController@showPoem')->name('poem');
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('Admin')->name('admin/')->group(static function() {
+        Route::prefix('scores')->name('scores/')->group(static function() {
+            Route::get('/',                                             'ScoreController@index')->name('index');
+//            Route::get('/create',                                       'ScoreController@create')->name('create');
+            Route::post('/',                                            'ScoreController@store')->name('store');
+            Route::get('/{score}/edit',                                 'ScoreController@edit')->name('edit');
+//            Route::post('/bulk-destroy',                                'ScoreController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{score}',                                     'ScoreController@update')->name('update');
+            Route::delete('/{score}',                                   'ScoreController@destroy')->name('destroy');
+        });
+    });
+});

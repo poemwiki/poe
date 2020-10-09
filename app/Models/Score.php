@@ -40,4 +40,12 @@ class Score extends Model
     public function originalPoem() {
         return $this->belongsTo(\App\Models\Poem::class, 'poem_id', 'id');
     }
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\hasOne
+     **/
+    public function content() {
+        return $this->hasOne(\App\Models\Content::class, 'id', 'content_id');
+    }
 }

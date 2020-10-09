@@ -36,5 +36,25 @@ return [
         ],
     ],
 
+    'score' => [
+        'title' => 'Score',
+
+        'actions' => [
+            'index' => 'Score',
+            'create' => 'New Score',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'content_id' => 'Content',
+            'factor' => 'Factor',
+            'poem_id' => 'Poem',
+            'score' => 'Score',
+            'user_id' => 'User',
+            
+        ],
+    ],
+
     // Do not delete me :) I'm used for auto-generation
 ];
