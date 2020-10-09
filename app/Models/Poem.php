@@ -203,6 +203,13 @@ class Poem extends Model {
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     **/
+    public function scores() {
+        return $this->hasMany(\App\Models\Score::class, 'poem_id', 'id');
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\hasMany
      **/
     public function sameTranslatedPoems() {
