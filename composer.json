@@ -30,6 +30,7 @@
     "laravel/tinker": "^2.0",
     "laravel/ui": "^2.1",
     "laravelcollective/html": "^6.1",
+    "renatomarinho/laravel-page-speed": "^1.9",
     "spatie/laravel-activitylog": "^3.16"
   },
   "require-dev": {
