@@ -14,7 +14,7 @@
         <h2>{{$poems[0]->poet_cn ? $poems[0]->poet_cn . ($poems[0]->poet_cn === $poems[0]->poet ? '' : '（'.$poems[0]->poet.'）') : $poems[0]->poet}} 的诗歌</h2>
         <ul>
         @foreach($poems as $poem)
-            <li><a target="_blank" href="{{$poem->url}}">{{$poem->title}}</a></li>
+            <li><a target="_blank" href="{{$poem->url}}">{{trim($poem->title) ? trim($poem->title) : '无题'}}</a></li>
         @endforeach
         </ul>
     </article>
