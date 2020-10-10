@@ -29,7 +29,7 @@ class PoemController extends AppBaseController
     private $poemRepository;
 
     public function __construct(PoemRepository $poemRepo) {
-        $this->middleware('auth')->except(['show', 'random', 'showContributions']);
+        $this->middleware('auth')->except(['show', 'showPoem', 'random', 'showContributions']);
         $this->poemRepository = $poemRepo;
     }
 
