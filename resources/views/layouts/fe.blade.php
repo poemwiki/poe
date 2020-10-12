@@ -13,6 +13,9 @@
 
     <!-- Fonts -->
     <link href="{{ asset('css/post.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/starability-slot.min.css') }}" rel="stylesheet">
+
+    @livewireStyles
 </head>
 <body class="position-ref">
     <div class="top-right links no-select">
@@ -21,5 +24,7 @@
     <main class="post">
         @yield('content')
     </main>
+    @livewireScripts
+    @stack('scripts')
 </body>
 </html>

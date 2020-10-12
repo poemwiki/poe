@@ -12,15 +12,23 @@ class CreateScoreTable extends Migration {
      */
     public function up() {
         Schema::create('score', function (Blueprint $table) {
+            $table->unsignedBigInteger('poem_id');
+            $table->unsignedBigInteger('user_id');
+            $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedTinyInteger('score');
+            $table->float('weight')->default(1);
+            $table->primary(['poem_id', 'user_id']);
+        });
+        Schema::create('comment', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned();
             $table->unsignedBigInteger('poem_id');
             $table->unsignedBigInteger('user_id');
-            $table->unsignedTinyInteger('score');
-            $table->unsignedBigInteger('content_id')->nullable();
-            $table->float('factor')->default(1);
+            $table->unsignedInteger('like')->default(0);
             $table->timestamps();
-            $table->index('poem_id');
             $table->softDeletes();
+            $table->unsignedBigInteger('content_id')->nullable();
+            $table->text('content')->nullable();
         });
     }
 
@@ -31,5 +39,6 @@ class CreateScoreTable extends Migration {
      */
     public function down() {
         Schema::drop('score');
+        Schema::drop('comment');
     }
 }

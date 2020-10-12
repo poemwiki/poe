@@ -28,9 +28,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('web.poem.change', function ($user) {
             return isset($user->id);
         });
-        Gate::define('web.score.index', function ($user) {
-            return isset($user->id);
-        });
         Gate::define('web.score.create', function ($user) {
             return isset($user->id);
         });

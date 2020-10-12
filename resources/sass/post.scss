@@ -41,7 +41,7 @@ a {
   line-height: 1.2em;
 }
 .hidden {
-  display: none;
+  display: none!important;
 }
 .no-select {
   user-select: none;
@@ -180,12 +180,12 @@ main.post {
     text-align: center;
     color: #666;
     @media all and (max-width: 500px) {
-      background-color: #eee;
+      background-color: #e9eaec;
     }
 
     h4.score-h {
       width: 100%;
-      padding-left: .5em;
+      padding-left: .5rem;
       text-align: left;
       font-weight: normal;
       color: #9d9d9d;
@@ -242,8 +242,9 @@ main.post {
 
   .rate{
     display: flex;
+    padding-left: .5rem;
     .left{
-      width: 8em;
+      width: 8em;font-size: 1.2rem;
     }
     .stars{
       flex-grow: 1;
@@ -253,6 +254,12 @@ main.post {
     }
   }
 
+  h4.review-h {
+    color: #9d9d9d;
+    font-weight: 300;
+    position: relative;
+    border-bottom: 1px solid #9d9d9d;
+  }
   .review {
   }
 }

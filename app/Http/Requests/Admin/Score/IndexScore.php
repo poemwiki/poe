@@ -12,8 +12,7 @@ class IndexScore extends FormRequest
      *
      * @return bool
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
         return Gate::allows('admin.score.index') || Gate::allows('web.score.index');;
     }
 
@@ -22,10 +21,9 @@ class IndexScore extends FormRequest
      *
      * @return array
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
-            'orderBy' => 'in:content_id,factor,id,poem_id,score,user_id|nullable',
+            'orderBy' => 'in:created_time|nullable',
             'orderDirection' => 'in:asc,desc|nullable',
             'search' => 'string|nullable',
             'page' => 'integer|nullable',
