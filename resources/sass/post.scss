@@ -169,20 +169,90 @@ main.post {
   }
 
 
-  .review {
-    margin-top: 3rem;
-    >h4 {
-      color: $gray;
-      font-weight: 300;
-      position: relative;
-      border-bottom: 1px solid $gray;
+  .score{
+    //height: 86px;
+    max-width: 500px;
+    padding: 8px 0 0 0;
+    margin-top: 2rem;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    text-align: center;
+    color: #666;
+    @media all and (max-width: 500px) {
+      background-color: #eee;
+    }
 
-      .add-comment{
+    h4.score-h {
+      width: 100%;
+      padding-left: .5em;
+      text-align: left;
+      font-weight: normal;
+      color: #9d9d9d;
+      font-size: .8em;
+    }
+
+    .left{
+      padding: 0 2em 0 5%;
+      .score-num {
         display: block;
-        position: absolute;
-        bottom: 0;
-        right: 1em;
+        font-size: 2.4rem;
+        line-height: 1;
+      }
+      .user-num{
+        display: block;
+        font-size: .8rem;
+        line-height: 2.8rem;
+
       }
     }
+    .right{
+      flex-grow: 3;
+      text-align: left;
+      padding-top: 2px;
+      display: flex;
+      .star-group{
+        width: 60px;
+        .stars{
+          display: block;
+          height: 13px;
+          width: 100%;
+        }
+      }
+      .bars{
+        margin-left: .6em;
+        flex-grow: 1;
+        padding-top: 2px;
+        .bar{
+          display: block;
+          background-color: #d8d8d8;
+          height: 8px;
+          border-width: 7px 0;
+          margin: 0 0 5px 0;
+          width: 90%;
+          .bar-percent{
+            background-color: $orange
+          }
+        }
+      }
+
+    }
+
+  }
+
+  .rate{
+    display: flex;
+    .left{
+      width: 8em;
+    }
+    .stars{
+      flex-grow: 1;
+      display: block;
+      height: 13px;
+      width: 100%;
+    }
+  }
+
+  .review {
   }
 }
