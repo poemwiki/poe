@@ -32,10 +32,10 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
             <div class="bars">
                 @foreach([5,4,3,2,1] as $v)
                     @if(isset($score['groupCount'][$v]))
-                        <span class="bar bar-{{$v}}"><span class="bar bar-percent"
-                                                           style="width: {{$score['groupCount'][$v] / $score['count'] * 100}}%"></span></span>
+                        <span class="bar bar-{{$v}}" title="{{$score['groupCount'][$v] / $score['count'] * 100}}%"><span class="bar bar-percent"
+                               style="width: {{$score['groupCount'][$v] / $score['count'] * 100}}%"></span></span>
                     @else
-                        <span class="bar bar-{{$v}}"></span>
+                        <span class="bar bar-{{$v}}" title="0%"></span>
                     @endif
                 @endforeach
             </div>
@@ -62,7 +62,7 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
         @endif
         </legend>
         @auth
-        <fieldset class="starts starability-slot">
+        <fieldset class="starability-slot">
             <input type="radio" id="no-rate" class="input-no-rate" name="rating" value="0" @if($rating==null)
                     checked
                    @endif

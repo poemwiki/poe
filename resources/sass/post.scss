@@ -169,7 +169,7 @@ main.post {
   }
 
 
-  .score{
+  section.score{
     //height: 86px;
     max-width: 500px;
     padding: 8px 0 0 0;
@@ -240,17 +240,24 @@ main.post {
 
   }
 
-  .rate{
+  section.rate{
     display: flex;
-    padding-left: .5rem;
+    padding-left: 0.5rem;
+    max-width: 500px;
+    margin-top: .5rem;
     .left{
-      width: 8em;font-size: 1.2rem;
+      max-width: 170px;
+      font-size: 1.2rem;
     }
     .stars{
       flex-grow: 1;
       display: block;
       height: 13px;
       width: 100%;
+    }
+    .starability-slot{
+      min-width: 150px;
+      zoom: .8;
     }
   }
 
