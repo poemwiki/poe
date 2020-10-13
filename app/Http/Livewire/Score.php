@@ -6,8 +6,11 @@ use App\Models\Poem;
 use App\Repositories\ScoreRepository;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class Score extends Component {
+    use AuthorizesRequests;
+
     /** @var  ScoreRepository */
     private $scoreRepository;
     public $poem;
@@ -35,6 +38,9 @@ class Score extends Component {
     }
 
     public function updatingRating($value) {
+        if(!Auth::check()) {
+            return redirect(route('login', ['ref' => route('poems/show', $this->poem->fake_id)]));
+        }
         $rating = \App\Models\Score::updateOrCreate(
             ['user_id' => Auth::user()->id, 'poem_id' => $this->poem->id],
             ['score' => $value]

@@ -1,8 +1,8 @@
 @import 'variables';
 @import '~bootstrap/scss/bootstrap-reboot';
 //@import url('https://unpkg.com/element-ui/lib/theme-chalk/index.css');
-// Fonts
 @import url('./MajorMonoDisplayFont.css');
+@import url('./vendor/starability-slot.min.css');
 
 @import 'menu';
 
@@ -231,7 +231,7 @@ main.post {
           margin: 0 0 5px 0;
           width: 90%;
           .bar-percent{
-            background-color: $orange
+            background-color: $yellow
           }
         }
       }
@@ -257,7 +257,11 @@ main.post {
     }
     .starability-slot{
       min-width: 150px;
-      zoom: .8;
+      zoom: 0.78;
+      padding-top: 2px;
+      input[type="radio"]:focus+label{
+        outline: 0;
+      }
     }
   }
 

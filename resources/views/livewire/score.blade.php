@@ -9,7 +9,7 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
         <div class="left">
             <strong class="score-num">{{number_format($score['score'], 1, '.', '')}}</strong>
             <span
-                class="user-num">{{trans_choice('score.number of people rated', $score['count'], ['value' => $score['count']])}}</span>
+                class="user-num">@choice('score.number of people rated', $score['count'], ['value' => $score['count']])</span>
         </div>
         <div class="right">
             <div class="star-group">
@@ -48,52 +48,29 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
         {{--        <use href="#stars-o-5"/>--}}
         {{--    </svg>--}}
         <legend class="left">
-        @if(Auth::check())
-            @if(empty($rating))
-                @lang('score.rate & review')
-            @else
-                @lang('score.my rating')
-            @endif
+        @if(Auth::check() && !empty($rating))
+            @lang('score.my rating')
         @else
-            <a class="btn"
-               href="{{ Auth::check() ? '' : route('login', ['ref' => route('p/show', $poem->fake_id, false)]) }}"
-               title="login"
-            >@lang('score.login to rate this poem')</a>
+            @lang('score.rate & review')
         @endif
         </legend>
-        @auth
+
+
         <fieldset class="starability-slot">
             <input type="radio" id="no-rate" class="input-no-rate" name="rating" value="0" @if($rating==null)
                     checked
-                   @endif
-                   aria-label="No rating."/>
-            <input type="radio" id="second-rate1" name="rating" value="1" @if($rating==1)
-                    checked
-                @endif/>
-            <label class="rate" wire:click="$set('rating', 1)" for="second-rate1" data-rating="1" title="Terrible">1
-                star</label>
-            <input type="radio" id="second-rate2" name="rating" value="2" @if($rating==2)
-            checked
-                @endif/>
-            <label class="rate" wire:click="$set('rating', 2)" for="second-rate2" data-rating="2" title="Not good">2
-                stars</label>
-            <input type="radio" id="second-rate3" name="rating" value="3" @if($rating==3)
-            checked
-                @endif/>
-            <label class="rate" wire:click="$set('rating', 3)" for="second-rate3" data-rating="3" title="Average">3
-                stars</label>
-            <input type="radio" id="second-rate4" name="rating" value="4" @if($rating==4)
-            checked
-                @endif/>
-            <label class="rate" wire:click="$set('rating', 4)" for="second-rate4" data-rating="4" title="Very good">4
-                stars</label>
-            <input type="radio" id="second-rate5" name="rating" value="5" @if($rating==5)
-            checked
-                @endif/>
-            <label class="rate" wire:click="$set('rating', 5)" for="second-rate5" data-rating="5" title="Amazing">5
-                stars</label>
+                @endif
+                   aria-label="@choice('score.rating', 0)"/>
+
+            @foreach([1, 2, 3, 4, 5] as $v)
+                <input type="radio" id="second-rate{{$v}}" name="rating" value="{{$v}}" @if($rating==$v)
+                checked aria-label="{{$v}} star"
+                    @endif/>
+                <label wire:click="$set('rating', {{$v}})" for="second-rate{{$v}}" data-rating="{{$v}}" title="@choice('score.rating', $v)">{{$v}}
+                    stars</label>
+            @endforeach
         </fieldset>
-        @endauth
+
     </section>
 
 

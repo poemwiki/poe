@@ -10,7 +10,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Score extends Model
 {
     use SoftDeletes;
-//    use LogsActivity; // TODO enable LogsActiivity cause error for this composite primary key model
+    // use LogsActivity; // TODO enable LogsActiivity cause error for this composite primary key model
     use HasCompositeKey;
     protected $table = 'score';
     protected $primaryKey = ['poem_id', 'user_id'];
