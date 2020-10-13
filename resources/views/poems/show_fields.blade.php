@@ -24,7 +24,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
         <h1 class="title font-song no-select" itemprop="name" id="title">{{ $poem->title }}</h1>
         <pre class="poem-content font-song no-select {{$softWrap ? 'soft-wrap' : ''}}" itemprop="poem" lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
         <dl class="poem-info">
-            <dt>@lang('admin.poem.columns.poet')</dt><dd>{{$nation}}<address itemprop="author" class="poem-writer">
+            <dt>@lang('admin.poem.columns.poet')</dt><dd itemscope itemtype="https://schema.org/Person"><span itemprop="nationality" class="poem-nation">{{$nation}}</span><address itemprop="name" class="poem-writer">
                     <a href="{{route('poet/show', $poem->poet)}}">
                         @if($poem->poet_cn)
                             {{$poem->poet_cn}}@if($poem->poet_cn !== $poem->poet)（{{$poem->poet}}）@endif
