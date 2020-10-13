@@ -74,7 +74,7 @@ class PoemController extends AppBaseController
 
     public function random() {
         $randomPoems = $this->poemRepository->randomOne();
-        return redirect($randomPoems[0]->url);
+        return redirect($randomPoems->url);
     }
 
     /**
