@@ -26,4 +26,13 @@
     @livewireScripts
     @stack('scripts')
 </body>
+
+@if(Auth::check())
+    @php
+        $currentUser = Auth::user();
+    @endphp
+<!--
+{{$currentUser->name}} {{$currentUser->last_online_at}}
+-->
+@endif
 </html>
