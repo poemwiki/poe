@@ -62,7 +62,12 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
                 <input type="radio" id="second-rate{{$v}}" name="rating" value="{{$v}}" @if($rating==$v)
                 checked aria-label="{{$v}} star"
                     @endif/>
-                <label wire:click="$set('rating', {{$v}})" for="second-rate{{$v}}" data-rating="{{$v}}" title="@choice('score.rating', $v)">{{$v}}
+                <label @if($rating !== $v)
+                       wire:click="$set('rating', {{$v}})"
+                       @else
+                       wire:click=""
+                       @endif
+                       for="second-rate{{$v}}" data-rating="{{$v}}" title="@choice('score.rating', $v)">{{$v}}
                     stars</label>
             @endforeach
         </fieldset>
