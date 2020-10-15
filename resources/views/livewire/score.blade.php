@@ -7,7 +7,7 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
     <section class="score">
         <h4 class="score-h">@lang('score.PoemWiki Rating')</h4>
         <div class="left">
-            <strong class="score-num">{{number_format($score['score'], 1, '.', '')}}</strong>
+            <strong class="score-num">{{$score['score']}}</strong>
             <span
                 class="user-num">@choice('score.number of people rated', $score['count'], ['value' => $score['count']])</span>
         </div>

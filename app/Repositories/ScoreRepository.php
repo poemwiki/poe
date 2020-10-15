@@ -10,17 +10,15 @@ use App\Repositories\BaseRepository;
  * Class PoemRepository
  * @package App\Repositories
  * @version July 17, 2020, 12:24 pm UTC
-*/
-
-class ScoreRepository extends BaseRepository
-{
+ */
+class ScoreRepository extends BaseRepository {
     /**
      * @var array
      */
     protected $fieldSearchable = [
-//        'content_id',
+        //        'content_id',
         'factor',
-//        'score',
+        //        'score',
     ];
 
     /**
@@ -47,7 +45,7 @@ class ScoreRepository extends BaseRepository
      * @param array $columns
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function listAll($perPage, $order = 'updated_at', $direction= 'desc', $columns = ['*']) {
+    public function listAll($perPage, $order = 'updated_at', $direction = 'desc', $columns = ['*']) {
         $query = $this->allQuery()->orderBy($order, $direction);
 
         return $query->paginate($perPage, $columns);
@@ -59,26 +57,34 @@ class ScoreRepository extends BaseRepository
         return $query->paginate($perPage, $columns);
     }
 
+
+    /**
+     * @param Poem $poem
+     * @return array
+     */
     public function calcScoreByPoem(Poem $poem) {
-        $res = $this->allQuery()->where(['poem_id' => $poem->id])->get();
+        return $this->calcScoreByPoemId($poem->id);
+    }
+
+    /**
+     * @param Int $poem
+     * @return array
+     */
+    public function calcScoreByPoemId($poemId): array {
+        $res = $this->allQuery()->where(['poem_id' => $poemId])->get();
         $scores = $res;//->toArray();
-//        return ['sum' => 0, 'weight' => 0, 'groupCount' => [], 'score' => 2, 'count' => 3];
+
         $groupCount = $res->groupBy('score')->map(function ($item) {
             return collect($item)->count();
         });
 
-//        $scoreTotal = array_reduce($scores, function($carry, $item) {
-//            $carry['sum'] += $item['score'] * $item['weight'];
-//            $carry['weight'] += $item['weight'];
-//            return $carry;
-//        }, ['sum' => 0, 'weight' => 0, 'groupCount' => $groupCount]);
         $scoreTotal = ['sum' => 0, 'weight' => 0, 'groupCount' => $groupCount, 'score' => null, 'count' => null];
-        foreach($scores as $item) {
+        foreach ($scores as $item) {
             $scoreTotal['sum'] += $item['score'] * $item['weight'];
             $scoreTotal['weight'] += $item['weight'];
         }
 
-        $scoreTotal['score'] = $scoreTotal['weight'] ? $scoreTotal['sum'] / $scoreTotal['weight'] : null;
+        $scoreTotal['score'] = $scoreTotal['weight'] ? number_format($scoreTotal['sum'] / $scoreTotal['weight'], 1) : null;
         $scoreTotal['count'] = count($scores);
         return $scoreTotal;
     }

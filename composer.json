@@ -26,6 +26,7 @@
     "fruitcake/laravel-cors": "^1.0",
     "fukuball/jieba-php": "^0.33.0",
     "guzzlehttp/guzzle": "^6.3",
+    "itsgoingd/clockwork": "^4.1",
     "laravel/framework": "^7.0",
     "laravel/tinker": "^2.0",
     "laravel/ui": "^2.1",
@@ -35,7 +36,6 @@
     "spatie/laravel-activitylog": "^3.16"
   },
   "require-dev": {
-    "barryvdh/laravel-debugbar": "^3.3",
     "barryvdh/laravel-ide-helper": "^2.7",
     "brackets/admin-generator": "^5.1",
     "facade/ignition": "^2.0",

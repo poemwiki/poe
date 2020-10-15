@@ -238,8 +238,5 @@ $config = [
 
 ];
 
-if($config['env'] === 'local') {
-    $config['providers'][] = Barryvdh\Debugbar\ServiceProvider::class;
-}
 
 return $config;
