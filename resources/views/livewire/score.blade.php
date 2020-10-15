@@ -67,8 +67,7 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
                        @else
                        wire:click=""
                        @endif
-                       for="second-rate{{$v}}" data-rating="{{$v}}" title="@choice('score.rating', $v)">{{$v}}
-                    stars</label>
+                       for="second-rate{{$v}}" data-rating="{{$v}}" title="@choice('score.rating', $v)"></label>
             @endforeach
         </fieldset>
 
