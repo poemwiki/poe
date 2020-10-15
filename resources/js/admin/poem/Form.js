@@ -52,6 +52,8 @@ Vue.component('poem-form', {
     this.form.dynasty = this.$el.querySelector('[name="dynasty"]').getAttribute('value') || this.form.dynasty;
     this.form.from = this.$el.querySelector('[name="from"]').getAttribute('value') || this.form.from;
     this.form.year = this.$el.querySelector('[name="year"]').getAttribute('value') || this.form.year;
+    this.form.month = this.$el.querySelector('[name="month"]').getAttribute('value') || this.form.month;
+    this.form.date = this.$el.querySelector('[name="date"]').getAttribute('value') || this.form.date;
     this.form.is_original = this.$el.querySelector('[name="is_original_fake_element"]').getAttribute('value') || this.form.is_original;
     this.form.bedtime_post_id = this.$el.querySelector('[name="bedtime_post_id"]')?.getAttribute('value') || this.form.bedtime_post_id;
     this.form.bedtime_post_title = this.$el.querySelector('[name="bedtime_post_title"]')?.getAttribute('value') || this.form.bedtime_post_title;

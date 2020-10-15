@@ -18,7 +18,7 @@
 </head>
 <body class="position-ref">
     <div class="top-right links no-select">
-        <a class="site-name no-bg" href="{{$randomPoemUrl}}">POEM&#0010;Wiki</a>
+        <a class="site-name no-bg" href="{{$randomPoemUrl ?? '/'}}">POEM&#0010;Wiki</a>
     </div>
     <main class="post">
         @yield('content')

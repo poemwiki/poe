@@ -207,19 +207,38 @@
      :class="{'has-danger': errors.has('year'), 'has-success': fields.year && fields.year.valid }">
     <label for="year" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.year') }}</label>
-    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'"
+        style="display: flex; gap: 1em;">
         <input type="text" v-model="form.year"
                v-validate="''"
                value="{{$originalPoem->year ?? $translatedPoem->year ?? ''}}"
                data-vv-as="{{ trans('admin.poem.columns.year') }}"
                @input="validate($event)" class="form-control"
                :class="{'form-control-danger': errors.has('year'), 'form-control-success': fields.year && fields.year.valid}"
-               id="year" name="year" placeholder="">
-        <div v-if="errors.has('year')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('year') }}</div>
+               id="year" name="year" placeholder="@lang('admin.poem.columns.year')"
+                style="flex-grow: 1; display: inline-block;">
+        <input type="text" v-model="form.month"
+               v-validate="''"
+               value="{{$originalPoem->month ?? $translatedPoem->month ?? ''}}"
+               data-vv-as="{{ trans('admin.poem.columns.month') }}"
+               @input="validate($event)" class="form-control"
+               :class="{'form-control-danger': errors.has('month'), 'form-control-success': fields.month && fields.month.valid}"
+               id="month" name="month" placeholder="@lang('admin.poem.columns.month')"
+                style="flex-grow: 1; display: inline-block;">
+        <input type="text" v-model="form.date"
+               v-validate="''"
+               value="{{$originalPoem->date ?? $translatedPoem->date ?? ''}}"
+               data-vv-as="{{ trans('admin.poem.columns.date') }}"
+               @input="validate($event)" class="form-control"
+               :class="{'form-control-danger': errors.has('date'), 'form-control-success': fields.date && fields.date.valid}"
+               id="date" name="date" placeholder="@lang('admin.poem.columns.date')"
+                style="flex-grow: 1; display: inline-block;">
+        <div v-if="errors.has('year') || errors.has('month') || errors.has('date')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('year') }}</div>
     </div>
 </div>
 
 
+@if(Auth::user()->is_admin)
 <div class="form-group row"
      :class="{'has-danger': errors.has('bedtime_post_id'), 'has-success': fields.bedtime_post_id && fields.bedtime_post_id.valid }">
     <label for="bedtime_post_id" class="col-form-label text-md-right"
@@ -256,6 +275,7 @@
         </div>
     </div>
 </div>
+@endif
 
 <div class="form-group row hidden"
      :class="{'has-danger': errors.has('length'), 'has-success': fields.length && fields.length.valid }">
