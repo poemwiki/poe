@@ -37,9 +37,18 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
             @if($poem->translator)
             <dt>@lang('admin.poem.columns.translator')</dt><dd itemprop="translator" class="poem-translator">{{$translator}}</dd>
             @endif
-            @if($poem->year)
-            <dt>@lang('admin.poem.columns.year')</dt><dd itemprop="dateCreated" class="poem-year">{{$poem->year}}</dd>
+
+            <dt>@lang('admin.poem.columns.time')</dt>
+            @if($poem->year && $poem->month && $poem->date)
+                <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}-{{$poem->date}}</dd>
+            @elseif($poem->year && $poem->month)
+                <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}</dd>
+            @elseif($poem->month && $poem->date)
+                <dd itemprop="dateCreated" class="poem-time">{{$poem->month}}-{{$poem->date}}</dd>
+            @elseif($poem->year)
+                <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}</dd>
             @endif
+
             @if($poem->from)
             <dt>@lang('admin.poem.columns.from')</dt><dd itemprop="isPartOf" class="poem-from">{{$poem->from}}</dd>
             @endif

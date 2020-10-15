@@ -8,6 +8,7 @@ use App\Models\Language;
 use App\Models\Poem;
 use App\Repositories\PoemRepository;
 use App\Http\Controllers\AppBaseController;
+use App\Repositories\ScoreRepository;
 use Illuminate\Http\Request;
 use Response;
 use Fukuball\Jieba\Jieba;
@@ -38,6 +39,7 @@ class BotController extends AppBaseController
         $msg = $request->input('keyword', '云朵');
 
         $keyword = $this->getKeywords($msg);
+
         if(empty($keyword)) {
             return Response::json([
                 'code' => -2,
@@ -54,7 +56,7 @@ class BotController extends AppBaseController
 
         if (is_array($keyword)) {
             $sql = 'SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`
-`from`, `year`, `bedtime_post_id`, `selected_count`,`last_selected_time`, dynasty
+`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, dynasty
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
@@ -79,7 +81,7 @@ class BotController extends AppBaseController
         } else {
             $q = $poeDB->prepare(<<<'SQL'
         SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`
-`from`, `year`, `bedtime_post_id`, `selected_count`,`last_selected_time`, dynasty
+`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, dynasty
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
@@ -127,15 +129,29 @@ SQL
 
                 $wikiLink = "\n诗歌维基：poemwiki.org/" . $post->id;
 
+                $scoreRepo = new ScoreRepository(app());
+                $score = $scoreRepo->calcScoreByPoemId($post->id);
+                $wikiScore = $score['score']
+                    ? "${score['score']} " . str_repeat("🌟", floor($score['score']))
+                    : '等你来评⬆️';
+                $wikiScore = '评分：'.$wikiScore;
+
                 $parts = [
                     '▍ '.$post->title."\n",
-                    $content."\n",
-                    $writer,
+                    $content."\n"
                 ];
-                if($post->year) array_push($parts, $post->year);
+
+                $timeStr = '';
+                if($post->year) $timeStr .= $post->year.'年';
+                if($post->month) $timeStr .= $post->month.'月';
+                if($post->date) $timeStr .= $post->date.'日';
+                array_push($parts, $timeStr);
+
+                array_push($parts, $writer);
                 if($post->translator) array_push($parts, '翻译 / '.trim($post->translator));
                 if(!empty($wxPost) && isset($wxPost['recommender'])) array_push($pars,'评论 / '.$wxPost['recommender']);
                 array_push($parts, $wikiLink);
+                array_push($parts, $wikiScore);
 
                 $poem = implode("\n", $parts);
 
