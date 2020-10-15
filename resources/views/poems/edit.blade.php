@@ -19,6 +19,8 @@
 
                     <div class="card-header">
                         <i class="fa fa-pencil"></i> {{ trans('admin.poem.actions.edit', ['name' => $poem->title]) }}
+
+                        《<a target="_blank" href="{{$poem->url}}">{{ $poem->title }}</a>》
                     </div>
 
                     <div class="card-body">

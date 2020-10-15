@@ -23,6 +23,12 @@
   vertical-align: text-bottom;
   zoom: 1.6;
 }
+#app.container-fluid{
+  @media all and (max-width: 767px) {
+    padding: 0;
+  }
+}
+
 .col-form-label{
   color: $mutedText;
   font-weight: bold;
