@@ -13,7 +13,6 @@
 
     <!-- Fonts -->
     <link href="{{ asset('css/post.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/starability-slot.min.css') }}" rel="stylesheet">
 
     @livewireStyles
 </head>
