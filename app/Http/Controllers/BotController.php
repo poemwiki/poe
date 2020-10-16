@@ -15,14 +15,13 @@ use Fukuball\Jieba\Jieba;
 use Fukuball\Jieba\Finalseg;
 use \PDO as PDO;
 
-class BotController extends AppBaseController
-{
+class BotController extends AppBaseController {
     /** @var  PoemRepository */
     private $poemRepository;
 
     public function __construct() {
         ini_set('memory_limit', '300M');
-        Jieba::init(array('mode'=>'default','dict'=>'small'));
+        Jieba::init(array('mode' => 'default', 'dict' => 'small'));
         Finalseg::init();
     }
 
@@ -40,7 +39,7 @@ class BotController extends AppBaseController
 
         $keyword = $this->getKeywords($msg);
 
-        if(empty($keyword)) {
+        if (empty($keyword)) {
             return Response::json([
                 'code' => -2,
                 'poem' => '抱歉，没有匹配到关键词。',
@@ -48,11 +47,11 @@ class BotController extends AppBaseController
             ]);
         }
 
-        $poeDB = new PDO('mysql:dbname=poe;host=' . config('database.connections.mysql.host') ,
+        $poeDB = new PDO('mysql:dbname=poe;host=' . config('database.connections.mysql.host'),
             config('database.connections.mysql.username'),
             config('database.connections.mysql.password'), [
-            PDO::ATTR_EMULATE_PREPARES   => TRUE
-        ]);
+                PDO::ATTR_EMULATE_PREPARES => TRUE
+            ]);
 
         if (is_array($keyword)) {
             $sql = 'SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`
@@ -105,10 +104,10 @@ SQL
         $code = -1;
         $poem = '';
         $data = [];
-        if($q->execute()) {
+        if ($q->execute()) {
             $code = 0;
             $res = $q->fetchAll(PDO::FETCH_ASSOC);
-            if(count($res) == 0) {
+            if (count($res) == 0) {
                 $poem = '抱歉，没有查到相关内容。';
             } else {
                 $data = $res[0];
@@ -119,12 +118,12 @@ SQL
 
                 $nation = $post->dynasty
                     ? "[$post->dynasty] "
-                    : (($post->nation && $post->nation!=='中国') ? "[$post->nation] " : '');
+                    : (($post->nation && $post->nation !== '中国') ? "[$post->nation] " : '');
 
                 $content = preg_replace('@[\r\n]{3,}@', "\n\n", $post->poem);
 
                 $writer = $post->poet_cn
-                    ? '作者 / '. $nation . ($post->poet_cn ?? $post->poet)
+                    ? '作者 / ' . $nation . ($post->poet_cn ?? $post->poet)
                     : ($post->poet ? $post->poet : '');
 
                 $wikiLink = "\n\n诗歌维基：poemwiki.org/" . $post->id;
@@ -134,28 +133,28 @@ SQL
                 $wikiScore = $score['score']
                     ? "${score['score']} " . str_repeat("🌟", floor($score['score']))
                     : '等你来评⬆️';
-                $wikiScore = '评分：'.$wikiScore;
+                $wikiScore = '评分：' . $wikiScore;
 
                 $parts = [
-                    '▍ '.$post->title."\n",
+                    '▍ ' . $post->title . "\n",
                     $content
                 ];
 
                 $timeStr = '';
-                if($post->year) $timeStr .= $post->year.'年';
-                if($post->month) $timeStr .= $post->month.'月';
-                if($post->date) $timeStr .= $post->date.'日';
+                if ($post->year) $timeStr .= $post->year . '年';
+                if ($post->month) $timeStr .= $post->month . '月';
+                if ($post->date) $timeStr .= $post->date . '日';
                 array_push($parts, $timeStr);
 
                 array_push($parts, $writer);
-                if($post->translator) array_push($parts, '翻译 / '.trim($post->translator));
-                if(!empty($wxPost) && isset($wxPost['recommender'])) array_push($pars,'评论 / '.$wxPost['recommender']);
+                if ($post->translator) array_push($parts, '翻译 / ' . trim($post->translator));
+                if (!empty($wxPost) && isset($wxPost['recommender'])) array_push($pars, '评论 / ' . $wxPost['recommender']);
                 array_push($parts, $wikiLink);
                 array_push($parts, $wikiScore);
 
                 $poem = implode("\n", $parts);
 
-                if($post->last_selected_time) {
+                if ($post->last_selected_time) {
                     $stmt = $poeDB->prepare('UPDATE `chatroom_poem_selected` SET `selected_count`=1+`selected_count`
                 WHERE `poem_id`=:poem_id AND `chatroom_id`=:chatroom_id');
                 } else {
@@ -209,7 +208,7 @@ SQL;
         $keyword = '';
         $matches = [];
         preg_match('@^(搜索??|search)(一下|一搜|一首|一个)??\s*?(?<keyword>.*)(的?((古|现代)?诗歌?|词))?$@Uu', $str, $matches);
-        if(isset($matches['keyword'])) {
+        if (isset($matches['keyword'])) {
             $keyword = trim($matches['keyword']);
         } else {
             $matches = [];
@@ -217,7 +216,7 @@ SQL;
             $keyword = isset($matches['keyword']) ? trim($matches['keyword']) : '';
         }
 
-        if($divide) {
+        if ($divide) {
             return Jieba::cut($keyword);
         }
 
