@@ -214,12 +214,17 @@ main.post {
       text-align: left;
       padding-top: 2px;
       display: flex;
+      min-height: 82px;
       .star-group{
         width: 60px;
         .stars{
           display: block;
           height: 13px;
           width: 100%;
+          //#star,svg,use{
+          //  -webkit-transform-box: fill-box;
+          //  transform-box: fill-box;
+          //}
         }
       }
       .bars{

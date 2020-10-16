@@ -55,6 +55,9 @@
                 text-decoration: none;
                 text-transform: uppercase;
             }
+            .top-right a{
+                color: #fff;
+            }
 
             .m-b-md {
                 margin-bottom: 30px;
