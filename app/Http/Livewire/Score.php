@@ -2,9 +2,11 @@
 
 namespace App\Http\Livewire;
 
+use App\Http\Requests\Admin\Score\UpdateScore;
 use App\Models\Poem;
 use App\Repositories\ScoreRepository;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
@@ -15,6 +17,10 @@ class Score extends Component {
     private $scoreRepository;
     public $poem;
     public $rating = null;
+
+    protected $rules = [
+        'rating' => 'integer|min:1|max:5',
+    ];
 
     public function __construct() {
 //        $this->middleware('auth')->except(['show', 'showContributions']);
@@ -37,14 +43,19 @@ class Score extends Component {
         }
     }
 
-    public function updatingRating($value) {
+
+
+
+    public function updatedRating($value) {
         if(!Auth::check()) {
             return redirect(route('login', ['ref' => route('poems/show', $this->poem->fake_id)]));
         }
-        $rating = \App\Models\Score::updateOrCreate(
-            ['user_id' => Auth::user()->id, 'poem_id' => $this->poem->id],
-            ['score' => $value]
-        );
+
+        $this->validateOnly('rating');
+
+        return  $this->scoreRepository->updateOrCreate(
+            ['poem_id' => $this->poem->id, 'user_id' => Auth::user()->id],
+            ['score' => $this->rating]);
     }
 
     public function render() {

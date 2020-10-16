@@ -26,12 +26,10 @@ class StoreScore extends FormRequest
     public function rules(): array
     {
         return [
-            'content_id' => ['nullable', 'integer'],
-            'factor' => ['required', 'numeric'],
+            'weight' => ['required', 'float'],
             'poem_id' => ['required', 'integer'],
-            'score' => ['required', 'boolean'],
+            'score' => 'integer|min:1|max:5',
             'user_id' => ['required', 'integer'],
-
         ];
     }
 

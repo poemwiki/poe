@@ -26,12 +26,8 @@ class UpdateScore extends FormRequest
     public function rules(): array
     {
         return [
-            'content_id' => ['nullable', 'integer'],
-            'factor' => ['sometimes', 'numeric'],
-            'poem_id' => ['sometimes', 'integer'],
-            'score' => ['sometimes', 'boolean'],
-            'user_id' => ['sometimes', 'integer'],
-
+            'weight' => ['sometimes', 'numeric'],
+            'score' => 'integer|min:1|max:5',
         ];
     }
 

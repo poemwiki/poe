@@ -122,9 +122,9 @@ SQL
 
                 $content = preg_replace('@[\r\n]{3,}@', "\n\n", $post->poem);
 
-                $writer = $post->poet_cn
-                    ? '作者 / ' . $nation . ($post->poet_cn ?? $post->poet)
-                    : ($post->poet ? $post->poet : '');
+                $writer = '作者 / ' .($post->poet_cn
+                    ?  $nation . ($post->poet_cn ?? $post->poet)
+                    : ($post->poet ? $post->poet : ''));
 
                 $wikiLink = "\n\n诗歌维基：poemwiki.org/" . $post->id;
 

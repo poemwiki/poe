@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasCompositeKey;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -25,7 +26,6 @@ class Score extends Model
         'score',
         'user_id',
     ];
-
 
     protected $dates = [
         'created_at',
