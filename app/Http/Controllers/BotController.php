@@ -119,15 +119,15 @@ SQL
 
                 $nation = $post->dynasty
                     ? "[$post->dynasty] "
-                    : ($post->nation ? "[$post->nation] " : '');
+                    : (($post->nation && $post->nation!=='中国') ? "[$post->nation] " : '');
 
                 $content = preg_replace('@[\r\n]{3,}@', "\n\n", $post->poem);
 
                 $writer = $post->poet_cn
-                    ? '作者 / '. $nation . $post->poet_cn . ($post->poet_cn === $post->poet ? '' : '（'.$post->poet.'）')
+                    ? '作者 / '. $nation . ($post->poet_cn ?? $post->poet)
                     : ($post->poet ? $post->poet : '');
 
-                $wikiLink = "\n诗歌维基：poemwiki.org/" . $post->id;
+                $wikiLink = "\n\n诗歌维基：poemwiki.org/" . $post->id;
 
                 $scoreRepo = new ScoreRepository(app());
                 $score = $scoreRepo->calcScoreByPoemId($post->id);
@@ -138,7 +138,7 @@ SQL
 
                 $parts = [
                     '▍ '.$post->title."\n",
-                    $content."\n"
+                    $content
                 ];
 
                 $timeStr = '';
