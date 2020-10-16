@@ -24,6 +24,19 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
         <h1 class="title font-song no-select" itemprop="name" id="title">{{ $poem->title }}</h1>
         <pre class="poem-content font-song no-select {{$softWrap ? 'soft-wrap' : ''}}" itemprop="poem" lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
         <dl class="poem-info">
+            @if($poem->year or $poem->month)
+                <dt>@lang('admin.poem.columns.time')</dt>
+                @if($poem->year && $poem->month && $poem->date)
+                    <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}-{{$poem->date}}</dd>
+                @elseif($poem->year && $poem->month)
+                    <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}</dd>
+                @elseif($poem->month && $poem->date)
+                    <dd itemprop="dateCreated" class="poem-time">{{$poem->month}}-{{$poem->date}}</dd>
+                @elseif($poem->year)
+                    <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}</dd>
+                @endif
+            @endif
+
             <dt>@lang('admin.poem.columns.poet')</dt><dd itemscope itemtype="https://schema.org/Person"><span itemprop="nationality" class="poem-nation">{{$nation}}</span><address itemprop="name" class="poem-writer">
                     <a href="{{route('poet/show', $poem->poet)}}">
                         @if($poem->poet_cn)
@@ -34,23 +47,13 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                     </a>
                 </address>
             </dd>
+
             @if($poem->translator)
             <dt>@lang('admin.poem.columns.translator')</dt><dd itemprop="translator" class="poem-translator">{{$translator}}</dd>
             @endif
 
-            <dt>@lang('admin.poem.columns.time')</dt>
-            @if($poem->year && $poem->month && $poem->date)
-                <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}-{{$poem->date}}</dd>
-            @elseif($poem->year && $poem->month)
-                <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}</dd>
-            @elseif($poem->month && $poem->date)
-                <dd itemprop="dateCreated" class="poem-time">{{$poem->month}}-{{$poem->date}}</dd>
-            @elseif($poem->year)
-                <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}</dd>
-            @endif
-
             @if($poem->from)
-            <dt>@lang('admin.poem.columns.from')</dt><dd itemprop="isPartOf" class="poem-from">{{$poem->from}}</dd>
+                <dt>@lang('admin.poem.columns.from')</dt><dd itemprop="isPartOf" class="poem-from">{{$poem->from}}</dd>
             @endif
         </dl>
         <a class="edit btn" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
