@@ -206,7 +206,7 @@
 <div class="form-group row"
      :class="{'has-danger': errors.has('year'), 'has-success': fields.year && fields.year.valid }">
     <label for="year" class="col-form-label text-md-right"
-           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.poem.columns.time') }}</label>
+           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.time') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'"
         style="display: flex; gap: 1em;">
         <input type="text" v-model="form.year"
