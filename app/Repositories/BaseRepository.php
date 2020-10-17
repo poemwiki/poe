@@ -76,7 +76,7 @@ abstract class BaseRepository {
      * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null
      */
     public function find($id, $columns = ['*']) {
-        return $this->newQuery()->find($id, $columns);
+        return $this->model->find($id, $columns);
     }
 
     /**
@@ -187,13 +187,13 @@ abstract class BaseRepository {
     /**
      * update.
      *
-     * @param array $attributes
      * @param mixed $id
+     * @param array $attributes
      * @return \Illuminate\Database\Eloquent\Model
      *
      * @throws \Throwable
      */
-    public function update($id, $attributes) {
+    public function update($attributes, $id) {
         return tap($this->findOrFail($id), function ($instance) use ($attributes) {
             $instance->fill($attributes)->saveOrFail();
         });

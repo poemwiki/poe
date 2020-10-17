@@ -16,9 +16,8 @@ class ScoreRepository extends BaseRepository {
      * @var array
      */
     protected $fieldSearchable = [
-        //        'content_id',
-        'factor',
-        //        'score',
+//        'poem_id',
+//        'score',
     ];
 
     /**
@@ -59,6 +58,25 @@ class ScoreRepository extends BaseRepository {
 
 
     /**
+     * Create or update a record matching the attributes, and fill it with values.
+     *
+     * @param array $attributes
+     * @param array $values
+     * @return \Illuminate\Database\Eloquent\Model|int
+     */
+    public function updateOrCreate(array $attributes, array $values = []) {
+        $find = $this->model->withTrashed()->where($attributes)->first();
+        if($find) {
+            $find->restore();
+            return $find->update($values);
+        } else {
+            return $this->newQuery()->updateOrCreate($attributes, $values);
+        }
+    }
+
+
+
+    /**
      * @param Poem $poem
      * @return array
      */
@@ -67,7 +85,7 @@ class ScoreRepository extends BaseRepository {
     }
 
     /**
-     * @param Int $poem
+     * @param Int $poemId
      * @return array
      */
     public function calcScoreByPoemId($poemId): array {

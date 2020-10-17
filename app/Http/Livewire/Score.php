@@ -43,9 +43,6 @@ class Score extends Component {
         }
     }
 
-
-
-
     public function updatedRating($value) {
         if(!Auth::check()) {
             return redirect(route('login', ['ref' => route('poems/show', $this->poem->fake_id)]));
@@ -56,6 +53,13 @@ class Score extends Component {
         return  $this->scoreRepository->updateOrCreate(
             ['poem_id' => $this->poem->id, 'user_id' => Auth::user()->id],
             ['score' => $this->rating]);
+    }
+
+    public function remove() {
+        $res = $this->scoreRepository->find(['poem_id' => $this->poem->id, 'user_id' => Auth::user()->id])->delete();
+        if($res) {
+            $this->rating = null;
+        }
     }
 
     public function render() {

@@ -25,8 +25,8 @@
                     <div class="card-body">
                         <form method="post" action="{{ route('login', ['ref' => request()->input('ref', '')]) }}">
                             @csrf
-                            <h1>登录</h1>
-                            <p class="text-muted">登录到 PoemWiki</p>
+                            <h1>@lang('Login')</h1>
+                            <p class="text-muted">{{config('app.name')}}</p>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">
@@ -55,13 +55,13 @@
                                 @endif
                             </div>
                             <div class="row">
-                                <div class="col-6">
-                                    <button class="btn btn-primary px-4" type="submit">登录</button>
+                                <div class="col-6 text-left">
+                                    <a class="btn btn-link px-0" href="{{ url('/password/reset') }}">
+                                        @lang('Forget Password')
+                                    </a>
                                 </div>
                                 <div class="col-6 text-right">
-                                    <a class="btn btn-link px-0" href="{{ url('/password/reset') }}">
-                                        忘记密码
-                                    </a>
+                                    <button class="btn btn-primary px-4" type="submit">登录</button>
                                 </div>
                             </div>
                         </form>
@@ -70,9 +70,9 @@
                 <div class="card text-white bg-primary py-5">
                     <div class="card-body text-center">
                         <div>
-                            <h2>注册</h2>
+                            <h2>@lang('Register')</h2>
                             <p>如果您还没有账号，<br>欢迎注册 PoemWiki！</p>
-                            <a class="btn btn-primary active mt-3" href="{{ url('/register') }}">注册</a>
+                            <a class="btn btn-primary active mt-3" href="{{ url('/register') }}">@lang('Register')</a>
                         </div>
                     </div>
                 </div>

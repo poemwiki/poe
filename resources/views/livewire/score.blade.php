@@ -45,7 +45,7 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
     <section class="rate">
         <legend class="left">
         @if(Auth::check() && !empty($rating))
-            @lang('score.my rating')
+            @lang('score.my rating') <a wire:click.prevent="remove()" href="#" class="btn btn-grey unrate">@lang('score.remove my rating')</a>
         @else
             @lang('score.rate & review')
         @endif
@@ -104,13 +104,17 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
                 @endif
             @endif
 
-            @if($poem->bedtime_post_title)
+            @if($poem->bedtime_post_title && $poem->bedtime_post_id)
                 <li>读睡博客存档：<a target="_blank"
                               href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">{{ $poem->bedtime_post_title }}</a>
                 </li>
-            @else
+            @elseif($poem->bedtime_post_id)
                 <li><a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">读睡博客存档</a>
                 </li
+            @endif
+
+            @if(!$wxPost && !$poem->bedtime_post_id)
+                <li>@lang('No Comment')</li>
             @endif
         </ol>
 
