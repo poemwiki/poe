@@ -8,6 +8,10 @@
 @import "styles/index";
 @import "../MajorMonoDisplayFont.css";
 @import "../_variables";
+
+.card-header{
+  color: $ui-text-color;
+}
 .logo {
   font-family: "Major Mono Display", monospace, sans-serif;
   color: #000;
