@@ -53,7 +53,7 @@
 </div>
 
 <div class="form-group row"
-     :class="{'has-danger': errors.has('poet_cn'), 'has-success': fields.poet_cn && fields.poet_cn.valid }">
+     :class="{'has-danger': errors.has('poet_cn') }">
     <label for="poet_cn" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.poet_cn') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
@@ -113,7 +113,7 @@
 </div>
 
 <div class="form-group row"
-     :class="{'hidden' : form.is_original==='1','has-danger': errors.has('translator'), 'has-success': fields.translator && fields.translator.valid }">
+     :class="{'hidden' : form.is_original==1,'has-danger': errors.has('translator') }">
     <label for="translator" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.translator') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
@@ -153,7 +153,7 @@
 </div>
 
 <div class="form-group row"
-     :class="{'has-danger': errors.has('nation'), 'has-success': fields.nation && fields.nation.valid }">
+     :class="{'has-danger': errors.has('nation') }">
     <label for="nation" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.nation') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
@@ -170,7 +170,7 @@
 </div>
 
 <div class="form-group row"
-     :class="{'has-danger': errors.has('dynasty'), 'has-success': fields.dynasty && fields.dynasty.valid }">
+     :class="{'has-danger': errors.has('dynasty') }">
     <label for="dynasty" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.dynasty') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
@@ -188,7 +188,7 @@
 </div>
 
 <div class="form-group row"
-     :class="{'has-danger': errors.has('from'), 'has-success': fields.from && fields.from.valid }">
+     :class="{'has-danger': errors.has('from') }">
     <label for="from" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.from') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
@@ -204,7 +204,7 @@
 </div>
 
 <div class="form-group row"
-     :class="{'has-danger': errors.has('year'), 'has-success': fields.year && fields.year.valid }">
+     :class="{'has-danger': errors.has('year') }">
     <label for="year" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.time') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'"
@@ -240,7 +240,7 @@
 
 @if(Auth::user()->is_admin)
 <div class="form-group row"
-     :class="{'has-danger': errors.has('bedtime_post_id'), 'has-success': fields.bedtime_post_id && fields.bedtime_post_id.valid }">
+     :class="{'has-danger': errors.has('bedtime_post_id') }">
     <label for="bedtime_post_id" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.bedtime_post_id') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
@@ -258,7 +258,7 @@
 </div>
 
 <div class="form-group row"
-     :class="{'has-danger': errors.has('bedtime_post_title'), 'has-success': fields.bedtime_post_title && fields.bedtime_post_title.valid }">
+     :class="{'has-danger': errors.has('bedtime_post_title')}">
     <label for="bedtime_post_title" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.bedtime_post_title') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
