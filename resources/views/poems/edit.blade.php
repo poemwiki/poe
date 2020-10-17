@@ -20,7 +20,7 @@
                     <div class="card-header">
                         <i class="fa fa-pencil"></i> {{ trans('admin.poem.actions.edit', ['name' => $poem->title]) }}
 
-                        《<a target="_blank" href="{{$poem->url}}">{{ $poem->title }}</a>》
+                        &nbsp;&nbsp;{{$poem->poet}} 《<a target="_blank" href="{{$poem->url}}">{{ $poem->title }}</a>》
                     </div>
 
                     <div class="card-body">
@@ -28,7 +28,7 @@
                     </div>
 
 
-                    <div class="card-footer">
+                    <div class="card-footer text-right">
                         <button type="submit" class="btn btn-primary" :disabled="submiting">
                             <i class="fa" :class="submiting ? 'fa-spinner' : 'fa-download'"></i>
                             {{ trans('brackets/admin-ui::admin.btn.save') }}

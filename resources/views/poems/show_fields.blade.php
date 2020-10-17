@@ -19,10 +19,10 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
 @section('author'){{$poem->poet.($poem->poet ? ',' : '').$poem->poet_cn}}@endsection
 
 
-<section class="poem" itemscope itemtype="http://schema.org/Article" itemid="{{ $poem->url }}">
+<section class="poem" itemscope itemtype="http://schema.org/Article" itemid="{{ $poem->fake_id }}">
     <article>
         <h1 class="title font-song no-select" itemprop="name" id="title">{{ $poem->title }}</h1>
-        <pre class="poem-content font-song no-select {{$softWrap ? 'soft-wrap' : ''}}" itemprop="poem" lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
+        <pre class="poem-content font-song no-select {{$softWrap ? 'soft-wrap' : ''}}" itemprop="text" lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
         <dl class="poem-info">
             @if($poem->year or $poem->month)
                 <dt>@lang('admin.poem.columns.time')</dt>
@@ -37,7 +37,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                 @endif
             @endif
 
-            <dt>@lang('admin.poem.columns.poet')</dt><dd itemscope itemtype="https://schema.org/Person"><span itemprop="nationality" class="poem-nation">{{$nation}}</span><address itemprop="name" class="poem-writer">
+            <dt>@lang('admin.poem.columns.poet')</dt><dd itemscope itemtype="https://schema.org/Person">@if($nation)<span itemprop="nationality" class="poem-nation">{{$nation}}</span>@endif<address itemprop="name" class="poem-writer">
                     <a href="{{route('poet/show', $poem->poet)}}">
                         @if($poem->poet_cn)
                             {{$poem->poet_cn}}@if($poem->poet_cn !== $poem->poet)（{{$poem->poet}}）@endif
@@ -57,7 +57,6 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
             @endif
         </dl>
         <a class="edit btn" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
-        <a class="btn" href="{{ Auth::check() ? route('poems/create') : route('login', ['ref' => route('poems/create')]) }}">@lang('poem.add poem')</a>
         <ol class="contribution">
         @if(count($logs) >= 1)
             @php
@@ -71,23 +70,24 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
             <li title="{{$poem->created_at}}"><a href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') PoemWiki</a></li>
         @endif
         </ol>
+        <a class="btn create" href="{{ Auth::check() ? route('poems/create') : route('login', ['ref' => route('poems/create')]) }}">@lang('poem.add poem')</a>
 
-        <dl class="poem-info">
-            <dt>其他版本</dt>
+        <dl class="poem-info poem-versions">
+            <dt>@lang('poem.Translated/Original Version of This Poem')</dt>
             @if(!$poem->is_original)
                 @if(!$poem->originalPoem)
-                    <dt>@lang('poem.no original work related')</dt><dd><a class="" href="{{ Auth::check() ? route('poems/create', ['translated_fake_id' => $fakeId]) : route('login', ['ref' => route('poems/create', ['translated_fake_id' => $fakeId], false)]) }}">@lang('poem.add original work')</a></dd>
+                    <dt>@lang('poem.no original work related')</dt><a class="" href="{{ Auth::check() ? route('poems/create', ['translated_fake_id' => $fakeId]) : route('login', ['ref' => route('poems/create', ['translated_fake_id' => $fakeId], false)]) }}"><dd>@lang('poem.add original work')</a></dd>
                 @else
-                    <dt><a href="{{$poem->originalPoem->url}}" title="@lang('poem.original work')">{{$poem->originalPoem->lang ? $poem->originalPoem->lang->name.'['.trans('poem.original work').']' : trans('poem.original work')}}</a></dt><dd>{{$poem->originalPoem->poet}}</dd>
+                    <a href="{{$poem->originalPoem->url}}"><dt>{{$poem->originalPoem->lang ? $poem->originalPoem->lang->name.'['.trans('poem.original work').']' : trans('poem.original work')}}</dt><dd>{{$poem->originalPoem->poet}}</dd></a>
                 @endif
 
                 @foreach($poem->otherTranslatedPoems()->get() as $t)
-                    <dt>{{$t->lang->name ?? trans('poem.')}}</dt><dd><a href="{{$t->url}}">{{$t->translator ?? '佚名'}}</a></dd>
+                    <a href="{{$t->url}}"><dt>{{$t->lang->name ?? trans('poem.')}}</dt><dd>{{$t->translator ?? '佚名'}}</dd></a>
                 @endforeach
 
             @elseif($poem->translatedPoems)
                 @foreach($poem->translatedPoems as $t)
-                    <dt>{{$t->lang->name ?? trans('poem.')}}</dt><dd><a href="{{$t->url}}">{{$t->translator ?? '佚名'}}</a></dd>
+                    <a href="{{$t->url}}"><dt>{{$t->lang->name ?? trans('poem.')}}</dt><dd>{{$t->translator ?? '佚名'}}</dd></a>
                 @endforeach
             @endif
 
