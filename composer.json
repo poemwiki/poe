@@ -32,6 +32,7 @@
     "laravel/ui": "^2.1",
     "laravelcollective/html": "^6.1",
     "livewire/livewire": "^2.2",
+    "mews/captcha": "^3.2",
     "renatomarinho/laravel-page-speed": "^1.9",
     "spatie/laravel-activitylog": "^3.16"
   },

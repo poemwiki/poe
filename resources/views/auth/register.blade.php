@@ -19,7 +19,7 @@
 <body class="app flex-row align-items-center">
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="card mx-4">
                 <div class="card-body p-4">
                     <form method="post" action="{{ url('/register/?invite_code_from='.app('request')->input('invite_code_from')) }}">
@@ -83,6 +83,23 @@
                                </span>
                             @endif
                         </div>
+                        <div class="input-group mb-4">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    C
+                                </span>
+                            </div>
+                            <input type="text" class="form-control {{ $errors->has('captcha')?'is-invalid':'' }}" name="captcha"
+                                   placeholder="@lang('captcha')">
+                            <img src="{{captcha_src()}}" onclick="this.src='{{captcha_src()}}'+Math.random()" alt="验证码">
+                            @if ($errors->has('captcha'))
+                                <span class="invalid-feedback">
+                                    <strong>{{ $errors->first('captcha') }}</strong>
+                                </span>
+                            @endif
+                        </div>
+
+
                         <button type="submit" class="btn btn-primary btn-block btn-flat mb-4">@lang('Register')</button>
                         <a href="{{ url('/login') }}" class="text-center">@lang('register.I already have a membership')</a>
                     </form>

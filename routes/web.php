@@ -90,8 +90,6 @@ Route::prefix('poet')->name('poet/')->group(static function() {
     Route::get('/{poetName}',    'PoetController@show')->name('show');
 });
 
-Route::get('/{id}', 'PoemController@showPoem')->name('poem');
-
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
@@ -107,12 +105,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
         });
     });
 });
-//
-//Route::prefix('score')->name('score/')->group(static function() {
-//    Route::get('/create',      'ScoreController@create')->name('create');
-//    Route::post('/store',           'ScoreController@store')->name('store');
-//    Route::get('/edit/{id}', 'ScoreController@edit')->name('edit');
-//    Route::post('/update/{id}',     'ScoreController@update')->name('update');
-//    Route::get('/{id}',    'ScoreController@show')->name('show');
-////    Route::get('/contribution/{id}',    'ScoreController@showContributions')->name('contribution');
-//});
+
+
+
+Route::get('/{id}', 'PoemController@showPoem')->name('poem');

@@ -23,6 +23,8 @@ return [
     |
     */
     'skip' => [
+        'admin*',
+        'captcha*',
         '*.xml',
         '*.less',
         '*.pdf',
