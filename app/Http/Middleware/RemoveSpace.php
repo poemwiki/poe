@@ -15,13 +15,15 @@ class RemoveSpace extends PageSpeed{
 //            "/\n/" => '',
 //            "/\t/" => '',
 //            "/ +/" => ' ',
-            '@(<\w+)\s+(\w+="[^"]*")@' => '$1 $2',
-            '@(\w+=".*")\s+(\w+=".*")@u' => '$1 $2',
             "@>\s*([^\s]*)\s*<@" => '>$1<',
             "@\s*(<(a|li|span|dt|dd|td|tr|th)[^>]*>)\s*@" => '$1',
             "@\s*(</(a|li|span|dt|dd|td|tr|th)[^>]*>)\s*@" => '$1'
         ];
 
-        return $this->replace($replace, $buffer);
+        $str = $this->replace($replace, $buffer);
+        return preg_replace_callback('@<\w+[^>]*>@', function ($matches){
+            // replace spaces between attrs
+            return preg_replace('@([\w\-:]+(?:="[^"]*")?)\s+@', '$1 ', $matches[0]);
+        }, $str);
     }
 }
