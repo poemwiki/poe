@@ -6,7 +6,7 @@ namespace App\Http\Middleware;
 
 use RenatoMarinho\LaravelPageSpeed\Middleware\PageSpeed;
 
-class RemoveSpace  extends PageSpeed{
+class RemoveSpace extends PageSpeed{
     // TODO replace spaces for html of livewire response
     public function apply($buffer) {
         $replace = [
