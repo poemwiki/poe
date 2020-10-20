@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller {
     /*
@@ -34,8 +35,25 @@ class LoginController extends Controller {
      */
     public function __construct() {
         $this->middleware('guest')->except('logout');
-        if(request()->get('ref')) {
+        if (request()->get('ref')) {
             $this->redirectTo = request()->get('ref');
         }
+    }
+
+
+    /**
+     * Validate the user login request.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return void
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function validateLogin(Request $request) {
+        $request->validate([
+            $this->username() => 'required|string',
+            'password' => 'required|string',
+            'captcha' => 'required|captcha'
+        ]);
     }
 }

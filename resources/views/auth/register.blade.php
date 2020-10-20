@@ -90,7 +90,7 @@
                                 </span>
                             </div>
                             <input type="text" class="form-control {{ $errors->has('captcha')?'is-invalid':'' }}" name="captcha"
-                                   placeholder="@lang('captcha')">
+                                   placeholder="@lang('Input captcha code here')">
                             <img src="{{captcha_src()}}" onclick="this.src='{{captcha_src()}}'+Math.random()" alt="验证码">
                             @if ($errors->has('captcha'))
                                 <span class="invalid-feedback">

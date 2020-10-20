@@ -27,7 +27,7 @@ class Kernel extends HttpKernel
 //        \RenatoMarinho\LaravelPageSpeed\Middleware\RemoveComments::class,
 //        \RenatoMarinho\LaravelPageSpeed\Middleware\TrimUrls::class,
 //        \RenatoMarinho\LaravelPageSpeed\Middleware\RemoveQuotes::class,
-        \App\Http\Middleware\RemoveSpace::class,
+//        \RenatoMarinho\LaravelPageSpeed\Middleware\CollapseWhitespace::class,
     ];
 
     /**
@@ -45,7 +45,8 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \App\Http\Middleware\LastOnline::class
+            \App\Http\Middleware\LastOnline::class,
+            \App\Http\Middleware\RemoveSpace::class,
         ],
 
         'api' => [

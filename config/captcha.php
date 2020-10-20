@@ -5,7 +5,7 @@ return [
     'default' => [
         'length' => 4,
         'width' => 80,
-        'height' => 36,
+        'height' => 35,
         'quality' => 90,
         'lines' => 6,
         'blur' => 3,
@@ -16,7 +16,7 @@ return [
     'math' => [
         'length' => 9,
         'width' => 120,
-        'height' => 36,
+        'height' => 35,
         'quality' => 90,
         'math' => true,
     ],
@@ -24,7 +24,7 @@ return [
     'flat' => [
         'length' => 4,
         'width' => 80,
-        'height' => 36,
+        'height' => 35,
         'quality' => 90,
         'lines' => 6,
         'blur' => 6,
@@ -41,7 +41,7 @@ return [
     'inverse' => [
         'length' => 4,
         'width' => 80,
-        'height' => 36,
+        'height' => 35,
         'quality' => 90,
 //        'sensitive' => false,
         'angle' => 42,

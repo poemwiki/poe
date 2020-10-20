@@ -19,7 +19,7 @@
 <body class="app flex-row align-items-center">
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-10 col-lg-8 col-sm-12">
             <div class="card-group">
                 <div class="card p-4">
                     <div class="card-body">
@@ -54,6 +54,20 @@
                                     </span>
                                 @endif
                             </div>
+                            <div class="input-group mb-4">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">C</span>
+                                </div>
+                                <input type="text" class="form-control {{ $errors->has('captcha')?'is-invalid':'' }}" name="captcha"
+                                       placeholder="@lang('Input captcha code here')">
+                                <img src="{{captcha_src()}}" onclick="this.src='{{captcha_src()}}'+Math.random()" alt="验证码">
+                                @if ($errors->has('captcha'))
+                                    <span class="invalid-feedback">
+                                    <strong>{{ $errors->first('captcha') }}</strong>
+                                </span>
+                                @endif
+                            </div>
+
                             <div class="row">
                                 <div class="col-6 text-left">
                                     <a class="btn btn-link px-0" href="{{ url('/password/reset') }}">

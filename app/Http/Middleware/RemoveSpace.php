@@ -15,9 +15,11 @@ class RemoveSpace extends PageSpeed{
 //            "/\n/" => '',
 //            "/\t/" => '',
 //            "/ +/" => ' ',
+            '@(<\w+)\s+(\w+="[^"]*")@' => '$1 $2',
+            '@(\w+=".*")\s+(\w+=".*")@u' => '$1 $2',
             "@>\s*([^\s]*)\s*<@" => '>$1<',
             "@\s*(<(a|li|span|dt|dd|td|tr|th)[^>]*>)\s*@" => '$1',
-            "@\s*(</(a|li|span|dt|dd|td|tr|th)[^>]*>)\s*@" => '$1',
+            "@\s*(</(a|li|span|dt|dd|td|tr|th)[^>]*>)\s*@" => '$1'
         ];
 
         return $this->replace($replace, $buffer);
