@@ -2664,16 +2664,16 @@
         },
         {
             "name": "livewire/livewire",
-            "version": "v2.2.9",
+            "version": "v2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/livewire/livewire.git",
-                "reference": "c01b331e7fcbccdffd63e49ce86c05a50fcb68ea"
+                "reference": "0674d4cb8e598ce67df00fb95472c73e668b1416"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/livewire/livewire/zipball/c01b331e7fcbccdffd63e49ce86c05a50fcb68ea",
-                "reference": "c01b331e7fcbccdffd63e49ce86c05a50fcb68ea",
+                "url": "https://api.github.com/repos/livewire/livewire/zipball/0674d4cb8e598ce67df00fb95472c73e668b1416",
+                "reference": "0674d4cb8e598ce67df00fb95472c73e668b1416",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -2710,6 +2710,9 @@
                 }
             },
             "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
                 "psr-4": {
                     "Livewire\\": "src/"
                 }
@@ -2731,7 +2734,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-09-30T16:19:54+00:00"
+            "time": "2020-10-15T17:49:47+00:00"
         },
         {
             "name": "maatwebsite/excel",
