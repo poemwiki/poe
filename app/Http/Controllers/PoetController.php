@@ -29,7 +29,16 @@ class PoetController extends AppBaseController {
             throw new ModelNotFoundException();
         }
 
-        // get desc from wikidata
+        // get title from user input
+        // get wikidata id from wikipedia api
+        // https://en.wikipedia.org/w/api.php?action=query&prop=pageprops&format=json&formatversion=2&titles=Louise_Glück
+        // get site url
+        // https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q2344210&props=sitelinks
+        // https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q2344210&props=sitelinks&sitefilter=zhwiki
+        // https://en.wikipedia.org/wiki/Special:ApiSandbox#action=sitematrix&format=json&formatversion=2
+        // get summary from wiki api
+        // https://zh.wikipedia.org/api/rest_v1/page/summary/路易丝·格吕克
+
         $poetDesc = '';
         return view('poets.show')->with([
             'poetDesc' => $poetDesc,
