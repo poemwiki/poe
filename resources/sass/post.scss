@@ -56,6 +56,14 @@ a {
   text-align: justify;
 }
 
+.flex-center-vertically {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
 
 @keyframes fadein {
   from { opacity: 0; }
@@ -276,25 +284,31 @@ main.post {
     padding-left: 0.5rem;
     max-width: 500px;
     margin-top: .5rem;
+    border: solid $gray;
+    border-width: 1px 0;
+    height: 60px;
     .left{
-      max-width: 154px;
+      width: 154px;
+      flex-grow: 1;
+      flex-shrink: 1;
+      display: inline-block;
+      justify-content: flex-start;
       font-size: 1.2rem;
       color: $gray;
+      margin-bottom: 0;
       //font-weight: lighter;
       .unrate{
         margin-left: 1em;
       }
     }
-    .stars{
-      flex-grow: 1;
-      display: block;
-      height: 13px;
-      width: 100%;
-    }
+
     .starability-slot{
       min-width: 150px;
+      min-height: 30px;
+      overflow: hidden;
       zoom: 0.78;
       padding-top: 2px;
+
       input[type="radio"]:focus+label{
         outline: 0;
       }
@@ -303,21 +317,21 @@ main.post {
 
   h4.review-h {
     margin: 1rem 0 0 0;
-    color: $gray;
-    font-weight: lighter;
+    color: #9d9d9d;
+    font-weight: bolder;
     position: relative;
-    border-bottom: 1px solid $gray;
-    //background-color: $darker-content-bg-color;
     border-radius: 8px 8px 0 0;
-    padding: .5rem .5rem .4rem .5rem;
+    padding: 0.5rem 0.5rem 0.4rem 0.5rem;
+    background-color: $darker-content-bg-color;
   }
   .review {
-    padding-top: .5rem;
+    padding: .5rem 0 .4rem;
     border-radius: 0 0 8px 8px;
     font-weight: lighter;
-    //background-color: $darker-content-bg-color;
+    background-color: $darker-content-bg-color;
     ol{
       padding-left: 1.2rem;
+      list-style: none;
     }
   }
 }

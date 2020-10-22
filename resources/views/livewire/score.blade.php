@@ -42,12 +42,12 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
         </div>
 
     </section>
-    <section class="rate">
+    <section class="rate flex-center-vertically">
         <legend class="left">
         @if(Auth::check() && !empty($rating))
-            @lang('score.my rating') <a wire:click.prevent="remove()" href="#" class="btn btn-grey unrate">@lang('score.remove my rating')</a>
+            @lang('score.my rating')<a wire:click.prevent="remove()" href="#" class="btn btn-grey unrate">@lang('score.remove my rating')</a>
         @else
-            @lang('score.rate & review')
+            @lang('score.rate & review')&nbsp;⇨
         @endif
         </legend>
 

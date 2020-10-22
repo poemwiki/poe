@@ -1,1 +1,10 @@
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28.48 54.65"><defs><style>.cls-1{fill:#666;}.cls-2{fill:#ffed4a;}</style></defs><title>stars</title><path class="cls-1" d="M16,43" transform="translate(-0.71 -3.56)"/><polygon class="cls-2" points="28.48 37.64 21.44 44.66 23.24 54.44 14.38 49.92 5.64 54.65 7.2 44.83 0 37.98 9.82 36.43 14.11 27.47 18.62 36.33 28.48 37.64"/><polygon class="cls-1" points="26.81 9.16 20.5 15.59 22 24.46 14.19 20.41 6.4 24.76 7.88 15.82 1.56 9.64 10.28 8.17 14.17 0 18.08 8.03 26.81 9.16"/></svg>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28.48 55.06">
+  <defs>
+    <style>.cls-1{fill:#666;}.cls-2{fill:#ffed4a;}.cls-3{fill:none;stroke:#666;stroke-miterlimit:10;}</style>
+  </defs>
+  <path class="cls-1" d="M16,43" transform="translate(-0.71 -3.15)"/>
+  <polygon class="cls-2"
+           points="28.48 38.05 21.44 45.07 23.24 54.85 14.38 50.33 5.64 55.06 7.2 45.24 0 38.39 9.82 36.84 14.11 27.88 18.62 36.74 28.48 38.05"/>
+  <polygon class="cls-3"
+           points="26.05 9.77 20.12 15.8 21.53 24.15 14.19 20.33 6.86 24.42 8.26 16.03 2.32 10.21 10.51 8.84 14.17 1.15 17.85 8.7 26.05 9.77"/>
+</svg>
