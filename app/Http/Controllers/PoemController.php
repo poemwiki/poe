@@ -1,15 +1,27 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreatePoemRequest;
-use App\Http\Requests\UpdatePoemRequest;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Poem\IndexPoem;
+use App\Http\Requests\Admin\Poem\StorePoem;
+use App\Http\Requests\Admin\Poem\UpdatePoem;
+use App\Models\ActivityLog;
 use App\Models\Language;
+use App\Models\Poem;
 use App\Repositories\PoemRepository;
-use App\Http\Controllers\AppBaseController;
-use Illuminate\Http\Request;
-use Flash;
-use Response;
+use Auth;
+use Brackets\AdminListing\Facades\AdminListing;
+use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
+use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
+use Spatie\Activitylog\Models\Activity;
+
 
 class PoemController extends AppBaseController
 {
@@ -17,145 +29,152 @@ class PoemController extends AppBaseController
     private $poemRepository;
 
     public function __construct(PoemRepository $poemRepo) {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['show', 'showPoem', 'random', 'showContributions']);
         $this->poemRepository = $poemRepo;
     }
 
-    /**
-     * Display a listing of the Poem.
-     *
-     * @param Request $request
-     *
-     * @return Response
-     */
-    public function index(Request $request)
-    {
-        $poems = $this->poemRepository->listAll(15, 'updated_at', 'desc',
-            ['id', 'title', 'poet', 'poet_cn', 'length', 'translator', 'dynasty', 'nation', 'language', 'is_original', 'need_confirm']);
+    private function _poem(Poem $poem){
+        $randomPoem = $this->poemRepository->randomOne();
 
-        return view('poems.index')
-            ->with('poems', $poems);
+        $logs = ActivityLog::findByPoem($poem);
+
+        return view('poems.show')->with([
+            'poem' => $poem,
+            'randomPoemUrl' => $randomPoem->url,
+            'fakeId' => $poem->fake_id,
+            'logs' => $logs
+        ]);
     }
-
-    /**
-     * Show the form for creating a new Poem.
-     *
-     * @return Response
-     */
-    public function create()
-    {
-        return view('poems.create')
-            ->with('langList', Language::listAll());
-    }
-
-    /**
-     * Store a newly created Poem in storage.
-     *
-     * @param CreatePoemRequest $request
-     *
-     * @return Response
-     */
-    public function store(CreatePoemRequest $request)
-    {
-        $input = $request->all();
-
-        $poem = $this->poemRepository->create($input);
-
-        Flash::success('Poem saved successfully.');
-
-        return redirect(route('poems.index'));
-    }
-
     /**
      * Display the specified Poem.
      *
-     * @param int $id
+     * @param String $fakeId
      *
-     * @return Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function show($id)
-    {
-        $poem = $this->poemRepository->find($id);
+    public function show(String $fakeId) {
+        $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
+        return $this->_poem($poem);
+    }
+    public function showPoem(Int $id){
+        $poem = Poem::findOrFail($id);
+        return $this->_poem($poem);
+    }
 
-        if (empty($poem)) {
-            Flash::error('Poem not found');
+    public function showContributions($fakeId) {
+        $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
+        $logs = ActivityLog::findByPoem($poem);
 
-            return redirect(route('poems.index'));
-        }
+        return view('poems.contribution')->with([
+            'poem' => $poem,
+            'randomPoemUrl' => '/',
+            'logs' => $logs
+        ]);
+    }
 
-        return view('poems.show')->with('poem', $poem)
-            ->with('langList', Language::listAll());
+    public function random() {
+        $randomPoems = $this->poemRepository->randomOne();
+        return redirect($randomPoems->url);
     }
 
     /**
-     * Show the form for editing the specified Poem.
+     * Show the form for creating a new resource.
      *
-     * @param int $id
-     *
-     * @return Response
+     * @throws AuthorizationException
+     * @return Factory|View
      */
-    public function edit($id)
-    {
-        $poem = $this->poemRepository->find($id);
+    public function create() {
+        $user = Auth::user();
 
-        if (empty($poem)) {
-            Flash::error('Poem not found');
-
-            return redirect(route('poems.index'));
+        if($t = request()->get('translated_fake_id')) {
+            $translatedPoem = $this->poemRepository->getPoemFromFakeId($t);
+        }
+        if($o = request()->get('original_fake_id')) {
+            $originalPoem = $this->poemRepository->getPoemFromFakeId($o);
         }
 
-        return view('poems.edit')->with('poem', $poem)
-          ->with('langList', Language::listAll());
+
+        return view('poems.create', [
+            'userName' => $user->name,
+            'languageList' => Language::all(),
+            'translatedPoem' => $translatedPoem ?? null,
+            'originalPoem' => $originalPoem ?? null
+        ]);
+    }
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param StorePoem $request
+     * @return array|RedirectResponse|Redirector
+     */
+    public function store(StorePoem $request) {
+        // Sanitize input
+        $sanitized = $request->getSanitized();
+
+        // Store the Poem
+        $poem = Poem::create($sanitized);
+
+        if(isset($sanitized['translated_id'])) {
+            $translatedPoem = Poem::find($sanitized['translated_id']);
+            if($translatedPoem) {
+                $translatedPoem->original_id = $poem->id;
+                $translatedPoem->save();
+            }
+        }
+
+        if ($request->ajax()) {
+            return [
+                'code' => 0,
+                'redirect' => route('poems/edit', Poem::getFakeId($poem->id)),
+                'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
+            ];
+        }
+
+        return redirect('poems/edit', $poem->fake_id);
     }
 
     /**
-     * Update the specified Poem in storage.
+     * Show the form for editing the specified resource.
      *
-     * @param int $id
-     * @param UpdatePoemRequest $request
-     *
-     * @return Response
+     * @param string $fakeId
+     * @throws AuthorizationException
+     * @return Factory|View
      */
-    public function update($id, UpdatePoemRequest $request)
-    {
-        $poem = $this->poemRepository->find($id);
+    public function edit($fakeId) {
+        $user = Auth::user();
 
-        if (empty($poem)) {
-            Flash::error('Poem not found');
+        $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
 
-            return redirect(route('poems.index'));
-        }
-
-        $poem = $this->poemRepository->update($request->all(), $id);
-
-        Flash::success('Poem updated successfully.');
-
-        return redirect(route('poems.index'));
+        return view('poems.edit', [
+            'poem' => $poem,
+            'userName' => $user->name,
+            'languageList' => Language::all()
+        ]);
     }
 
     /**
-     * Remove the specified Poem from storage.
+     * Update the specified resource in storage.
      *
-     * @param int $id
-     *
-     * @throws \Exception
-     *
-     * @return Response
+     * @param UpdatePoem $request
+     * @param Poem $poem
+     * @return array|RedirectResponse|Redirector
      */
-    public function destroy($id)
-    {
-        $poem = $this->poemRepository->find($id);
+    public function update($fakeId, UpdatePoem $request) {
+        // Sanitize input
+        $sanitized = $request->getSanitized();
 
-        if (empty($poem)) {
-            Flash::error('Poem not found');
+        // Update changed values Poem
+        $id = Poem::getIdFromFakeId($fakeId);
+        $this->poemRepository->update($sanitized, $id);
 
-            return redirect(route('poems.index'));
+        if ($request->ajax()) {
+            return [
+                'code' => 0,
+                'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
+            ];
         }
 
-        $this->poemRepository->delete($id);
-
-        Flash::success('Poem deleted successfully.');
-
-        return redirect(route('poems.index'));
+        return redirect('poems/edit', Poem::getFakeId($id));
     }
+
 }

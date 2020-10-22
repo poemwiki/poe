@@ -1,5 +1,6 @@
 <?php
 
+use App\Repositories\PoemRepository;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,7 +15,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome', [
+        'poemUrl' => PoemRepository::randomOne()->url
+    ]);
 });
 
 Auth::routes(['verify' => true]);
@@ -37,6 +40,7 @@ Route::get('/home', 'HomeController@index')->middleware('verified');
 //    '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@generateFromFile'
 //)->name('io_generator_builder_generate_from_file');
 
+
 Route::resource('contents', 'contentController');
 Auth::routes();
 
@@ -47,11 +51,61 @@ Auth::routes(['verify' => true]);
 
 Route::get('/home', 'HomeController@index')->middleware('verified');
 
-Route::resource('poems', 'PoemController');
+
+Route::resource('/bot', 'BotController');
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('Admin')->name('admin/')->group(static function() {
+        Route::prefix('poems')->name('poems/')->group(static function() {
+            Route::get('/',                                             'PoemController@index')->name('index');
+            Route::get('/create',                                       'PoemController@create')->name('create');
+            Route::post('/',                                            'PoemController@store')->name('store');
+            Route::get('/{poem}/edit',                                  'PoemController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'PoemController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{poem}',                                      'PoemController@update')->name('update');
+            Route::delete('/{poem}',                                    'PoemController@destroy')->name('destroy');
+        });
+    });
+});
+
+//Route::resource('poems', 'PoemController');
+Route::prefix('poems')->name('poems/')->group(static function() {
+    Route::get('/random',      'PoemController@random')->name('random');
+    Route::get('/search',      'PoemController@index')->name('index');
+    Route::get('/create',      'PoemController@create')->name('create');
+    Route::post('/store',           'PoemController@store')->name('store');
+    Route::get('/edit/{fakeId}', 'PoemController@edit')->name('edit');
+    Route::post('/update/{fakeId}',     'PoemController@update')->name('update');
+    Route::get('/{fakeId}',    'PoemController@show')->name('show');
+    Route::get('/contribution/{fakeId}',    'PoemController@showContributions')->name('contribution');
+});
+
+Route::prefix('p')->name('p/')->group(static function() {
+    Route::get('/{fakeId}',    'PoemController@show')->name('show');
+});
+
+Route::prefix('poet')->name('poet/')->group(static function() {
+    Route::get('/{poetName}',    'PoetController@show')->name('show');
+});
+
+
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('Admin')->name('admin/')->group(static function() {
+        Route::prefix('scores')->name('scores/')->group(static function() {
+            Route::get('/',                                             'ScoreController@index')->name('index');
+//            Route::get('/create',                                       'ScoreController@create')->name('create');
+            Route::post('/',                                            'ScoreController@store')->name('store');
+            Route::get('/{score}/edit',                                 'ScoreController@edit')->name('edit');
+//            Route::post('/bulk-destroy',                                'ScoreController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{score}',                                     'ScoreController@update')->name('update');
+            Route::delete('/{score}',                                   'ScoreController@destroy')->name('destroy');
+        });
+    });
+});
 
 
 
-Route::resource('languages', 'LanguageController');
-
-
-Route::resource('bot', 'BotController');
+Route::get('/{id}', 'PoemController@showPoem')->name('poem');

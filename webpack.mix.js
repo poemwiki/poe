@@ -25,4 +25,16 @@ mix.webpackConfig({
  */
 
 mix.js('resources/js/app.js', 'public/js')
-  .sass('resources/sass/app.scss', 'public/css');
+  .sass('resources/sass/app.scss', 'public/css')
+  .sass('resources/sass/post.scss', 'public/css');
+
+
+mix.js(['resources/js/admin/admin.js'], 'public/js')
+    .sass('resources/sass/admin/admin.scss', 'public/css');
+
+mix.copyDirectory('resources/js/lib', 'public/js/lib');
+mix.copyDirectory('resources/sass/vendor', 'public/css/vendor');
+
+if (mix.inProduction()) {
+    mix.version();
+}

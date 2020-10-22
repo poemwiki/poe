@@ -1,114 +1,113 @@
-<!-- Title Field -->
-<div class="form-group">
-    <p>{{ $poem->title }}</p>
-</div>
+<?php
 
-<!-- Poem Field -->
-<div class="form-group">
-    <pre>{{ $poem->poem }}
+/** @var \App\Models\Poem $poem */
+$nation = $poem->dynasty
+    ? "[$poem->dynasty] "
+    : ($poem->nation ? "[$poem->nation]" : '');
 
+$translator = $poem->translator ? trim($poem->translator) : '';
 
-作者 / {{ $poem->poet }}
-    </pre>
-</div>
-<br>
-<br>
-@if(Route::currentRouteName() === 'poems.show' && $poem->bedtime_post_id)
-<!-- Bedtime Post Id Field -->
-<div class="form-group">
-    <a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">{!! Form::label('bedtime_post_id', '读睡博客链接') !!} {{ $poem->bedtime_post_title }}</a>
-</div>
-@endif
+$maxLength = max(array_map(function($line) {
+    return grapheme_strlen($line);
+}, explode("\n", $poem->poem)));
+$softWrap = $maxLength >= config('app.soft_wrap_length');
 
 
-<!-- Poet Cn Field -->
-<div class="form-group">
-    {!! Form::label('poet_cn', 'Poet Cn:') !!}
-    <p>{{ $poem->poet_cn }}</p>
-</div>
-
-<!-- Language Field -->
-<div class="form-group">
-    {!! Form::label('language', 'Language:') !!}
-    <p>{{ $poem->language===null ? '待定' : $langList[$poem->language] }}</p>
-</div>
-
-<!-- Is Original Field -->
-<div class="form-group">
-    {!! Form::label('is_original', 'Is Original:') !!}
-    <p>{{ $poem->is_original }}</p>
-</div>
-
-<!-- Bedtime Post Id Field -->
-<div class="form-group">
-    {!! Form::label('bedtime_post_id', 'Bedtime Post Id:') !!}
-    <p>{{ $poem->bedtime_post_id }}</p>
-</div>
-
-<!-- Bedtime Post Title Field -->
-<div class="form-group">
-    {!! Form::label('bedtime_post_title', 'Bedtime Post Title:') !!}
-    <p>{{ $poem->bedtime_post_title }}</p>
-</div>
+$createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' => $fakeId], false) : null;
+?>
+@section('title'){{$poem->title}}@endsection
+@section('author'){{$poem->poet.($poem->poet ? ',' : '').$poem->poet_cn}}@endsection
 
 
-<!-- Length Field -->
-<div class="form-group">
-    {!! Form::label('length', 'Length:') !!}
-    <p>{{ $poem->length }}</p>
-</div>
+<section class="poem" itemscope itemtype="http://schema.org/Article" itemid="{{ $poem->fake_id }}">
+    <article>
+        <h1 class="title font-song no-select" itemprop="name" id="title">{{ $poem->title }}</h1>
+        <pre class="poem-content font-song no-select {{$softWrap ? 'soft-wrap' : ''}}" itemprop="text" lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
+        <dl class="poem-info">
+            @if($poem->year or $poem->month)
+                <dt>@lang('admin.poem.columns.time')</dt>
+                @if($poem->year && $poem->month && $poem->date)
+                    <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}-{{$poem->date}}</dd>
+                @elseif($poem->year && $poem->month)
+                    <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}</dd>
+                @elseif($poem->month && $poem->date)
+                    <dd itemprop="dateCreated" class="poem-time">{{$poem->month}}-{{$poem->date}}</dd>
+                @elseif($poem->year)
+                    <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}</dd>
+                @endif
+            @endif
 
-<!-- Translator Field -->
-<div class="form-group">
-    {!! Form::label('translator', 'Translator:') !!}
-    <p>{{ $poem->translator }}</p>
-</div>
+            <dt>@lang('admin.poem.columns.poet')</dt><dd itemscope itemtype="https://schema.org/Person">@if($nation)<span itemprop="nationality" class="poem-nation">{{$nation}}</span>@endif<address itemprop="name" class="poem-writer">
+                    <a href="{{route('poet/show', $poem->poet)}}">
+                        @if($poem->poet_cn)
+                            {{$poem->poet_cn}}@if($poem->poet_cn !== $poem->poet)（{{$poem->poet}}）@endif
+                        @else
+                            {{$poem->poet}}
+                        @endif
+                    </a>
+                </address>
+            </dd>
 
-<!-- From Field -->
-<div class="form-group">
-    {!! Form::label('from', 'From:') !!}
-    <p>{{ $poem->from }}</p>
-</div>
+            @if($poem->translator)
+            <dt>@lang('admin.poem.columns.translator')</dt><dd itemprop="translator" class="poem-translator">{{$translator}}</dd>
+            @endif
 
-<!-- Year Field -->
-<div class="form-group">
-    {!! Form::label('year', 'Year:') !!}
-    <p>{{ $poem->year }}</p>
-</div>
+            @if($poem->from)
+                <dt>@lang('admin.poem.columns.from')</dt><dd itemprop="isPartOf" class="poem-from">{{$poem->from}}</dd>
+            @endif
+        </dl>
+        <a class="edit btn" href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
+        <ol class="contribution">
+        @if(count($logs) >= 1)
+            @php
+            //dd($logs);
+            $latestLog = $logs[0];
+            $initialLog = $logs[count($logs) - 1];
+            @endphp
+            <li title="{{$latestLog->created_at}}"><a href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update') {{$latestLog->causer_type === "App\User" ? \App\User::find($latestLog->causer_id)->name : 'PoemWiki'}}</a></li>
+            <li title="{{$initialLog->created_at}}"><a href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') {{($initialLog->description === 'created') ? \App\User::find($initialLog->causer_id)->name : 'PoemWiki'}}</a></li>
+        @else
+            <li title="{{$poem->created_at}}"><a href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') PoemWiki</a></li>
+        @endif
+        </ol>
+        <a class="btn create" href="{{ Auth::check() ? route('poems/create') : route('login', ['ref' => route('poems/create')]) }}">@lang('poem.add poem')</a>
 
-<!-- Month Field -->
-<div class="form-group">
-    {!! Form::label('month', 'Month:') !!}
-    <p>{{ $poem->month }}</p>
-</div>
+        <dl class="poem-info poem-versions">
+            <dt>@lang('poem.Translated/Original Version of This Poem')</dt>
+            @if(!$poem->is_original)
+                @if(!$poem->originalPoem)
+                    <dt>@lang('poem.no original work related')</dt><a class="" href="{{ Auth::check() ? route('poems/create', ['translated_fake_id' => $fakeId]) : route('login', ['ref' => route('poems/create', ['translated_fake_id' => $fakeId], false)]) }}"><dd>@lang('poem.add original work')</a></dd>
+                @else
+                    <a href="{{$poem->originalPoem->url}}"><dt>{{$poem->originalPoem->lang ? $poem->originalPoem->lang->name.'['.trans('poem.original work').']' : trans('poem.original work')}}</dt><dd>{{$poem->originalPoem->poet}}</dd></a>
+                @endif
 
-<!-- Date Field -->
-<div class="form-group">
-    {!! Form::label('date', 'Date:') !!}
-    <p>{{ $poem->date }}</p>
-</div>
+                @foreach($poem->otherTranslatedPoems()->get() as $t)
+                    <a href="{{$t->url}}"><dt>{{$t->lang->name ?? trans('poem.')}}</dt><dd>{{$t->translator ?? '佚名'}}</dd></a>
+                @endforeach
 
-<!-- Dynasty Field -->
-<div class="form-group">
-    {!! Form::label('dynasty', 'Dynasty:') !!}
-    <p>{{ $poem->dynasty }}</p>
-</div>
+            @elseif($poem->translatedPoems)
+                @foreach($poem->translatedPoems as $t)
+                    <a href="{{$t->url}}"><dt>{{$t->lang->name ?? trans('poem.')}}</dt><dd>{{$t->translator ?? '佚名'}}</dd></a>
+                @endforeach
+            @endif
 
-<!-- Nation Field -->
-<div class="form-group">
-    {!! Form::label('nation', 'Nation:') !!}
-    <p>{{ $poem->nation }}</p>
-</div>
+            @if($poem->is_original)
+            <dt><a class="btn" href="{{ Auth::check() ? $createPageUrl : route('login', ['ref' => $createPageUrl]) }}">@lang('poem.add another translated version')</a></dt>
+            @endif
 
-<!-- Need Confirm Field -->
-<div class="form-group">
-    {!! Form::label('need_confirm', 'Need Confirm:') !!}
-    <p>{{ $poem->need_confirm }}</p>
-</div>
+        </dl>
 
-<!-- Is Lock Field -->
-<div class="form-group">
-    {!! Form::label('is_lock', 'Is Lock:') !!}
-    <p>{{ $poem->is_lock }}</p>
-</div>
+    </article>
+</section>
 
+@livewire('score', [
+    'poem' => $poem
+])
+
+
+<script src="{{ asset('js/lib/color-hash.js') }}"></script>
+<script>
+    var colorHash = new ColorHash({lightness: 0.6, saturation: 0.86});
+    var mainColor = colorHash.hex('{{ $poem->title }}'); // '#8796c5'
+    document.getElementById("title").style.setProperty('--main-color', mainColor);
+</script>

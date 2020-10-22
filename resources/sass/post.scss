@@ -1,0 +1,323 @@
+@import 'variables';
+@import '~bootstrap/scss/bootstrap-reboot';
+//@import url('https://unpkg.com/element-ui/lib/theme-chalk/index.css');
+@import 'css/MajorMonoDisplayFont.css';
+@import 'css/starability-slot.css';
+
+@import 'menu';
+
+ol{
+  list-style-type: disc;
+}
+a {
+  color: $blue;
+  &:hover{
+    text-decoration: none;
+    color: $white;
+    background-color: $blue;
+  }
+
+  &.no-bg{
+    background: none;
+    &:hover{
+      background: none;
+    }
+  }
+
+  &.fancy-underline{
+    text-decoration:none;
+    transition: all .13s linear;
+    &:hover {
+      text-decoration: none;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.0) 50%, #000000 50%) repeat-x 0 1.0em;
+      background-size: .1em .1em;
+    }
+  }
+}
+.btn {
+  font-size: $font-size-sm;
+  display: inline-block;
+  margin-right: 1em;
+  line-height: 1.2em;
+}
+.btn-grey {
+  color: gray;
+}
+
+.hidden {
+  display: none!important;
+}
+.no-select {
+  user-select: none;
+}
+
+.soft-wrap {
+  white-space: pre-wrap;
+  text-align: justify;
+}
+
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.no-vertical-padding {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.full-height {
+  height: 100vh;
+}
+
+html, body {
+  color: $default-text-color;
+  font-family: $font-family-sans-serif;
+  font-weight: lighter;
+  min-height: 100%;
+  margin: 0;
+  //background-color: rgba(255, 41, 65, 0.08);
+  //animation: fadein 2s ease;
+  @media all and (max-width: 768px) {
+    font-weight: normal;
+  }
+}
+
+
+.position-ref {
+  position: relative;
+}
+main.post {
+  min-width: 90%;
+  height: 100%;
+  overflow: auto;
+  padding: 2em 1em;
+  //color: #fff;
+
+  article{
+    .title {
+      font-size: 1.4rem;
+      font-weight: 400;
+      //animation: fadein 2s ease;
+      vertical-align: unset;
+      margin-bottom: 1rem;
+      &:before {
+        content: '▍';
+        vertical-align: unset;
+        //opacity: 1;
+        color: rgba(255, 255, 255, 0);
+        color: var(--main-color);
+        animation: fadein 5s ease;
+      }
+    }
+
+    pre{
+      font-size: 1rem;
+      line-height: 2;
+      animation: fadein 2s ease;
+      @include media-breakpoint-up(md) {
+        font-size: 1.2rem;
+      }
+    }
+
+
+    dl.poem-info{
+      line-height: 1em;
+      margin: 2rem 0 0;
+      font-weight: 300;
+      dt,dd{
+        display: inline;
+        line-height: 2;
+      }
+      dt{
+        color: $gray;
+        font-weight: 300;
+        &:before{
+          content: "";
+          display: block;
+        }
+      }
+      dd{
+        &:before{
+          content: "";
+          display: inline-block;
+          width: 1em;
+        }
+        >*{
+          display: inline;
+        }
+      }
+      .poem-nation{
+        margin-right: .4em;
+      }
+      &.poem-versions{
+        a:hover>dt{
+          color: #fff;
+        }
+      }
+    }
+
+    ol.contribution {
+      list-style: none;
+      padding-left: 0;
+      font-size: $font-size-sm;
+      color: $gray;
+      >#folder{
+        display: none;
+      }
+      &.collapsed{
+        .log-middle {
+          display: none;
+        }
+        >#folder{
+          display: inline-block;
+        }
+      }
+      a{
+        color: unset;
+        &:hover{
+          background-color: unset;
+        }
+      }
+    }
+
+    a.create{
+      background-color: darken($blue, 7);
+      color: #fff;
+      padding: .4em 1em;
+      border-radius: 4px;
+      transition: all .4s ease-in-out;
+      &:hover{
+        background-color: $blue;
+      }
+    }
+  }
+
+
+  section.score{
+    //height: 86px;
+    max-width: 500px;
+    padding: 8px 0 0 0;
+    margin-top: 2rem;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    text-align: center;
+    color: #666;
+    @media all and (max-width: 500px) {
+      background-color: $darker-content-bg-color;
+    }
+
+    h4.score-h {
+      width: 100%;
+      padding-left: .5rem;
+      text-align: left;
+      font-weight: normal;
+      color: #9d9d9d;
+      font-size: .8em;
+    }
+
+    .left{
+      padding: 0 20px 0 20px;
+      .score-num {
+        display: block;
+        font-size: 2.4rem;
+        font-weight: 300;
+        line-height: 1;
+      }
+      .user-num{
+        display: block;
+        font-size: .8rem;
+        line-height: 2.8rem;
+      }
+    }
+    .right{
+      flex-grow: 3;
+      text-align: left;
+      padding: 2px 10px 0 0;
+      display: flex;
+      min-height: 82px;
+      .star-group{
+        width: 60px;
+        .stars{
+          display: block;
+          height: 13px;
+          width: 100%;
+          //#star,svg,use{
+          //  -webkit-transform-box: fill-box;
+          //  transform-box: fill-box;
+          //}
+        }
+      }
+      .bars{
+        margin-left: .6em;
+        flex-grow: 1;
+        padding-top: 2px;
+        .bar{
+          display: block;
+          background-color: #d8d8d8;
+          height: 8px;
+          border-width: 7px 0;
+          margin: 0 0 5px 0;
+          width: 100%;
+          .bar-percent{
+            background-color: $yellow
+          }
+        }
+      }
+
+    }
+
+  }
+
+  section.rate{
+    display: flex;
+    padding-left: 0.5rem;
+    max-width: 500px;
+    margin-top: .5rem;
+    .left{
+      max-width: 154px;
+      font-size: 1.2rem;
+      color: $gray;
+      //font-weight: lighter;
+      .unrate{
+        margin-left: 1em;
+      }
+    }
+    .stars{
+      flex-grow: 1;
+      display: block;
+      height: 13px;
+      width: 100%;
+    }
+    .starability-slot{
+      min-width: 150px;
+      zoom: 0.78;
+      padding-top: 2px;
+      input[type="radio"]:focus+label{
+        outline: 0;
+      }
+    }
+  }
+
+  h4.review-h {
+    margin: 1rem 0 0 0;
+    color: $gray;
+    font-weight: lighter;
+    position: relative;
+    border-bottom: 1px solid $gray;
+    //background-color: $darker-content-bg-color;
+    border-radius: 8px 8px 0 0;
+    padding: .5rem .5rem .4rem .5rem;
+  }
+  .review {
+    padding-top: .5rem;
+    border-radius: 0 0 8px 8px;
+    font-weight: lighter;
+    //background-color: $darker-content-bg-color;
+    ol{
+      padding-left: 1.2rem;
+    }
+  }
+}

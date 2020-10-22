@@ -14,8 +14,8 @@ class AddInviteCodeActiveToUser extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('invite_code');
-            $table->unsignedTinyInteger('is_active')->default(0);
+//            $table->string('invite_code');
+//            $table->unsignedTinyInteger('is_active')->default(0);
         });
     }
 
@@ -27,7 +27,7 @@ class AddInviteCodeActiveToUser extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['invite_code', 'is_active']);
+//            $table->dropColumn(['invite_code', 'is_active']);
         });
     }
 }

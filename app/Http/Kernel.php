@@ -20,6 +20,14 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+
+//        \RenatoMarinho\LaravelPageSpeed\Middleware\InlineCss::class,
+//        \RenatoMarinho\LaravelPageSpeed\Middleware\ElideAttributes::class,
+//        \RenatoMarinho\LaravelPageSpeed\Middleware\InsertDNSPrefetch::class,
+//        \RenatoMarinho\LaravelPageSpeed\Middleware\RemoveComments::class,
+//        \RenatoMarinho\LaravelPageSpeed\Middleware\TrimUrls::class,
+//        \RenatoMarinho\LaravelPageSpeed\Middleware\RemoveQuotes::class,
+//        \RenatoMarinho\LaravelPageSpeed\Middleware\CollapseWhitespace::class,
     ];
 
     /**
@@ -29,6 +37,7 @@ class Kernel extends HttpKernel
      */
     protected $middlewareGroups = [
         'web' => [
+            'throttle:8|10,0.4',
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
@@ -36,11 +45,14 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\LastOnline::class,
+            \App\Http\Middleware\RemoveSpace::class,
         ],
 
         'api' => [
-            'throttle:60,1',
+            'throttle:10|20,1',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\LastOnline::class
         ],
     ];
 

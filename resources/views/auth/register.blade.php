@@ -6,30 +6,26 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     @include('layouts.icon')
+    @include('layouts.analyze')
     <title>{{config('app.name')}}</title>
-    <meta name="description" content="CoreUI Template - InfyOm Laravel Generator">
-    <meta name="keyword" content="CoreUI,Bootstrap,Admin,Template,InfyOm,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <link rel="shortcut icon" href="/icon.svg">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
-    <!-- Theme style -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@coreui/coreui@2.1.16/dist/css/coreui.min.css">
-    <!-- Ionicons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@icon/coreui-icons-free@1.0.1-alpha.1/coreui-icons-free.css">
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.4.1/css/simple-line-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.3.0/css/flag-icon.min.css">
+    <meta name="author" content="PoemWiki">
+    <meta name="description" content="PoemWiki">
+    <meta name="keyword" content="poem,poetry,poet,诗，诗歌，诗人">
+
+    <link rel="stylesheet" href="/css/vendor/coreui.min.css">
+    <link rel="stylesheet" href="/css/vendor/simple-line-icons.min.css">
 
 </head>
 <body class="app flex-row align-items-center">
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="card mx-4">
                 <div class="card-body p-4">
                     <form method="post" action="{{ url('/register/?invite_code_from='.app('request')->input('invite_code_from')) }}">
                         @csrf
                         <h1>@lang('Register')</h1>
-                        <p class="text-muted">{{ App\User::inviteFromStr(app('request')->input('invite_code_from')) }} 邀请您注册 <b><a target="_blank" href="/">PoemWiki</a></b></p>
+                        <p class="text-muted">{{ config('invite_limited') ? App\User::inviteFromStr(app('request')->input('invite_code_from')) : '' }} 邀请您注册 <b><a target="_blank" href="/">PoemWiki</a></b></p>
                         <p class="text-muted">@lang('Create your account')</p>
                         @if (count($errors))
                             <p class="font-weight-bold text-danger">提交失败</p>
@@ -87,6 +83,23 @@
                                </span>
                             @endif
                         </div>
+                        <div class="input-group mb-4">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    C
+                                </span>
+                            </div>
+                            <input type="text" class="form-control {{ $errors->has('captcha')?'is-invalid':'' }}" name="captcha"
+                                   placeholder="@lang('Input captcha code here')">
+                            <img src="{{captcha_src()}}" onclick="this.src='{{captcha_src()}}'+Math.random()" alt="验证码">
+                            @if ($errors->has('captcha'))
+                                <span class="invalid-feedback">
+                                    <strong>{{ $errors->first('captcha') }}</strong>
+                                </span>
+                            @endif
+                        </div>
+
+
                         <button type="submit" class="btn btn-primary btn-block btn-flat mb-4">@lang('Register')</button>
                         <a href="{{ url('/login') }}" class="text-center">@lang('register.I already have a membership')</a>
                     </form>
@@ -95,11 +108,6 @@
         </div>
     </div>
 </div>
-<!-- CoreUI and necessary plugins-->
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@coreui/coreui@2.1.16/dist/js/coreui.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/1.4.0/perfect-scrollbar.js"></script>
+
 </body>
 </html>

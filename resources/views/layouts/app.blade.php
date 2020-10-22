@@ -1,29 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <title>{{config('app.name')}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    @include('layouts.icon')
+@include('layouts.icon')
+@include('layouts.analyze')
 
 
     <!-- Scripts -->
-    <script>
-        (function(d) {
-            var config = {
-                    kitId: 'vqw8ekp',
-                    scriptTimeout: 3000,
-                    async: true
-                },
-                h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
-        })(document);
-    </script>
-
     <script src="{{ asset('js/app.js') }}" defer></script>
 
 
     <!-- Styles -->
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <?php
     $user = Auth::user();
@@ -36,7 +25,7 @@
     <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url('/') }}">
-                {{ config('app.name', 'Laravel') }}
+                {{ config('app.name', 'PoemWiki') }}
 
                 <a class="navbar-brand" href="#">
                     <img class="navbar-brand-full" src="/icon.svg" width="30" height="30"

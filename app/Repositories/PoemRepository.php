@@ -50,8 +50,7 @@ class PoemRepository extends BaseRepository
     /**
      * Configure the Model
      **/
-    public function model()
-    {
+    public function model() {
         return Poem::class;
     }
 
@@ -63,10 +62,42 @@ class PoemRepository extends BaseRepository
      * @param array $columns
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function listAll($perPage, $order, $direction, $columns = ['*'])
-    {
+    public function listAll($perPage, $order, $direction, $columns = ['*']) {
         $query = $this->allQuery()->orderBy($order, $direction);
 
         return $query->paginate($perPage, $columns);
+    }
+
+    /**
+     * @param int $num
+     * @return mixed
+     * @TODO optimize sql by :
+     * SELECT r1.id
+    FROM poem AS r1
+    JOIN
+    (SELECT CEIL(RAND() *
+    (SELECT MAX(id)
+    FROM poem)) AS id)
+    AS r2
+    WHERE r1.id >= r2.id AND r1.deleted_at is NULL
+    ORDER BY r1.id ASC
+    LIMIT 1
+     */
+    public static function random($num = 1) {
+        return Poem::select()->with('wx')
+            ->inRandomOrder()
+            ->take($num)->get();
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function randomOne() {
+        return self::random(1)->first();
+    }
+
+    public function getPoemFromFakeId($fakeId){
+        $id = Poem::getIdFromFakeId($fakeId);
+        return Poem::findOrFail($id);
     }
 }

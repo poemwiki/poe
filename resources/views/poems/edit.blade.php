@@ -1,32 +1,46 @@
-@extends('layouts.app')
+@extends('layouts.form')
 
-@section('content')
-    <ol class="breadcrumb">
-          <li class="breadcrumb-item">
-             <a href="{!! route('poems.index') !!}">Poem</a>
-          </li>
-          <li class="breadcrumb-item active">Edit</li>
-        </ol>
-    <div class="container-fluid">
-         <div class="animated fadeIn">
-             @include('coreui-templates::common.errors')
-             <div class="row">
-                 <div class="col-lg-12">
-                      <div class="card">
-                          <div class="card-header">
-                              <i class="fa fa-edit fa-lg"></i>
-                              <strong>Edit Poem</strong>
-                          </div>
-                          <div class="card-body">
-                              {!! Form::model($poem, ['route' => ['poems.update', $poem->id], 'method' => 'patch']) !!}
+<?php /** @var \App\Models\Poem $poem */ ?>
+@section('title', trans('admin.poem.actions.edit'))
+@section('poemTitle', $poem->title)
 
-                              @include('poems.fields')
+@section('body')
 
-                              {!! Form::close() !!}
-                            </div>
-                        </div>
+    <div class="container-xl">
+        <div class="card">
+
+            <poem-form
+                :action="'{{ route('poems/update', [$poem->fake_id]) }}'"
+                :data="{{ $poem->toJson() }}"
+                v-cloak
+                inline-template>
+
+                <form class="form-horizontal form-edit" method="post" @submit.prevent="onSubmit" :action="action" novalidate>
+
+                    <div class="card-header">
+                        <i class="fa fa-pencil"></i> {{ trans('admin.poem.actions.edit', ['name' => $poem->title]) }}
+
+                        &nbsp;&nbsp;{{$poem->poet}} 《<a target="_blank" href="{{$poem->url}}">{{ $poem->title }}</a>》
                     </div>
-                </div>
-         </div>
-    </div>
+
+                    <div class="card-body">
+                        @include('poems.components.form-elements')
+                    </div>
+
+
+                    <div class="card-footer text-right">
+                        <button type="submit" class="btn btn-primary" :disabled="submiting">
+                            <i class="fa" :class="submiting ? 'fa-spinner' : 'fa-download'"></i>
+                            {{ trans('brackets/admin-ui::admin.btn.save') }}
+                        </button>
+                    </div>
+
+                </form>
+
+        </poem-form>
+
+        </div>
+
+</div>
+
 @endsection

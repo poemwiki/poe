@@ -92,4 +92,13 @@ class Language extends Model
         };
         return $langList;
     }
+
+    public static function ids() {
+        $langs = self::select('id')->get()->toArray();
+        $idList = [];
+        foreach ($langs as $value) {
+            $idList[] = $value['id'];
+        };
+        return $idList;
+    }
 }

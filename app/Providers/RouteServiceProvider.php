@@ -21,11 +21,12 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    public const HOME = '/poems';
+    public const HOME = '/';
     public const INDEX = '/';
     public const LOGIN = '/login';
     public const REGISTER = '/register';
     public const EDIT = '/poems';
+    public const RANDOM_POEM = '/poems/random';
     public const ASK_INVITE_CODE = '/get-invite-code';
 
     /**

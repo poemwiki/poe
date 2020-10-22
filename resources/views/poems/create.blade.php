@@ -1,32 +1,50 @@
-@extends('layouts.app')
+@extends('layouts.form')
 
-@section('content')
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-         <a href="{!! route('poems.index') !!}">Poem</a>
-      </li>
-      <li class="breadcrumb-item active">Create</li>
-    </ol>
-     <div class="container-fluid">
-          <div class="animated fadeIn">
-                @include('coreui-templates::common.errors')
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <i class="fa fa-plus-square-o fa-lg"></i>
-                                <strong>Create Poem</strong>
-                            </div>
-                            <div class="card-body">
-                                {!! Form::open(['route' => 'poems.store']) !!}
+@section('title', trans('admin.poem.actions.create'))
+{{--@section('poemTitle', $poem->title)--}}
 
-                                   @include('poems.create_fields')
+@section('body')
 
-                                {!! Form::close() !!}
-                            </div>
-                        </div>
-                    </div>
+    <div class="container-xl">
+
+                <div class="card">
+
+        <poem-form
+            :action="'{{ url('poems/store') }}'"
+            v-cloak
+            inline-template>
+
+            <form class="form-horizontal form-create" method="post" @submit.prevent="onSubmit" :action="action" novalidate>
+
+                <div class="card-header">
+                    <i class="fa fa-plus"></i>
+                    @if($translatedPoem)
+                        添加 《<a target="_blank" href="{{$translatedPoem->url}}">{{ $translatedPoem->title }}</a>》 的原作
+                    @elseif($originalPoem)
+                        添加 《<a target="_blank" href="{{$originalPoem->url}}">{{ $originalPoem->title }}</a>》 的其他版本
+                    @else
+                         {{ trans('admin.poem.actions.create') }}
+                    @endif
                 </div>
-           </div>
-    </div>
+
+                <div class="card-body">
+                    @include('poems.components.form-elements')
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary" :disabled="submiting">
+                        <i class="fa" :class="submiting ? 'fa-spinner' : 'fa-download'"></i>
+                        {{ trans('brackets/admin-ui::admin.btn.save') }}
+                    </button>
+                </div>
+
+            </form>
+
+        </poem-form>
+
+        </div>
+
+        </div>
+
+
 @endsection
