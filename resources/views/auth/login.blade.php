@@ -75,7 +75,7 @@
                                     </a>
                                 </div>
                                 <div class="col-6 text-right">
-                                    <button class="btn btn-primary px-4" type="submit">登录</button>
+                                    <button class="btn btn-primary px-3" type="submit">登录</button>
                                 </div>
                             </div>
                         </form>
