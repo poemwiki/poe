@@ -33,8 +33,10 @@
     "laravelcollective/html": "^6.1",
     "livewire/livewire": "^2.2",
     "mews/captcha": "^3.2",
+    "overtrue/laravel-wechat": "^6.0",
     "renatomarinho/laravel-page-speed": "^1.9",
-    "spatie/laravel-activitylog": "^3.16"
+    "spatie/laravel-activitylog": "^3.16",
+    "ext-json": "*"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.7",

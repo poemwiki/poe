@@ -1,6 +1,7 @@
 <?php
 
 use App\Repositories\PoemRepository;
+use App\User;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -107,5 +108,26 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 });
 
 
+//Route::get('/login-wechat', function () {
+//    $user = session('wechat.oauth_user.default'); // 拿到授权用户资料
+//    if(request()->input('code'))
+//        dd($user);
+//    return $user;
+//})->name('login-wechat')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
+
+if(User::isWechat()) {
+    Route::any('/login', [\App\Http\Controllers\Auth\LoginWechatController::class, 'login'])
+        ->name('login')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
+} else {
+    Route::get('/login', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])
+        ->name('login');
+}
+
+Route::get('/union-login', function () {
+    if(User::isWechat()) {
+        return redirect(route('login-wechat'));
+    }
+    return redirect(route('login'));
+})->name('union-login');
 
 Route::get('/{id}', 'PoemController@showPoem')->name('poem');

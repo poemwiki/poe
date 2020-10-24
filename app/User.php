@@ -7,8 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Redis;
 
-class User extends Authenticatable implements MustVerifyEmail
-{
+class User extends Authenticatable implements MustVerifyEmail {
     use Notifiable;
 
     /**
@@ -45,14 +44,24 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
     protected $appends = ['last_online_at'];
 
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\hasMany
+     **/
+    public function userBind() {
+        return $this->hasMany(\App\Models\UserBind::class, 'user_id', 'id');
+    }
+
     public static function inviteFromStr($inviteCode) {
         $user = self::where(['invite_code' => $inviteCode])->first();
         return $user->name . ' (' . $user->email . ')';
     }
 
-    public function getLastOnlineAtAttribute() {
-        $redis = Redis::connection();
-        return $redis->get('online_' . $this->id);
+    public static function isWechat() {
+        if (isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -67,16 +76,21 @@ class User extends Authenticatable implements MustVerifyEmail
      * @return String containing either just a URL or a complete image tag
      * @source https://gravatar.com/site/implement/images/php/
      */
-    public static function avatar( $email, $s = 80, $d = 'mp', $r = 'g', $img = false, $atts = array() ) {
+    public static function avatar($email, $s = 80, $d = 'mp', $r = 'g', $img = false, $atts = array()) {
         $url = 'https://avatar.tobi.sh/';
-        $url .= md5( strtolower( trim( $email ) ) );
+        $url .= md5(strtolower(trim($email)));
         $url .= "?s=$s&d=$d&r=$r";
-        if ( $img ) {
+        if ($img) {
             $url = '<img src="' . $url . '"';
-            foreach ( $atts as $key => $val )
+            foreach ($atts as $key => $val)
                 $url .= ' ' . $key . '="' . $val . '"';
             $url .= ' />';
         }
         return $url;
+    }
+
+    public function getLastOnlineAtAttribute() {
+        $redis = Redis::connection();
+        return $redis->get('online_' . $this->id);
     }
 }
