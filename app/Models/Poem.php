@@ -25,7 +25,7 @@ class Poem extends Model {
     const UPDATED_AT = 'updated_at';
 
 
-    protected $fillable = [
+    public $fillable = [
         'title',
         'language',
         'is_original',
@@ -34,7 +34,7 @@ class Poem extends Model {
         'bedtime_post_id',
         'bedtime_post_title',
         'poem',
-        'length',
+//        'length',
         'translator',
         'from',
         'year',
@@ -43,9 +43,11 @@ class Poem extends Model {
         'dynasty',
         'nation',
         'need_confirm',
-        'is_lock',
-        'content_id',
-        'original_id'
+//        'is_lock',
+//        'content_id',
+//        'original_id',
+        'preface',
+        'subtitle'
     ];
 
     /**
@@ -74,7 +76,9 @@ class Poem extends Model {
         'need_confirm' => 'integer',
         'is_lock' => 'boolean',
         'content_id' => 'integer',
-        'original_id' => 'integer'
+        'original_id' => 'integer',
+        'preface' => 'string',
+        'subtitle' => 'string'
     ];
 
 

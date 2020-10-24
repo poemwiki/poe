@@ -22,6 +22,8 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
 <section class="poem" itemscope itemtype="http://schema.org/Article" itemid="{{ $poem->fake_id }}">
     <article>
         <h1 class="title font-song no-select" itemprop="name" id="title">{{ $poem->title }}</h1>
+        @if($poem->preface) <pre class="preface font-song no-select" itemprop="preface">{{ $poem->preface }}</pre> @endif
+        @if($poem->subtitle) <pre class="subtitle font-song no-select" itemprop="subtitle">{{ $poem->subtitle }}</pre> @endif
         <pre class="poem-content font-song no-select {{$softWrap ? 'soft-wrap' : ''}}" itemprop="text" lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
         <dl class="poem-info">
             @if($poem->year or $poem->month)

@@ -48,7 +48,9 @@ class UpdatePoem extends FormRequest
             'need_confirm' => ['nullable', 'boolean'],
             'is_lock' => ['sometimes', 'boolean'],
             'content_id' => ['nullable', 'integer'],
-
+            'original_id' => ['nullable', 'integer'],
+            'preface' => ['nullable', 'string', 'max:64'],
+            'subtitle' => ['nullable', 'string', 'max:32']
         ];
     }
 

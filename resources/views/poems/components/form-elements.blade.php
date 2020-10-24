@@ -29,6 +29,38 @@
 </div>
 
 <div class="form-group row"
+     :class="{'has-danger': errors.has('preface') }">
+    <label for="preface" class="col-form-label text-md-right"
+           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.preface') }}</label>
+    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+        <input type="text" v-model="form.preface"
+               v-validate="'max:64'"
+               data-vv-as="{{ trans('admin.poem.columns.preface') }}"
+               @input="validate($event)" class="form-control"
+               :class="{'form-control-danger': errors.has('preface'), 'form-control-success': fields.preface && fields.preface.valid}"
+               id="preface" name="preface" placeholder="">
+        <div v-if="errors.has('preface')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('preface') }}
+        </div>
+    </div>
+</div>
+
+<div class="form-group row"
+     :class="{'has-danger': errors.has('subtitle') }">
+    <label for="subtitle" class="col-form-label text-md-right"
+           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.subtitle') }}</label>
+    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+        <input type="text" v-model="form.subtitle"
+               v-validate="'max:32'"
+               data-vv-as="{{ trans('admin.poem.columns.subtitle') }}"
+               @input="validate($event)" class="form-control"
+               :class="{'form-control-danger': errors.has('subtitle'), 'form-control-success': fields.subtitle && fields.subtitle.valid}"
+               id="subtitle" name="subtitle" placeholder="">
+        <div v-if="errors.has('subtitle')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('subtitle') }}
+        </div>
+    </div>
+</div>
+
+<div class="form-group row"
      :class="{'has-danger': errors.has('poem'), 'has-success': fields.poem && fields.poem.valid }">
     <label for="poem" class="col-form-label text-md-right required"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.poem') }}</label>

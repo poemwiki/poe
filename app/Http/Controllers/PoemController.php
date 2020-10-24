@@ -56,7 +56,7 @@ class PoemController extends AppBaseController
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
         return $this->_poem($poem);
     }
-    public function showPoem(Int $id){
+    public function showPoem($id){
         $poem = Poem::findOrFail($id);
         return $this->_poem($poem);
     }

@@ -31,6 +31,10 @@ class UserBindInfo extends Migration {
             $table->index('open_id_crc32');
             $table->index('user_id');
         });
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropUnique('users_email_unique');
+        });
     }
 
     /**
@@ -40,5 +44,8 @@ class UserBindInfo extends Migration {
      */
     public function down() {
         Schema::drop('user_bind_info');
+        Schema::table('users', function (Blueprint $table) {
+            $table->unique('email', 'users_email_unique');
+        });
     }
 }

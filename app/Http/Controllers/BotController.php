@@ -55,7 +55,7 @@ class BotController extends AppBaseController {
 
         if (is_array($keyword)) {
             $sql = 'SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`
-`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, dynasty
+`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
@@ -80,7 +80,7 @@ class BotController extends AppBaseController {
         } else {
             $q = $poeDB->prepare(<<<'SQL'
         SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`
-`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, dynasty
+`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
@@ -137,6 +137,8 @@ SQL
 
                 $parts = [
                     '▍ ' . $post->title . "\n",
+                    '        '. $post->preface,
+                    '    '.$post->subtitle . "\n",
                     $content
                 ];
 

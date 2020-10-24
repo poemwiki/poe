@@ -32,6 +32,8 @@ return [
             'need_confirm' => '审核状态',
             'is_lock' => '锁定',
             'content_id' => '内容ID',
+            'preface' => '题记',
+            'subtitle' => '副标题',
 
         ],
     ],

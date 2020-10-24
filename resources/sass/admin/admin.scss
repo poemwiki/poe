@@ -47,8 +47,8 @@
   }
 }
 .form-control {
-  background-position-x: 97%;
-  background-position-y: 0.5rem;
+  background-position: right center;
+  background-position-x: calc(100% - 1.1em);
   color: #111;
 }
 select.form-control{
@@ -71,5 +71,13 @@ select.form-control{
     font-size: .8rem;
     line-height: 2;
     font-family: $font-family-serif;
+  }
+}
+.card-footer{
+  >button{
+    display: block;
+    position: absolute;
+    right: 11%;
+    bottom: 2em;
   }
 }

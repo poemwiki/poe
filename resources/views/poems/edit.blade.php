@@ -11,7 +11,7 @@
 
             <poem-form
                 :action="'{{ route('poems/update', [$poem->fake_id]) }}'"
-                :data="{{ $poem->toJson() }}"
+                :data="{{ $poem->toJson() /*TODO pass fillable attributes only*/}}"
                 v-cloak
                 inline-template>
 

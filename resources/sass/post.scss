@@ -119,6 +119,14 @@ main.post {
         animation: fadein 5s ease;
       }
     }
+    .preface{
+      color: $gray;
+      text-indent: 2em;
+    }
+    .subtitle{
+      font-size: 1.1em;
+      font-weight: bolder;
+    }
 
     pre{
       font-size: 1rem;

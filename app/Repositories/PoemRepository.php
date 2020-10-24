@@ -96,8 +96,8 @@ class PoemRepository extends BaseRepository
         return self::random(1)->first();
     }
 
-    public function getPoemFromFakeId($fakeId){
+    public function getPoemFromFakeId($fakeId, $select='*'){
         $id = Poem::getIdFromFakeId($fakeId);
-        return Poem::findOrFail($id);
+        return Poem::findOrFail($id, $select);
     }
 }
