@@ -49,7 +49,7 @@ class UserBindInfo extends Migration {
         Schema::drop('user_bind_info');
         Schema::table('users', function (Blueprint $table) {
             $table->unique('email', 'users_email_unique');
-            $table->removeColumn('avatar');
+            $table->dropColumn('avatar');
         });
     }
 }
