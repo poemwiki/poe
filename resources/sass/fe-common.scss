@@ -1,0 +1,134 @@
+@import 'menu';
+
+ol{
+  list-style-type: disc;
+}
+
+a {
+  color: $blue;
+  transition: all .4s ease-in-out;
+  &:hover{
+    text-decoration: none;
+    color: $white;
+    background-color: $blue;
+  }
+
+  &.no-bg{
+    background: none;
+    &:hover{
+      background: none;
+      color: $blue;
+    }
+  }
+
+  &.fancy-underline{
+    text-decoration:none;
+    transition: all .13s linear;
+    &:hover {
+      text-decoration: none;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, .0) 50%, $black 50%) repeat-x 0 1.0em;
+      background-size: .1em .1em;
+    }
+  }
+}
+
+.btn {
+  font-size: $font-size-sm;
+  display: inline-block;
+  margin-right: 1em;
+  line-height: 1.2em;
+}
+
+.btn-grey {
+  color: gray;
+}
+
+.hidden {
+  display: none!important;
+}
+
+.no-select {
+  user-select: none;
+}
+
+.soft-wrap {
+  white-space: pre-wrap;
+  text-align: justify;
+}
+
+.flex-center {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.flex-center-vertically {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeout {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.no-vertical-padding {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.full-height {
+  height: calc(100vh - env(safe-area-inset-top));
+}
+
+.position-ref {
+  position: relative;
+}
+
+html, body {
+  color: $default-text-color;
+  font-size: 62.5%;
+  font-family: $font-family-sans-serif;
+  font-weight: lighter;
+  min-height: 100%;
+  margin: 0;
+  //background-color: rgba(255, 41, 65, .08);
+  //animation: fadein 2s ease;
+  @include media-breakpoint-down(md) {
+    font-weight: normal;
+  }
+}
+
+html{
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+}
+
+@include media-breakpoint-up(md) {
+  html, body, nav.header-fixed {
+    width: breakpoint-min(md);
+    margin: 0 auto;
+  }
+}
+
+body{
+  font-size: 16px;
+  background-color: $bg-color;
+  overscroll-behavior-y: none;
+}
+
+main{
+  margin-top: 6rem;
+  z-index: 2;
+  //position: sticky;
+  background-color: $bg-color;
+}

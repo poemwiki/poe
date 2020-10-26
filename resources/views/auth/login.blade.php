@@ -21,7 +21,7 @@
     <div class="row justify-content-center">
         <div class="col-md-10 col-lg-8 col-sm-12">
             <div class="card-group">
-                <div class="card p-4">
+                <div class="card p-2">
                     <div class="card-body">
                         <form method="post" action="{{ route('login', ['ref' => request()->input('ref', '')]) }}">
                             @csrf

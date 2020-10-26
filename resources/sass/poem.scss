@@ -1,0 +1,138 @@
+.title {
+  font-size: 1.4em;
+  font-weight: 400;
+  //animation: fadein 2s ease;
+  vertical-align: unset;
+  margin: 0;
+  //background-color: $bg-color;
+  animation: fadein 5s ease;
+  &:before {
+    content: '▍';
+    vertical-align: unset;
+    //opacity: 1;
+    color: rgba(255, 255, 255, 0);
+    color: var(--main-color);
+  }
+}
+
+section.poem {
+  min-width: 90%;
+  height: 100%;
+  overflow: auto;
+  padding: 2rem 1.6rem;
+
+  article{
+    .title{
+      margin-bottom: 1.6rem;
+    }
+    .preface{
+      color: $gray;
+      text-indent: 2em;
+    }
+    .subtitle{
+      font-size: 1.1em;
+      font-weight: bolder;
+    }
+
+    pre{
+      font-size: 1em;
+      line-height: 2;
+      animation: fadein 2s ease;
+      @include media-breakpoint-up(md) {
+        font-size: $font-size-larger;
+      }
+    }
+
+
+    dl.poem-info{
+      line-height: 1em;
+      margin: 3.2rem 0 0;
+      font-weight: 300;
+      dt,dd{
+        display: inline;
+        line-height: 2;
+      }
+      dt{
+        color: $gray;
+        font-weight: 300;
+        &:before{
+          content: "";
+          display: block;
+        }
+      }
+      dd{
+        &:before{
+          content: "";
+          display: inline-block;
+          width: 1em;
+        }
+        >*{
+          display: inline;
+        }
+      }
+      .poem-nation{
+        margin-right: .4em;
+      }
+      &.poem-versions{
+        a:hover>dt{
+          color: $white;
+        }
+      }
+    }
+    .btn.edit{
+      font-weight: lighter;
+    }
+
+    ol.contribution {
+      list-style: none;
+      padding-left: 0;
+      font-size: $font-size-sm;
+      color: $gray;
+      >#folder{
+        display: none;
+      }
+      &.collapsed{
+        .log-middle {
+          display: none;
+        }
+        >#folder{
+          display: inline-block;
+        }
+      }
+      a{
+        color: unset;
+        &:hover{
+          background-color: unset;
+        }
+      }
+    }
+
+    a.create{
+      //background-color: darken($blue, 7);
+      //color: #fff;
+      padding: .5em 1em;
+      border: 1px solid $blue;
+      border-radius: .618em;
+      transition: all .4s ease-in-out;
+      font-weight: normal;
+      &:hover{
+        border-radius: 1em;
+        background-color: $blue;
+        background: linear-gradient(315deg, $blue, darken($blue, 8));
+        box-shadow: -.3em -.3em 1em #c9cbcc, .5em .5em 1em $white;
+      }
+    }
+  }
+
+}
+
+nav.next{
+  border-top: 1px solid $gray-lighter;
+  >a{
+    display: block;
+    height: 3em;
+    line-height: 3em;
+    font-size: $font-size-larger;
+    text-align: center;
+  }
+}

@@ -78,14 +78,12 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @param string $s Size in pixels, defaults to 80px [ 1 - 2048 ]
      * @param string $d Default imageset to use [ 404 | mp | identicon | monsterid | wavatar ]
      * @param string $r Maximum rating (inclusive) [ g | pg | r | x ]
-     * @param boole $img True to return a complete IMG tag False for just the URL
+     * @param bool $img True to return a complete IMG tag False for just the URL
      * @param array $atts Optional, additional key/value attributes to include in the IMG tag
      * @return String containing either just a URL or a complete image tag
      * @source https://gravatar.com/site/implement/images/php/
      */
-    public static function getAvatar($email, $s = 80, $d = 'mp', $r = 'g', $img = false, $atts = array() ) {
-        $user = User::where(['email' => $email])->first();
-        if($user && $user->avartar) return $user->avatar;
+    public static function getGravatar($email, $s = 80, $d = 'mp', $r = 'g', $img = false, $atts = array() ) {
 
         $url = 'https://www.gravatar.com/avatar/';
         $url .= md5( strtolower( trim( $email ) ) );
@@ -97,6 +95,10 @@ class User extends Authenticatable implements MustVerifyEmail {
             $url .= ' />';
         }
         return $url;
+    }
+
+    public function getAvatarUrlAttribute() {
+        return $this->avatar ?? self::getGravatar($this->email);
     }
 
     public function getLastOnlineAtAttribute() {

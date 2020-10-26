@@ -1,18 +1,43 @@
-// Fonts
+@import 'variables';
+@import '~bootstrap/scss/bootstrap-reboot';
+@import 'fe-common';
 @import 'css/MajorMonoDisplayFont.css';
 @import 'css/NunitoFont.css';
 
-// Variables
-@import 'variables';
 
-// Bootstrap
-@import '~bootstrap/scss/bootstrap';
-@import 'menu';
-
-.no-vertical-padding {
-  padding-top: 0;
-  padding-bottom: 0;
+html, body {
+  background-color: #fff;
+  color: #636b6f;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 200;
+  height: 100%;
+  margin: 0;
 }
+
+.content {
+  text-align: center;
+}
+
+.title {
+  font-size: 6.4rem;
+}
+
+.links > a {
+  padding: 0 25px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .1rem;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.top-right a{
+  color: #fff;
+}
+
+.m-b-md {
+  margin-bottom: 30px;
+}
+
 main {
   width: 100%;
   height: 100%;

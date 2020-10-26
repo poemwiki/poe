@@ -3,10 +3,10 @@
 $wxPost = $poem->wx ? $poem->wx->first() : null;
 @endphp
 
-<div>
-    <section class="score">
+<div class="comments-wrapper">
+    <section class="comments">
         <h4 class="score-h">@lang('score.PoemWiki Rating')</h4>
-        <div class="left">
+        <div class="left @if(empty($score['score'])) no-score @endif">
             <strong class="score-num">{{$score['score']}}</strong>
             <span
                 class="user-num">@choice('score.number of people rated', $score['count'], ['value' => $score['count']])</span>
@@ -41,36 +41,36 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
             </div>
         </div>
 
-    </section>
-    <section class="rate flex-center-vertically">
-        <legend class="left">
-        @if(Auth::check() && !empty($rating))
-            @lang('score.my rating')<a wire:click.prevent="remove()" href="#" class="btn btn-grey unrate">@lang('score.remove my rating')</a>
-        @else
-            @lang('score.rate & review')&nbsp;⇨
-        @endif
-        </legend>
-
-
-        <fieldset class="starability-slot">
-            <input type="radio" id="no-rate" class="input-no-rate" name="rating" value="0" @if($rating==null)
-                    checked
+        <section class="rate flex-center-vertically">
+            <legend class="left">
+                @if(Auth::check() && !empty($rating))
+                    @lang('score.my rating')<a wire:click.prevent="remove()" href="#" class="btn btn-grey unrate">@lang('score.remove my rating')</a>
+                @else
+                    @lang('score.rate & review')&nbsp;⇨
                 @endif
-                   aria-label="@choice('score.rating', 0)"/>
+            </legend>
 
-            @foreach([1, 2, 3, 4, 5] as $v)
-                <input type="radio" id="second-rate{{$v}}" name="rating" value="{{$v}}" @if($rating==$v)
-                checked aria-label="{{$v}} star"
-                    @endif/>
-                <label @if($rating !== $v)
-                       wire:click="$set('rating', {{$v}})"
-                       @else
-                       wire:click=""
+
+            <fieldset class="starability-slot">
+                <input type="radio" id="no-rate" class="input-no-rate" name="rating" value="0" @if($rating==null)
+                checked
                        @endif
-                       for="second-rate{{$v}}" data-rating="{{$v}}" title="@choice('score.rating', $v)"></label>
-            @endforeach
-        </fieldset>
+                       aria-label="@choice('score.rating', 0)"/>
 
+                @foreach([1, 2, 3, 4, 5] as $v)
+                    <input type="radio" id="second-rate{{$v}}" name="rating" value="{{$v}}" @if($rating==$v)
+                    checked aria-label="{{$v}} star"
+                        @endif/>
+                    <label @if($rating !== $v)
+                           wire:click="$set('rating', {{$v}})"
+                           @else
+                           wire:click=""
+                           @endif
+                           for="second-rate{{$v}}" data-rating="{{$v}}" title="@choice('score.rating', $v)"></label>
+                @endforeach
+            </fieldset>
+
+        </section>
     </section>
 
 

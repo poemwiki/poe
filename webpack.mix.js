@@ -10,7 +10,11 @@ mix.webpackConfig({
     }
   }
 });
-
+if ( ! mix.inProduction()) {
+  mix.webpackConfig({
+    devtool: 'inline-source-map'
+  })
+}
 
 
 /*

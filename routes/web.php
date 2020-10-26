@@ -23,6 +23,7 @@ Route::get('/', function () {
 
 Auth::routes(['verify' => true]);
 
+Route::get('/logout', 'Auth\LoginController@logout');
 Route::get('/home', 'HomeController@index')->middleware('verified');
 
 
@@ -115,13 +116,13 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 //    return $user;
 //})->name('login-wechat')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
 
-if(User::isWechat()) {
-    Route::any('/login', [\App\Http\Controllers\Auth\LoginWechatController::class, 'login'])
-        ->name('login')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
-} else {
+//if(User::isWechat()) {
+//    Route::any('/login', [\App\Http\Controllers\Auth\LoginWechatController::class, 'login'])
+//        ->name('login')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
+//} else {
     Route::get('/login', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])
         ->name('login');
-}
+//}
 
 Route::get('/union-login', function () {
     if(User::isWechat()) {

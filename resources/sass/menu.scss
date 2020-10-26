@@ -1,23 +1,90 @@
-.top-right {
+nav.header-fixed {
+  width: 100%;
   position: fixed;
-  right: 0;
+  left: initial;
   top: 0;
-  z-index: 1;
-  background-color: rgba(0, 0, 0, 0.57);
-  a.site-name {
-    display: block;
-    padding: 0 .5em;
-    color: #fff;
-    font-family: 'Major Mono Display', monospace, sans-serif;
-    font-size: 1rem;
-    font-weight: 300;
-    letter-spacing: .1rem;
-    text-decoration: none;
-    white-space: pre-line;
-    text-align: center;
-    &:hover {
-      text-decoration: none;
-      animation: fadein 2s ease;
+  z-index: 10;
+  background-color: $bg-color;
+  border-bottom: 1px solid $gray-lighter;
+  overflow: hidden;
+  //@include media-breakpoint-down(md) {
+  //  background-color: rgba(0, 0, 0, 0.93);
+  //}
+  &>ul{
+    height: 6rem;
+    padding: 0 1.6rem;
+    margin: 0;
+    &>li{
+      list-style: none;
+      display: flex;
+      height: 5rem;
+      min-width: 5rem;
+      &:hover>.logout{
+        display: flex;
+      }
     }
   }
+
+  a {
+    display: block;
+    text-decoration: none;
+    height: 5rem;
+    white-space: nowrap;
+    overflow: visible;
+    color: $black;
+  }
+  .title{
+    height: 100%;
+    max-width: 70%;
+    position: absolute;
+    top: 6rem;
+    left: 1.6rem;
+    font-size: 1em;
+    line-height: 6rem;
+    transition: top .8s ease-in-out;
+  }
+  &.show-title{
+    .title{
+      display: flex;
+      top: 0;
+    }
+    .site-logo{
+      //display: none;
+      opacity: 0;
+      transition: opacity .4s ease-in-out;
+    }
+  }
+  .site-logo {
+    font-family: 'Major Mono Display', monospace, sans-serif;
+    font-size: 1em;
+    font-weight: 300;
+    letter-spacing: .1em;
+    text-align: center;
+    opacity: 1;
+    transition: opacity 2s ease-in-out;
+    a{
+      white-space: pre-line;
+    }
+    &a:hover {
+      text-decoration: none;
+      animation: fadein 2s ease;
+      background-color: initial;
+    }
+  }
+  .menu-button{
+    right: 0;
+    top: 0;
+    width: 5rem;
+    line-height: 5rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    img{
+      width: 4rem;
+    }
+    &.logout{
+      display: none;
+    }
+  }
+
 }
