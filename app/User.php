@@ -16,7 +16,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'invite_code', 'invited_by'
+        'name', 'email', 'password', 'invite_code', 'invited_by', 'avatar'
     ];
 
     /**
@@ -65,8 +65,15 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     /**
-     * Get either a avatar URL or complete image tag for a specified email address.
-     * eg: https://avatar.tobi.sh/ray7551@gmail.com.svg
+     * @param string $email The email address
+     */
+    public static function svgAvatar(User $user) {
+        return $user->userBind()->first()->avatar ?? 'https://avatar.tobi.sh/' . $user->email . '.svg';
+    }
+
+    /**
+     * Get either a Gravatar URL or complete image tag for a specified email address.
+     *
      * @param string $email The email address
      * @param string $s Size in pixels, defaults to 80px [ 1 - 2048 ]
      * @param string $d Default imageset to use [ 404 | mp | identicon | monsterid | wavatar ]
@@ -76,13 +83,16 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return String containing either just a URL or a complete image tag
      * @source https://gravatar.com/site/implement/images/php/
      */
-    public static function avatar($email, $s = 80, $d = 'mp', $r = 'g', $img = false, $atts = array()) {
-        $url = 'https://avatar.tobi.sh/';
-        $url .= md5(strtolower(trim($email)));
+    public static function getAvatar($email, $s = 80, $d = 'mp', $r = 'g', $img = false, $atts = array() ) {
+        $user = User::where(['email' => $email])->first();
+        if($user && $user->avartar) return $user->avatar;
+
+        $url = 'https://www.gravatar.com/avatar/';
+        $url .= md5( strtolower( trim( $email ) ) );
         $url .= "?s=$s&d=$d&r=$r";
-        if ($img) {
+        if ( $img ) {
             $url = '<img src="' . $url . '"';
-            foreach ($atts as $key => $val)
+            foreach ( $atts as $key => $val )
                 $url .= ' ' . $key . '="' . $val . '"';
             $url .= ' />';
         }

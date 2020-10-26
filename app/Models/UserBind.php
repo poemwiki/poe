@@ -31,7 +31,9 @@ class UserBind extends Model {
         'nickname',
         'avatar',
         'gender',
-        'info'
+        'info',
+        'tel',
+        'email'
     ];
 
     public static function boot() {

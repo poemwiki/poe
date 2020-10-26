@@ -21,6 +21,8 @@ class UserBindInfo extends Migration {
             $table->tinyInteger('bind_status')->default(1);
             $table->tinyInteger('bind_ref')->comment('绑定来源：0：微信内授权 1：微信扫码登录');
             $table->string('nickname')->nullable();
+            $table->string('tel')->nullable();
+            $table->string('email')->nullable();
             $table->string('avatar')->nullable();
             $table->tinyInteger('gender')->comment('0:unknow 1:male 2:female');
 
@@ -33,6 +35,7 @@ class UserBindInfo extends Migration {
         });
 
         Schema::table('users', function (Blueprint $table) {
+            $table->string('avatar')->nullable();
             $table->dropUnique('users_email_unique');
         });
     }
@@ -46,6 +49,7 @@ class UserBindInfo extends Migration {
         Schema::drop('user_bind_info');
         Schema::table('users', function (Blueprint $table) {
             $table->unique('email', 'users_email_unique');
+            $table->removeColumn('avatar');
         });
     }
 }

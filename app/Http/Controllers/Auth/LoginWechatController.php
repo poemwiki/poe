@@ -34,6 +34,7 @@ class LoginWechatController extends Controller {
                 'invite_code' => hash('crc32', sha1(2 . $wechatUser->email)),
                 'invited_by' => 2,
                 'password' => '',
+                'avatar' => $wechatUser->raw['headimgurl']
             ]);
             UserBind::create([
                 'open_id' => $wechatUser->raw['openid'],
@@ -41,7 +42,7 @@ class LoginWechatController extends Controller {
                 'user_id' => $newUser->id,
                 'bind_status' => 1,
                 'bind_ref' => UserBind::BIND_REF['wechat'],
-                'nick_name' => $wechatUser->nickname,
+                'nickname' => $wechatUser->nickname,
                 'avatar' => $wechatUser->avatar,
                 'gender' => $wechatUser->raw['sex'],
                 'info' => json_encode($wechatUser)
