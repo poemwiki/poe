@@ -54,7 +54,7 @@ class BotController extends AppBaseController {
             ]);
 
         if (is_array($keyword)) {
-            $sql = 'SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`
+            $sql = 'SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
 `from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
@@ -79,7 +79,7 @@ class BotController extends AppBaseController {
 
         } else {
             $q = $poeDB->prepare(<<<'SQL'
-        SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`
+        SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
 `from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
@@ -126,7 +126,11 @@ SQL
                     ?  $nation . ($post->poet_cn ?? $post->poet)
                     : ($post->poet ? $post->poet : ''));
 
-                $wikiLink = "\n\n诗歌维基：poemwiki.org/" . $post->id;
+                if($post->length > 600) {
+                    $wikiLink = "\n\n诗歌维基：https://poemwiki.org/" . $post->id;
+                } else {
+                    $wikiLink = "\n\n诗歌维基：poemwiki.org/" . $post->id;
+                }
 
                 $scoreRepo = new ScoreRepository(app());
                 $score = $scoreRepo->calcScoreByPoemId($post->id);
@@ -135,12 +139,10 @@ SQL
                     : '等你来评⬆️';
                 $wikiScore = '评分：' . $wikiScore;
 
-                $parts = [
-                    '▍ ' . $post->title . "\n",
-                    '        '. $post->preface,
-                    '    '.$post->subtitle . "\n",
-                    $content
-                ];
+                $parts = ['▍ ' . $post->title];
+                if($post->preface) array_push($parts, '        '. $post->preface);
+                if($post->subtitle) array_push($parts, "\n    ".$post->subtitle);
+                array_push($parts, "\n".$content);
 
                 $timeStr = '';
                 if ($post->year) $timeStr .= $post->year . '年';
