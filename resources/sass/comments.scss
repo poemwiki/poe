@@ -1,6 +1,5 @@
 .comments-wrapper{
-  padding: 2.2rem 1.6rem;
-
+  padding: 1.2rem 1.6rem;
   background-color: $darker-content-bg-color;
 }
 
@@ -84,7 +83,7 @@ section.comments{
     border: solid $gray-lighter;
     border-width: .1rem 0 .1rem 0;
     .left{
-      width: 15.4rem;
+      width: 10rem;
       margin-bottom: 0;
       flex-grow: 1;
       flex-shrink: 1;
@@ -98,7 +97,7 @@ section.comments{
     }
 
     .starability-slot{
-      min-width: 15rem;
+      //width: 15rem;
       min-height: 3rem;
       overflow: hidden;
       zoom: .78;

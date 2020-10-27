@@ -6,7 +6,9 @@ nav.header-fixed {
   z-index: 10;
   background-color: $bg-color;
   border-bottom: 1px solid $gray-lighter;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,.1);
   overflow: hidden;
+  user-select: none;
   //@include media-breakpoint-down(md) {
   //  background-color: rgba(0, 0, 0, 0.93);
   //}

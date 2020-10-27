@@ -158,7 +158,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
             $nav.classList.remove('show-title');
         }
     });
-    $nav.addEventListener('click', function () {
+    $nav.addEventListener('dblclick', function () {
         window.scrollTo({top:0});
     })
 </script>

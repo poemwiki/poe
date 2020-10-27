@@ -7,6 +7,7 @@ ol{
 a {
   color: $blue;
   transition: all .4s ease-in-out;
+  font-weight: normal;
   &:hover{
     text-decoration: none;
     color: $white;
@@ -97,14 +98,9 @@ html, body {
   color: $default-text-color;
   font-size: 62.5%;
   font-family: $font-family-sans-serif;
-  font-weight: lighter;
+  font-weight: normal;
   min-height: 100%;
   margin: 0;
-  //background-color: rgba(255, 41, 65, .08);
-  //animation: fadein 2s ease;
-  @include media-breakpoint-down(md) {
-    font-weight: normal;
-  }
 }
 
 html{

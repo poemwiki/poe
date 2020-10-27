@@ -47,14 +47,15 @@ section.poem {
     dl.poem-info{
       line-height: 1em;
       margin: 3.2rem 0 0;
-      font-weight: 300;
+      font-size: $font-size-sm;
+      //font-weight: 300;
       dt,dd{
         display: inline;
         line-height: 2;
       }
       dt{
         color: $gray;
-        font-weight: 300;
+        font-weight: normal;
         &:before{
           content: "";
           display: block;
@@ -80,7 +81,7 @@ section.poem {
       }
     }
     .btn.edit{
-      font-weight: lighter;
+      //font-weight: lighter;
     }
 
     ol.contribution {
@@ -114,7 +115,6 @@ section.poem {
       border: 1px solid $blue;
       border-radius: .618em;
       transition: all .4s ease-in-out;
-      font-weight: normal;
       &:hover{
         border-radius: 1em;
         background-color: $blue;
