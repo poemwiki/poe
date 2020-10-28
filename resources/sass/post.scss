@@ -7,3 +7,32 @@
 @import "fe-common";
 @import "poem";
 @import "comments";
+
+// poet page
+article.poet{
+  padding: 2rem 1.6rem;
+  ul{
+    list-style: none;
+    padding-left: 0;
+    line-height: 3em;
+    >li{
+      height: 3em;
+      margin-bottom: 1rem;
+      &:hover{
+        //background-color: $gray-lighter;
+      }
+      >a.title{
+        padding-left: 1.6rem;
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        &:before{
+          color: var(--title-color); // attr(data-color);
+        }
+        &:hover{
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
