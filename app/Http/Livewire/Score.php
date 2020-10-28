@@ -28,7 +28,6 @@ class Score extends Component {
         parent::__construct();
     }
 
-
     public function mount(Poem $poem) {
         $this->poem = $poem;
         $this->score = $this->scoreRepository->calcScoreByPoem($this->poem);
@@ -57,7 +56,7 @@ class Score extends Component {
 
     public function remove() {
         $res = $this->scoreRepository->find(['poem_id' => $this->poem->id, 'user_id' => Auth::user()->id])->delete();
-        if($res) {
+        if ($res) {
             $this->rating = null;
         }
     }

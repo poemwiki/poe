@@ -1,5 +1,5 @@
 .title {
-  font-size: 1.4em;
+  font-size: $font-size-larger;
   font-weight: 400;
   //animation: fadein 2s ease;
   vertical-align: unset;
@@ -41,6 +41,10 @@ section.poem {
       @include media-breakpoint-up(md) {
         font-size: $font-size-larger;
       }
+    }
+    .title::selection, pre::selection {
+      color: var(--main-color);
+      background-color: transparent;
     }
 
 
@@ -119,7 +123,7 @@ section.poem {
         border-radius: 1em;
         background-color: $blue;
         background: linear-gradient(315deg, $blue, darken($blue, 8));
-        box-shadow: -.3em -.3em 1em #c9cbcc, .5em .5em 1em $white;
+        box-shadow: -.2em -.2em 1em #d8d8d8, .5em .5em 1em $white;
       }
     }
   }
@@ -127,12 +131,17 @@ section.poem {
 }
 
 nav.next{
-  border-top: 1px solid $gray-lighter;
+  margin: 3rem 0 4rem 0;
+  padding: 2rem 1.6rem;
   >a{
     display: block;
     height: 3em;
     line-height: 3em;
     font-size: $font-size-larger;
-    text-align: center;
+    color: $default-text-color;
+    //text-align: center;
+    &:before{
+      color: var(--main-color-next);
+    }
   }
 }

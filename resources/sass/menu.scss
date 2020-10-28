@@ -41,9 +41,12 @@ nav.header-fixed {
     position: absolute;
     top: 6rem;
     left: 1.6rem;
-    font-size: 1em;
     line-height: 6rem;
     transition: top .8s ease-in-out;
+
+    @include media-breakpoint-only(xs) {
+      font-size: 1em;
+    }
   }
   &.show-title{
     .title{

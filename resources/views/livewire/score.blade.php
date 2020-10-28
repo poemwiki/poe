@@ -32,8 +32,12 @@ $wxPost = $poem->wx ? $poem->wx->first() : null;
             <div class="bars">
                 @foreach([5,4,3,2,1] as $v)
                     @if(isset($score['groupCount'][$v]))
-                        <span class="bar bar-{{$v}}" title="{{$score['groupCount'][$v] / $score['count'] * 100}}%"><span class="bar bar-percent"
-                               style="width: {{$score['groupCount'][$v] / $score['count'] * 100}}%"></span></span>
+                        <span class="bar bar-{{$v}}" title="{{$score['groupCount'][$v] / $score['count'] * 100}}%">
+                            <span class="bar bar-percent"
+                               style="width: {{$score['groupCount'][$v] / $score['count'] * 100}}%">
+                                <span class="bar bar-inner"></span>
+                            </span>
+                        </span>
                     @else
                         <span class="bar bar-{{$v}}" title="0%"></span>
                     @endif

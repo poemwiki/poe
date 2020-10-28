@@ -22,12 +22,12 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
 
     <section class="poem" itemscope itemtype="http://schema.org/Article" itemid="{{ $poem->fake_id }}">
         <article>
-            <h1 class="title font-song no-select" itemprop="name" id="title">{{ $poem->title }}</h1>
+            <h1 class="title font-song" itemprop="name" id="title">{{ $poem->title }}</h1>
             @if($poem->preface)
-                <pre class="preface font-song no-select" itemprop="preface">{{ $poem->preface }}</pre> @endif
+                <pre class="preface font-song" itemprop="preface">{{ $poem->preface }}</pre> @endif
             @if($poem->subtitle)
-                <pre class="subtitle font-song no-select" itemprop="subtitle">{{ $poem->subtitle }}</pre> @endif
-            <pre class="poem-content font-song no-select {{$softWrap ? 'soft-wrap' : ''}}" itemprop="text"
+                <pre class="subtitle font-song" itemprop="subtitle">{{ $poem->subtitle }}</pre> @endif
+            <pre class="poem-content font-song {{$softWrap ? 'soft-wrap' : ''}}" itemprop="text"
                  lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
 
             <section class="poem-meta">
@@ -142,13 +142,16 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
     'poem' => $poem
     ])
 
-    <nav class="next"><a class="no-bg" href="{{$randomPoemUrl}}">@lang('Next Poem')</a></nav>
+    <nav class="next"><a class="no-bg title font-song no-select" href="{{$randomPoemUrl}}">{{$randomPoemTitle}}</a></nav>
 
 <script src="{{ asset('js/lib/color-hash.js') }}"></script>
 <script>
     var colorHash = new ColorHash({lightness: 0.6, saturation: 0.86});
-    var mainColor = colorHash.hex('{{ $poem->title }}'); // '#8796c5'
-    document.getElementsByTagName("body")[0].style.setProperty('--main-color', mainColor);
+    var mainColor = colorHash.hex('{{ $poem->title }}');
+    var mainColorNext = colorHash.hex('{{ $randomPoemTitle }}'); // '#8796c5'
+    var $body = document.getElementsByTagName("body")[0];
+    $body.style.setProperty('--main-color', mainColor);
+    $body.style.setProperty('--main-color-next', mainColorNext);
 
     var $nav = document.getElementById('top-nav');
     window.addEventListener('scroll', function(e) {

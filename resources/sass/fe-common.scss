@@ -6,8 +6,9 @@ ol{
 
 a {
   color: $blue;
-  transition: all .4s ease-in-out;
+  transition: background-color .4s ease-in-out,color .4s ease-in-out,border-radius .4s ease-in-out;
   font-weight: normal;
+  padding: .2em 0;
   &:hover{
     text-decoration: none;
     color: $white;
@@ -16,6 +17,7 @@ a {
 
   &.no-bg{
     background: none;
+    color: $default-text-color;
     &:hover{
       background: none;
       color: $blue;
@@ -80,6 +82,10 @@ a {
   from { opacity: 1; }
   to   { opacity: 0; }
 }
+@keyframes width-stretch {
+  from { width: 0; }
+  to   { width: 100%; }
+}
 
 .no-vertical-padding {
   padding-top: 0;
@@ -106,7 +112,9 @@ html, body {
 html{
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeSpeed;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: transparent;
 }
 
 @include media-breakpoint-up(md) {
@@ -115,7 +123,10 @@ html{
     margin: 0 auto;
   }
 }
-
+::selection {
+  color: $indigo;//#a282ec;
+  background-color: transparent;
+}
 body{
   font-size: 16px;
   background-color: $bg-color;
