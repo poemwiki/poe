@@ -142,7 +142,11 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
     'poem' => $poem
     ])
 
-    <nav class="next"><a class="no-bg title font-song no-select" href="{{$randomPoemUrl}}">{{$randomPoemTitle}}</a></nav>
+    <nav class="next">
+        <span>@lang('Next Poem')</span>
+        <a class="no-bg title font-song no-select" href="{{$randomPoemUrl}}">{{$randomPoemTitle}}</a>
+        <p class="first-line">{!!Str::of($randomPoemFirstLine)->surround('span')!!}</p>
+    </nav>
 
 <script src="{{ asset('js/lib/color-hash.js') }}"></script>
 <script>

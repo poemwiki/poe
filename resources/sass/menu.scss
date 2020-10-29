@@ -42,11 +42,11 @@ nav.header-fixed {
     top: 6rem;
     left: 1.6rem;
     line-height: 6rem;
-    transition: top .8s ease-in-out;
+    transition: top .8s ease-out;
 
-    @include media-breakpoint-only(xs) {
-      font-size: 1em;
-    }
+    //@include media-breakpoint-only(xs) {
+    //  font-size: $font-size * 1.2;
+    //}
   }
   &.show-title{
     .title{
@@ -56,24 +56,23 @@ nav.header-fixed {
     .site-logo{
       //display: none;
       opacity: 0;
-      transition: opacity .4s ease-in-out;
+      transition: opacity .4s ease-in;
     }
   }
   .site-logo {
-    font-family: 'Major Mono Display', monospace, sans-serif;
-    font-size: 1em;
-    font-weight: 300;
-    letter-spacing: .1em;
-    text-align: center;
     opacity: 1;
-    transition: opacity 2s ease-in-out;
+    transition: opacity 2s ease-in;
+
     a{
+      width: 5rem;
+      height: 5rem;
       white-space: pre-line;
+      background: url("/images/poemwiki.svg") no-repeat 0 0;
+      background-size: 5rem 5rem;
     }
     &a:hover {
       text-decoration: none;
-      animation: fadein 2s ease;
-      background-color: initial;
+      animation: fadein 2s ease-in-out;
     }
   }
   .menu-button{

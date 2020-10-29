@@ -67,7 +67,7 @@ section.comments{
         margin: 0 0 .5rem 0;
         width: 100%;
         .bar-percent>.bar-inner{
-          animation: width-stretch 1s ease;
+          animation: width-stretch 1s ease-out;
           background-color: $yellow;
         }
       }

@@ -14,7 +14,14 @@
         <h2>{{$poems[0]->poet_cn ? $poems[0]->poet_cn . ($poems[0]->poet_cn === $poems[0]->poet ? '' : '（'.$poems[0]->poet.'）') : $poems[0]->poet}} 的诗歌</h2>
         <ul>
         @foreach($poems as $poem)
-            <li><a class="title no-bg" target="_blank" href="{{$poem->url}}">{{trim($poem->title) ? trim($poem->title) : '无题'}}</a></li>
+            <li>
+                <a class="title font-song no-bg" target="_blank" href="{{$poem->url}}">{!!
+                    Str::of(trim($poem->title) ? trim($poem->title) : '无题')
+                        ->surround('span')!!}</a>
+                <p class="first-line">{!!Str::of($poem->poem)->firstLine()->surround('span', function ($i) {
+                            return 'style="animation-delay:'.($i*20).'ms"';
+                    })!!}</p>
+            </li>
         @endforeach
         </ul>
     </article>

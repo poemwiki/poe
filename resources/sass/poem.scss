@@ -1,17 +1,17 @@
 .title {
   font-size: $font-size-larger;
   font-weight: 400;
-  //animation: fadein 2s ease;
   vertical-align: unset;
   margin: 0;
-  //background-color: $bg-color;
-  animation: fadein 5s ease;
   &:before {
     content: '▍';
     vertical-align: unset;
-    //opacity: 1;
+    animation: fadein 5s ease;
     color: rgba(255, 255, 255, 0);
     color: var(--main-color);
+  }
+  @include media-breakpoint-down(xs) {
+    font-size: $font-size * 1.2;
   }
 }
 
@@ -35,11 +35,11 @@ section.poem {
     }
 
     pre{
-      font-size: 1em;
+      font-size: $font-size;
       line-height: 2;
-      animation: fadein 2s ease;
-      @include media-breakpoint-up(md) {
-        font-size: $font-size-larger;
+      animation: fadein 2s ease-out;
+      @include media-breakpoint-down(xs) {
+        font-size: $font-size;
       }
     }
     .title::selection, pre::selection {
@@ -131,17 +131,28 @@ section.poem {
 }
 
 nav.next{
-  margin: 3rem 0 4rem 0;
+  margin: 3rem 0 3rem 0;
   padding: 2rem 1.6rem;
   >a{
     display: block;
-    height: 3em;
-    line-height: 3em;
-    font-size: $font-size-larger;
+    height: 2.2em;
     color: $default-text-color;
     //text-align: center;
     &:before{
       color: var(--main-color-next);
     }
+  }
+  >p.first-line{
+    font-size: $font-size-sm;
+    line-height: 1em;
+    opacity: 0;
+    color: $gray;
+    transition: opacity .8s ease-out;
+    @include media-breakpoint-down(xs){
+      opacity: 1;
+    }
+  }
+  >a:hover+p.first-line{
+    opacity: 1!important;
   }
 }
