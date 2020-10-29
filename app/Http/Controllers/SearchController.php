@@ -2,11 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreatePoemRequest;
-use App\Http\Requests\UpdatePoemRequest;
-use App\Models\Language;
 use App\Repositories\PoemRepository;
-use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
 use Flash;
 use Response;

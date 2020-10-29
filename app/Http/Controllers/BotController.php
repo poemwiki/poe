@@ -7,7 +7,6 @@ use App\Http\Requests\UpdatePoemRequest;
 use App\Models\Language;
 use App\Models\Poem;
 use App\Repositories\PoemRepository;
-use App\Http\Controllers\AppBaseController;
 use App\Repositories\ScoreRepository;
 use Illuminate\Http\Request;
 use Response;
@@ -15,7 +14,7 @@ use Fukuball\Jieba\Jieba;
 use Fukuball\Jieba\Finalseg;
 use \PDO as PDO;
 
-class BotController extends AppBaseController {
+class BotController extends Controller {
     /** @var  PoemRepository */
     private $poemRepository;
 

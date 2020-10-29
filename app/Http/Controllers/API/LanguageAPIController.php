@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\API\CreateLanguageAPIRequest;
 use App\Http\Requests\API\UpdateLanguageAPIRequest;
 use App\Models\Language;
 use App\Repositories\LanguageRepository;
 use Illuminate\Http\Request;
-use App\Http\Controllers\AppBaseController;
 use Response;
 
 /**
@@ -15,7 +15,7 @@ use Response;
  * @package App\Http\Controllers\API
  */
 
-class LanguageAPIController extends AppBaseController
+class LanguageAPIController extends Controller
 {
     /** @var  LanguageRepository */
     private $languageRepository;

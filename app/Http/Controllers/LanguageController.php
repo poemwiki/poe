@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests;
 use App\Http\Requests\CreateLanguageRequest;
 use App\Http\Requests\UpdateLanguageRequest;
 use App\Repositories\LanguageRepository;
 use Flash;
-use App\Http\Controllers\AppBaseController;
 use Response;
 
 class LanguageController extends Controller
