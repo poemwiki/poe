@@ -24,7 +24,7 @@ use Illuminate\View\View;
 use Spatie\Activitylog\Models\Activity;
 
 
-class ScoreController extends AppBaseController
+class ScoreController extends Controller
 {
     /** @var  PoemRepository */
     private $poemRepository;

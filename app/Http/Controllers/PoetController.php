@@ -6,7 +6,7 @@ use App\Repositories\PoemRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 
-class PoetController extends AppBaseController {
+class PoetController extends Controller {
     /** @var  PoemRepository */
     private $poemRepository;
 

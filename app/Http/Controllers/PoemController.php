@@ -19,11 +19,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Spatie\Activitylog\Models\Activity;
 
 
-class PoemController extends AppBaseController
+class PoemController extends Controller
 {
     /** @var  PoemRepository */
     private $poemRepository;
@@ -41,6 +42,8 @@ class PoemController extends AppBaseController
         return view('poems.show')->with([
             'poem' => $poem,
             'randomPoemUrl' => $randomPoem->url,
+            'randomPoemTitle' => $randomPoem->title,
+            'randomPoemFirstLine' => Str::of($randomPoem->poem)->firstLine(),
             'fakeId' => $poem->fake_id,
             'logs' => $logs
         ]);

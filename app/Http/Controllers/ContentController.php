@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Flash;
 use Response;
 
-class ContentController extends AppBaseController
+class ContentController extends Controller
 {
     /** @var  ContentRepository */
     private $contentRepository;

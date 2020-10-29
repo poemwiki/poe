@@ -10,7 +10,7 @@ use Flash;
 use App\Http\Controllers\AppBaseController;
 use Response;
 
-class LanguageController extends AppBaseController
+class LanguageController extends Controller
 {
     /** @var  LanguageRepository */
     private $languageRepository;

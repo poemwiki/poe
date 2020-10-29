@@ -13,7 +13,7 @@ use Response;
 use Fukuball\Jieba\Jieba;
 use Fukuball\Jieba\Finalseg;
 
-class SearchController extends AppBaseController
+class SearchController extends Controller
 {
     /** @var  PoemRepository */
     private $poemRepository;
