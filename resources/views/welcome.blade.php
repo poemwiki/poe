@@ -9,7 +9,7 @@
     @include('layouts.icon')
     @include('layouts.analyze')
 
-    <title>{{config('app.name')}},@lang('poemwiki')</title>
+    <title>{{config('app.name')}} @lang('poemwiki')</title>
 
     <!-- Fonts -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
