@@ -151,8 +151,8 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
 <script src="{{ asset('js/lib/color-hash.js') }}"></script>
 <script>
     var colorHash = new ColorHash({lightness: 0.6, saturation: 0.86});
-    var mainColor = colorHash.hex('{{ $poem->title }}');
-    var mainColorNext = colorHash.hex('{{ $randomPoemTitle }}'); // '#8796c5'
+    var mainColor = colorHash.hex(document.querySelector('article .title').innerText);
+    var mainColorNext = colorHash.hex(document.querySelector('.next .title').innerText);
     var $body = document.getElementsByTagName("body")[0];
     $body.style.setProperty('--main-color', mainColor);
     $body.style.setProperty('--main-color-next', mainColorNext);
