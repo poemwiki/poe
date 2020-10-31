@@ -22,8 +22,7 @@ class LoginWechatController extends Controller {
         Log::info(json_encode(request()->all()));
         $wechatUser = session('wechat.oauth_user.default'); // 拿到授权用户资料
         //        if(request()->input('code'))
-        if ($userBind = $this->getUserBindInfoByOpenID($wechatUser->raw['openid'])) {
-
+        if ($userBind = $this->getUserBindInfoByUnionID($wechatUser->raw['unionid'])) {
             $this->guard()->login(User::find($userBind->user_id));
         } else {
             // TODO if union_id exists, get first user id by union_id
@@ -75,10 +74,23 @@ class LoginWechatController extends Controller {
     public function getUserBindInfoByOpenID($openID, $bindRef = UserBind::BIND_REF['wechat']) {
         try {
             $data = UserBind::where([
-                    'open_id_crc32' => UserBind::crc32($openID),
-                    'open_id' => $openID,
-                    'bind_status' => 1,
-                    'bind_ref' => $bindRef])
+                'open_id_crc32' => UserBind::crc32($openID),
+                'open_id' => $openID,
+                'bind_status' => 1,
+                'bind_ref' => $bindRef])
+                ->first();
+            return $data;
+        } catch (\Exception $exception) {
+            return [];
+        }
+    }
+    public function getUserBindInfoByUnionID($unionID, $bindRef = UserBind::BIND_REF['wechat']) {
+        try {
+            $data = UserBind::where([
+                'union_id_crc32' => UserBind::crc32($unionID),
+                'union_id' => $unionID,
+                'bind_status' => 1,
+                'bind_ref' => $bindRef])
                 ->first();
             return $data;
         } catch (\Exception $exception) {
