@@ -43,8 +43,6 @@ class ShowReviews extends Component {
     }
 
     public function submit() {
-        dd($this->validate());
-        dd($res);
         $this->isEditing = false;
 
         $this->dispatchBrowserEvent('review-updated');

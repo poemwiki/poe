@@ -29,7 +29,7 @@ class LoginWechatController extends Controller {
             // TODO if union_id exists, get first user id by union_id
             // TODO user.name should be unique
             $newUser = User::create([
-                'name' => $wechatUser->nickname,
+                'name' => $wechatUser->nickname . '[from-wechat]',
                 'email' => $wechatUser->email ?? '',
                 'invite_code' => hash('crc32', sha1(2 . $wechatUser->email)),
                 'invited_by' => 2,

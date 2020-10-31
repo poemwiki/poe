@@ -64,6 +64,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasMany(\App\Models\review::class, 'user_id', 'id');
     }
 
+    public function getNameAttribute() {
+        return str_replace('[from-wechat]', '', $this->attributes['name']);
+    }
+
     public static function inviteFromStr($inviteCode) {
         $user = self::where(['invite_code' => $inviteCode])->first();
         return $user->name . ' (' . $user->email . ')';

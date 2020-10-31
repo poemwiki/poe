@@ -47,6 +47,9 @@
                 @endauth
             </li>
         @endforeach
+        @if(count($reviews) <= 0)
+            <li>@lang('No reviews.')</li>
+        @endif
     </ol>
 
     <ol class="links full-col">
@@ -97,10 +100,6 @@
         var $close = document.getElementsByClassName('close-review');
         var $modal = document.getElementById('review-modal');
 
-        $open.addEventListener('click', function (e) {
-            $modal.classList.remove('hidden');
-            e.preventDefault();
-        });
         Array.prototype.forEach.call($close, function($el){
             $el.addEventListener('click', function (e) {
                 $modal.classList.add('hidden');
@@ -114,19 +113,25 @@
             });
         })
 
-        if ('IntersectionObserver' in window) {
-            var options = {root: null, rootMargin: '0px', threshold: 0.01};
-            var observer = new IntersectionObserver(function (entries) {
-                entries.forEach(function (entry) {
-                    if (entry.isIntersecting) {
-                        $open.classList.remove('hidden');
-                    } else {
-                        $open.classList.add('hidden');
-                    }
-                });
-            }, options);
-            var $reviews = document.getElementsByClassName('reviews')[0];
-            observer.observe($reviews);
+        if($open) {
+            $open.addEventListener('click', function (e) {
+                $modal.classList.remove('hidden');
+                e.preventDefault();
+            });
+            if ('IntersectionObserver' in window) {
+                var options = {root: null, rootMargin: '0px', threshold: 0.01};
+                var observer = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            $open.classList.remove('hidden');
+                        } else {
+                            $open.classList.add('hidden');
+                        }
+                    });
+                }, options);
+                var $reviews = document.getElementsByClassName('reviews')[0];
+                observer.observe($reviews);
+            }
         }
     });
 </script>
