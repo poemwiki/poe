@@ -52,7 +52,6 @@ section.poem {
       line-height: 1em;
       margin: 3.2rem 0 0;
       font-size: $font-size-sm;
-      //font-weight: 300;
       dt,dd{
         display: inline;
         line-height: 2;
@@ -118,7 +117,8 @@ section.poem {
       padding: .5em 1em;
       border: 1px solid $blue;
       border-radius: .618em;
-      transition: all .4s ease-in-out;
+      transition: .4s ease-in-out;
+      transition-property: border-radius, background-color, box-shadow;
       &:hover{
         border-radius: 1em;
         background-color: $blue;

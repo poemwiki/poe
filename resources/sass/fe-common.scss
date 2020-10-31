@@ -1,7 +1,8 @@
 @import 'menu';
 
 ol{
-  list-style-type: disc;
+  list-style-type: none;
+  padding: 0;
 }
 
 a {
@@ -33,13 +34,32 @@ a {
       background-size: .1em .1em;
     }
   }
+
 }
 
 .btn {
   font-size: $font-size-sm;
+  color: $blue;
+  background-color: transparent;
   display: inline-block;
   margin-right: 1em;
   line-height: 1.2em;
+  &.btn-wire{
+    //background-color: darken($blue, 7);
+    //color: #fff;
+    padding: .5em 1em;
+    border: 1px solid $blue;
+    border-radius: .618em;
+    transition: .4s ease-in-out;
+    transition-property: border-radius, background-color, box-shadow;
+    &:hover{
+      color: $white;
+      border-radius: 1em;
+      background-color: $blue;
+      background: linear-gradient(315deg, $blue, darken($blue, 8));
+      box-shadow: -.2em -.2em 1em #d8d8d8, .5em .5em 1em $white;
+    }
+  }
 }
 
 .btn-grey {
@@ -145,7 +165,7 @@ html{
 }
 ::selection {
   color: $white;
-  background-color: rgb(0 0 0 / 30%);
+  background-color: $transparent-black;
 }
 body{
   font-size: $body-font-size-in-px;

@@ -51,6 +51,18 @@ class User extends Authenticatable implements MustVerifyEmail {
     public function userBind() {
         return $this->hasMany(\App\Models\UserBind::class, 'user_id', 'id');
     }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\hasMany
+     **/
+    public function scores() {
+        return $this->hasMany(\App\Models\Score::class, 'user_id', 'id');
+    }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\hasMany
+     **/
+    public function reviews() {
+        return $this->hasMany(\App\Models\review::class, 'user_id', 'id');
+    }
 
     public static function inviteFromStr($inviteCode) {
         $user = self::where(['invite_code' => $inviteCode])->first();

@@ -23,7 +23,6 @@ class Score extends Component {
     ];
 
     public function __construct() {
-//        $this->middleware('auth')->except(['show', 'showContributions']);
         $this->scoreRepository = new ScoreRepository(app());
         parent::__construct();
     }

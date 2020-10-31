@@ -56,6 +56,11 @@ class ScoreRepository extends BaseRepository {
         return $query->paginate($perPage, $columns);
     }
 
+    public function listByPoemUsers(Poem $poem, $userIds, $columns = ['*']) {
+        $query = $this->allQuery()->where(['poem_id' => $poem->id])->whereIn('user_id', $userIds);
+        return $query;
+    }
+
 
     /**
      * Create or update a record matching the attributes, and fill it with values.
