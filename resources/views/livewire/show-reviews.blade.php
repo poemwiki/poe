@@ -60,15 +60,6 @@
                 <li><a target="_blank" href="{{ $wxPost->link }}">读首诗再睡觉公众号</a></li>
             @endif
         @endif
-
-        @if($poem->bedtime_post_title && $poem->bedtime_post_id)
-            <li>读睡博客存档：<a target="_blank"
-                          href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">{{ $poem->bedtime_post_title }}</a>
-            </li>
-        @elseif($poem->bedtime_post_id)
-            <li><a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">读睡博客存档</a>
-            </li
-        @endif
     </ol>
 
     <section id="review-modal" @if(!$isEditing) class="hidden" @endif>
