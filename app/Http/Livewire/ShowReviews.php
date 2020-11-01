@@ -43,8 +43,8 @@ class ShowReviews extends Component {
     }
 
     public function submit() {
-        $this->isEditing = false;
-
+        $this->isEditing = true;
+        $this->validate();
         $this->dispatchBrowserEvent('review-updated');
         // Execution doesn't reach here if validation fails.
         Review::create([
@@ -53,6 +53,7 @@ class ShowReviews extends Component {
             'poem_id' => $this->poem->id,
             'user_id' => Auth::user()->id
         ]);
+        $this->isEditing = false;
     }
 
     public function delete($review_id) {

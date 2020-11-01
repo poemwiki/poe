@@ -69,10 +69,6 @@
             <li><a target="_blank" href="https://bedtimepoem.com/archives/{{ $poem->bedtime_post_id }}">读睡博客存档</a>
             </li
         @endif
-
-        @if(!$wxPost && !$poem->bedtime_post_id)
-            <li>@lang('No Comment')</li>
-        @endif
     </ol>
 
     <section id="review-modal" @if(!$isEditing) class="hidden" @endif>
