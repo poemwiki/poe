@@ -147,7 +147,7 @@ SQL
                 if ($post->year) $timeStr .= $post->year . '年';
                 if ($post->month) $timeStr .= $post->month . '月';
                 if ($post->date) $timeStr .= $post->date . '日';
-                array_push($parts, $timeStr);
+                if ($timeStr <> '') array_push($parts, "\n".$timeStr);
 
                 array_push($parts, $writer);
                 if ($post->translator) array_push($parts, '翻译 / ' . trim($post->translator));
