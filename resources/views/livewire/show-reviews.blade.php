@@ -98,20 +98,18 @@
 
 
         var $reviews = document.getElementsByClassName('reviews')[0];
-        if($open) {
-            if('IntersectionObserver' in window) {
-                var options = {root: null, rootMargin: '0px', threshold: [0.01, 1]};
-                var observer = new IntersectionObserver(function (entries) {
-                    entries.forEach(function (entry) {
-                        if (entry.isIntersecting) {
-                            $open.classList.remove('hidden');
-                        } else {
-                            $open.classList.add('hidden');
-                        }
-                    });
-                }, options);
-                observer.observe($reviews);
-            }
+        if($open && 'IntersectionObserver' in window) {
+            var options = {root: null, rootMargin: '0px', threshold: [0.01, 1]};
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        $open.classList.remove('hidden');
+                    } else {
+                        $open.classList.add('hidden');
+                    }
+                });
+            }, options);
+            observer.observe($reviews);
         }
         $reviews.addEventListener('click', function (e) {
             for (var target = e.target; target && target !== this; target = target.parentNode) {
