@@ -7,7 +7,6 @@
     <meta name="description" content="PoemWiki">
     <meta name="keyword" content="@yield('title'),@yield('author'),poemwiki,poem,poetry,poet,诗,诗歌,诗人">
     @include('layouts.icon')
-    @include('layouts.analyze')
 
     <title>@yield('title') - {{config('app.name')}}</title>
 
@@ -15,6 +14,8 @@
     <link href="{{ asset('css/post.css') }}" rel="stylesheet">
 
     @livewireStyles
+
+    @include('layouts.analyze')
 </head>
 <body class="position-ref">
     @include('layouts.fe-menu')
