@@ -56,5 +56,26 @@ return [
         ],
     ],
 
+    'review' => [
+        'title' => 'Review',
+
+        'actions' => [
+            'index' => 'Review',
+            'create' => 'New Review',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'content' => 'Content',
+            'content_id' => 'Content',
+            'like' => 'Like',
+            'poem_id' => 'Poem',
+            'title' => 'Title',
+            'user_id' => 'User',
+            
+        ],
+    ],
+
     // Do not delete me :) I'm used for auto-generation
 ];

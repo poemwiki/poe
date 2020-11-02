@@ -43,3 +43,19 @@ $factory->define(App\Models\Score::class, static function (Faker\Generator $fake
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\Review::class, static function (Faker\Generator $faker) {
+    return [
+        'content' => $faker->text(),
+        'content_id' => $faker->sentence,
+        'created_at' => $faker->dateTime,
+        'deleted_at' => null,
+        'like' => $faker->randomNumber(5),
+        'poem_id' => $faker->sentence,
+        'title' => $faker->sentence,
+        'updated_at' => $faker->dateTime,
+        'user_id' => $faker->sentence,
+        
+        
+    ];
+});

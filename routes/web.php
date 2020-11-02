@@ -108,6 +108,21 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
     });
 });
 
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('Admin')->name('admin/')->group(static function() {
+        Route::prefix('reviews')->name('reviews/')->group(static function() {
+            Route::get('/',                                             'ReviewController@index')->name('index');
+            Route::get('/create',                                       'ReviewController@create')->name('create');
+            Route::post('/',                                            'ReviewController@store')->name('store');
+            Route::get('/{review}/edit',                                'ReviewController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'ReviewController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{review}',                                    'ReviewController@update')->name('update');
+            Route::delete('/{review}',                                  'ReviewController@destroy')->name('destroy');
+        });
+    });
+});
+
 
 //Route::get('/login-wechat', function () {
 //    $user = session('wechat.oauth_user.default'); // 拿到授权用户资料
