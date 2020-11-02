@@ -99,9 +99,6 @@
 
         var $reviews = document.getElementsByClassName('reviews')[0];
         if($open) {
-            $open.addEventListener('click', function (e) {
-                e.preventDefault();
-            });
             if('IntersectionObserver' in window) {
                 var options = {root: null, rootMargin: '0px', threshold: [0.01, 1]};
                 var observer = new IntersectionObserver(function (entries) {
