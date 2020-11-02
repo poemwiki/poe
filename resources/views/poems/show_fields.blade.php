@@ -20,14 +20,18 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
 
 
 
-    <section class="poem" itemscope itemtype="http://schema.org/Article" itemid="{{ $poem->fake_id }}">
+    <section class="poem" itemscope itemtype="https://schema.org/Article" itemid="{{ $poem->fake_id }}">
         <article>
-            <h1 class="title font-song" itemprop="name" id="title">{{ $poem->title }}</h1>
+            <h1 class="title font-song" itemprop="headline" id="title">{{ $poem->title }}</h1>
+            <span itemprops="provider" itemscope itemtype="https://schema.org/Organization" class="hidden">
+                <span itemprops="name">PoemWiki</span>
+                <meta itemprops="url" content="https://poemwiki.org">
+            </span>
             @if($poem->preface)
                 <pre class="preface font-song" itemprop="preface">{{ $poem->preface }}</pre> @endif
             @if($poem->subtitle)
                 <pre class="subtitle font-song" itemprop="subtitle">{{ $poem->subtitle }}</pre> @endif
-            <pre class="poem-content font-song {{$softWrap ? 'soft-wrap' : ''}}" itemprop="text"
+            <pre class="poem-content font-song {{$softWrap ? 'soft-wrap' : ''}}" itemprop="articleBody"
                  lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
 
             <section class="poem-meta">

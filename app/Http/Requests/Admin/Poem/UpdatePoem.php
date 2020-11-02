@@ -3,10 +3,12 @@
 namespace App\Http\Requests\Admin\Poem;
 
 use App\Models\Language;
+use App\Models\Poem;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Spatie\ValidationRules\Rules\ModelsExist;
 
 class UpdatePoem extends FormRequest
 {
@@ -48,7 +50,7 @@ class UpdatePoem extends FormRequest
             'need_confirm' => ['nullable', 'boolean'],
             'is_lock' => ['sometimes', 'boolean'],
             'content_id' => ['nullable', 'integer'],
-            'original_id' => ['nullable', 'integer'],
+            'original_id' => ['nullable', 'integer', new ModelsExist(Poem::class, 'id')],
             'preface' => ['nullable', 'string', 'max:64'],
             'subtitle' => ['nullable', 'string', 'max:32']
         ];

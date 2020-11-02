@@ -3,20 +3,20 @@
 namespace App\Http\Requests\Admin\Poem;
 
 use App\Models\Language;
+use App\Models\Poem;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Spatie\ValidationRules\Rules\ModelsExist;
 
-class StorePoem extends FormRequest
-{
+class StorePoem extends FormRequest {
     /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
         return Gate::allows('admin.poem.create') || Gate::allows('web.poem.change', Auth::user());
     }
 
@@ -25,8 +25,7 @@ class StorePoem extends FormRequest
      *
      * @return array
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
             'title' => ['nullable', 'string'],
             'language' => Rule::in(Language::ids()),
@@ -47,19 +46,17 @@ class StorePoem extends FormRequest
             'need_confirm' => ['nullable', 'boolean'],
             'is_lock' => ['nullable', 'boolean'],
             'content_id' => ['nullable', 'integer'],
-            'original_id' => ['nullable', 'integer'],
-            'translated_id' => ['nullable', 'integer'],
-
+            'original_id' => ['nullable', 'integer', 'exists:'.\App\Models\Poem::class.',id'],
+            'translated_id' => ['nullable', 'integer', 'exists:'.\App\Models\Poem::class.',id'],
         ];
     }
 
     /**
-    * Modify input data
-    *
-    * @return array
-    */
-    public function getSanitized(): array
-    {
+     * Modify input data
+     *
+     * @return array
+     */
+    public function getSanitized(): array {
         $sanitized = $this->validated();
 
         //Add your code for manipulation with request data here

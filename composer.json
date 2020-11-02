@@ -19,6 +19,7 @@
   "license": "MIT",
   "require": {
     "php": "^7.2.5",
+    "ext-json": "*",
     "brackets/admin-translations": "dev-fix-dash-locale",
     "brackets/craftable": "dev-dev-fix-private-admin-translations-depend",
     "doctrine/dbal": "~2.3",
@@ -36,7 +37,7 @@
     "overtrue/laravel-wechat": "^6.0",
     "renatomarinho/laravel-page-speed": "^1.9",
     "spatie/laravel-activitylog": "^3.16",
-    "ext-json": "*"
+    "spatie/laravel-validation-rules": "^2.7"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.7",

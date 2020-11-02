@@ -44,6 +44,9 @@ a {
   display: inline-block;
   margin-right: 1em;
   line-height: 1.2em;
+  &:focus{
+    outline: none;
+  }
   &.btn-wire{
     //background-color: darken($blue, 7);
     //color: #fff;

@@ -37,8 +37,8 @@ class ShowReviews extends Component {
     }
 
     public function updated($propName) {
-        $this->validateOnly($propName);
         $this->isEditing = true;
+        $this->validateOnly($propName);
         $this->dispatchBrowserEvent('review-updated');
     }
 
@@ -71,7 +71,7 @@ class ShowReviews extends Component {
     }
 
     public function render() {
-        $reviews = $this->reviewRepository->listByPoem($this->poem);
+        $reviews = $this->reviewRepository->listByOriginalPoem($this->poem);
         $userIds = [];
         foreach ($reviews as $review) {
             $userIds[] = $review->user->id;

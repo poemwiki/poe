@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property mixed original_id
+ * @property mixed translatedPoems
+ * @property mixed id
+ */
 class Poem extends Model {
     use SoftDeletes;
     use LogsActivity;
@@ -45,7 +50,7 @@ class Poem extends Model {
         'need_confirm',
 //        'is_lock',
 //        'content_id',
-//        'original_id',
+        'original_id',
         'preface',
         'subtitle'
     ];
@@ -77,6 +82,7 @@ class Poem extends Model {
         'is_lock' => 'boolean',
         'content_id' => 'integer',
         'original_id' => 'integer',
+        'translated_id' => 'integer',
         'preface' => 'string',
         'subtitle' => 'string'
     ];

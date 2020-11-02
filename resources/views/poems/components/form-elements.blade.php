@@ -130,6 +130,7 @@
                 v-model="form.is_original"
                 v-validate="'required'"
                 value="{{!empty($originalPoem) ? 0 : (!empty($translatedPoem) ? 1 : '')}}"
+                @if(!empty($originalPoem) || !empty($translatedPoem)) disabled @endif
                 data-vv-as="{{ trans('admin.poem.columns.is_original') }}" data-vv-name="is_original"
                 name="is_original_fake_element">
             <option value="1"

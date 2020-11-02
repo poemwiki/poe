@@ -43,10 +43,25 @@ class ReviewRepository extends BaseRepository {
         return $query->paginate($perPage, $columns);
     }
 
+    public function listByOriginalPoem(Poem $poem, $perPage = 10, $order = 'updated_at', $direction = 'desc', $columns = ['*']) {
+        $poemIds = [$poem->id];
+        if ($poem->original_id) {
+            $poemIds[] = $poem->original_id;
+            $op = Poem::where('original_id', $poem->original_id)->get();
+            $poemIds = $op->pluck('id')->concat($poemIds)->all();
+        }
+        if ($poem->translatedPoems) {
+            $poemIds = $poem->translatedPoems->pluck('id')->concat($poemIds)->all();
+        }
+        $query = $this->allQuery()->whereIn('poem_id', $poemIds)->orderBy($order, $direction);
+        return $query->paginate($perPage, $columns);
+    }
+
     public function listByPoem(Poem $poem, $perPage = 10, $order = 'updated_at', $direction = 'desc', $columns = ['*']) {
         $query = $this->allQuery()->where(['poem_id' => $poem->id])->orderBy($order, $direction);
         return $query->paginate($perPage, $columns);
     }
+
     public function listByUser(User $user, $perPage = 10, $order = 'updated_at', $direction = 'desc', $columns = ['*']) {
         $query = $this->allQuery()->where(['user_id' => $user->id])->orderBy($order, $direction);
         return $query->paginate($perPage, $columns);

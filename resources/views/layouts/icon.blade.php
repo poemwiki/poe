@@ -5,3 +5,4 @@
 <link rel="mask-icon" href="/icon/safari-pinned-tab.svg" color="#5251b7">
 <meta name="msapplication-TileColor" content="#5251b7">
 <meta name="theme-color" content="#5251b7">
+<meta property="og:image" content="https://og-image.vercel.app/PoemWiki.png" />

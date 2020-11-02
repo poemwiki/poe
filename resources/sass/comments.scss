@@ -133,6 +133,31 @@ section.reviews{
     border-radius: .8rem .8rem 0 0;
     padding-top: .8rem;
     padding-bottom: .64rem;
+
+    >.add-review-wrapper{
+      position: fixed;
+      right: 1.6rem;
+      bottom: 3rem;
+      width: 4rem;
+      height: 4rem;
+      padding: 0;
+      background: $modal-black;
+      border-radius: 50%;
+      >svg{
+        height: 100%;
+        width: 100%;
+        padding: .6em;
+        vertical-align: baseline;
+        fill: darken($white, 10);
+      }
+      &:hover {
+        transform: scale(1.1);
+        transition: .4s ease-out;
+        > svg {
+          fill: $white;
+        }
+      }
+    }
   }
 
   >ol.review-list{
@@ -160,6 +185,7 @@ section.reviews{
             color: $gray;
           }
         }
+
       }
       .stars{
         height: 1.6rem;
@@ -167,10 +193,18 @@ section.reviews{
         transform: scaleX(-1);
         fill: $ui-star-light-color;
       }
-      >.review-title{font-size: $font-size-sm}
+      >.review-title{
+        color: $ui-text-color;
+        font-size: $font-size-sm;
+      }
       >.review-content{
         color: $ui-text-color;
         font-size: $font-size-sm;
+      }
+      .review-none{
+        height: 16rem;
+        line-height: 16rem;
+        text-align: center;
       }
     }
   }
@@ -180,29 +214,6 @@ section.reviews{
     list-style: none;
   }
 
-  .add-review{position: fixed;
-    right: 1.6rem;
-    bottom: 3rem;
-    width: 4rem;
-    height: 4rem;
-    padding: 0;
-    background: $modal-black;
-    border-radius: 50%;
-    >svg{
-      height: 100%;
-      width: 100%;
-      transform: scale(.618);
-      vertical-align: baseline;
-      fill: darken($white, 10);
-    }
-    &:hover {
-      transform: scale(1.1);
-      transition: .4s ease-out;
-      > svg {
-        fill: $white;
-      }
-    }
-  }
 
   #review-modal{
     position: fixed;

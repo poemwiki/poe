@@ -4,15 +4,15 @@
 @endphp
 
 <section class="reviews full-row">
-    <h4 class="reviews-h full-col">
+    <h4 class="reviews-h full-col add-review">
         评论
-        <a class="add-review btn no-bg hidden"
+        <a class="add-review-wrapper add-review btn no-bg hidden"
            @auth
            href="#" id="open-review"
            @else
            href="{{ route('login', ['ref' => route('p/show', $poem->fake_id, false)]) }}"
            @endauth
-           title="@lang('Add My Review')"
+           title="@lang('Write Review')"
         >
             <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
                  xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" xml:space="preserve"><g>
@@ -42,13 +42,23 @@
                 <p class="review-content">{!! nl2br(e($review->content)) !!}</p>
                 @auth
                 @if($review->user_id === Auth::user()->id || Auth::user()->is_admin)
-                    <a href="#" wire:click.prevent="delete({{$review->id}})" class="btn">@lang('Delete')</a>
+                    <a href="#" wire:click.prevent="delete({{$review->id}})" class="btn">@lang('brackets/admin-ui::admin.btn.x')</a>
                 @endif
                 @endauth
             </li>
         @endforeach
         @if(count($reviews) <= 0)
-            <li>@lang('No reviews.')</li>
+            <li>
+                <p class="review-none">
+                    @lang('No reviews.')&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a
+                    @auth
+                        href="#" class="add-review btn btn-wire"
+                    @else
+                        href="{{ route('login', ['ref' => route('p/show', $poem->fake_id, false)]) }}" class="btn btn-wire"
+                    @endauth >@lang('Write Review')</a>
+                </p>
+            </li>
         @endif
     </ol>
 
@@ -67,7 +77,7 @@
 
         <form wire:submit.prevent="submit">
             <div class="review-form-header flex-center-vertically">
-                <p class="review-form-h">@lang('Writing Review')</p>
+                <p class="review-form-h">@lang('Write Review')</p>
                 <div class="review-form-btn"><a href="#" class="btn close-review">@lang('Close')</a><button class="btn btn-wire" type="submit">@lang('Submit')</button></div>
             </div>
             <input name="title" wire:model.lazy="title" type="text" class="review-title" placeholder="@lang('Title')">
@@ -84,29 +94,16 @@
 <script type="text/javascript">
     document.addEventListener('livewire:load', () => {
         var $open = document.getElementById('open-review');
-        var $close = document.getElementsByClassName('close-review');
         var $modal = document.getElementById('review-modal');
 
-        Array.prototype.forEach.call($close, function($el){
-            $el.addEventListener('click', function (e) {
-                $modal.classList.add('hidden');
-                e.preventDefault();
-            });
-        });
-        window.addEventListener('review-updated', function(e) {
-            $modal.querySelector('.close-review.btn').addEventListener('click', function (e) {
-                $modal.classList.add('hidden');
-                e.preventDefault();
-            });
-        })
 
+        var $reviews = document.getElementsByClassName('reviews')[0];
         if($open) {
             $open.addEventListener('click', function (e) {
-                $modal.classList.remove('hidden');
                 e.preventDefault();
             });
-            if ('IntersectionObserver' in window) {
-                var options = {root: null, rootMargin: '0px', threshold: 0.01};
+            if('IntersectionObserver' in window) {
+                var options = {root: null, rootMargin: '0px', threshold: [0.01, 1]};
                 var observer = new IntersectionObserver(function (entries) {
                     entries.forEach(function (entry) {
                         if (entry.isIntersecting) {
@@ -116,10 +113,24 @@
                         }
                     });
                 }, options);
-                var $reviews = document.getElementsByClassName('reviews')[0];
                 observer.observe($reviews);
             }
         }
+        $reviews.addEventListener('click', function (e) {
+            for (var target = e.target; target && target !== this; target = target.parentNode) {
+                if (target.matches('.add-review')) {
+                    $modal.classList.remove('hidden');
+                    e.preventDefault();
+                    break;
+                }
+                if(target.matches('.close-review')) {
+                    $modal.classList.add('hidden');
+                    e.preventDefault();
+                    if($open) $open.classList.remove('hidden');
+                    break;
+                }
+            }
+        });
     });
 </script>
 @endpush
