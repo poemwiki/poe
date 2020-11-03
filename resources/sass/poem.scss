@@ -133,6 +133,10 @@ section.poem {
 nav.next{
   margin: 3rem 0 3rem 0;
   padding: 2rem 1.6rem;
+  >span{
+    color: $gray;
+    font-size: $font-size-sm;
+  }
   >a{
     display: block;
     height: 2.2em;

@@ -18,11 +18,11 @@ article.poet{
     >li{
       position: relative;
       >a.title{
-        //padding-left: 1.6rem;
         display: inline-block;
         width: 100%;
         line-height: 2em;
         overflow-y: hidden;
+        padding: 0;
 
         &>span{
           //vertical-align: bottom;
@@ -47,8 +47,8 @@ article.poet{
       &>p.first-line{
         padding-left: $font-size-larger-in-px;
         font-size: $font-size-sm;
-        height: 1em;
-        line-height: 1em;
+        height: 1.2em;
+        line-height: 1.2em;
         color: $gray;
         overflow-y: hidden;
 
