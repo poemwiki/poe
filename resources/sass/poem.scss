@@ -141,7 +141,8 @@ nav.next{
     display: block;
     height: 2.2em;
     color: $default-text-color;
-    //text-align: center;
+    white-space: nowrap;
+    overflow-x: scroll;
     &:before{
       color: var(--main-color-next);
     }
