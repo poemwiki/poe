@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "16a9945a65a78d041bc186ea572f1de0",
+    "content-hash": "3a7118f907e3341ddf56150ecddb3523",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -322,7 +322,7 @@
                 "translations"
             ],
             "support": {
-                "source": "https://github.com/ray7551/admin-translations/tree/dev-fix-dash-locale"
+                "source": "https://github.com/ray7551/admin-translations/tree/fix-dash-locale"
             },
             "time": "2020-08-28T04:04:05+00:00"
         },
@@ -488,12 +488,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ray7551/craftable.git",
-                "reference": "4293caaa4b1cf6d5f1e6044e2c245de6e6c2a882"
+                "reference": "296a695f3cc24c76d972d53f9d3cf60d859af517"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ray7551/craftable/zipball/4293caaa4b1cf6d5f1e6044e2c245de6e6c2a882",
-                "reference": "4293caaa4b1cf6d5f1e6044e2c245de6e6c2a882",
+                "url": "https://api.github.com/repos/ray7551/craftable/zipball/296a695f3cc24c76d972d53f9d3cf60d859af517",
+                "reference": "296a695f3cc24c76d972d53f9d3cf60d859af517",
                 "shasum": ""
             },
             "require": {
@@ -563,9 +563,9 @@
                 "toolkit"
             ],
             "support": {
-                "source": "https://github.com/ray7551/craftable/tree/master"
+                "source": "https://github.com/ray7551/craftable/tree/dev-fix-private-admin-translations-depend"
             },
-            "time": "2020-09-06T18:53:31+00:00"
+            "time": "2020-11-04T05:01:03+00:00"
         },
         {
             "name": "brackets/media",
@@ -2125,16 +2125,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v7.29.2",
+            "version": "v7.29.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "0fb15ae253c3a043f2c5cbf9641427a7646ea77a"
+                "reference": "93f6d565a07045baa0e4b941ae1f733cd5984d65"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/0fb15ae253c3a043f2c5cbf9641427a7646ea77a",
-                "reference": "0fb15ae253c3a043f2c5cbf9641427a7646ea77a",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/93f6d565a07045baa0e4b941ae1f733cd5984d65",
+                "reference": "93f6d565a07045baa0e4b941ae1f733cd5984d65",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -2289,7 +2289,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2020-10-29T18:57:35+00:00"
+            "time": "2020-11-03T14:12:58+00:00"
         },
         {
             "name": "laravel/tinker",
@@ -2367,16 +2367,16 @@
         },
         {
             "name": "laravel/ui",
-            "version": "v2.4.1",
+            "version": "v2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/ui.git",
-                "reference": "1c69ae3e8b52fe6c9eaf83b43c6dd8ef5c3f9e2c"
+                "reference": "d01a705763c243b07be795e9d1bb47f89260f73d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/ui/zipball/1c69ae3e8b52fe6c9eaf83b43c6dd8ef5c3f9e2c",
-                "reference": "1c69ae3e8b52fe6c9eaf83b43c6dd8ef5c3f9e2c",
+                "url": "https://api.github.com/repos/laravel/ui/zipball/d01a705763c243b07be795e9d1bb47f89260f73d",
+                "reference": "d01a705763c243b07be795e9d1bb47f89260f73d",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -2389,11 +2389,7 @@
                 "illuminate/console": "^7.0",
                 "illuminate/filesystem": "^7.0",
                 "illuminate/support": "^7.0",
-                "php": "^7.2.5"
-            },
-            "require-dev": {
-                "mockery/mockery": "^1.0",
-                "phpunit/phpunit": "^8.0"
+                "php": "^7.2.5|^8.0"
             },
             "type": "library",
             "extra": {
@@ -2426,9 +2422,9 @@
             ],
             "support": {
                 "issues": "https://github.com/laravel/ui/issues",
-                "source": "https://github.com/laravel/ui/tree/v2.4.1"
+                "source": "https://github.com/laravel/ui/tree/v2.5.0"
             },
-            "time": "2020-09-22T16:51:51+00:00"
+            "time": "2020-11-03T19:45:19+00:00"
         },
         {
             "name": "laravelcollective/html",
@@ -3338,16 +3334,16 @@
         },
         {
             "name": "mews/captcha",
-            "version": "3.2.2",
+            "version": "3.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mewebstudio/captcha.git",
-                "reference": "1d5e24ba4293e999024a2b6f81b389a9bc16b71d"
+                "reference": "b5549a90110ec6c32a93073aba3ea9ade288c6f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mewebstudio/captcha/zipball/1d5e24ba4293e999024a2b6f81b389a9bc16b71d",
-                "reference": "1d5e24ba4293e999024a2b6f81b389a9bc16b71d",
+                "url": "https://api.github.com/repos/mewebstudio/captcha/zipball/b5549a90110ec6c32a93073aba3ea9ade288c6f7",
+                "reference": "b5549a90110ec6c32a93073aba3ea9ade288c6f7",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -3411,9 +3407,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mewebstudio/captcha/issues",
-                "source": "https://github.com/mewebstudio/captcha/tree/3.2.2"
+                "source": "https://github.com/mewebstudio/captcha/tree/3.2.3"
             },
-            "time": "2020-10-27T13:43:40+00:00"
+            "time": "2020-11-03T19:44:37+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -3921,16 +3917,16 @@
         },
         {
             "name": "overtrue/socialite",
-            "version": "3.0.5",
+            "version": "3.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/overtrue/socialite.git",
-                "reference": "cb1c93c759375434cb21893f4e6ed9b27c07d985"
+                "reference": "765941f858facdeff611d3f8652c8f8bfba3e0af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/overtrue/socialite/zipball/cb1c93c759375434cb21893f4e6ed9b27c07d985",
-                "reference": "cb1c93c759375434cb21893f4e6ed9b27c07d985",
+                "url": "https://api.github.com/repos/overtrue/socialite/zipball/765941f858facdeff611d3f8652c8f8bfba3e0af",
+                "reference": "765941f858facdeff611d3f8652c8f8bfba3e0af",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -3983,7 +3979,7 @@
             ],
             "support": {
                 "issues": "https://github.com/overtrue/socialite/issues",
-                "source": "https://github.com/overtrue/socialite/tree/3.0.5"
+                "source": "https://github.com/overtrue/socialite/tree/3.0.6"
             },
             "funding": [
                 {
@@ -3991,7 +3987,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2020-10-28T06:12:37+00:00"
+            "time": "2020-11-02T02:51:54+00:00"
         },
         {
             "name": "overtrue/wechat",
@@ -5365,16 +5361,16 @@
         },
         {
             "name": "spatie/laravel-activitylog",
-            "version": "3.16.0",
+            "version": "3.16.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-activitylog.git",
-                "reference": "a01fce5f3011c8b7eac86b18e2121da55f0564cd"
+                "reference": "ade270f291f4cb5883b3653919304a0b4e1cc284"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-activitylog/zipball/a01fce5f3011c8b7eac86b18e2121da55f0564cd",
-                "reference": "a01fce5f3011c8b7eac86b18e2121da55f0564cd",
+                "url": "https://api.github.com/repos/spatie/laravel-activitylog/zipball/ade270f291f4cb5883b3653919304a0b4e1cc284",
+                "reference": "ade270f291f4cb5883b3653919304a0b4e1cc284",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -5387,7 +5383,7 @@
                 "illuminate/config": "^6.0 || ^7.0 || ^8.0",
                 "illuminate/database": "^6.0 || ^7.0 || ^8.0",
                 "illuminate/support": "^6.0 || ^7.0 || ^8.0",
-                "php": "^7.2"
+                "php": "^7.2 || ^8.0"
             },
             "require-dev": {
                 "ext-json": "*",
@@ -5445,7 +5441,7 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/laravel-activitylog/issues",
-                "source": "https://github.com/spatie/laravel-activitylog/tree/3.16.0"
+                "source": "https://github.com/spatie/laravel-activitylog/tree/3.16.1"
             },
             "funding": [
                 {
@@ -5457,7 +5453,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-09-16T15:28:13+00:00"
+            "time": "2020-11-03T11:34:26+00:00"
         },
         {
             "name": "spatie/laravel-backup",
@@ -9143,23 +9139,17 @@
         },
         {
             "name": "brackets/admin-generator",
-            "version": "v5.2.0",
+            "version": "dev-fix-dash-locale",
             "source": {
                 "type": "git",
-                "url": "https://github.com/BRACKETS-by-TRIAD/admin-generator.git",
-                "reference": "949c50ab33feb8a9374665d35f5d16f42290aa2b"
+                "url": "https://github.com/ray7551/admin-generator.git",
+                "reference": "a442df4421cd41c3a4ef6646ad0c4dfa267b97a0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BRACKETS-by-TRIAD/admin-generator/zipball/949c50ab33feb8a9374665d35f5d16f42290aa2b",
-                "reference": "949c50ab33feb8a9374665d35f5d16f42290aa2b",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
+                "url": "https://api.github.com/repos/ray7551/admin-generator/zipball/a442df4421cd41c3a4ef6646ad0c4dfa267b97a0",
+                "reference": "a442df4421cd41c3a4ef6646ad0c4dfa267b97a0",
+                "shasum": ""
             },
             "require": {
                 "doctrine/dbal": "^2.6.0",
@@ -9190,7 +9180,11 @@
                     "Brackets\\AdminGenerator\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Brackets\\AdminGenerator\\Tests\\": "tests/"
+                }
+            },
             "license": [
                 "MIT"
             ],
@@ -9237,9 +9231,9 @@
                 "make"
             ],
             "support": {
-                "source": "https://github.com/BRACKETS-by-TRIAD/admin-generator/tree/v5.2.0"
+                "source": "https://github.com/ray7551/admin-generator/tree/fix-dash-locale"
             },
-            "time": "2020-10-22T09:29:57+00:00"
+            "time": "2020-11-04T07:19:51+00:00"
         },
         {
             "name": "composer/ca-bundle",
@@ -10226,16 +10220,16 @@
         },
         {
             "name": "laravel/helpers",
-            "version": "v1.3.0",
+            "version": "v1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/helpers.git",
-                "reference": "b4b8d6e84a6306fc88870f61a244d8c537779f2d"
+                "reference": "cde8ea2427db4f37d67729846b70452499210a21"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/helpers/zipball/b4b8d6e84a6306fc88870f61a244d8c537779f2d",
-                "reference": "b4b8d6e84a6306fc88870f61a244d8c537779f2d",
+                "url": "https://api.github.com/repos/laravel/helpers/zipball/cde8ea2427db4f37d67729846b70452499210a21",
+                "reference": "cde8ea2427db4f37d67729846b70452499210a21",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -10246,7 +10240,7 @@
             },
             "require": {
                 "illuminate/support": "~5.8.0|^6.0|^7.0|^8.0",
-                "php": ">=7.1.3"
+                "php": "^7.1.3|^8.0"
             },
             "require-dev": {
                 "phpunit/phpunit": "^7.0|^8.0|^9.0"
@@ -10282,9 +10276,9 @@
                 "laravel"
             ],
             "support": {
-                "source": "https://github.com/laravel/helpers/tree/v1.3.0"
+                "source": "https://github.com/laravel/helpers/tree/v1.4.0"
             },
-            "time": "2020-08-25T17:54:37+00:00"
+            "time": "2020-11-03T16:38:41+00:00"
         },
         {
             "name": "mockery/mockery",
@@ -12401,7 +12395,8 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "brackets/admin-translations": 20,
-        "brackets/craftable": 20
+        "brackets/craftable": 20,
+        "brackets/admin-generator": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
