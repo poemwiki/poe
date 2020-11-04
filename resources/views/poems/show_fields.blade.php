@@ -115,7 +115,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
 
                         @foreach($poem->otherTranslatedPoems()->get() as $t)
                             <a href="{{$t->url}}">
-                                <dt>{{$t->lang->name ?? trans('poem.')}}</dt>
+                                <dt>{{$t->lang->name ?? trans('poem.other')}}</dt>
                                 <dd>{{$t->translator ?? '佚名'}}</dd>
                             </a>
                         @endforeach
@@ -123,7 +123,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                     @elseif($poem->translatedPoems)
                         @foreach($poem->translatedPoems as $t)
                             <a href="{{$t->url}}">
-                                <dt>{{$t->lang->name ?? trans('poem.')}}</dt>
+                                <dt>{{$t->lang->name ?? trans('poem.other')}}</dt>
                                 <dd>{{$t->translator ?? '佚名'}}</dd>
                             </a>
                         @endforeach
