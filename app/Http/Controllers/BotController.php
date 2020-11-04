@@ -141,7 +141,7 @@ SQL
                 $parts = ['▍ ' . $post->title];
                 if($post->preface) array_push($parts, '        '. $post->preface);
                 if($post->subtitle) array_push($parts, "\n    ".$post->subtitle);
-                array_push($parts, "\n".$content);
+                array_push($parts, "\n".$content."\n");
 
                 $timeStr = '';
                 if ($post->year) $timeStr .= $post->year . '年';
