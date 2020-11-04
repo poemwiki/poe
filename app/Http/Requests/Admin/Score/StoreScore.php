@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Score;
 
+use App\Models\Score;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -15,7 +16,7 @@ class StoreScore extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('admin.score.create') || Gate::allows('web.score.create');
+        return Gate::allows('admin.score.create');
     }
 
     /**
@@ -26,10 +27,11 @@ class StoreScore extends FormRequest
     public function rules(): array
     {
         return [
-            'weight' => ['required', 'float'],
-            'poem_id' => ['required', 'integer'],
-            'score' => 'integer|min:1|max:5',
-            'user_id' => ['required', 'integer'],
+            'poem_id' => ['required', Rule::unique('score', 'poem_id'), 'string'],
+            'score' => ['required', Rule::in(Score::$RATING)],
+            'user_id' => ['required', Rule::unique('score', 'user_id'), 'string'],
+            'weight' => ['required', 'numeric'],
+
         ];
     }
 

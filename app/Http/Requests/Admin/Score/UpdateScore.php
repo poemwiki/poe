@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Score;
 
+use App\Models\Score;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -15,7 +16,7 @@ class UpdateScore extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('admin.score.edit', $this->score) || Gate::allows('web.score.update', $this->score);
+        return Gate::allows('admin.score.edit', $this->score);
     }
 
     /**
@@ -26,8 +27,11 @@ class UpdateScore extends FormRequest
     public function rules(): array
     {
         return [
+            'poem_id' => ['sometimes', Rule::unique('score', 'poem_id')->ignore($this->score->getKey(), $this->score->getKeyName()), 'string'],
+            'score' => ['sometimes', Rule::in(Score::$RATING)],
+            'user_id' => ['sometimes', Rule::unique('score', 'user_id')->ignore($this->score->getKey(), $this->score->getKeyName()), 'string'],
             'weight' => ['sometimes', 'numeric'],
-            'score' => 'integer|min:1|max:5',
+
         ];
     }
 

@@ -165,3 +165,17 @@ $factory->define(App\Models\Author::class, static function (Faker\Generator $fak
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\Score::class, static function (Faker\Generator $faker) {
+    return [
+        'created_at' => $faker->dateTime,
+        'deleted_at' => null,
+        'poem_id' => $faker->sentence,
+        'score' => $faker->boolean(),
+        'updated_at' => $faker->dateTime,
+        'user_id' => $faker->sentence,
+        'weight' => $faker->randomFloat,
+        
+        
+    ];
+});

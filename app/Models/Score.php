@@ -2,24 +2,20 @@
 
 namespace App\Models;
 
-use App\Traits\HasCompositeKey;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-class Score extends Model
-{
+class Score extends Model {
     use SoftDeletes;
-    // use LogsActivity; // TODO enable LogsActiivity cause error for this composite primary key model
-    use HasCompositeKey;
+    use LogsActivity;
+
     protected $table = 'score';
-    protected $primaryKey = ['poem_id', 'user_id'];
-    public $incrementing = false;
 
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
     protected static $ignoreChangedAttributes = ['created_at'];
+    public static $RATING = [1, 2, 3, 4, 5];
 
     protected $fillable = [
         'poem_id',
@@ -27,9 +23,12 @@ class Score extends Model
         'user_id',
     ];
 
+
     protected $dates = [
         'created_at',
-        'updated_at'
+        'deleted_at',
+        'updated_at',
+
     ];
 
     protected $appends = ['resource_url'];
@@ -37,14 +36,15 @@ class Score extends Model
     /* ************************ ACCESSOR ************************* */
 
     public function getResourceUrlAttribute() {
-        return url('/admin/scores/'.$this->getKey());
+        return url('/admin/scores/' . $this->getKey());
     }
+
     /**
      * @return string
      */
-//    public function getUrlAttribute() {
-//        return route('score/show', ['id' => $this->id]);
-//    }
+    //    public function getUrlAttribute() {
+    //        return route('score/show', ['id' => $this->id]);
+    //    }
 
 
     /**

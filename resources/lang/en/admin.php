@@ -226,5 +226,24 @@ return [
         ],
     ],
 
+    'score' => [
+        'title' => 'Score',
+
+        'actions' => [
+            'index' => 'Score',
+            'create' => 'New Score',
+            'edit' => 'Edit :name',
+        ],
+
+        'columns' => [
+            'id' => 'ID',
+            'poem_id' => 'Poem',
+            'score' => 'Score',
+            'user_id' => 'User',
+            'weight' => 'Weight',
+            
+        ],
+    ],
+
     // Do not delete me :) I'm used for auto-generation
 ];

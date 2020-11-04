@@ -10,6 +10,7 @@ use App\Http\Requests\Admin\Score\StoreScore;
 use App\Http\Requests\Admin\Score\UpdateScore;
 use App\Models\Score;
 use Brackets\AdminListing\Facades\AdminListing;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Routing\ResponseFactory;
@@ -37,7 +38,7 @@ class ScoreController extends Controller
             $request,
 
             // set columns to query
-            ['content_id', 'factor', 'id', 'poem_id', 'score', 'user_id'],
+            ['id', 'poem_id', 'score', 'user_id', 'weight'],
 
             // set columns to searchIn
             ['id']
@@ -177,7 +178,10 @@ class ScoreController extends Controller
             collect($request->data['ids'])
                 ->chunk(1000)
                 ->each(static function ($bulkChunk) {
-                    Score::whereIn('id', $bulkChunk)->delete();
+                    DB::table('scores')->whereIn('id', $bulkChunk)
+                        ->update([
+                            'deleted_at' => Carbon::now()->format('Y-m-d H:i:s')
+                    ]);
 
                     // TODO your code goes here
                 });

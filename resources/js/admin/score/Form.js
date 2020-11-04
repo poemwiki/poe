@@ -5,11 +5,10 @@ Vue.component('score-form', {
     data: function() {
         return {
             form: {
-                content_id:  '' ,
-                factor:  '' ,
                 poem_id:  '' ,
                 score:  false ,
                 user_id:  '' ,
+                weight:  '' ,
                 
             }
         }
