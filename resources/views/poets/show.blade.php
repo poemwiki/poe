@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var colorHash = new ColorHash({lightness: 0.6, saturation: 0.86});
     var $titles = document.getElementsByClassName('title');
     for(var item of $titles) {
-        console.log(item.innerHTML);
         item.style.setProperty('--title-color', colorHash.hex(item.innerHTML));
     }
 })
