@@ -46,9 +46,15 @@ section.poem {
       line-height: 2;
       animation: fadein 2s ease-out;
       @include media-breakpoint-down(xs) {
-        font-size: 4vw;
+        font-size: 3.8vw;
         white-space: nowrap;
         overflow: auto;
+      }
+      @media (max-width: 375px) {
+        font-size: 4vw;
+      }
+      &.text-justify>.poem-line {
+        line-height: 2;
       }
       &>.poem-line{
         padding: .4em;
