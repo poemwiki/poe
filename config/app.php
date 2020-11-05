@@ -235,7 +235,8 @@ $config = [
 
     'invite_limited' => env('INVITE_LIMITED', false),
 
-    'soft_wrap_length' => 30
+    'default_soft_wrap_length' => 45,
+    'language_line_length_max' => [1 => 20, 2=>45, 7 => 20],
 
 ];
 
