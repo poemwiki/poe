@@ -84,9 +84,9 @@ class PoemRepository extends BaseRepository
     LIMIT 1
      */
     public static function random($num = 1) {
-        return Poem::select()->with('wx')
+        return Poem::query()->with('wx', 'lang')
             ->inRandomOrder()
-            ->take($num)->get();
+            ->take($num);
     }
 
     /**
@@ -96,8 +96,8 @@ class PoemRepository extends BaseRepository
         return self::random(1)->first();
     }
 
-    public function getPoemFromFakeId($fakeId, $select='*'){
+    public function getPoemFromFakeId($fakeId){
         $id = Poem::getIdFromFakeId($fakeId);
-        return Poem::findOrFail($id, $select);
+        return Poem::findOrFail($id);
     }
 }

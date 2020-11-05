@@ -56,8 +56,9 @@ class ScoreRepository extends BaseRepository {
         return $query->paginate($perPage, $columns);
     }
 
-    public function listByPoemUsers(Poem $poem, $userIds, $columns = ['*']) {
-        $query = $this->allQuery()->where(['poem_id' => $poem->id])->whereIn('user_id', $userIds);
+    public function listByPoemsUsers($poemIds, $userIds, $columns = ['*']) {
+        $query = $this->allQuery()->whereIn('poem_id', $poemIds, 'and')
+            ->whereIn('user_id', $userIds);
         return $query;
     }
 

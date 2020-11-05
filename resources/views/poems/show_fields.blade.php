@@ -7,12 +7,21 @@ $nation = $poem->dynasty
 
 $translator = $poem->translator ? trim($poem->translator) : '';
 
-$maxLength = max(array_map(function($line) {
+$graphemeLength = max(array_map(function($line) {
     return grapheme_strlen($line);
 }, explode("\n", $poem->poem)));
-$softWrap = $maxLength >= config('app.soft_wrap_length');
 
+$softWrap = true;
+$maxLengthConf = config('app.language_line_length_max');
+if ($poem->lang || $poem->language) {
+    $languageId = $poem->lang ? $poem->lang->id : \App\Repositories\LanguageRepository::findByName($poem->language)->id;
+    $maxLength = $maxLengthConf[$languageId];
+} else {
+    $maxLength = config('app.default_soft_wrap_length');
+}
+$softWrap = $softWrap && ($graphemeLength >= $maxLength);
 
+/** @var String $fakeId */
 $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' => $fakeId], false) : null;
 ?>
 @section('title'){{$poem->title}}@endsection
@@ -22,17 +31,34 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
 
     <section class="poem" itemscope itemtype="https://schema.org/Article" itemid="{{ $poem->fake_id }}">
         <article>
-            <h1 class="title font-song" itemprop="headline" id="title">{{ $poem->title }}</h1>
-            <span itemprops="provider" itemscope itemtype="https://schema.org/Organization" class="hidden">
-                <span itemprops="name">PoemWiki</span>
-                <meta itemprops="url" content="https://poemwiki.org">
-            </span>
-            @if($poem->preface)
-                <pre class="preface font-song" itemprop="preface">{{ $poem->preface }}</pre> @endif
-            @if($poem->subtitle)
-                <pre class="subtitle font-song" itemprop="subtitle">{{ $poem->subtitle }}</pre> @endif
-            <pre class="poem-content font-song {{$softWrap ? 'soft-wrap' : ''}}" itemprop="articleBody"
-                 lang="{{ $poem->language }}">{{ $poem->poem }}</pre>
+            <div class="poem-main">
+                <h1 class="title font-hei" itemprop="headline" id="title">{{ $poem->title }}</h1>
+                <span itemprops="provider" itemscope itemtype="https://schema.org/Organization" class="hidden">
+                    <span itemprops="name">PoemWiki</span>
+                    <meta itemprops="url" content="https://poemwiki.org" />
+                </span>
+
+                @if($poem->preface)
+                    <pre class="preface font-hei" itemprop="preface">{{ $poem->preface }}</pre>
+                @endif
+
+                @if($poem->subtitle)
+                    <pre class="subtitle font-hei" itemprop="subtitle">{{ $poem->subtitle }}</pre>
+                @endif
+
+                <div class="poem-content {{$softWrap ? 'soft-wrap' : ''}}" itemprop="articleBody"
+                     lang="{{ $poem->lang ? $poem->lang->locale : $poem->language }}">
+                    <code class="poem-line no-height"><br></code>
+                    @foreach(Str::of($poem->poem)->toLines() as $line)
+                        @if(trim($line))
+                            <code class="poem-line font-hei">{{$line}}</code>
+                        @else
+                            <code class="poem-line poem-line-empty"><br></code>
+                        @endif
+                    @endforeach
+                    <p class="poem-line no-height"><br></p>
+                </div>
+            </div>
 
             <section class="poem-meta">
                 <dl class="poem-info">
@@ -40,13 +66,13 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                         <dt>@lang('admin.poem.columns.time')</dt>
                         @if($poem->year && $poem->month && $poem->date)
                             <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}
-                                -{{$poem->date}}</dd>
+                                -{{$poem->date}}</dd><br>
                         @elseif($poem->year && $poem->month)
-                            <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}</dd>
+                            <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}</dd><br>
                         @elseif($poem->month && $poem->date)
-                            <dd itemprop="dateCreated" class="poem-time">{{$poem->month}}-{{$poem->date}}</dd>
+                            <dd itemprop="dateCreated" class="poem-time">{{$poem->month}}-{{$poem->date}}</dd><br>
                         @elseif($poem->year)
-                            <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}</dd>
+                            <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}</dd><br>
                         @endif
                     @endif
 
@@ -62,16 +88,16 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                                 @endif
                             </a>
                         </address>
-                    </dd>
+                    </dd><br>
 
                     @if($poem->translator)
                         <dt>@lang('admin.poem.columns.translator')</dt>
-                        <dd itemprop="translator" class="poem-translator">{{$translator}}</dd>
+                        <dd itemprop="translator" class="poem-translator">{{$translator}}</dd><br>
                     @endif
 
                     @if($poem->from)
                         <dt>@lang('admin.poem.columns.from')</dt>
-                        <dd itemprop="isPartOf" class="poem-from">{{$poem->from}}</dd>
+                        <dd itemprop="isPartOf" class="poem-from">{{$poem->from}}</dd><br>
                     @endif
                 </dl>
                 <a class="edit btn"
@@ -80,6 +106,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                     @if(count($logs) >= 1)
                         @php
                             //dd($logs);
+                            /** @var \App\Models\ActivityLog[] $logs */
                             $latestLog = $logs[0];
                             $initialLog = $logs[count($logs) - 1];
                         @endphp
@@ -105,18 +132,18 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                         @if(!$poem->originalPoem)
                             <dt>@lang('poem.no original work related')</dt><a class=""
                                                                               href="{{ Auth::check() ? route('poems/create', ['translated_fake_id' => $fakeId]) : route('login', ['ref' => route('poems/create', ['translated_fake_id' => $fakeId], false)]) }}">
-                                <dd>@lang('poem.add original work')</a></dd>
+                                <dd>@lang('poem.add original work')</a></dd><br>
                         @else
                             <a href="{{$poem->originalPoem->url}}">
                                 <dt>{{$poem->originalPoem->lang ? $poem->originalPoem->lang->name.'['.trans('poem.original work').']' : trans('poem.original work')}}</dt>
-                                <dd>{{$poem->originalPoem->poet}}</dd>
+                                <dd>{{$poem->originalPoem->poet}}</dd><br>
                             </a>
                         @endif
 
                         @foreach($poem->otherTranslatedPoems()->get() as $t)
                             <a href="{{$t->url}}">
                                 <dt>{{$t->lang->name ?? trans('poem.other')}}</dt>
-                                <dd>{{$t->translator ?? '佚名'}}</dd>
+                                <dd>{{$t->translator ?? '佚名'}}</dd><br>
                             </a>
                         @endforeach
 
@@ -124,7 +151,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                         @foreach($poem->translatedPoems as $t)
                             <a href="{{$t->url}}">
                                 <dt>{{$t->lang->name ?? trans('poem.other')}}</dt>
-                                <dd>{{$t->translator ?? '佚名'}}</dd>
+                                <dd>{{$t->translator ?? '佚名'}}</dd><br>
                             </a>
                         @endforeach
                     @endif
@@ -148,8 +175,10 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
 
     <nav class="next">
         <span>@lang('Next Poem')</span>
-        <a class="no-bg title font-song no-select" href="{{$randomPoemUrl}}">{{$randomPoemTitle}}</a>
-        <p class="first-line">{!!Str::of($randomPoemFirstLine)->surround('span')!!}</p>
+        <p>
+            <a class="no-bg title font-hei no-select" href="{{$randomPoemUrl}}">{{$randomPoemTitle}}</a>
+            <a class="first-line no-bg" href="{{$randomPoemUrl}}">{!!Str::of($randomPoemFirstLine)->surround('span')!!}</a>
+        </p>
     </nav>
 
 <script src="{{ asset('js/lib/color-hash.js') }}"></script>
@@ -169,7 +198,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
             $nav.classList.remove('show-title');
         }
     });
-    $nav.addEventListener('dblclick', function () {
+    $nav.addEventListener('click', function () {
         window.scrollTo({top:0});
     });
 </script>

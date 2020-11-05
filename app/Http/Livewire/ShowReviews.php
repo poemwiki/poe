@@ -71,14 +71,17 @@ class ShowReviews extends Component {
     }
 
     public function render() {
-        $reviews = $this->reviewRepository->listByOriginalPoem($this->poem);
+        // TODO paginate for reviews
+        $reviews = $this->reviewRepository->listByOriginalPoem($this->poem, 100);
         $userIds = [];
+        $poemIds = [];
         foreach ($reviews as $review) {
             $userIds[] = $review->user->id;
+            $poemIds[] = $review->poem->id;
         }
 
         $userScore = [];
-        $scores = $this->scoreRepository->listByPoemUsers($this->poem, $userIds)->get();
+        $scores = $this->scoreRepository->listByPoemsUsers($poemIds, $userIds)->get();
         foreach ($scores as $score) {
             $userScore[$score->user_id] = $score->score;
         }

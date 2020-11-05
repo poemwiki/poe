@@ -1,6 +1,6 @@
 .title {
   font-size: $font-size-larger;
-  font-weight: 400;
+  font-weight: bolder;
   vertical-align: unset;
   margin: 0;
   &:before {
@@ -9,9 +9,6 @@
     animation: fadein 5s ease;
     color: rgba(255, 255, 255, 0);
     color: var(--main-color);
-  }
-  @include media-breakpoint-down(xs) {
-    font-size: $font-size * 1.2;
   }
 }
 
@@ -22,29 +19,62 @@ section.poem {
   padding: 2rem 1.6rem;
 
   article{
+    .poem-main{
+      @include media-breakpoint-down(xs) {
+        min-height: calc(100vh - 14.4rem);
+      }
+    }
+
     .title{
       margin-bottom: 1.6rem;
     }
     .preface{
       color: $gray;
       text-indent: 2em;
+      font-size: $font-size-sm;
     }
     .subtitle{
       font-size: 1.1em;
       font-weight: bolder;
     }
 
-    pre{
+
+    .poem-content{
+      //padding-left: 1em;
+      //text-indent: -1em;
       font-size: $font-size;
       line-height: 2;
       animation: fadein 2s ease-out;
       @include media-breakpoint-down(xs) {
         font-size: $font-size;
+        white-space: nowrap;
+        overflow: auto;
       }
-    }
-    .title::selection, pre::selection {
-      color: var(--main-color);
-      background-color: transparent;
+      &>.poem-line{
+        //margin: 0;
+        padding: .4em 0;
+        display: block;
+        line-height: 1.6em;
+        border: transparent 0;
+        border-radius: .2em;
+        &.poem-line-empty{
+          height: 1.4em;
+          line-height: 1.4em;
+        }
+        &.no-height {
+          height: 0;
+          padding: 0;
+          margin: 0;
+        }
+        &::selection,&>br::selection {
+          color: var(--main-color);
+          background-color: transparent;
+        }
+        &:active {
+          // TODO this is for share function
+          // background-color: lighten($gray-lighter, 10);
+        }
+      }
     }
 
 
@@ -134,30 +164,38 @@ nav.next{
   margin: 3rem 0 3rem 0;
   padding: 2rem 1.6rem;
   >span{
-    color: $gray;
-    font-size: $font-size-sm;
-  }
-  >a{
     display: block;
-    height: 2.2em;
-    color: $default-text-color;
-    white-space: nowrap;
-    overflow-x: scroll;
-    &:before{
-      color: var(--main-color-next);
-    }
-  }
-  >p.first-line{
-    font-size: $font-size-sm;
-    line-height: 1em;
-    opacity: 0;
     color: $gray;
-    transition: opacity .8s ease-out;
-    @include media-breakpoint-down(xs){
-      opacity: 1;
-    }
+    font-size: $font-size-sm;
   }
-  >a:hover+p.first-line{
-    opacity: 1!important;
+  >p{
+    >a.title{
+      display: inline-block;
+      width: 100%;
+      height: 2.2em;
+      color: $blue;
+
+      &:before{
+        color: var(--main-color-next);
+      }
+    }
+    >a.first-line{
+      display: block;
+      color: $gray;
+      font-size: $font-size-sm;
+      height: 1.2em;
+      line-height: 1.2em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0;
+      transition: opacity .8s ease-out;
+      @include media-breakpoint-down(xs){
+        opacity: 1;
+      }
+    }
+    &:hover>a.first-line{
+      opacity: 1!important;
+    }
   }
 }

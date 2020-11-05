@@ -30,12 +30,17 @@ class AppServiceProvider extends ServiceProvider {
                 return new static($carry . "<$tagName $attr>$content</$tagName>");
             });
         });
+
         Stringable::macro('firstLine', function ($lengthLimit = 20) {
-            $arr = explode("\n", $this->value, 3);
+            $arr = explode("\n", $this->value);
             $firstLine = (new static($arr[0]))->replaceMatches('@[[:punct:]]+$@u', '');
             return $firstLine->length > $lengthLimit
                 ? new static($firstLine->split('@[,，.。:：;；]@u', 2)->first())
                 : $firstLine;
+        });
+
+        Stringable::macro('toLines', function () {
+            return $this->explode("\n");
         });
     }
 }

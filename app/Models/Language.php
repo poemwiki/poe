@@ -79,18 +79,8 @@ class Language extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      **/
-    public function poems()
-    {
+    public function poems() {
         return $this->hasMany(\App\Models\Poem::class, 'language', 'id');
-    }
-
-    public static function listAll() {
-        $langs = self::select(['id', 'name_cn'])->get()->toArray();
-        $langList = [];
-        foreach ($langs as $value) {
-            $langList[$value['id']] = $value['name_cn'];
-        };
-        return $langList;
     }
 
     public static function ids() {

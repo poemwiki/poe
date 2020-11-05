@@ -50,7 +50,7 @@ article.poet{
         height: 1.2em;
         line-height: 1.2em;
         color: $gray;
-        overflow-y: hidden;
+        overflow: hidden;
 
         &>span{
           //transform: translateY(0);
