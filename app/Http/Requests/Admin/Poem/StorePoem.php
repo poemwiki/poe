@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Poem;
 
+use App\Models\Genre;
 use App\Models\Language;
 use App\Models\Poem;
 use Illuminate\Foundation\Http\FormRequest;
@@ -48,6 +49,7 @@ class StorePoem extends FormRequest {
             'content_id' => ['nullable', 'integer'],
             'original_id' => ['nullable', 'integer', 'exists:'.\App\Models\Poem::class.',id'],
             'translated_id' => ['nullable', 'integer', 'exists:'.\App\Models\Poem::class.',id'],
+            'genre_id' => ['nullable', Rule::in(Genre::ids())],
         ];
     }
 

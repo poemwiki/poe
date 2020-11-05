@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\Poem\IndexPoem;
 use App\Http\Requests\Admin\Poem\StorePoem;
 use App\Http\Requests\Admin\Poem\UpdatePoem;
 use App\Models\ActivityLog;
+use App\Models\Genre;
 use App\Models\Language;
 use App\Models\Poem;
 use App\Repositories\PoemRepository;
@@ -100,6 +101,7 @@ class PoemController extends Controller
         return view('poems.create', [
             'userName' => $user->name,
             'languageList' => Language::all(),
+            'genreList' => Genre::all(),
             'translatedPoem' => $translatedPoem ?? null,
             'originalPoem' => $originalPoem ?? null
         ]);
@@ -151,7 +153,8 @@ class PoemController extends Controller
         return view('poems.edit', [
             'poem' => $poem,
             'userName' => $user->name,
-            'languageList' => Language::all()
+            'languageList' => Language::all(),
+            'genreList' => Genre::all()
         ]);
     }
 

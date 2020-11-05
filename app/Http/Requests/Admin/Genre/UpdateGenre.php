@@ -25,10 +25,10 @@ class UpdateGenre extends TranslatableFormRequest
      */
     public function untranslatableRules(): array {
         return [
-            'f_id' => ['sometimes', 'string'],
+            'f_id' => ['sometimes', 'integer'],
             'name' => ['sometimes', Rule::unique('genre', 'name')->ignore($this->genre->getKey(), $this->genre->getKeyName()), 'string'],
             'wikidata_id' => ['nullable', 'string'],
-            
+
 
         ];
     }
@@ -42,7 +42,7 @@ class UpdateGenre extends TranslatableFormRequest
         return [
             'describe_lang' => ['nullable', 'string'],
             'name_lang' => ['sometimes', 'string'],
-            
+
         ];
     }
 

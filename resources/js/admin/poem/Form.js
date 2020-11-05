@@ -32,7 +32,8 @@ Vue.component('poem-form', {
         // is_lock:  false ,
         // content_id:  '' ,
         original_id: '',
-        translated_id: ''
+        translated_id: '',
+        genre_id: '',
       },
 
       cmOptions: {
@@ -59,6 +60,7 @@ Vue.component('poem-form', {
     this.form.bedtime_post_title = this.$el.querySelector('[name="bedtime_post_title"]')?.getAttribute('value') || this.form.bedtime_post_title;
     this.form.original_id = this.$el.querySelector('[name="original_id"]')?.getAttribute('value') || this.form.original_id;
     this.form.translated_id = this.$el.querySelector('[name="translated_id"]')?.getAttribute('value') || this.form.translated_id;
+    this.form.genre_id = this.$el.querySelector('[name="genre_id"]')?.getAttribute('value') || this.form.genre_id;
 
   },
 

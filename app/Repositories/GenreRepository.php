@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Models\Language;
+use App\Models\Genre;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -11,15 +11,13 @@ use Illuminate\Support\Facades\DB;
  * @package App\Repositories
  * @version July 19, 2020, 11:24 am UTC
  */
-class LanguageRepository extends BaseRepository {
+class GenreRepository extends BaseRepository {
     /**
      * @var array
      */
     protected $fieldSearchable = [
         'name',
-        'name_cn',
-        'name_lang',
-        'id'
+        'name_cn'
     ];
 
     /**
@@ -33,7 +31,7 @@ class LanguageRepository extends BaseRepository {
 
     public static function findByName($name) {
         $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
-        return Language::select(['id', 'name_lang'])
+        return Genre::select(['id', 'name_lang'])
             ->whereRaw('LOWER(your_table.your_column) LIKE ' . $value)->first()->toArray();
     }
 
@@ -41,6 +39,6 @@ class LanguageRepository extends BaseRepository {
      * Configure the Model
      **/
     public function model() {
-        return Language::class;
+        return Genre::class;
     }
 }

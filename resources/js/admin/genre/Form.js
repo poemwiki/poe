@@ -6,11 +6,11 @@ Vue.component('genre-form', {
         return {
             form: {
                 describe_lang:  this.getLocalizedFormDefaults() ,
-                f_id:  '' ,
+                f_id:  0 ,
                 name:  '' ,
                 name_lang:  this.getLocalizedFormDefaults() ,
                 wikidata_id:  '' ,
-                
+
             }
         }
     }

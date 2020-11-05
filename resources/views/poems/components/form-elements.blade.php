@@ -146,6 +146,30 @@
 </div>
 
 <div class="form-group row"
+     :class="{'hidden' : form.is_original==0, 'has-danger': errors.has('genre_id'), 'has-success': fields.genre_id && fields.genre_id.valid }">
+    <label for="genre_id" class="col-form-label text-md-right"
+           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.genre_id') }}</label>
+
+    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+        <select class="form-control"
+                :class="{'form-control-danger': errors.has('genre_id'), 'form-control-success': fields.genre_id && fields.genre_id.valid}"
+                id="genre_id" v-model="form.genre_id"
+                v-validate="''"
+                data-vv-as="{{ trans('admin.poem.columns.genre_id') }}" data-vv-name="genre_id"
+                name="genre_id_fake_element">
+            <option value="" :selected="form.genre_id==''">  </option>
+            @foreach($genreList as $genre)
+                <option value="{{$genre->id}}" :selected="form.genre_id=={{$genre->id}}">{{ $genre->name_lang }}</option>
+            @endforeach
+        </select>
+        <input type="hidden" name="genre_id" :value="form.genre_id">
+        <div v-if="errors.has('genre_id')" class="form-control-feedback form-text" v-cloak>@{{
+            errors.first('genre_id') }}
+        </div>
+    </div>
+</div>
+
+<div class="form-group row"
      :class="{'hidden' : form.is_original==1,'has-danger': errors.has('translator') }">
     <label for="translator" class="col-form-label text-md-right"
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.translator') }}</label>

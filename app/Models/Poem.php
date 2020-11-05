@@ -85,7 +85,8 @@ class Poem extends Model {
         'original_id' => 'integer',
         'translated_id' => 'integer',
         'preface' => 'string',
-        'subtitle' => 'string'
+        'subtitle' => 'string',
+        'genre_id' => 'integer',
     ];
 
 

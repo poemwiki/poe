@@ -25,10 +25,10 @@ class StoreGenre extends TranslatableFormRequest
      */
     public function untranslatableRules(): array {
         return [
-            'f_id' => ['required', 'string'],
+            'f_id' => ['required', 'integer'],
             'name' => ['required', Rule::unique('genre', 'name'), 'string'],
             'wikidata_id' => ['nullable', 'string'],
-            
+
         ];
     }
 
@@ -41,7 +41,7 @@ class StoreGenre extends TranslatableFormRequest
         return [
             'describe_lang' => ['nullable', 'string'],
             'name_lang' => ['required', 'string'],
-            
+
         ];
     }
 
