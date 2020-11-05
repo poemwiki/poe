@@ -482,4 +482,8 @@ abstract class BaseRepository {
 
         return $query->get($columns);
     }
+
+    public function ids() {
+        return $this->newQuery()->select('id')->get()->pluck('id');
+    }
 }

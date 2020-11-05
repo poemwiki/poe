@@ -56,4 +56,8 @@ class Genre extends Model {
     public function getResourceUrlAttribute() {
         return url('/admin/genres/' . $this->getKey());
     }
+
+    public static function ids() {
+        return self::select('id')->get()->pluck('id');
+    }
 }
