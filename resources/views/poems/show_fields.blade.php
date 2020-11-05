@@ -47,7 +47,8 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
 
                 <div class="poem-content {{$softWrap ? 'soft-wrap' : ''}} {{$graphemeLength >= config('app.length_too_long') ? 'text-justify' : ''}}"
                      itemprop="articleBody"
-                     @if($poem->lang) lang="{{ $poem->lang->locale }}"> @endif
+                     @if($poem->lang) lang="{{ $poem->lang->locale }}" @endif
+                >
                     <code class="poem-line no-height"><br></code>
                     @foreach(Str::of($poem->poem)->toLines() as $line)
                         @if(trim($line))
