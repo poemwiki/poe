@@ -13,9 +13,8 @@ $graphemeLength = max(array_map(function($line) {
 
 $softWrap = true;
 $maxLengthConf = config('app.language_line_length_max');
-if ($poem->lang || $poem->language) {
-    $languageId = $poem->lang ? $poem->lang->id : \App\Repositories\LanguageRepository::findByName($poem->language)->id;
-    $maxLength = $maxLengthConf[$languageId];
+if ($poem->language_id) {
+    $maxLength = $maxLengthConf[$poem->language_id];
 } else {
     $maxLength = config('app.default_soft_wrap_length');
 }
@@ -46,8 +45,9 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                     <pre class="subtitle font-hei" itemprop="subtitle">{{ $poem->subtitle }}</pre>
                 @endif
 
-                <div class="poem-content {{$softWrap ? 'soft-wrap' : ''}}" itemprop="articleBody"
-                     lang="{{ $poem->lang ? $poem->lang->locale : $poem->language }}">
+                <div class="poem-content {{$softWrap ? 'soft-wrap' : ''}} {{$graphemeLength >= config('app.length_too_long') ? 'text-justify' : ''}}"
+                     itemprop="articleBody"
+                     @if($poem->lang) lang="{{ $poem->lang->locale }}"> @endif
                     <code class="poem-line no-height"><br></code>
                     @foreach(Str::of($poem->poem)->toLines() as $line)
                         @if(trim($line))
@@ -130,19 +130,19 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                     <dt>@lang('poem.Translated/Original Version of This Poem')</dt>
                     @if(!$poem->is_original)
                         @if(!$poem->originalPoem)
-                            <dt>@lang('poem.no original work related')</dt><a class=""
-                                                                              href="{{ Auth::check() ? route('poems/create', ['translated_fake_id' => $fakeId]) : route('login', ['ref' => route('poems/create', ['translated_fake_id' => $fakeId], false)]) }}">
-                                <dd>@lang('poem.add original work')</a></dd><br>
+                            <dt>@lang('poem.no original work related')</dt>
+                            <dd><a class="" href="{{ Auth::check() ? route('poems/create', ['translated_fake_id' => $fakeId]) : route('login', ['ref' => route('poems/create', ['translated_fake_id' => $fakeId], false)]) }}">
+                                @lang('poem.add original work')</a></dd><br>
                         @else
                             <a href="{{$poem->originalPoem->url}}">
-                                <dt>{{$poem->originalPoem->lang ? $poem->originalPoem->lang->name.'['.trans('poem.original work').']' : trans('poem.original work')}}</dt>
+                                <dt>{{$poem->originalPoem->lang ? $poem->originalPoem->lang->name_lang.'['.trans('poem.original work').']' : trans('poem.original work')}}</dt>
                                 <dd>{{$poem->originalPoem->poet}}</dd><br>
                             </a>
                         @endif
 
                         @foreach($poem->otherTranslatedPoems()->get() as $t)
                             <a href="{{$t->url}}">
-                                <dt>{{$t->lang->name ?? trans('poem.other')}}</dt>
+                                <dt>{{$t->lang->name_lang ?? trans('poem.other')}}</dt>
                                 <dd>{{$t->translator ?? '佚名'}}</dd><br>
                             </a>
                         @endforeach
@@ -150,7 +150,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                     @elseif($poem->translatedPoems)
                         @foreach($poem->translatedPoems as $t)
                             <a href="{{$t->url}}">
-                                <dt>{{$t->lang->name ?? trans('poem.other')}}</dt>
+                                <dt>{{$t->lang->name_lang ?? trans('poem.other')}}</dt>
                                 <dd>{{$t->translator ?? '佚名'}}</dd><br>
                             </a>
                         @endforeach

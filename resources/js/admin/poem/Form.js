@@ -13,7 +13,7 @@ Vue.component('poem-form', {
     return {
       form: {
         title: '',
-        language: null,
+        language_id: null,
         is_original: 1,
         poet: '',
         poet_cn: '',

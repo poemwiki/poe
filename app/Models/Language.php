@@ -2,58 +2,41 @@
 
 namespace App\Models;
 
-use Eloquent as Model;
+use Brackets\Translatable\Traits\HasTranslations;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
 
-/**
- * @SWG\Definition(
- *      definition="Language",
- *      required={""},
- *      @SWG\Property(
- *          property="id",
- *          description="id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="name",
- *          description="name",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="name_cn",
- *          description="name_cn",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="created_at",
- *          description="created_at",
- *          type="string",
- *          format="date-time"
- *      ),
- *      @SWG\Property(
- *          property="updated_at",
- *          description="updated_at",
- *          type="string",
- *          format="date-time"
- *      )
- * )
- */
-class Language extends Model
-{
+class Language extends Model {
     use SoftDeletes;
+    use HasTranslations;
+    use LogsActivity;
+
+    protected static $logFillable = true;
+    protected static $logOnlyDirty = true;
+    protected static $ignoreChangedAttributes = ['created_at'];
 
     public $table = 'language';
 
-
-    protected $dates = ['deleted_at'];
-
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at'
+    ];
 
 
     public $fillable = [
         'name',
-        'name_cn'
+        'name_cn',
+        'name_lang',
+        'locale',
+        'wikidata_id',
+        'wikipedia_url',
+        'pic_url',
+    ];
+    // these attributes are translatable
+    public $translatable = [
+        'name_lang'
     ];
 
     /**
@@ -80,7 +63,7 @@ class Language extends Model
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      **/
     public function poems() {
-        return $this->hasMany(\App\Models\Poem::class, 'language', 'id');
+        return $this->hasMany(\App\Models\Poem::class, 'language_id', 'id');
     }
 
     public static function ids() {

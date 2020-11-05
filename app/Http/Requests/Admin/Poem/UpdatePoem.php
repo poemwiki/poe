@@ -32,7 +32,7 @@ class UpdatePoem extends FormRequest
         return [
             'id' => ['integer'],
             'title' => ['nullable', 'string'],
-            'language' => Rule::in(Language::ids()),
+            'language_id' => Rule::in(Language::ids()),
             'is_original' => ['nullable', 'boolean'],
             'poet' => ['nullable', 'string'],
             'poet_cn' => ['nullable', 'string'],

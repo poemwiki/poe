@@ -55,7 +55,7 @@ class PoemController extends Controller
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function show(String $fakeId) {
+    public function show($fakeId) {
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
         return $this->_poem($poem);
     }

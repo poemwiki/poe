@@ -24,7 +24,7 @@
         "inView": true
     },
     {
-        "name": "language",
+        "name": "language_id",
         "dbType": "boolean:nullable",
         "htmlType": "checkbox,1",
         "validations": null,

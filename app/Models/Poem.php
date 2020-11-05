@@ -32,7 +32,7 @@ class Poem extends Model {
 
     public $fillable = [
         'title',
-        'language',
+        'language_id',
         'is_original',
         'poet',
         'poet_cn',
@@ -52,7 +52,8 @@ class Poem extends Model {
 //        'content_id',
         'original_id',
         'preface',
-        'subtitle'
+        'subtitle',
+        'genre_id',
     ];
 
     /**
@@ -63,7 +64,7 @@ class Poem extends Model {
     protected $casts = [
         'id' => 'integer',
         'title' => 'string',
-        'language' => 'integer',
+        'language_id' => 'integer',
         'is_original' => 'integer',
         'poet' => 'string',
         'poet_cn' => 'string',
@@ -195,7 +196,7 @@ class Poem extends Model {
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo
      **/
     public function lang() {
-        return $this->belongsTo(\App\Models\Language::class, 'language', 'id');
+        return $this->belongsTo(\App\Models\Language::class, 'language_id', 'id');
     }
 
     /**
@@ -235,6 +236,13 @@ class Poem extends Model {
 
     public function otherTranslatedPoems() {
         return $this->sameTranslatedPoems()->where('id', '<>', $this->id);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     **/
+    public function genre() {
+        return $this->belongsTo(\App\Models\Genre::class, 'genre_id', 'id');
     }
 
     /**

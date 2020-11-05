@@ -163,24 +163,24 @@
 </div>
 
 <div class="form-group row"
-     :class="{'has-danger': errors.has('language'), 'has-success': fields.language && fields.language.valid }">
-    <label for="language" class="col-form-label text-md-right required"
-           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.language') }}</label>
+     :class="{'has-danger': errors.has('language_id'), 'has-success': fields.language_id && fields.language_id.valid }">
+    <label for="language_id" class="col-form-label text-md-right required"
+           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.language_id') }}</label>
 
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
         <select class="form-control"
-                :class="{'form-control-danger': errors.has('language'), 'form-control-success': fields.language && fields.language.valid}"
-                id="language" v-model="form.language"
+                :class="{'form-control-danger': errors.has('language_id'), 'form-control-success': fields.language_id && fields.language_id.valid}"
+                id="language_id" v-model="form.language_id"
                 v-validate="'required'"
-                data-vv-as="{{ trans('admin.poem.columns.language') }}" data-vv-name="language"
-                name="language_fake_element">
+                data-vv-as="{{ trans('admin.poem.columns.language_id') }}" data-vv-name="language_id"
+                name="language_id_fake_element">
             @foreach($languageList as $lang)
-                <option value="{{$lang->id}}" :selected="form.language=={{$lang->id}}">{{ $lang->name }}</option>
+                <option value="{{$lang->id}}" :selected="form.language_id=={{$lang->id}}">{{ $lang->name }}</option>
             @endforeach
         </select>
-        <input type="hidden" name="language" :value="form.language">
-        <div v-if="errors.has('language')" class="form-control-feedback form-text" v-cloak>@{{
-            errors.first('language') }}
+        <input type="hidden" name="language_id" :value="form.language_id">
+        <div v-if="errors.has('language_id')" class="form-control-feedback form-text" v-cloak>@{{
+            errors.first('language_id') }}
         </div>
     </div>
 </div>

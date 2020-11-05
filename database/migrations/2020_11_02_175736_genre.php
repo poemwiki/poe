@@ -73,7 +73,7 @@ class Genre extends Migration {
 
         Schema::create('author', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned();
-            $table->json('name_lang')->nullable();
+            $table->json('name_lang');
             $table->unsignedBigInteger('user_id')->nullable();
             $table->string('pic_url')->nullable();
 
@@ -85,6 +85,7 @@ class Genre extends Migration {
         });
 
         Schema::table('poem', function (Blueprint $table) {
+            $table->renameColumn('language', 'language_id');
             $table->unsignedBigInteger('genre_id')->nullable();
             $table->unsignedBigInteger('dynasty_id')->nullable();
             $table->unsignedBigInteger('nation_id')->nullable();
@@ -92,6 +93,7 @@ class Genre extends Migration {
         Schema::table('language', function (Blueprint $table) {
             $table->removeColumn('name_cn');
             $table->json('name_lang');
+            $table->string('locale')->default('');
             $table->string('pic_url')->nullable();
             $table->text('wikidata_id')->nullable();
             $table->json('wikipedia_url')->nullable();

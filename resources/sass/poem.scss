@@ -40,19 +40,18 @@ section.poem {
 
 
     .poem-content{
-      //padding-left: 1em;
-      //text-indent: -1em;
+      margin-left: -.4em;
       font-size: $font-size;
+      letter-spacing: 0.08em;
       line-height: 2;
       animation: fadein 2s ease-out;
       @include media-breakpoint-down(xs) {
-        font-size: $font-size;
+        font-size: 4vw;
         white-space: nowrap;
         overflow: auto;
       }
       &>.poem-line{
-        //margin: 0;
-        padding: .4em 0;
+        padding: .4em;
         display: block;
         line-height: 1.6em;
         border: transparent 0;
@@ -70,9 +69,9 @@ section.poem {
           color: var(--main-color);
           background-color: transparent;
         }
-        &:active {
-          // TODO this is for share function
-          // background-color: lighten($gray-lighter, 10);
+        &:hover {
+           // TODO this is for share function
+           background-color: lighten($gray-lighter, 10);
         }
       }
     }

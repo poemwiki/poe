@@ -23,12 +23,11 @@ class IndexPoem extends FormRequest
      */
     public function rules(): array {
         return [
-            'orderBy' => 'in:id,title,language,is_original,poet,poet_cn,bedtime_post_id,bedtime_post_title,length,translator,from,year,month,date,dynasty,nation,need_confirm,is_lock,content_id|nullable',
-            'orderDirection' => 'in:asc,desc|nullable',
+            'orderBy' => 'in:updated_at, id,title,language_id,is_original,poet,poet_cn,bedtime_post_id,bedtime_post_title,length,translator,from,year,month,date,dynasty,nation,need_confirm,is_lock,content_id|nullable',
+            'orderDirection' => 'in:desc|nullable',
             'search' => 'string|nullable',
             'page' => 'integer|nullable',
             'per_page' => 'integer|nullable',
-
         ];
     }
 }
