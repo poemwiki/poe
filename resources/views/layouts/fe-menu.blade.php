@@ -1,7 +1,7 @@
 <nav class="header-fixed" id="top-nav">
     <ul class="flex-center-vertically">
         <li class="flex-center-vertically site-logo" id="site-logo"><a class="no-bg" href="/"></a></li>
-        <li class="flex-center-vertically"><a href="#" class="title no-bg font-song no-select" id="menu-title">@yield('title')</a></li>
+        <li class="flex-center-vertically"><span href="#" class="title no-bg font-hei no-select" id="menu-title">@yield('title')</span></li>
         <li class="flex-center-vertically">
             @auth
                 <a class="menu-button no-bg logout" href="{{route('logout')}}">@lang('Logout')</a>
