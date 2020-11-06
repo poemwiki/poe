@@ -66,8 +66,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                     @if($poem->year or $poem->month)
                         <dt>@lang('admin.poem.columns.time')</dt>
                         @if($poem->year && $poem->month && $poem->date)
-                            <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}
-                                -{{$poem->date}}</dd><br>
+                            <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}-{{$poem->date}}</dd><br>
                         @elseif($poem->year && $poem->month)
                             <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}-{{$poem->month}}</dd><br>
                         @elseif($poem->month && $poem->date)
@@ -79,7 +78,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
 
                     <dt>@lang('admin.poem.columns.poet')</dt>
                     <dd itemscope itemtype="https://schema.org/Person">@if($nation)<span itemprop="nationality"
-                                                                                         class="poem-nation">{{$nation}}</span>@endif
+                        class="poem-nation">{{$nation}}</span>@endif
                         <address itemprop="name" class="poem-writer">
                             <a href="{{route('poet/show', $poem->poet)}}">
                                 @if($poem->poet_cn)
