@@ -184,3 +184,24 @@ main{
   //position: sticky;
   background-color: $bg-color;
 }
+
+.first-line{
+  display: block;
+  font-size: $font-size-sm;
+  height: 1.2em;
+  line-height: 1.2em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  >span {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: transform .666s $soft-enter-bezier, opacity 1.333s $soft-enter-bezier;
+  }
+}
+.show-first-line .first-line>span{
+  transform: translateY(0);
+  opacity: 1!important;
+}

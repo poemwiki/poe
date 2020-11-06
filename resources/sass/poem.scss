@@ -184,23 +184,9 @@ nav.next{
         color: var(--main-color-next);
       }
     }
-    >a.first-line{
-      display: block;
+    .first-line {
       color: $gray;
-      font-size: $font-size-sm;
-      height: 1.2em;
-      line-height: 1.2em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      opacity: 0;
-      transition: opacity .8s ease-out;
-      @include media-breakpoint-down(xs){
-        opacity: 1;
-      }
-    }
-    &:hover>a.first-line{
-      opacity: 1!important;
     }
   }
 }
+

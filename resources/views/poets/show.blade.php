@@ -19,7 +19,7 @@
                     Str::of(trim($poem->title) ? trim($poem->title) : '无题')
                         ->surround('span')!!}</a>
                 <p class="first-line">{!!Str::of($poem->poem)->firstLine()->surround('span', function ($i) {
-                            return 'style="animation-delay:'.($i*20).'ms"';
+                            return 'style="transition-delay:'.($i*20).'ms"';
                     })!!}</p>
             </li>
         @endforeach

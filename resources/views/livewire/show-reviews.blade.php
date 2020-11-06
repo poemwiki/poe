@@ -92,7 +92,7 @@
 </section>
 @push('scripts')
 <script type="text/javascript">
-    document.addEventListener('livewire:load', () => {
+    document.addEventListener('livewire:load', function() {
         var $open = document.getElementById('open-review');
         var $modal = document.getElementById('review-modal');
 

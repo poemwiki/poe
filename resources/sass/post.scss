@@ -18,11 +18,12 @@ article.poet{
     >li{
       position: relative;
       >a.title{
-        display: inline-block;
+        padding: 0;
         width: 100%;
+        display: inline-block;
+        color: $blue;
         line-height: 2em;
         overflow-y: hidden;
-        padding: 0;
 
         &>span{
           //vertical-align: bottom;
@@ -44,30 +45,10 @@ article.poet{
           }
         }
       }
-      &>p.first-line{
-        padding-left: $font-size-larger-in-px;
-        font-size: $font-size-sm;
-        height: 1.2em;
-        line-height: 1.2em;
-        color: $gray;
-        overflow: hidden;
 
-        &>span{
-          //transform: translateY(0);
-          animation: none;
-          @include media-breakpoint-up(sm){
-            display: inline-block;
-            opacity: 0;
-            transform: translateY(100%);
-          }
-        }
-      }
-      &:hover{
-        @include media-breakpoint-up(sm){
-          >p.first-line>span{
-            animation: appear .2s ease-out forwards;
-          }
-        }
+      .first-line{
+        padding-left: $font-size-larger-in-px;
+        color: $gray;
       }
     }
   }

@@ -177,7 +177,11 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
         <span>@lang('Next Poem')</span>
         <p>
             <a class="no-bg title font-hei no-select" href="{{$randomPoemUrl}}">{{$randomPoemTitle}}</a>
-            <a class="first-line no-bg" href="{{$randomPoemUrl}}">{!!Str::of($randomPoemFirstLine)->surround('span')!!}</a>
+            <a class="first-line no-bg" href="{{$randomPoemUrl}}">{!!
+                Str::of($randomPoemFirstLine)->surround('span', function ($i) {
+                    return 'style="transition-delay:'.($i*20).'ms"';
+                })!!}
+            </a>
         </p>
     </nav>
 

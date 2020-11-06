@@ -43,7 +43,7 @@ nav.header-fixed {
     top: 6rem;
     left: 1.6rem;
     line-height: 6rem;
-    transition: top .8s ease-out;
+    transition: top .8s ease-in;
 
     //@include media-breakpoint-only(xs) {
     //  font-size: $font-size * 1.2;
@@ -53,6 +53,7 @@ nav.header-fixed {
     .title{
       display: flex;
       top: 0;
+      transition: top .8s $soft-enter-bezier;
     }
     .site-logo{
       //display: none;
@@ -73,7 +74,8 @@ nav.header-fixed {
     }
     &a:hover {
       text-decoration: none;
-      animation: fadein 2s ease-in-out;
+      //color: $blue;
+      //transition: color .4s $soft-enter-bezier;
     }
   }
   .menu-button{

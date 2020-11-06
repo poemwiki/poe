@@ -30,6 +30,26 @@
     @stack('scripts')
 </body>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    $firstLines = document.querySelectorAll('.first-line');
+    if('IntersectionObserver' in window) {
+        var options = {root: null, rootMargin: '0px', threshold: [0.9]};
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                console.log(entry);
+                if (entry.intersectionRatio >= 0.9) {
+                    document.body.classList.add('show-first-line');
+                }
+            });
+        }, options);
+        [].forEach.call($firstLines, function($line) {
+            observer.observe($line);
+        });
+    }
+});
+</script>
+
 @if(Auth::check())
     @php
         $currentUser = Auth::user();
