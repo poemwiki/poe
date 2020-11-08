@@ -5,8 +5,10 @@ namespace App\Console\Commands;
 use App\Models\Wikidata;
 use Illuminate\Console\Command;
 use BorderCloud\SPARQL\SparqlClient;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class initialAlias extends Command {
     /**
@@ -22,7 +24,7 @@ class initialAlias extends Command {
      * @var string
      */
     protected $description = 'initial alias table, initial wikidata.data, initial poem.poet_id & poem.translator_id';
-    protected $entityApiUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=Q';
+    protected $entityApiUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=';
     protected $picUrlBase = 'https://upload.wikimedia.org/wikipedia/commons/';
 
     /**
@@ -46,7 +48,7 @@ class initialAlias extends Command {
 
 
         // add alias, alias.author_id
-        $this->importAliasFromWikiData(305962, 305962);
+        $this->importAliasFromWikiData(306000, 306100);
 
         // match poem.poet to alias, update poem.poet_id poem.translator_id
         $this->matchAliasForPoem(0, 999999);
@@ -60,12 +62,18 @@ class initialAlias extends Command {
 
     public function matchAliasForPoem($fromId = 0, $toId = 0) {
         $poems = DB::table('poem')->whereBetween('id', [$fromId, $toId])
-            ->where(function ($query) {
-                $query->whereNull('poet_id')
-                    ->orWhereNull('translator_id');
+            ->where(function (Builder $query) {
+                $query->where(function (Builder $query) {
+                    $query->whereNull('poet_id')
+                        ->whereNotNull('poet');
+                })->orWhere(function (Builder $query) {
+                    $query->whereNull('translator_id')
+                        ->whereNotNull('translator');
+                });
             })->get();
 
-        echo 'Need update author id: ' . count($poems) . PHP_EOL;
+
+        Log::info('Need update author id: ' . count($poems));
 
         foreach ($poems as $poem) {
             $poet = $poem->poet;
@@ -74,19 +82,22 @@ class initialAlias extends Command {
             if ($poet) {
                 $poetAlia = DB::table('alias')->where('name', $poet)->first();
                 if ($poetAlia) {
-                    DB::table('poem')->where([
-                        ['id', '=', $poem->id]
-                    ])->update(['poet_id' => $poetAlia->id]);
-                    echo "$poet \t $poetAlia->id \t $poetAlia->name \t $poetAlia->locale" . PHP_EOL;
+                    DB::table('poem')->where('id', $poem->id)
+                        ->update([
+                            'poet_id' => $poetAlia->id
+                        ]);
+                    Log::info("poem.poet_id updated: poem_id: $poem->id \t $poet \t alias_id $poetAlia->id \t $poetAlia->name \t $poetAlia->locale");
                 }
             }
+
             if ($translator) {
                 $translatorAlia = DB::table('alias')->where('name', $translator)->first();
                 if ($translatorAlia) {
-                    DB::table('poem')->where([
-                        ['id', '=', $poem->id]
-                    ])->update(['poet_id' => $translatorAlia->id]);
-                    echo "$translator \t $translatorAlia->id \t $translatorAlia->name \t $poetAlia->locale";
+                    DB::table('poem')->where('id', $poem->id)
+                        ->update([
+                            'poet_id' => $translatorAlia->id
+                        ]);
+                    Log::info("poem.translator_id updated: poem_id: $poem->id \t $translator \t $translatorAlia->id \t $translatorAlia->name \t $poetAlia->locale");
                 }
             }
         }
@@ -108,7 +119,6 @@ class initialAlias extends Command {
                 $language = DB::table('language')->select('id')->where('locale', $locale)->first();
 
                 foreach ($items as $item) {
-                    echo "$poet->id \t $locale \t $item->value" . PHP_EOL;
                     $insert = [
                         'name' => $item->value,
                         'locale' => $locale,
@@ -123,6 +133,7 @@ class initialAlias extends Command {
                         'locale' => $locale,
                         'name' => $item->value,
                     ], $insert);
+                    Log::info("Alias added: wikidata_id: $poet->id \t $locale \t $item->value");
                 }
             }
         }
