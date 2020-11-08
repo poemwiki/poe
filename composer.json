@@ -24,6 +24,7 @@
   "require": {
     "php": "^7.2.5",
     "ext-json": "*",
+    "bordercloud/sparql": "^2.0",
     "brackets/admin-translations": "dev-fix-dash-locale",
     "brackets/craftable": "dev-dev-fix-private-admin-translations-depend",
     "doctrine/dbal": "~2.3",
