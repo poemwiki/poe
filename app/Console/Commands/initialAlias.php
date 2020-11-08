@@ -48,10 +48,10 @@ class initialAlias extends Command {
 
 
         // add alias, alias.author_id
-        $this->importAliasFromWikiData(306000, 306100);
+        $this->importAliasFromWikiData(1376522, 4255778);
 
         // match poem.poet to alias, update poem.poet_id poem.translator_id
-        $this->matchAliasForPoem(0, 999999);
+        // $this->matchAliasForPoem(0, 999999);
         // if poem.poet not matched any alias?
 
         // add poem.poet_id
@@ -97,7 +97,7 @@ class initialAlias extends Command {
                         ->update([
                             'poet_id' => $translatorAlia->id
                         ]);
-                    Log::info("poem.translator_id updated: poem_id: $poem->id \t $translator \t $translatorAlia->id \t $translatorAlia->name \t $poetAlia->locale");
+                    Log::info("poem.translator_id updated: poem_id: $poem->id \t $translator \t $translatorAlia->id \t $translatorAlia->name \t $translatorAlia->locale");
                 }
             }
         }
