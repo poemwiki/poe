@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Wikidata;
 use Illuminate\Console\Command;
 use BorderCloud\SPARQL\SparqlClient;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class initialAuthor extends Command {
     /**
@@ -19,8 +21,9 @@ class initialAuthor extends Command {
      *
      * @var string
      */
-    protected $description = 'initial author and alias table, initial wikidata.data, initial poem.poet_id & poem.translator_id';
+    protected $description = 'initial author table';
     protected $entityApiUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=Q';
+    protected $picUrlBase = 'https://upload.wikimedia.org/wikipedia/commons/';
 
     /**
      * Create a new command instance.
@@ -37,63 +40,23 @@ class initialAuthor extends Command {
      * @return int
      */
     public function handle() {
-        // fill wikidata with wikidata_poem
-        $this->translateFromWikiDataPoem();
+        // YOU NEED TO IMPORT wikidata_poem from json file FIRST, manually
 
+        // fill wikidata with wikidata_poem
+        // $this->translateFromWikiDataPoem();
 
         // import author
-        $this->importAuthorFromWikiData();
+        $this->importAuthorFromWikiData(160422);
 
-        // add author.describe_lang name_lang wikipedia_url
-
-        // add alias, alias.author_id
-
-        // match poem.poet to alias to author_id,
-        // if poem.poet not matched any alias?
-
-        // add poem.poet_id
-        // add poem.translator_id
 
         return 0;
     }
 
-    public function getWiki($poet) {
-        $endpoint = "https://query.wikidata.org/sparql";
-        $sp_readonly = new SparqlClient();
-        $sp_readonly->setEndpointRead($endpoint);
-        $q = <<<EOD
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX wd: <http://www.wikidata.org/entity/>
-select  ?value
-where {
-        wd:Q41861 skos:altLabel ?value .
-FILTER (langMatches(lang(?value), "fr"))
-      }
-EOD;
-        $rows = $sp_readonly->query($q, 'rows');
-        $err = $sp_readonly->getErrors();
-        if ($err) {
-            print_r($err);
-            throw new Exception(print_r($err, true));
-        }
 
-        foreach ($rows["result"]["variables"] as $variable) {
-            printf("%-20.20s", $variable);
-            echo '|';
-        }
-        echo "\n";
-
-        foreach ($rows["result"]["rows"] as $row) {
-            foreach ($rows["result"]["variables"] as $variable) {
-                printf("%-20.20s", $row[$variable]);
-                echo '|';
-            }
-            echo "\n";
-        }
-    }
-
-    public function translateFromWikiDataPoem() {
-        $poets = DB::table('wikidata_poet')->select()->get();
+    public function translateFromWikiDataPoem($fromId = 0) {
+        $poets = DB::table('wikidata_poet')->where([
+            ['id', '>=', $fromId]
+        ])->get();
         foreach ($poets as $poet) {
             $insert = [
                 'id' => $poet->wikidata_id,
@@ -101,30 +64,66 @@ EOD;
                 'label_lang' => json_encode((object)['zh-CN' => $poet->label_zh, 'en' => $poet->label_en]),
                 // 'data' => json_encode()
             ];
-            DB::table('wikidata')->insert($insert);
+            DB::table('wikidata')->updateOrInsert(['id' => $poet->wikidata_id], $insert);
         }
     }
 
-    public function importAuthorFromWikiData() {
-        // write poet detail data into wikidata.data
-        $poets = DB::table('wikidata')->where(['type' => 0])->get();
-        foreach ($poets as $poet) {
-            $poets = DB::table('wikidata_poet')->select()->get();
-            foreach ($poets as $poet) {
-                $res = file_get_contents($this->entityApiUrl . $poet->id);
-                $data = json_decode($res);
-                if (!$data->success) continue;
+    public function importAuthorFromWikiData($fromId = 0) {
+        $poets = DB::table('wikidata')->where([
+            ['type', '=', Wikidata::TYPE['poet']],
+            ['id', '>=', $fromId],
+        ])->get();
 
-                // DB::table('wikidata')->
+        foreach ($poets as $poet) {
+            var_dump($this->entityApiUrl . $poet->id);
+            $response = Http::withOptions([
+                'http' => 'tcp://localhost:1087',
+                'https' => 'tcp://localhost:1087',
+            ])->timeout(20)->retry(3, 10)->get($this->entityApiUrl . $poet->id);
+            $body = (string)$response->getBody();
+
+            $data = json_decode($body);
+
+            if (!$data->success) continue;
+
+            // write poet detail data into wikidata.data
+            $entityId = 'Q' . $poet->id;
+            $entity = $data->entities->$entityId;
+            DB::table('wikidata')->where('id', $poet->id)
+                ->update(['data' => json_encode($entity)]);
+
+
+            $authorNameLang = [];
+            foreach ($entity->labels as $locale => $label) {
+                $authorNameLang[$locale] = $label->value;
+            }
+            $descriptionLang = [];
+            foreach ($entity->descriptions as $locale => $description) {
+                $descriptionLang[$locale] = $description->value;
             }
 
-            die();
+            $picUrl = null;
+            if (isset($entity->claims->P18)) {
+                $P18 = $entity->claims->P18;
+                foreach ($P18 as $image) {
+                    $fileName = str_replace(' ', '_', $image->mainsnak->datavalue->value);
+                    $ab = substr(md5($fileName), 0, 2);
+                    $a = substr($ab, 0, 1);
+                    $picUrl[] = $this->picUrlBase . $a . '/' . $ab . '/' . $fileName;
+                }
+            }
+            // insert poet detail data into author
             $insert = [
-                'id' => $poet->wikidata_id,
-                'name_lang' => $poet->label_lang,
-                'wiki_data_id' => $poet->id,
+                'name_lang' => json_encode((object)$authorNameLang),
+                'pic_url' => $picUrl ? json_encode($picUrl) : null,
+                'wikidata_id' => $poet->id,
+                'wikipedia_url' => json_encode($entity->sitelinks),
+                'describe_lang' => json_encode((object)$authorNameLang),
+                "created_at" => now(),
+                "updated_at" => now(),
             ];
-            DB::table('wikidata')->insert($insert);
+            DB::table('author')->updateOrInsert(['wikidata_id' => $poet->id], $insert);
+
         }
     }
 }

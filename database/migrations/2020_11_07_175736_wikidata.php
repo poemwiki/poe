@@ -15,11 +15,12 @@ class Wikidata extends Migration {
 
         Schema::create('wikidata', function (Blueprint $table) {
             $table->unsignedBigInteger('id')->unsigned()->unique()->primary()->comment('wikidata entity ID');
-            $table->enum('type', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])->comment(
-                '0:poet, 1:dynasty,
-                2:nation/region/country of citizenship, 3:language/locale, 4:genre');
+            $table->enum('type', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])->comment("
+                '0':poet, '1':nation/region/country of citizenship,
+                '2':language/locale, '3':genre', '4':dynasty");
             $table->json('label_lang');
             $table->json('data')->nullable();
+            $table->timestamps();
         });
 
         Schema::create('alias', function (Blueprint $table) {
@@ -36,12 +37,15 @@ class Wikidata extends Migration {
 
 
         Schema::table('poem', function (Blueprint $table) {
-            $table->foreignId('poet_id')->nullable()->constrained('author', 'id');
-            $table->foreignId('translator_id')->nullable()->constrained('author', 'id');
+            $table->unsignedBigInteger('poet_id')->nullable();
+            $table->unsignedBigInteger('translator_id')->nullable();
+            // $table->foreignId('poet_id')->nullable()->constrained('author', 'id');
+            // $table->foreignId('translator_id')->nullable()->constrained('author', 'id');
         });
 
         Schema::table('author', function (Blueprint $table) {
             $table->unsignedBigInteger('wikidata_id')->nullable();
+            $table->json('pic_url')->nullable();
         });
         Schema::table('language', function (Blueprint $table) {
             $table->unsignedBigInteger('wikidata_id')->nullable();
