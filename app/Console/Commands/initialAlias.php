@@ -48,11 +48,14 @@ class initialAlias extends Command {
 
 
         // add alias, alias.author_id
-        $this->importAliasFromWikiData(1376522, 4255778);
+        $this->importAliasFromWikiData(101247956, 101247956);
 
-        // match poem.poet to alias, update poem.poet_id poem.translator_id
-        // $this->matchAliasForPoem(0, 999999);
-        // if poem.poet not matched any alias?
+        // match poem.poet to author.name_lang or alias.name, update poem.poet_id poem.translator_id
+        $this->matchAliasFor('poet', 0, 999999);
+        $this->matchAliasFor('translator', 0, 999999);
+        // if poem.poet not matched any alias, create a author for it
+        // $this->createAuthorFor('poet', 0, 999999);
+        // $this->createAuthorFor('translator', 0, 999999);
 
         // add poem.poet_id
         // add poem.translator_id
@@ -60,46 +63,51 @@ class initialAlias extends Command {
         return 0;
     }
 
-    public function matchAliasForPoem($fromId = 0, $toId = 0) {
+    public function createAuthorFor($field, $fromId = 0, $toId = 9999999) {
+        // $idField = $field.'_id';
+        // $poems = DB::table('poem')->whereBetween('id', [$fromId, $toId])
+        //     ->whereNotNull($field)->whereNull($idField)->get();
+    }
+
+
+    public function matchAliasFor($field, $fromId = 0, $toId = 9999999) {
+        $idField = $field.'_id';
         $poems = DB::table('poem')->whereBetween('id', [$fromId, $toId])
-            ->where(function (Builder $query) {
-                $query->where(function (Builder $query) {
-                    $query->whereNull('poet_id')
-                        ->whereNotNull('poet');
-                })->orWhere(function (Builder $query) {
-                    $query->whereNull('translator_id')
-                        ->whereNotNull('translator');
-                });
-            })->get();
+            ->whereNotNull($field)->whereNull($idField)->get();
 
-
-        Log::info('Need update author id: ' . count($poems));
+        Log::info('Need update poem.' . $idField . ': ' . count($poems));
 
         foreach ($poems as $poem) {
-            $poet = $poem->poet;
-            $translator = $poem->translator;
+            $authorName = $poem->$field;
 
-            if ($poet) {
-                $poetAlia = DB::table('alias')->where('name', $poet)->first();
-                if ($poetAlia) {
-                    DB::table('poem')->where('id', $poem->id)
-                        ->update([
-                            'poet_id' => $poetAlia->id
-                        ]);
-                    Log::info("poem.poet_id updated: poem_id: $poem->id \t $poet \t alias_id $poetAlia->id \t $poetAlia->name \t $poetAlia->locale");
-                }
+            echo "Matching poem id=$poem->id $field $authorName " . PHP_EOL;
+
+            $author = DB::table('author')->select('id')->whereRaw(
+                "JSON_SEARCH(name_lang, 'one', JSON_UNQUOTE(:name))",
+                ['name' => $authorName]
+            )->first();
+            echo \Illuminate\Support\Arr::last(DB::getQueryLog())['query'] . PHP_EOL;
+
+            if ($author) {
+                DB::table('poem')->where('id', $poem->id)
+                    ->update([
+                        $idField => $author->id
+                    ]);
+                echo ("poem.poet_id updated to $author->id : poem_id: $poem->id \t $authorName");
+                Log::info("poem.poet_id updated to $author->id : poem_id: $poem->id \t $authorName");
+                continue;
             }
 
-            if ($translator) {
-                $translatorAlia = DB::table('alias')->where('name', $translator)->first();
-                if ($translatorAlia) {
-                    DB::table('poem')->where('id', $poem->id)
-                        ->update([
-                            'poet_id' => $translatorAlia->id
-                        ]);
-                    Log::info("poem.translator_id updated: poem_id: $poem->id \t $translator \t $translatorAlia->id \t $translatorAlia->name \t $translatorAlia->locale");
-                }
+            $alia = DB::table('alias')->where('name', $authorName)->first();
+            if ($alia) {
+                DB::table('poem')->where('id', $poem->id)
+                    ->update([
+                        $idField => $alia->author_id
+                    ]);
+                Log::info("poem.poet_id updated to $alia->author_id : poem_id: $poem->id \t $authorName \t alias_id $alia->id \t $alia->locale");
+                continue;
             }
+
         }
     }
 
