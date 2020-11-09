@@ -43,7 +43,7 @@ Route::get('/home', 'HomeController@index')->middleware('verified');
 //)->name('io_generator_builder_generate_from_file');
 
 
-Route::resource('contents', 'contentController');
+// Route::resource('contents', 'contentController');
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
@@ -91,6 +91,8 @@ Route::prefix('p')->name('p/')->group(static function() {
 Route::prefix('poet')->name('poet/')->group(static function() {
     Route::get('/{poetName}',    'PoetController@show')->name('show');
 });
+
+Route::get('/new', 'PoemController@create')->name('new');
 
 
 /* Auto-generated admin routes */
