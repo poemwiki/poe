@@ -9,6 +9,7 @@ use App\Models\Poem;
 use App\Repositories\PoemRepository;
 use App\Repositories\ScoreRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Response;
 use Fukuball\Jieba\Jieba;
 use Fukuball\Jieba\Finalseg;
@@ -52,7 +53,9 @@ class BotController extends Controller {
                 PDO::ATTR_EMULATE_PREPARES => TRUE
             ]);
 
+        $originWords = '';
         if (is_array($keyword)) {
+            $originWords = implode(' ', $keyword);
             $sql = 'SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
 `from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`
         FROM `poem` p
@@ -69,6 +72,7 @@ class BotController extends Controller {
 
             $q = $poeDB->prepare($sql);
             foreach ($keyword as $idx => $word) {
+                $word = '%' . $word . '%';
                 $q->bindValue(":keyword1_$idx", "%$word%", PDO::PARAM_STR);
                 $q->bindValue(":keyword2_$idx", "%$word%", PDO::PARAM_STR);
                 $q->bindValue(":keyword3_$idx", "%$word%", PDO::PARAM_STR);
@@ -77,6 +81,7 @@ class BotController extends Controller {
             }
 
         } else {
+            $originWords = $keyword;
             $q = $poeDB->prepare(<<<'SQL'
         SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
 `from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`
@@ -88,12 +93,12 @@ class BotController extends Controller {
         ORDER BY `selected_count`,`last_selected_time`,length(`poem`) limit 0,1
 SQL
             );
-            $keyword = '%' . $keyword . '%';
-            $q->bindValue(':keyword1', $keyword, PDO::PARAM_STR);
-            $q->bindValue(':keyword2', $keyword, PDO::PARAM_STR);
-            $q->bindValue(':keyword3', $keyword, PDO::PARAM_STR);
-            $q->bindValue(':keyword4', $keyword, PDO::PARAM_STR);
-            $q->bindValue(':keyword5', $keyword, PDO::PARAM_STR);
+            $word = '%' . $keyword . '%';
+            $q->bindValue(':keyword1', $word, PDO::PARAM_STR);
+            $q->bindValue(':keyword2', $word, PDO::PARAM_STR);
+            $q->bindValue(':keyword3', $word, PDO::PARAM_STR);
+            $q->bindValue(':keyword4', $word, PDO::PARAM_STR);
+            $q->bindValue(':keyword5', $word, PDO::PARAM_STR);
         }
 
         $q->bindValue(':chatroomId', $chatroom, PDO::PARAM_STR);
@@ -107,7 +112,18 @@ SQL
             $code = 0;
             $res = $q->fetchAll(PDO::FETCH_ASSOC);
             if (count($res) == 0) {
-                $poem = '抱歉，没有查到相关内容。';
+                $emoji = Arr::random(['😓', '😅', '😢', '😂', '😭呜呜 ', '', '🙁️', '😫', '😶', '😬', '😔', '😒', '😠', '😊', '😹','🙁','🙃']);
+                $sorry = Arr::random(['Sorry', '对不起', '抱歉', '不好意思', '不好意思哈', 'Soooorry']);
+                $notFound = Arr::random(['没查到', '没搜着', '没找到', '没找着']);
+                $ne = Arr::random(['相关内容', '', '呢']);
+                $welcome = Arr::random([
+                    "欢迎你来上传关于“${originWords}”的诗，",
+                    "你来这里上传一些关于“${originWords}”的诗如何，",
+                    "你来这里上传一些关于“${originWords}”的诗如何，",
+                ]);
+                $click = Arr::random(['点这里：','点击：','👉','➡️']);
+                $link = 'poemwiki.org/new';
+                $poem = "$emoji ${sorry}，${notFound}${ne}。${welcome}\n${click}$link";
             } else {
                 $data = $res[0];
                 $post = (object)$res[0];
@@ -125,7 +141,7 @@ SQL
                     ?  $nation . ($post->poet_cn ?? $post->poet)
                     : ($post->poet ? $post->poet : ''));
 
-                if($post->length > 600) {
+                if(isset($post->length) && $post->length > 600) {
                     $wikiLink = "\n\n诗歌维基：https://poemwiki.org/" . $post->id;
                 } else {
                     $wikiLink = "\n\n诗歌维基：poemwiki.org/" . $post->id;
