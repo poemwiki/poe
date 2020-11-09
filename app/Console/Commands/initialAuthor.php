@@ -47,7 +47,7 @@ class initialAuthor extends Command {
         // $this->translateFromWikiDataPoem();
 
         // import author
-        $this->importAuthorFromWikiData(1392522);
+        $this->importAuthorFromWikiData(9334924);
 
 
         return 0;
@@ -61,7 +61,7 @@ class initialAuthor extends Command {
         foreach ($poets as $poet) {
             $insert = [
                 'id' => $poet->wikidata_id,
-                'type' => '0',
+                'type' => Wikidata::TYPE['poet'],
                 'label_lang' => json_encode((object)['zh-CN' => $poet->label_zh, 'en' => $poet->label_en]),
                 // 'data' => json_encode()
             ];
@@ -76,14 +76,14 @@ class initialAuthor extends Command {
         ])->orderBy('id')->chunk(40, function ($poets) { // Maximum number of chunk size is 50
 
             $ids = $poets->map(function ($poet) {
-                return 'Q'.$poet->id;
+                return 'Q' . $poet->id;
             })->implode('|');
             $options = config('app.env') === 'production' ? [] : [
                 'http' => 'tcp://localhost:1087',
                 'https' => 'tcp://localhost:1087',
             ];
 
-            Log::info('Fetching: '.$this->entityApiUrl . $ids);
+            Log::info('Fetching: ' . $this->entityApiUrl . $ids);
             $response = Http::withOptions($options)->timeout(30)->retry(5, 10)->get($this->entityApiUrl . $ids);
             $body = (string)$response->getBody();
 
@@ -95,6 +95,7 @@ class initialAuthor extends Command {
                 $entityId = 'Q' . $poet->id;
                 $this->_processEntity($poet, $data->entities->$entityId);
             }
+            return true;
         });;
 
     }
@@ -122,6 +123,9 @@ class initialAuthor extends Command {
         if (isset($entity->claims->P18)) {
             $P18 = $entity->claims->P18;
             foreach ($P18 as $image) {
+                if (!isset($image->mainsnak->datavalue->value)) {
+                    continue;
+                }
                 $fileName = str_replace(' ', '_', $image->mainsnak->datavalue->value);
                 $ab = substr(md5($fileName), 0, 2);
                 $a = substr($ab, 0, 1);
