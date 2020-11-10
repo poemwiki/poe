@@ -45,7 +45,7 @@ class initialAuthor extends Command {
         // YOU NEED TO fill poem.poet_wikidata_id and poem.translator_wikidata_id FIRST,
         // by initialAlias command matchAliasFor()
 
-        // import from wikidata. it's too slow and not necessary. DEPRECATED
+        // import from wikidata. it takes too much time and not necessary. DEPRECATED
         // $this->importAuthorFromWikiData(0);//9334924);
 
         // import author only for who has related poem
@@ -73,8 +73,8 @@ class initialAuthor extends Command {
             // TODO should add ->whereNull($idField)
             ->whereNotNull($wikiIDField)->orderBy('id')->chunk(46, function ($poems) use ($idField, $wikiIDField) {
 
-            $ids = $poems->map(function ($poem) {
-                return 'Q' . $poem->id;
+            $ids = $poems->map(function ($poem) use ($wikiIDField) {
+                return 'Q' . $poem->$wikiIDField;
             })->implode('|');
             $options = config('app.env') === 'production' ? [] : [
                 'http' => 'tcp://localhost:1087',
@@ -146,7 +146,8 @@ class initialAuthor extends Command {
         echo $author->id . 'added to author.' . PHP_EOL;
         echo "update poem id $poem->id .$idField to $author->id" . PHP_EOL;
 
-        $poem->update([$idField => $author->id]);
+        $poem->$idField = $author->id;
+        $poem->save();
     }
 }
 
