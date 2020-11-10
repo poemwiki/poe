@@ -28,9 +28,9 @@ class Wikidata extends Migration {
             $table->string('name');
             $table->string('locale', 128);
 
-            $table->foreignId('author_id')->nullable()->constrained('author');
-            $table->foreignId('language_id')->nullable()->constrained('language');
-            $table->foreignId('wikidata_id')->nullable()->constrained('wikidata');
+            // $table->foreignId('author_id')->nullable()->constrained('author');
+            // $table->foreignId('language_id')->nullable()->constrained('language');
+            // $table->foreignId('wikidata_id')->nullable()->constrained('wikidata');
 
             $table->timestamps();
         });
@@ -39,12 +39,14 @@ class Wikidata extends Migration {
         Schema::table('poem', function (Blueprint $table) {
             $table->unsignedBigInteger('poet_id')->nullable();
             $table->unsignedBigInteger('translator_id')->nullable();
+            $table->unsignedBigInteger('poet_wikidata_id')->nullable();
+            $table->unsignedBigInteger('translator_wikidata_id')->nullable();
             // $table->foreignId('poet_id')->nullable()->constrained('author', 'id');
             // $table->foreignId('translator_id')->nullable()->constrained('author', 'id');
         });
 
         Schema::table('author', function (Blueprint $table) {
-            $table->unsignedBigInteger('wikidata_id')->nullable();
+            $table->unsignedBigInteger('wikidata_id')->nullable(false)->unique();
             $table->json('pic_url')->nullable();
         });
         Schema::table('language', function (Blueprint $table) {
