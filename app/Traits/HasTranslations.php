@@ -22,8 +22,13 @@ trait HasTranslations {
         if (!$this->isTranslatableAttribute($key)) {
             return parent::getAttributeValue($key);
         }
-        $locale = $this->getLocale();
-        $translation = $this->getTranslation($key, $locale);
+
+        return $this->getTranslated($key, $this->getLocale());
+    }
+
+    public function getTranslated(string $key, string $locale) {
+
+        $translation = $this->getTranslation($key, $locale, false);
         if(!empty($translation)) {
             return $translation;
         }
