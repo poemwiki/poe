@@ -7,8 +7,8 @@
 
 @section('content')
     <article class="poet">
-        <h1 class="hidden">{{$poetName}}</h1>
-        <p class="hidden">简介：{{$poetDesc}}</p>
+        <h1>{{$poetName}}</h1>
+        <p>简介：{{$poetDesc}}</p>
 
         @if($poemsAsPoet->isNotEmpty())
         <h2>
