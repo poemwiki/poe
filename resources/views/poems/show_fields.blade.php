@@ -5,6 +5,15 @@ $nation = $poem->dynasty
     ? "[$poem->dynasty] "
     : ($poem->nation ? "[$poem->nation]" : '');
 
+$poetName = '';
+if($poem->poet_cn) {
+    $poetName = $poem->poet_cn;
+    if ($poem->poet_cn !== $poem->poet) {
+        $poetName .= $poem->poet;
+    }
+} else {
+    $poetName = $poem->poet;
+}
 $translator = $poem->translator ? trim($poem->translator) : '';
 
 $graphemeLength = max(array_map(function($line) {
@@ -80,19 +89,23 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                     <dd itemscope itemtype="https://schema.org/Person">@if($nation)<span itemprop="nationality"
                         class="poem-nation">{{$nation}}</span>@endif
                         <address itemprop="name" class="poem-writer">
-                            <a href="{{route('poet/show', $poem->poet)}}">
-                                @if($poem->poet_cn)
-                                    {{$poem->poet_cn}}@if($poem->poet_cn !== $poem->poet)（{{$poem->poet}}）@endif
-                                @else
-                                    {{$poem->poet}}
-                                @endif
-                            </a>
+                            @if($poem->poet_id)
+                                <a href="{{route('author/show', ['id' => $poem->poet_id, 'from' => $poem->id])}}">{{$poetName}}</a>
+                            @else
+                                {{$poetName}}
+                            @endif
                         </address>
                     </dd><br>
 
                     @if($poem->translator)
                         <dt>@lang('admin.poem.columns.translator')</dt>
-                        <dd itemprop="translator" class="poem-translator">{{$translator}}</dd><br>
+                        <dd itemprop="translator" class="poem-translator">
+                        @if($poem->translator_id)
+                            <a href="{{route('author/show', $poem->translator_id)}}">{{$translator}}</a>
+                        @else
+                            {{$translator}}
+                        @endif
+                        </dd><br>
                     @endif
 
                     @if($poem->from)

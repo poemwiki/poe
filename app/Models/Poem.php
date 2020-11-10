@@ -258,6 +258,15 @@ class Poem extends Model {
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\hasOne
+     **/
+    public function author() {
+        return $this->hasOne(\App\Models\Author::class, 'id', 'poet_id');
+    }
+
+    // TODO poem hasMany translators
+
+    /**
      * @return string A xor encrypted string
      */
     public function getFakeIdAttribute() {

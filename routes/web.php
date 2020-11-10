@@ -88,8 +88,8 @@ Route::prefix('p')->name('p/')->group(static function() {
     Route::get('/{fakeId}',    'PoemController@show')->name('show');
 });
 
-Route::prefix('poet')->name('poet/')->group(static function() {
-    Route::get('/{poetName}',    'PoetController@show')->name('show');
+Route::prefix('author')->name('author/')->group(static function() {
+    Route::get('/{id}',    'AuthorController@show')->name('show');
 });
 
 Route::get('/new', 'PoemController@create')->name('new');
