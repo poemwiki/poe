@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Brackets\Translatable\Traits\HasTranslations;
 
-class Author extends Model
-{
+class Author extends Model {
     use SoftDeletes;
-use HasTranslations;
+    use HasTranslations;
+
     protected $table = 'author';
 
     protected $fillable = [
@@ -19,30 +19,27 @@ use HasTranslations;
         'user_id',
         'wikidata_id',
         'wikipedia_url',
-    
+
     ];
-    
-    
+
+
     protected $dates = [
         'created_at',
         'deleted_at',
         'updated_at',
-    
+
     ];
     // these attributes are translatable
     public $translatable = [
         'describe_lang',
         'name_lang',
-        'wikipedia_url',
-    
     ];
-    
+
     protected $appends = ['resource_url'];
 
     /* ************************ ACCESSOR ************************* */
 
-    public function getResourceUrlAttribute()
-    {
-        return url('/admin/authors/'.$this->getKey());
+    public function getResourceUrlAttribute() {
+        return url('/admin/authors/' . $this->getKey());
     }
 }
