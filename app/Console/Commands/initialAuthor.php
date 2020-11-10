@@ -138,7 +138,7 @@ class initialAuthor extends Command {
             'pic_url' => $picUrl ? json_encode($picUrl) : null,
             'wikidata_id' => $poet->id,
             'wikipedia_url' => json_encode($entity->sitelinks),
-            'describe_lang' => json_encode((object)$authorNameLang),
+            'describe_lang' => json_encode((object)$descriptionLang),
             "created_at" => now(),
             "updated_at" => now(),
         ];
