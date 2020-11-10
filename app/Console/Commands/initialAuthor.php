@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Poem;
 use App\Models\Wikidata;
 use Illuminate\Console\Command;
 use BorderCloud\SPARQL\SparqlClient;
@@ -41,42 +42,39 @@ class initialAuthor extends Command {
      * @return int
      */
     public function handle() {
-        // YOU NEED TO IMPORT wikidata_poem from json file FIRST, manually
+        // YOU NEED TO fill poem.poet_wikidata_id and poem.translator_wikidata_id FIRST,
+        // by initialAlias command matchAliasFor()
 
-        // fill wikidata with wikidata_poem
-        // $this->translateFromWikiDataPoem();
+        // import from wikidata. it's too slow and not necessary. DEPRECATED
+        // $this->importAuthorFromWikiData(0);//9334924);
 
-        // import author
-        $this->importAuthorFromWikiData(9334924);
+        // import author only for who has related poem
+        $this->importAuthorFromPoem('poet', 0);
+        $this->importAuthorFromPoem('translator', 0);
 
+        // if poem.poet not matched any alias, create a author for it
+        // $this->createAuthorFor('poet', 0, 999999);
+        // $this->createAuthorFor('translator', 0, 999999);
 
         return 0;
     }
 
-
-    public function translateFromWikiDataPoem($fromId = 0) {
-        $poets = DB::table('wikidata_poet')->where([
-            ['id', '>=', $fromId]
-        ])->get();
-        foreach ($poets as $poet) {
-            $insert = [
-                'id' => $poet->wikidata_id,
-                'type' => Wikidata::TYPE['poet'],
-                'label_lang' => json_encode((object)['zh-CN' => $poet->label_zh, 'en' => $poet->label_en]),
-                // 'data' => json_encode()
-            ];
-            DB::table('wikidata')->updateOrInsert(['id' => $poet->wikidata_id], $insert);
-        }
+    public function createAuthorFor($field, $fromId = 0, $toId = 9999999) {
+        // $idField = $field.'_id';
+        // $poems = DB::table('poem')->whereBetween('id', [$fromId, $toId])
+        //     ->whereNotNull($field)->whereNull($idField)->get();
     }
 
-    public function importAuthorFromWikiData($fromId = 0) {
-        DB::table('wikidata')->where([
-            ['type', '=', Wikidata::TYPE['poet']],
-            ['id', '>=', $fromId],
-        ])->orderBy('id')->chunk(40, function ($poets) { // Maximum number of chunk size is 50
+    public function importAuthorFromPoem($field, $fromId = 0) {
+        $idField = $field . '_id';
+        $wikiIDField = $field . '_wikidata_id';
 
-            $ids = $poets->map(function ($poet) {
-                return 'Q' . $poet->id;
+        Poem::query()->where('id', '>=', $fromId)
+            // TODO should add ->whereNull($idField)
+            ->whereNotNull($wikiIDField)->orderBy('id')->chunk(46, function ($poems) use ($idField, $wikiIDField) {
+
+            $ids = $poems->map(function ($poem) {
+                return 'Q' . $poem->id;
             })->implode('|');
             $options = config('app.env') === 'production' ? [] : [
                 'http' => 'tcp://localhost:1087',
@@ -86,27 +84,25 @@ class initialAuthor extends Command {
             Log::info('Fetching: ' . $this->entityApiUrl . $ids);
             $response = Http::withOptions($options)->timeout(30)->retry(5, 10)->get($this->entityApiUrl . $ids);
             $body = (string)$response->getBody();
-
             $data = json_decode($body);
 
             if (!$data->success) return false;
 
-            foreach ($poets as $poet) {
-                $entityId = 'Q' . $poet->id;
-                $this->_processEntity($poet, $data->entities->$entityId);
+            foreach ($poems as $poem) {
+                $entityId = 'Q' . $poem->$wikiIDField;
+                $this->_processEntity($poem, $idField, $wikiIDField, $data->entities->$entityId);
             }
             return true;
-        });;
-
+        });
     }
 
     /**
-     * @param $poet
+     * @param Poem $poem
      * @param $data
      */
-    private function _processEntity($poet, $entity): void {
+    private function _processEntity(Poem $poem, $idField, $wikiIDField, $entity): void {
         // write poet detail data into wikidata.data
-        DB::table('wikidata')->where('id', $poet->id)
+        DB::table('wikidata')->where('id', $poem->$wikiIDField)
             ->update(['data' => json_encode($entity)]);
 
 
@@ -132,17 +128,25 @@ class initialAuthor extends Command {
                 $picUrl[] = $this->picUrlBase . $a . '/' . $ab . '/' . $fileName;
             }
         }
+
         // insert poet detail data into author
         $insert = [
             'name_lang' => json_encode((object)$authorNameLang),
             'pic_url' => $picUrl ? json_encode($picUrl) : null,
-            'wikidata_id' => $poet->id,
+            'wikidata_id' => $poem->$wikiIDField,
             'wikipedia_url' => json_encode($entity->sitelinks),
             'describe_lang' => json_encode((object)$descriptionLang),
             "created_at" => now(),
             "updated_at" => now(),
         ];
-        DB::table('author')->updateOrInsert(['wikidata_id' => $poet->id], $insert);
+        DB::table('author')->updateOrInsert(['wikidata_id' => $poem->$wikiIDField], $insert);
+
+        $author = DB::table('author')->where(['wikidata_id' => $poem->$wikiIDField])->first();
+
+        echo $author->id . 'added to author.' . PHP_EOL;
+        echo "update poem id $poem->id .$idField to $author->id" . PHP_EOL;
+
+        $poem->update([$idField => $author->id]);
     }
 }
 

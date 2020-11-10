@@ -54,6 +54,8 @@ class Poem extends Model {
         'preface',
         'subtitle',
         'genre_id',
+        'poet_wikidata_id',
+        'translator_wikidata_id',
     ];
 
     /**
@@ -87,6 +89,8 @@ class Poem extends Model {
         'preface' => 'string',
         'subtitle' => 'string',
         'genre_id' => 'integer',
+        'poet_wikidata_id' => 'integer',
+        'translator_wikidata_id' => 'integer',
     ];
 
 
