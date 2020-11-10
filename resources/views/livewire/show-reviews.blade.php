@@ -80,9 +80,9 @@
                 <p class="review-form-h">@lang('Write Review')</p>
                 <div class="review-form-btn"><a href="#" class="btn close-review">@lang('Close')</a><button class="btn btn-wire" type="submit">@lang('Submit')</button></div>
             </div>
-            <input name="title" wire:model.lazy="title" type="text" class="review-title" placeholder="@lang('Title')">
+            <input name="title" wire:model.defer="title" type="text" class="review-title" placeholder="@lang('Title')">
 
-            <textarea name="content" wire:model.lazy="content" id="review-content" cols="30" rows="10" class="review-content" placeholder="@lang('Content')"></textarea>
+            <textarea name="content" wire:model.defer="content" id="review-content" cols="30" rows="10" class="review-content" placeholder="@lang('Content')"></textarea>
             <span class="error">@error('title') {{ $message }} @enderror @error('content') {{ $message }} @enderror</span>
 
 
