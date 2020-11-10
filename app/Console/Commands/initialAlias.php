@@ -48,51 +48,49 @@ class initialAlias extends Command {
 
 
         // add alias, alias.author_id
-        $this->importAliasFromWikiData(101247956, 101247956);
+        // $this->importAliasFromWikiData(101247956, 101247956);
 
         // match poem.poet to author.name_lang or alias.name, update poem.poet_id poem.translator_id
         $this->matchAliasFor('poet', 0, 999999);
         $this->matchAliasFor('translator', 0, 999999);
-        // if poem.poet not matched any alias, create a author for it
-        // $this->createAuthorFor('poet', 0, 999999);
-        // $this->createAuthorFor('translator', 0, 999999);
 
 
         return 0;
     }
 
-    public function createAuthorFor($field, $fromId = 0, $toId = 9999999) {
-        // $idField = $field.'_id';
-        // $poems = DB::table('poem')->whereBetween('id', [$fromId, $toId])
-        //     ->whereNotNull($field)->whereNull($idField)->get();
-    }
-
 
     public function matchAliasFor($field, $fromId = 0, $toId = 9999999) {
-        $idField = $field.'_id';
+        // $idField = $field.'_id';
+        $wikidataIDField = $field.'_wikidata_id';
         $poems = DB::table('poem')->whereBetween('id', [$fromId, $toId])
-            ->whereNotNull($field)->whereNull($idField)->get();
+            ->whereNotNull($field)->whereNull($wikidataIDField)->get();
 
-        Log::info('Need update poem.' . $idField . ': ' . count($poems));
+        Log::info('Need update poem.' . $wikidataIDField . ': ' . count($poems));
 
         foreach ($poems as $poem) {
             $authorName = $poem->$field;
 
             echo "Matching poem id=$poem->id $field $authorName " . PHP_EOL;
 
-            $author = DB::table('author')->select('id')->whereRaw(
-                "JSON_SEARCH(name_lang, 'one', JSON_UNQUOTE(:name))",
+            $wikiEntry = DB::table('wikidata')->select('id')->whereRaw(
+                "JSON_SEARCH(label_lang, 'one', JSON_UNQUOTE(:name))",
                 ['name' => $authorName]
             )->first();
             echo \Illuminate\Support\Arr::last(DB::getQueryLog())['query'] . PHP_EOL;
 
-            if ($author) {
+            if(empty($wikiEntry)) {
+                $wikiEntry = DB::table('wikidata')->select('id')->whereRaw(
+                    "JSON_SEARCH(`data`->'$.labels', 'one', JSON_UNQUOTE(:name))",
+                    ['name' => $authorName]
+                )->first();
+            }
+            if ($wikiEntry) {
                 DB::table('poem')->where('id', $poem->id)
                     ->update([
-                        $idField => $author->id
+                        $wikidataIDField => $wikiEntry->id
                     ]);
-                echo ("poem.poet_id updated to $author->id : poem_id: $poem->id \t $authorName");
-                Log::info("poem.poet_id updated to $author->id : poem_id: $poem->id \t $authorName");
+                echo ("poem.$wikidataIDField updated to $wikiEntry->id : poem_id: $poem->id \t $authorName");
+                Log::info("poem.$wikidataIDField updated to $wikiEntry->id : poem_id: $poem->id \t $authorName");
                 continue;
             }
 
@@ -100,9 +98,10 @@ class initialAlias extends Command {
             if ($alia) {
                 DB::table('poem')->where('id', $poem->id)
                     ->update([
-                        $idField => $alia->author_id
+                        $wikidataIDField => $alia->wikidata_id
                     ]);
-                Log::info("poem.poet_id updated to $alia->author_id : poem_id: $poem->id \t $authorName \t alias_id $alia->id \t $alia->locale");
+                echo ("poem.$wikidataIDField updated to $alia->wikidata_id : poem_id: $poem->id \t $authorName \t alias_id $alia->id \t $alia->locale");
+                Log::info("poem.$wikidataIDField updated to $alia->wikidata_id : poem_id: $poem->id \t $authorName \t alias_id $alia->id \t $alia->locale");
                 continue;
             }
 
