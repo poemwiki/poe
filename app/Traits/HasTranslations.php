@@ -24,14 +24,34 @@ trait HasTranslations {
         }
         $locale = $this->getLocale();
         $translation = $this->getTranslation($key, $locale);
-        if ($locale === 'zh-cn' && empty($translation)) {
-            $translation = $this->getTranslation($key, 'zh');
-            if(empty($translation)) {
-                return $this->getTranslation($key, 'zh-Hans-CN');
-            }
+        if(!empty($translation)) {
+            return $translation;
         }
 
-        return $this->getTranslation($key, $locale);
+        $translations = parent::getAttributeValue($key);
+        if(empty($translations)) return '';
+
+        $lastFallback = array_key_first($translations);
+        $zhFallback = ['zh', 'zh-cn', 'zh-hans', 'zh-Hans-CN', 'zh-hant', 'zh-hk', 'zh-tw', 'zh-yue', 'zh-sg', $lastFallback];
+        $zhTFallback = ['zh-hant', 'zh-hk', 'zh-tw', 'zh-yue', 'zh', 'zh-cn', 'zh-hans', 'zh-Hans-CN', 'zh-sg', $lastFallback];
+        if (in_array($locale, $zhFallback)){
+            return $this->getFallbackTranslation($key, $zhFallback);
+        }
+        if (in_array($locale, $zhTFallback)){
+            return $this->getFallbackTranslation($key, $zhTFallback);
+        }
+
+        return $translations[$lastFallback];
+    }
+
+    function getFallbackTranslation(String $key, Array $fallbackArr): string {
+        foreach ($fallbackArr as $locale) {
+            $translation = $this->getTranslation($key, $locale);
+            if(!empty($translation)) {
+                return $translation;
+            }
+        }
+        return '';
     }
 
     /**
