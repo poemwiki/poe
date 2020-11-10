@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
-use Brackets\Translatable\Traits\HasTranslations;
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Wikidata extends Model {
+    use HasTranslations;
+    use LogsActivity;
+
     protected $table = 'wikidata';
     // '0':poet, '1':nation/region/country of citizenship,
     // '2':language/locale, '3':genre',
@@ -18,13 +21,11 @@ class Wikidata extends Model {
         'genre' => '3',
     ];
 
-    use HasTranslations;
     public $translatable = [
         'label_lang',
     ];
 
     // TODO log activity for command execution
-    use LogsActivity;
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
     protected static $ignoreChangedAttributes = ['created_at'];

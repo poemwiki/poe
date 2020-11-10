@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Brackets\Translatable\Traits\HasTranslations;
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;

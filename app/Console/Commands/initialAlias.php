@@ -57,8 +57,6 @@ class initialAlias extends Command {
         // $this->createAuthorFor('poet', 0, 999999);
         // $this->createAuthorFor('translator', 0, 999999);
 
-        // add poem.poet_id
-        // add poem.translator_id
 
         return 0;
     }

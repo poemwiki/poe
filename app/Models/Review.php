@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-class Review extends Model
-{
+class Review extends Model {
     use SoftDeletes;
     use LogsActivity;
+
     protected $table = 'review';
 
     protected static $logFillable = true;
@@ -35,9 +35,9 @@ class Review extends Model
     /**
      * @return string
      */
-//    public function getUrlAttribute() {
-//        return route('review/show', ['id' => $this->id]);
-//    }
+    //    public function getUrlAttribute() {
+    //        return route('review/show', ['id' => $this->id]);
+    //    }
 
 
     /**
