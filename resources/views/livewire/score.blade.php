@@ -129,7 +129,7 @@
     </svg>
 </div>
 @push('scripts')
-<script type="text/javascript">
+<script>
 document.addEventListener('livewire:load', () => {
     var rateCurrent = null;
     document.querySelectorAll('label.rate').forEach(function($lable) {

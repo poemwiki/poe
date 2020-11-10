@@ -91,7 +91,7 @@
 
 </section>
 @push('scripts')
-<script type="text/javascript">
+<script>
     document.addEventListener('livewire:load', function() {
         var $open = document.getElementById('open-review');
         var $modal = document.getElementById('review-modal');

@@ -198,8 +198,10 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
         </p>
     </nav>
 
+@push('scripts')
 <script src="{{ asset('js/lib/color-hash.js') }}"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
     var colorHash = new ColorHash({lightness: 0.6, saturation: 0.86});
     var mainColor = colorHash.hex(document.querySelector('article .title').innerText);
     var mainColorNext = colorHash.hex(document.querySelector('.next .title').innerText);
@@ -218,4 +220,6 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
     $nav.addEventListener('click', function () {
         window.scrollTo({top:0});
     });
+});
 </script>
+@endpush

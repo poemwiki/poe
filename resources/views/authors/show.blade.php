@@ -48,17 +48,20 @@
             @endforeach
         </ul>
     </article>
+
 @endsection
 
 
-<script src="{{ asset('js/lib/color-hash.js') }}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var colorHash = new ColorHash({lightness: 0.6, saturation: 0.86});
-    var $titles = document.getElementsByClassName('title');
-    for(var item of $titles) {
-        item.style.setProperty('--title-color', colorHash.hex(item.innerHTML));
-    }
-})
+@push('scripts')
+    <script src="{{ asset('js/lib/color-hash.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var colorHash = new ColorHash({lightness: 0.6, saturation: 0.86});
+            var $titles = document.getElementsByClassName('title');
+            for(var item of $titles) {
+                item.style.setProperty('--title-color', colorHash.hex(item.innerHTML));
+            }
+        })
 
-</script>
+    </script>
+@endpush
