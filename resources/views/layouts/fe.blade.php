@@ -36,7 +36,6 @@
                 var options = {root: null, rootMargin: '0px', threshold: [0.9]};
                 var observer = new IntersectionObserver(function (entries) {
                     entries.forEach(function (entry) {
-                        console.log(entry);
                         if (entry.intersectionRatio >= 0.9) {
                             document.body.classList.add('show-first-line');
                         }

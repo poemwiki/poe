@@ -128,23 +128,3 @@
         </symbol>
     </svg>
 </div>
-@push('scripts')
-<script>
-document.addEventListener('livewire:load', () => {
-    var rateCurrent = null;
-    document.querySelectorAll('label.rate').forEach(function($lable) {
-        $lable.addEventListener('click', function () {
-
-            // Set the value of the "count" property
-            //@this.set('rating', this.dataset['rating']);
-            console.log(this.dataset['rating']);
-
-            // Call the increment component action
-            // @this.call('increment')
-        })
-    });
-});
-
-
-</script>
-@endpush
