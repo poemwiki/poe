@@ -9,7 +9,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
-use Spatie\ValidationRules\Rules\ModelsExist;
 
 class UpdatePoem extends FormRequest
 {
@@ -51,7 +50,7 @@ class UpdatePoem extends FormRequest
             'need_confirm' => ['nullable', 'boolean'],
             'is_lock' => ['sometimes', 'boolean'],
             'content_id' => ['nullable', 'integer'],
-            'original_id' => ['nullable', 'integer', new ModelsExist(Poem::class, 'id')],
+            'original_id' => ['nullable', 'integer', 'exists:'.\App\Models\Poem::class.',id'],
             'preface' => ['nullable', 'string', 'max:64'],
             'subtitle' => ['nullable', 'string', 'max:32'],
             'genre_id' => ['nullable', Rule::in(Genre::ids())],

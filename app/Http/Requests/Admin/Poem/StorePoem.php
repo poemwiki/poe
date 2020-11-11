@@ -9,7 +9,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
-use Spatie\ValidationRules\Rules\ModelsExist;
 
 class StorePoem extends FormRequest {
     /**
