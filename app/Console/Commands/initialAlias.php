@@ -76,7 +76,6 @@ class initialAlias extends Command {
                 "JSON_SEARCH(label_lang, 'one', JSON_UNQUOTE(:name))",
                 ['name' => $authorName]
             )->first();
-            echo \Illuminate\Support\Arr::last(DB::getQueryLog())['query'] . PHP_EOL;
 
             if(empty($wikiEntry)) {
                 $wikiEntry = DB::table('wikidata')->select('id')->whereRaw(
