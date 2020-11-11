@@ -111,6 +111,8 @@ SQL
         if ($q->execute()) {
             $code = 0;
             $res = $q->fetchAll(PDO::FETCH_ASSOC);
+
+            // TODO put this into blade
             if (count($res) == 0) {
                 $emoji = Arr::random(['😓', '😅', '😢', '😂', '😭呜呜 ', '', '🙁️', '😫', '😶', '😬', '😔', '😒', '😠', '😊', '😹','🙁','🙃']);
                 $sorry = Arr::random(['Sorry', '对不起', '抱歉', '不好意思', '不好意思哈', 'Soooorry']);
@@ -141,23 +143,15 @@ SQL
                     ?  $nation . ($post->poet_cn ?? $post->poet)
                     : ($post->poet ? $post->poet : ''));
 
-                if(isset($post->length) && $post->length > 600) {
-                    $wikiLink = "\n\n诗歌维基：https://poemwiki.org/" . $post->id;
-                } else {
-                    $wikiLink = "\n\n诗歌维基：poemwiki.org/" . $post->id;
-                }
 
-                $scoreRepo = new ScoreRepository(app());
-                $score = $scoreRepo->calcScoreByPoemId($post->id);
-                $wikiScore = $score['score']
-                    ? "${score['score']} " . str_repeat("🌟", floor($score['score']))
-                    : '等你来评⬆️';
-                $wikiScore = '评分：' . $wikiScore;
-
+                // poem content
                 $parts = ['▍ ' . $post->title];
                 if($post->preface) array_push($parts, '        '. $post->preface);
                 if($post->subtitle) array_push($parts, "\n    ".$post->subtitle);
                 array_push($parts, "\n".$content."\n");
+
+                // poem's other properties
+                array_push($parts, $writer);
 
                 $timeStr = '';
                 if ($post->year) $timeStr .= $post->year . '年';
@@ -165,11 +159,25 @@ SQL
                 if ($post->date) $timeStr .= $post->date . '日';
                 if ($timeStr <> '') array_push($parts, "\n".$timeStr);
 
-                array_push($parts, $writer);
                 if ($post->translator) array_push($parts, '翻译 / ' . trim($post->translator));
                 if (!empty($wxPost) && isset($wxPost['recommender'])) array_push($pars, '评论 / ' . $wxPost['recommender']);
-                array_push($parts, $wikiLink);
-                array_push($parts, $wikiScore);
+
+                // links & score
+                $url = (isset($post->length) && $post->length > 600)
+                    ? "https://poemwiki.org/" . $post->id
+                    : "poemwiki.org/" . $post->id;
+                $wikiLink = "\n\n诗歌维基：$url";
+
+                $scoreRepo = new ScoreRepository(app());
+                $score = $scoreRepo->calcScoreByPoemId($post->id);
+                if ($score['score']) {
+                    $wikiScore = '评分：' . "${score['score']} " . str_repeat("🌟", floor($score['score']));
+                    array_push($parts, $wikiLink);
+                    array_push($parts, $wikiScore);
+                } else {
+                    $wikiScore = "点这里：$url 做第一个给这首诗打分的人";
+                    array_push($parts, $wikiScore);
+                }
 
                 $poem = implode("\n", $parts);
 
