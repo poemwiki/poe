@@ -52,7 +52,7 @@ class Import extends Command {
 
         $wikidataId = $this->option('id');
         if (App::runningInConsole() && !$this->option('id')) {
-            if($this->choice('Do you wants specify wikidata id?', ['yes', 'no'], 0) === 'yes') {
+            if ($this->choice('Do you wants specify wikidata id?', ['yes', 'no'], 0) === 'yes') {
                 $wikidataId = $this->ask('Input wikidata id: ');
             }
         }
@@ -71,10 +71,21 @@ class Import extends Command {
             ['id', '>=', $fromId]
         ])->orderBy('id');
 
-        $poets->chunk(self::CHUNK_SIZE, function (Collection $poets) {
+        $bar = $this->output->createProgressBar($poets->count());
+        $bar->start();
+
+        $poets->chunk(self::CHUNK_SIZE, function (Collection $poets) use ($bar) {
             $ids = $poets->pluck('id');
-            return $this->_process($ids);
+            $continue = $this->_process($ids);
+            if ($continue) {
+                $bar->advance(self::CHUNK_SIZE);
+                return true;
+            }
+            $bar->finish();
+            return false;
         });
+
+        $bar->finish();
     }
 
     /**
@@ -89,6 +100,7 @@ class Import extends Command {
             'http' => 'tcp://localhost:1087',
             'https' => 'tcp://localhost:1087',
         ];
+
 
         $this->info('Fetching: ' . $this->entityApiUrl . $qIds);
         $response = Http::withOptions($options)->timeout(30)->retry(5, 10)->get($this->entityApiUrl . $qIds);
