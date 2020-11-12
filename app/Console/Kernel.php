@@ -37,6 +37,8 @@ class Kernel extends ConsoleKernel
     {
         if(!(config('app.env') === 'production')) DB::enableQueryLog(); // Enable query log
         $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__.'/Alias');
+        $this->load(__DIR__.'/Wiki');
 
         require base_path('routes/console.php');
     }
