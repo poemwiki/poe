@@ -282,4 +282,6 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
     });
 });
 
+
+Route::get('/q/{word}', 'QueryController@search')->name('search');
 Route::get('/{id}', 'PoemController@showPoem')->name('poem');
