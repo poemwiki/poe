@@ -261,6 +261,26 @@ class Poem extends Model {
         return $this->hasMany(\App\Models\WxPost::class, 'poem_id', 'id');
     }
 
+    public function poetWikidata() {
+        return $this->belongsTo(\App\Models\Wikidata::class, 'poet_wikidata_id', 'id');
+    }
+    public function translatorWikidata() {
+        return $this->belongsTo(\App\Models\Wikidata::class, 'translator_wikidata_id', 'id');
+    }
+
+    public function poetAuthor() {
+        return $this->belongsTo(\App\Models\Author::class, 'poet_id', 'id');
+    }
+    public function poetThroughWikidata() {
+        return $this->belongsTo(\App\Models\Author::class, 'poet_wikidata_id', 'wikidata_id');
+    }
+    public function translatorAuthor() {
+        return $this->belongsTo(\App\Models\Author::class, 'translator_id', 'id');
+    }
+    public function translatorThroughWikidata() {
+        return $this->belongsTo(\App\Models\Author::class, 'translator_wikidata_id', 'wikidata_id');
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasOne
      **/
