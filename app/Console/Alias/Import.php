@@ -69,33 +69,33 @@ class Import extends Command {
         foreach ($poets as $poet) {
             $entity = json_decode($poet->data);
 
-            collect(['labels', 'alias'])->each(function ($field) use ($entity, $poet) {
+            DB::table('alias')->where('wikidata_id', $poet->id)->delete();
+            $author = DB::table('author')->select('id')->where('wikidata_id', $poet->id)->first();
 
-                if(!isset($entity->$field)) return;
+            $all = collect(isset($entity->labels) ? $entity->labels : []);
 
-                foreach ($entity->$field as $locale => $item) {
-                    // insert alias data into alias
-                    $author = DB::table('author')->select('id')->where('wikidata_id', $poet->id)->first();
-                    $language = DB::table('language')->select('id')->where('locale', $locale)->first();
+            if (isset($entity->aliases)) {
+                $all = $all->concat(collect($entity->aliases)->flatten());
+            }
 
-                    $insert = [
-                        'name' => $item->value,
-                        'locale' => $locale,
-                        'wikidata_id' => $poet->id,
-                        'author_id' => $author ? $author->id : null,
-                        'language_id' => $language ? $language->id : null,
-                        "created_at" => now(),
-                        "updated_at" => now(),
-                    ];
-                    DB::table('alias')->updateOrInsert([
-                        'wikidata_id' => $poet->id,
-                        'locale' => $locale,
-                        'name' => $item->value,
-                    ], $insert);
+            $all->unique('value')->each(function ($item) use($poet, $author) {
 
-                    Log::info("Label added to alias: wikidata_id: $poet->id \t $locale \t $item->value");
-                }
+                // insert alias data into alias
+                $insert = [
+                    'name' => $item->value,
+                    'wikidata_id' => $poet->id,
+                    'author_id' => $author ? $author->id : null,
+                    "created_at" => now(),
+                    "updated_at" => now(),
+                ];
+                DB::table('alias')->updateOrInsert([
+                    'wikidata_id' => $poet->id,
+                    'name' => $item->value
+                ], $insert);
+
+                $this->info("Label added to alias: wikidata_id: $poet->id \t $item->value");
             });
+
         }
     }
 
