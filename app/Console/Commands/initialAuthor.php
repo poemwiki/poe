@@ -13,7 +13,7 @@ class initialAuthor extends Command {
      *
      * @var string
      */
-    protected $signature = 'author:import {fromId?} {toId?} {--poem_id=}';
+    protected $signature = 'author:import {fromId?} {toId?} {--poem_id=} {--force}';
 
     /**
      * The console command description.
@@ -47,6 +47,7 @@ class initialAuthor extends Command {
         $fromId = $this->argument('fromId') ?? 0;
         $toId = $this->argument('toId') ?? 0;
 
+        $force = $this->option('force');
         $poemId = $this->option('poem_id');
         if (App::runningInConsole() && !$this->option('poem_id')) {
             if ($this->choice('Do you wants specify wikidata id?', ['yes', 'no'], 0) === 'yes') {
@@ -54,14 +55,15 @@ class initialAuthor extends Command {
             }
         }
 
+
         if (is_numeric($poemId)) {
-            $this->importAuthorFromPoem('poet', $poemId, $poemId);
-            $this->importAuthorFromPoem('translator', $poemId, $poemId);
+            $this->importAuthorFromPoem('poet', $poemId, $poemId, $force);
+            $this->importAuthorFromPoem('translator', $poemId, $poemId, $force);
             return 0;
         }
 
-        $this->importAuthorFromPoem('poet', $fromId, $toId);
-        $this->importAuthorFromPoem('translator', $fromId, $toId);
+        $this->importAuthorFromPoem('poet', $fromId, $toId, $force);
+        $this->importAuthorFromPoem('translator', $fromId, $toId, $force);
 
         // if poem.poet not matched any alias, create a author for it
         // $this->createAuthorFor('poet', 0, 999999);
@@ -70,32 +72,39 @@ class initialAuthor extends Command {
         return 0;
     }
 
-    public function importAuthorFromPoem(string $field, int $fromId = 0, int $toId = 0) {
+    public function importAuthorFromPoem(string $field, int $fromId = 0, int $toId = 0, $force = false) {
         $idField = $field . '_id';
         $wikiIDField = $field . '_wikidata_id';
         $relation = $field . 'ThroughWikidata';
         $wikidataRelation = $field . 'Wikidata';
 
-        $poems = Poem::query()->where([
+        $query = Poem::query()->where([
             ['id', '>=', $fromId],
             ['id', '<=', $toId]
         ])
-            ->whereNotNull($wikiIDField)
-            ->whereNull($idField)->orderBy('id')->get();
+            ->whereNotNull($wikiIDField);
 
+        if(!$force) {
+            $query = $query->whereNull($idField);
+        }
+
+        $poems = $query->orderBy('id')->get();
 
         $poems->each(function (Poem $poem) use ($idField, $wikiIDField, $relation, $wikidataRelation) {
+            // if exists author has same wikidata_id
             if($poem->$relation) {
                 $this->info("Get author $relation from wikidata_id");
                 $this->_setPoemAuthorId($poem, $idField, $poem->$relation->id);
                 return;
             }
 
+            // if no exists author related, create one
             if($poem->$wikidataRelation) {
                 $entity = json_decode($poem->$wikidataRelation->data);
                 $author = $this->_storeToAuthor($poem, $idField, $wikiIDField, $entity);
 
                 $this->_setPoemAuthorId($poem, $idField, $author->id);
+                return;
             }
             $this->error("Poem id: $poem->id, not found $wikidataRelation relation by $wikiIDField $poem->$wikiIDField");
 
@@ -135,11 +144,11 @@ class initialAuthor extends Command {
 
         // insert or update poet detail data into author
         $insert = [
-            'name_lang' => json_encode((object)$authorNameLang),
+            'name_lang' => $authorNameLang,         // Don't json_encode translatable attributes
             'pic_url' => $picUrl ? json_encode($picUrl) : null,
             'wikidata_id' => $poem->$wikiIDField,
             'wikipedia_url' => json_encode($entity->sitelinks),
-            'describe_lang' => json_encode((object)$descriptionLang),
+            'describe_lang' => $descriptionLang,    // Don't json_encode translatable attributes
             "created_at" => now(),
             "updated_at" => now(),
         ];

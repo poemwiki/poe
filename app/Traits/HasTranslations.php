@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use Brackets\Translatable\Traits\HasTranslations as ParentHasTranslations;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Str;
 
 trait HasTranslations {
 
@@ -59,6 +60,27 @@ trait HasTranslations {
         return '';
     }
 
+
+    public function setAttribute($key, $value) {
+        if ($this->isTranslatableAttribute($key) && is_array($value)) {
+            return $this->setTranslations($key, $value);
+        }
+
+        // if $value is valid json string, write it to field instead of write it as a translation
+        if ($this->isTranslatableAttribute($key) && is_string($value) && Str::of($value)->isTranslatableJson()) {
+            return parent::setAttribute($key, $value);
+        }
+
+        // Pass arrays and untranslatable attributes to the parent method.
+        if (! $this->isTranslatableAttribute($key) || is_array($value)) {
+            return parent::setAttribute($key, $value);
+        }
+
+        // If the attribute is translatable and not already translated, set a
+        // translation for the current app locale.
+        return $this->setTranslation($key, $this->getLocale(), $value);
+    }
+
     /**
      * Get current locale of the model
      *
@@ -66,9 +88,6 @@ trait HasTranslations {
      */
     public function getLocale() {
         $locale = $this->locale ?? App::getLocale();
-        if($locale === 'zh-CN') {
-            return 'zh-cn';
-        }
-        return $locale;
+        return strtolower($locale);
     }
 }

@@ -57,6 +57,7 @@ class MatchWikidataID extends Command {
         if (is_numeric($poemId)) {
             $this->matchWikidatdaIDFor('poet', $poemId, $poemId);
             $this->matchWikidatdaIDFor('translator', $poemId, $poemId);
+            $this->setPoetWikidataId($poemId, $poemId); // TODO move it to end
             return 0;
         }
 
@@ -64,15 +65,28 @@ class MatchWikidataID extends Command {
         // update poem.poet_wikidata_id poem.translator_wikidata_id
         $this->matchWikidatdaIDFor('poet', $fromId, $toId);
         $this->matchWikidatdaIDFor('translator', $fromId, $toId);
+        $this->setPoetWikidataId($fromId, $toId); // TODO move it to end
 
         return 0;
     }
 
     // set poet_wikidata_id if it's original poem has
-    public function setPoetWikidataId($id, $poet_wikidata_id) {
-        $poem = Poem::where('original_id', $id);
-        $poem->poet_wikidata_id = $poet_wikidata_id;
-        $poem->save();
+    public function setPoetWikidataId($fromId = 0, $toId = 9999999) {
+
+        Poem::withoutEvents(function () use ($fromId, $toId) {
+
+            $poems = Poem::whereBetween('id', [$fromId, $toId])
+                ->whereNull('poet_wikidata_id')
+                ->whereHas('originalPoem', function($q){
+                    $q->whereNotNull('poet_wikidata_id');
+                })->get();
+
+            $poems->each(function ($poem) {
+                $poem->poet_wikidata_id = $poem->originalPoem->poet_wikidata_id;
+                $poem->save();
+            });
+        });
+
     }
 
     public function matchWikidatdaIDFor($field, $fromId = 0, $toId = 9999999) {
@@ -88,6 +102,7 @@ class MatchWikidataID extends Command {
 
         foreach ($poems as $poem) {
             $authorName = $poem->$field;
+            if(empty($authorName)) continue;
 
             $this->info("Matching poem id=$poem->id $field $authorName");
 
