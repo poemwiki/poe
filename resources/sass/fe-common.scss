@@ -177,6 +177,14 @@ body{
   background-color: $bg-color;
   overscroll-behavior-y: none;
 }
+.error-page{
+  min-height: calc(100vh - 6rem);
+  >.message{
+    line-height: calc(100vh - 6rem);
+    font-weight: bolder;
+    text-align: center;
+  }
+}
 
 main{
   margin-top: 6rem;

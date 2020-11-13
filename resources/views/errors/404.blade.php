@@ -3,7 +3,7 @@
 @section('content')
 <div class="error-page">
     <div class="message">
-        @lang('Too Many Requests')
+        @lang('Not Found')
     </div>
 </div>
 @endsection
