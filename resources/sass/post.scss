@@ -11,6 +11,26 @@
 // poet page
 article.poet{
   padding: 2rem 1.6rem;
+
+  .poet-gallery{
+    display: flex;
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    gap: 1rem;
+    .poet-pic {
+      height: 20vh;
+    }
+  }
+  .poet-brief {
+    margin-top: 1rem;
+    line-height: 1.4em;
+  }
+  h2 {
+    margin-top: 2rem;
+    font-size: $font-size-h2;
+  }
+
   ul{
     list-style: none;
     padding-left: 0;

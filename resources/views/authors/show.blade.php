@@ -8,7 +8,14 @@
 @section('content')
     <article class="poet">
         <h1>{{$poetName}}</h1>
-        <p>简介：{{$poetDesc}}</p>
+        <div class="poet-gallery">
+            @if($author->pic_url)
+            @foreach($author->pic_url as $url)
+                <img class="poet-pic" src="{{$url}}" alt="image of {{$poetName}}">
+            @endforeach
+            @endif
+        </div>
+        <p class="poet-brief">简介：{{$poetDesc}}</p>
 
         @if($poemsAsPoet->isNotEmpty())
         <h2>
