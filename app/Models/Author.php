@@ -35,6 +35,19 @@ class Author extends Model {
         'name_lang',
     ];
 
+
+    /**
+     * The attributes that should be casted to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'id' => 'integer',
+        'wikidata_id' => 'integer',
+        'user_id' => 'integer',
+        'pic_url' => 'json'
+    ];
+
     protected $appends = ['resource_url'];
 
     /* ************************ ACCESSOR ************************* */

@@ -128,7 +128,7 @@ class initialAuthor extends Command {
             $descriptionLang[$locale] = $description->value;
         }
 
-        $picUrl = null;
+        $picUrl = [];
         if (isset($entity->claims->P18)) {
             $P18 = $entity->claims->P18;
             foreach ($P18 as $image) {
@@ -145,7 +145,7 @@ class initialAuthor extends Command {
         // insert or update poet detail data into author
         $insert = [
             'name_lang' => $authorNameLang,         // Don't json_encode translatable attributes
-            'pic_url' => $picUrl ? json_encode($picUrl) : null,
+            'pic_url' => $picUrl,                   // And Don't json_encode attributes that casted to json
             'wikidata_id' => $poem->$wikiIDField,
             'wikipedia_url' => json_encode($entity->sitelinks),
             'describe_lang' => $descriptionLang,    // Don't json_encode translatable attributes
