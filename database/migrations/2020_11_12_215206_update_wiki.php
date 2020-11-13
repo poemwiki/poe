@@ -12,7 +12,12 @@ class UpdateWiki extends Migration {
      */
     public function up() {
         Schema::table('wikidata', function (Blueprint $table) {
-            $table->removeColumn('label_lang');
+            $table->dropColumn('label_lang');
+        });
+        Schema::table('alias', function (Blueprint $table) {
+            $table->dropColumn('author_id');
+            // $table->unique(['author_id', 'locale', 'name'], 'wikidata_id_locale_name');
+            $table->string('locale', 128)->nullable();
         });
     }
 
@@ -24,6 +29,7 @@ class UpdateWiki extends Migration {
     public function down() {
         Schema::table('wikidata', function (Blueprint $table) {
             $table->json('label_lang');
+            $table->unsignedBigInteger('author_id');
         });
     }
 }

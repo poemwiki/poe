@@ -77,7 +77,7 @@ class Genre extends Migration {
             $table->unsignedBigInteger('user_id')->nullable();
             $table->string('pic_url')->nullable();
 
-            $table->text('wikidata_id')->nullable();
+            $table->unsignedBigInteger('wikidata_id')->nullable(false)->unique();
             $table->json('wikipedia_url')->nullable();
             $table->json('describe_lang')->nullable();
             $table->timestamps();

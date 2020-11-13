@@ -27,6 +27,9 @@ class Wikidata extends Migration {
             $table->bigIncrements('id')->unsigned();
             $table->string('name');
             $table->string('locale', 128);
+            $table->unsignedBigInteger('author_id')->nullable();
+            $table->unsignedBigInteger('language_id')->nullable();
+            $table->unsignedBigInteger('wikidata_id')->nullable();
 
             // $table->foreignId('author_id')->nullable()->constrained('author');
             // $table->foreignId('language_id')->nullable()->constrained('language');
@@ -46,7 +49,7 @@ class Wikidata extends Migration {
         });
 
         Schema::table('author', function (Blueprint $table) {
-            $table->unsignedBigInteger('wikidata_id')->nullable(false)->unique();
+            // $table->unsignedBigInteger('wikidata_id')->nullable(false)->unique();
             $table->json('pic_url')->nullable();
         });
         Schema::table('language', function (Blueprint $table) {
