@@ -10,7 +10,7 @@
 
 // poet page
 article.poet{
-  padding: 2rem 1.6rem;
+  padding: 1rem 1.6rem 2rem;
 
   .poet-gallery{
     display: flex;
@@ -74,3 +74,27 @@ article.poet{
   }
 }
 
+.search {
+  padding: 1rem 1.6rem 2rem;
+  >h1 {
+    font-size: $font-size-larger;
+  }
+  .search-count {
+    color: $gray-lighter;
+    font-size: $font-size-sm;
+  }
+  .search-group {
+    h2{
+      font-size: $font-size-h2;
+    }
+    ol{
+      padding-left: 0;
+      list-style: none;
+      .item{
+        .item-pic{
+          height: 10rem;
+        }
+      }
+    }
+  }
+}
