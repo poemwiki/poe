@@ -163,7 +163,7 @@ SQL
                 if (!empty($wxPost) && isset($wxPost['recommender'])) array_push($pars, '评论 / ' . $wxPost['recommender']);
 
                 // links & score
-                $url = (isset($post->length) && $post->length > 600)
+                $url = (isset($post->length) && $post->length > 500)
                     ? "https://poemwiki.org/" . $post->id
                     : "poemwiki.org/" . $post->id;
                 $wikiLink = "\n\n诗歌维基：$url";
