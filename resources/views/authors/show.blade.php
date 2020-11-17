@@ -28,13 +28,13 @@
         @endif
         <ul>
         @foreach($poemsAsPoet as $poem)
-            <li>
-                <a class="title font-song no-bg" target="_blank" href="{{$poem->url}}">{!!
+            <li class="title-list-item">
+                <a class="title title-bar font-song no-bg" href="{{$poem->url}}">{!!
                     Str::of(trim($poem->title) ? trim($poem->title) : '无题')
                         ->surround('span')!!}</a>
-                <p class="first-line">{!!Str::of($poem->poem)->firstLine()->surround('span', function ($i) {
+                <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->poem)->firstLine()->surround('span', function ($i) {
                             return 'style="transition-delay:'.($i*20).'ms"';
-                    })!!}</p>
+                    })!!}</a>
             </li>
         @endforeach
         </ul>
@@ -44,13 +44,13 @@
         @endif
         <ul>
             @foreach($poemsAsTranslator as $poem)
-                <li>
-                    <a class="title font-song no-bg" target="_blank" href="{{$poem->url}}">{!!
+                <li class="title-list-item">
+                    <a class="title title-bar font-song no-bg" href="{{$poem->url}}">{!!
                     Str::of(trim($poem->title) ? trim($poem->title) : '无题')
                         ->surround('span')!!}</a>
-                    <p class="first-line">{!!Str::of($poem->poem)->firstLine()->surround('span', function ($i) {
+                    <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->poem)->firstLine()->surround('span', function ($i) {
                             return 'style="transition-delay:'.($i*20).'ms"';
-                    })!!}</p>
+                    })!!}</a>
                 </li>
             @endforeach
         </ul>

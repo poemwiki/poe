@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "cross-env": "^5.1",
+    "imports-loader": "^1.2.0",
     "laravel-mix": "^4.0.7",
     "resolve-url-loader": "^2.3.1",
     "sass": "^1.20.1",
@@ -24,9 +25,11 @@
     "craftable": "^2.1.8",
     "jquery": "^3.2",
     "lodash": "^4.17.13",
+    "medium-editor": "^5.23.3",
     "popper.js": "^1.12",
     "simple-line-icons": "2.4.1",
     "vue": "^2.5.17",
-    "vue-codemirror": "^4.0.6"
+    "vue-codemirror": "^4.0.6",
+    "zepto": "^1.2.0"
   }
 }

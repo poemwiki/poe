@@ -40,7 +40,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
     <section class="poem" itemscope itemtype="https://schema.org/Article" itemid="{{ $poem->fake_id }}">
         <article>
             <div class="poem-main">
-                <h1 class="title font-hei" itemprop="headline" id="title">{{ $poem->title }}</h1>
+                <h1 class="title title-bar font-hei" itemprop="headline" id="title">{{ $poem->title }}</h1>
                 <span itemprops="provider" itemscope itemtype="https://schema.org/Organization" class="hidden">
                     <span itemprops="name">PoemWiki</span>
                     <meta itemprops="url" content="https://poemwiki.org" />
@@ -92,7 +92,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
                             @if($poem->poet_id)
                                 <a href="{{route('author/show', ['id' => $poem->poet_id, 'from' => $poem->id])}}">{{$poetName}}</a>
                             @else
-                                {{$poetName}}
+                                <a href="{{route('search', $poetName)}}">{{$poetName}}</a>
                             @endif
                         </address>
                     </dd><br>
@@ -189,7 +189,7 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
     <nav class="next">
         <span>@lang('Next Poem')</span>
         <p>
-            <a class="no-bg title font-hei no-select" href="{{$randomPoemUrl}}">{{$randomPoemTitle}}</a>
+            <a class="no-bg title font-hei no-select title-bar" href="{{$randomPoemUrl}}">{{$randomPoemTitle}}</a>
             <a class="first-line no-bg" href="{{$randomPoemUrl}}">{!!
                 Str::of($randomPoemFirstLine)->surround('span', function ($i) {
                     return 'style="transition-delay:'.($i*20).'ms"';

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Content;
+use Spatie\Searchable\Searchable;
+use Spatie\Searchable\SearchResult;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,7 +15,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property mixed translatedPoems
  * @property mixed id
  */
-class Poem extends Model {
+class Poem extends Model implements Searchable {
     use SoftDeletes;
     use LogsActivity;
 
@@ -323,4 +325,13 @@ class Poem extends Model {
         return ($decoded ^ mb_ord(self::FAKEID_KEY)) / self::FAKEID_SPARSE;
     }
 
+    public function getSearchResult(): SearchResult {
+        $url = route('poem', $this->id);
+
+        return new SearchResult(
+            $this,
+            $this->title,
+            $url
+        );
+    }
 }

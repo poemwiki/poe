@@ -8,7 +8,7 @@ mix.webpackConfig({
     alias: {
       "@": ".."
     }
-  }
+  },
 });
 if ( ! mix.inProduction()) {
   mix.webpackConfig({
@@ -32,6 +32,8 @@ mix.js('resources/js/app.js', 'public/js')
   .sass('resources/sass/app.scss', 'public/css')
   .sass('resources/sass/post.scss', 'public/css');
 
+
+mix.js('resources/js/review.js', 'public/js')
 
 mix.js(['resources/js/admin/admin.js'], 'public/js')
     .sass('resources/sass/admin/admin.scss', 'public/css');

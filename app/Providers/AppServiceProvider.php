@@ -42,9 +42,16 @@ class AppServiceProvider extends ServiceProvider {
         Stringable::macro('toLines', function () {
             return $this->explode("\n");
         });
+
         Stringable::macro('isTranslatableJson', function () {
             json_decode($this->value);
             return $this->startWith('{') && $this->endsWith('}') && (json_last_error() == JSON_ERROR_NONE);
+        });
+
+        Stringable::macro('addLinks', function () {
+            return $this->replaceMatches(
+            '%\b((https?://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))%s',
+            '&nbsp;<a href="$1" target="_blank">$1</a>&nbsp;');
         });
     }
 }

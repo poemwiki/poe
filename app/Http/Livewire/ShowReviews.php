@@ -23,6 +23,13 @@ class ShowReviews extends Component {
     public $isEditing = false;
 
     //    protected $listeners = ['new-review' => '$refresh'];
+    protected $listeners = ['contentUpdated'];
+
+    public function contentUpdated($string) {
+        $this->content = $string;
+        // dd($this->content);
+        $this->isEditing = true;
+    }
 
 
     protected $rules = [
@@ -39,13 +46,13 @@ class ShowReviews extends Component {
     public function updated($propName) {
         $this->isEditing = true;
         $this->validateOnly($propName);
-        $this->dispatchBrowserEvent('review-updated');
+        // $this->dispatchBrowserEvent('review-updated');
     }
 
     public function submit() {
         $this->isEditing = true;
         $this->validate();
-        $this->dispatchBrowserEvent('review-updated');
+        // $this->dispatchBrowserEvent('review-updated');
         // Execution doesn't reach here if validation fails.
         Review::create([
             'title' => $this->title,
@@ -64,6 +71,10 @@ class ShowReviews extends Component {
             return;
         }
         Review::destroy($review_id);
+    }
+
+    public function setContent($v) {
+        $this->content = $v;
     }
 
     public function mount(Poem $poem) {

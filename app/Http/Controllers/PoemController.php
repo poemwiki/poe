@@ -60,6 +60,8 @@ class PoemController extends Controller
         $id = Poem::getIdFromFakeId($fakeId);
         return redirect(route('poem', $id));
     }
+
+    // route('poem');
     public function showPoem($id){
         $poem = Poem::findOrFail($id);
         return $this->_poem($poem);

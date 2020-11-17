@@ -3,7 +3,7 @@
   font-weight: bolder;
   vertical-align: unset;
   margin: 0;
-  &:before {
+  &.title-bar:before {
     content: '▍';
     vertical-align: unset;
     animation: fadein 5s ease;
@@ -183,9 +183,6 @@ nav.next{
       &:before{
         color: var(--main-color-next);
       }
-    }
-    .first-line {
-      color: $gray;
     }
   }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasCompositeKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Review extends Model {
@@ -31,6 +32,21 @@ class Review extends Model {
     ];
 
     protected $appends = [];
+
+
+    // public static function boot() {
+    //     parent::boot();
+    //
+    //     self::retrieved(function ($model) {
+    //         $model->content = Str::of($model->content)->addLinks();
+    //         dd($model->content);
+    //     });
+    // }
+
+    public function getRichContentAttribute() {
+        // dd(Str::of($this->content)->addLinks());
+        return Str::of($this->content)->addLinks();
+    }
 
     /**
      * @return string

@@ -5,8 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasTranslations;
+use Spatie\Searchable\Searchable;
+use Spatie\Searchable\SearchResult;
 
-class Author extends Model {
+class Author extends Model implements Searchable {
     use SoftDeletes;
     use HasTranslations;
 
@@ -50,9 +52,30 @@ class Author extends Model {
 
     protected $appends = ['resource_url'];
 
+    public function poems() {
+        return $this->hasMany(\App\Models\Poem::class, 'poet_id', 'id');
+    }
+    public function translatedPoems() {
+        return $this->hasMany(\App\Models\Poem::class, 'translator_id', 'id');
+    }
+
     /* ************************ ACCESSOR ************************* */
 
     public function getResourceUrlAttribute() {
         return url('/admin/authors/' . $this->getKey());
+    }
+
+    public static function searchPoems() {
+
+    }
+
+    public function getSearchResult(): SearchResult {
+        $url = route('author/show', $this->id);
+
+        return new SearchResult(
+            $this,
+            $this->name_lang,
+            $url
+        );
     }
 }

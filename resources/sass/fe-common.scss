@@ -202,6 +202,8 @@ main{
   overflow: hidden;
   text-overflow: ellipsis;
   padding: 0;
+  color: $gray!important;
+
 
   >span {
     display: inline-block;

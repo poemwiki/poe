@@ -39,10 +39,13 @@
                     <svg class="stars"><use href="#stars-{{$userScore[$review->user_id]}}"></use></svg>
                 @endif
                 <h2 class="review-title">{{$review->title}}</h2>
-                <p class="review-content">{!! nl2br(e($review->content)) !!}</p>
+
+                <p class="review-content">{!! nl2br($review->content) !!}</p>
+
+
                 @auth
                 @if($review->user_id === Auth::user()->id || Auth::user()->is_admin)
-                    <a href="#" wire:click.prevent="delete({{$review->id}})" class="btn">@lang('brackets/admin-ui::admin.btn.x')</a>
+                    <a href="#" wire:click.prevent="delete({{$review->id}})" class="btn">@lang('Delete')</a>
                 @endif
                 @endauth
             </li>
@@ -75,14 +78,17 @@
     <section id="review-modal" @if(!$isEditing) class="hidden" @endif>
         <div class="overlay close-review"></div>
 
-        <form wire:submit.prevent="submit">
+        <form wire:submit.prevent="" wire:ignore>
             <div class="review-form-header flex-center-vertically">
                 <p class="review-form-h">@lang('Write Review')</p>
-                <div class="review-form-btn"><a href="#" class="btn close-review">@lang('Close')</a><button class="btn btn-wire" type="submit">@lang('Submit')</button></div>
+                <div class="review-form-btn"><a href="#" class="btn close-review">@lang('Close')</a><button class="btn btn-wire" type="submit" wire:click="submit()">@lang('Submit')</button></div>
             </div>
-            <input name="title" wire:model.defer="title" type="text" class="review-title" placeholder="@lang('Title')">
+            <input name="title" type="text" class="review-title" placeholder="@lang('Title')" wire:model.lazy="title">
 
-            <textarea name="content" wire:model.defer="content" id="review-content" cols="30" rows="10" class="review-content" placeholder="@lang('Content')"></textarea>
+            <div id="content-warpper">
+                <textarea id="review-content" name="content" cols="30" rows="10" class="review-content medium-editor-textarea"
+                          placeholder="@lang('Content')"></textarea>
+            </div>
             <span class="error">@error('title') {{ $message }} @enderror @error('content') {{ $message }} @enderror</span>
 
 
@@ -90,9 +96,50 @@
     </section>
 
 </section>
+
 @push('scripts')
+<script src="js/lib/zepto.min.js"></script>
+<script src="js/review.js"></script>
 <script>
-    document.addEventListener('livewire:load', function() {
+    document.addEventListener('DOMContentLoaded', function() {
+
+        window.editor = new MediumEditor('#review-content', {
+            toolbar: {
+                buttons: ['anchor'],
+                // relativeContainer: $('#content-warpper').get('0'),
+                // relativeContainer: $('#review-modal').get('0'),
+                diffLeft: -90,
+                diffTop: -70,
+            },
+            anchor: {
+                linkValidation: true,
+                placeholderText: '请粘贴或输入链接',
+            },
+            paste: {
+                forcePlainText: true,
+                cleanPastedHTML: true,
+                cleanReplacements: [],
+                cleanAttrs: ['class', 'style', 'dir'],
+                cleanTags: ['meta', 'script', 'b', 'strong', 'style'],
+                unwrapTags: []
+            },
+            autoLink: true,
+            // elementsContainer: $('#content-warpper').get('0'),
+            placeholder: {
+                /* This example includes the default options for placeholder,
+                   if nothing is passed this is what it used */
+                text: $('#review-content').attr('placeholder'),
+                hideOnClick: true
+            },
+            // static: true,
+            // autoLink: true,
+
+            imageDragging: false
+        });
+        editor.subscribe('blur', function () {
+            Livewire.emit('contentUpdated', editor.getContent());
+        });
+
         var $open = document.getElementById('open-review');
         var $modal = document.getElementById('review-modal');
 
@@ -126,6 +173,12 @@
                 }
             }
         });
+
     });
+
+
+    // document.addEventListener('DOMContentLoaded', function() {
+    // });
+
 </script>
 @endpush
