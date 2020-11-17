@@ -56,7 +56,7 @@ class BotController extends Controller {
         $originWords = '';
         if (is_array($keyword)) {
             $originWords = implode(' ', $keyword);
-            $sql = 'SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
+            $sql = 'SELECT (select 1 from wx_post WHERE poem_id=p.id) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
 `from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
@@ -67,7 +67,7 @@ class BotController extends Controller {
         OR `poet` like :keyword3_$idx OR `poet_cn` like :keyword4_$idx OR `translator` like :keyword5_$idx) AND";
             }
             $sql = trim($sql, 'AND') . ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR`need_confirm`<>1)
-        ORDER BY `selected_count`,`last_selected_time`,length(`poem`) limit 0,1';
+        ORDER BY wx desc, `selected_count`,`last_selected_time`,length(`poem`) limit 0,1';
             $poeDB->prepare($sql);
 
             $q = $poeDB->prepare($sql);
@@ -83,14 +83,14 @@ class BotController extends Controller {
         } else {
             $originWords = $keyword;
             $q = $poeDB->prepare(<<<'SQL'
-        SELECT `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
+        SELECT (select 1 from wx_post WHERE poem_id=p.id) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
 `from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
         WHERE (`poem` like :keyword1 OR `title` like :keyword2
         OR `poet` like :keyword3 OR `poet_cn` like :keyword4 OR `translator` like :keyword5) AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1)
-        ORDER BY `selected_count`,`last_selected_time`,length(`poem`) limit 0,1
+        ORDER BY wx desc, `selected_count`,`last_selected_time`,length(`poem`) limit 0,1
 SQL
             );
             $word = '%' . $keyword . '%';
