@@ -157,7 +157,7 @@ SQL
                 if ($post->year) $timeStr .= $post->year . '年';
                 if ($post->month) $timeStr .= $post->month . '月';
                 if ($post->date) $timeStr .= $post->date . '日';
-                if ($timeStr <> '') array_push($parts, "\n".$timeStr);
+                if ($timeStr <> '') array_push($parts, $timeStr);
 
                 if ($post->translator) array_push($parts, '翻译 / ' . trim($post->translator));
                 if (!empty($wxPost) && isset($wxPost['recommender'])) array_push($pars, '评论 / ' . $wxPost['recommender']);
@@ -176,7 +176,7 @@ SQL
                     array_push($parts, $wikiScore);
                 } else {
                     $wikiScore = "点这里：$url 做第一个给这首诗打分的人";
-                    array_push($parts, $wikiScore);
+                    array_push($parts, "\n\n$wikiScore");
                 }
 
                 $poem = implode("\n", $parts);
