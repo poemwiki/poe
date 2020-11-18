@@ -19,11 +19,6 @@ section.poem {
   padding: 2rem 1.6rem;
 
   article{
-    .poem-main{
-      @include media-breakpoint-down(xs) {
-        min-height: calc(100vh - 14.4rem);
-      }
-    }
 
     .title{
       margin-bottom: 1.6rem;
