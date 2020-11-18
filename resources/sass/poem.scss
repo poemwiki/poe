@@ -3,6 +3,7 @@
   font-weight: bolder;
   vertical-align: unset;
   margin: 0;
+
   &.title-bar:before {
     content: '▍';
     vertical-align: unset;
@@ -18,23 +19,25 @@ section.poem {
   overflow: auto;
   padding: 2rem 1.6rem;
 
-  article{
+  article {
 
-    .title{
+    .title {
       margin-bottom: 1.6rem;
     }
-    .preface{
+
+    .preface {
       color: $gray;
       text-indent: 2em;
       font-size: $font-size-sm;
     }
-    .subtitle{
+
+    .subtitle {
       font-size: 1.1em;
       font-weight: bolder;
     }
 
 
-    .poem-content{
+    .poem-content {
       margin-left: -.4em;
       font-size: $font-size;
       letter-spacing: 0.08em;
@@ -48,72 +51,86 @@ section.poem {
       @media (max-width: 375px) {
         font-size: 4vw;
       }
-      &.text-justify>.poem-line {
+
+      &.text-justify > .poem-line {
         line-height: 2;
       }
-      &>.poem-line{
+
+      & > .poem-line {
         padding: .4em;
         display: block;
         line-height: 1.6em;
         border: transparent 0;
         border-radius: .2em;
-        &.poem-line-empty{
+
+        &.poem-line-empty {
           height: 1.4em;
           line-height: 1.4em;
         }
+
         &.no-height {
           height: 0;
           padding: 0;
           margin: 0;
         }
-        &::selection,&>br::selection {
+
+        &::selection, & > br::selection {
           color: var(--main-color);
           background-color: transparent;
         }
+
         &:hover {
-           // TODO this is for share function
-           background-color: lighten($gray-lighter, 10);
+          // TODO this is for share function
+          background-color: lighten($gray-lighter, 10);
         }
       }
     }
 
 
-    dl.poem-info{
+    dl.poem-info {
       line-height: 1em;
       margin: 3.2rem 0 0;
       font-size: $font-size-sm;
-      dt,dd{
+
+      dt, dd {
         display: inline;
         line-height: 2;
       }
-      dt{
+
+      dt {
         color: $gray;
         font-weight: normal;
-        &:before{
+
+        &:before {
           content: "";
           display: block;
         }
       }
-      dd{
-        &:before{
+
+      dd {
+        &:before {
           content: "";
           display: inline-block;
           width: 1em;
         }
-        >*{
+
+        > * {
           display: inline;
         }
       }
-      .poem-nation{
+
+      .poem-nation {
         margin-right: .4em;
       }
-      &.poem-versions{
-        a:hover>dt{
+
+      &.poem-versions {
+        a:hover > dt {
           color: $white;
         }
       }
     }
-    .btn.edit{
+
+    .btn.edit {
       //font-weight: lighter;
     }
 
@@ -122,26 +139,31 @@ section.poem {
       padding-left: 0;
       font-size: $font-size-sm;
       color: $gray;
-      >#folder{
+
+      > #folder {
         display: none;
       }
-      &.collapsed{
+
+      &.collapsed {
         .log-middle {
           display: none;
         }
-        >#folder{
+
+        > #folder {
           display: inline-block;
         }
       }
-      a{
+
+      a {
         color: unset;
-        &:hover{
+
+        &:hover {
           background-color: unset;
         }
       }
     }
 
-    a.create{
+    a.create {
       //background-color: darken($blue, 7);
       //color: #fff;
       padding: .5em 1em;
@@ -149,7 +171,8 @@ section.poem {
       border-radius: .618em;
       transition: .4s ease-in-out;
       transition-property: border-radius, background-color, box-shadow;
-      &:hover{
+
+      &:hover {
         border-radius: 1em;
         background-color: $blue;
         background: linear-gradient(315deg, $blue, darken($blue, 8));
@@ -160,22 +183,24 @@ section.poem {
 
 }
 
-nav.next{
+nav.next {
   margin: 3rem 0 3rem 0;
   padding: 2rem 1.6rem;
-  >span{
+
+  > span {
     display: block;
     color: $gray;
     font-size: $font-size-sm;
   }
-  >p{
-    >a.title{
+
+  > p {
+    > a.title {
       display: inline-block;
       width: 100%;
       height: 2.2em;
       color: $blue;
 
-      &:before{
+      &:before {
         color: var(--main-color-next);
       }
     }

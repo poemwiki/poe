@@ -103,7 +103,6 @@ article.poet{
       .item{
         margin-bottom: 2rem;
         display: flex;
-        gap: 1rem;
         .title{
           line-height: 1.6em;
           margin-top: -.3em;
@@ -119,6 +118,7 @@ article.poet{
           width: 8rem;
           height: 10rem;
           object-fit: cover;
+          margin-right: 1rem;
         }
       }
     }
