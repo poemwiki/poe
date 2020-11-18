@@ -65,16 +65,6 @@
         @endif
     </ol>
 
-    <ol class="links full-col">
-        @if($wxPost)
-            @if($wxPost->link && $wxPost->title)
-                <li>读首诗再睡觉公众号：<a target="_blank" href="{{ $wxPost->link }}">{{ $wxPost->title }}</a></li>
-            @elseif($wxPost->link)
-                <li><a target="_blank" href="{{ $wxPost->link }}">读首诗再睡觉公众号</a></li>
-            @endif
-        @endif
-    </ol>
-
     <section id="review-modal" @if(!$isEditing) class="hidden" @endif>
         <div class="overlay close-review"></div>
 
