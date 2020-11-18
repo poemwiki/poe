@@ -169,6 +169,7 @@ section.reviews{
       border-bottom: 1px solid $gray-lighter;
       white-space: normal;
       line-break: anywhere;
+      overflow-wrap: break-word;
       &:hover{
         background-color: $darker-content-bg-color;
       }
