@@ -53,7 +53,7 @@ class Review extends Command {
                 'poem_id' => $post->poem_id,
                 'user_id' => $userId,
                 'content' => <<<blade
-我在《{$post->title}》 <a href="{$post->link}" target="_blank">{$post->link}</a> 这篇公众号文章里提到了这首诗"
+我在《{$post->title}》&nbsp;&nbsp; <a href="{$post->link}" target="_blank">{$post->link}</a> &nbsp;&nbsp;这篇公众号文章里提到了这首诗
 blade,
                 'created_at' => now(),
                 'updated_at' => now(),
