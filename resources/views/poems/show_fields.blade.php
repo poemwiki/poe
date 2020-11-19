@@ -31,10 +31,29 @@ $softWrap = $softWrap && ($graphemeLength >= $maxLength);
 
 /** @var String $fakeId */
 $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' => $fakeId], false) : null;
+
+$firstLine = Str::of($poem->poem)->firstLine();
+$cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.org/icon/apple-touch-icon.png'
 ?>
 @section('title'){{$poem->title}}@endsection
 @section('author'){{$poem->poet.($poem->poet ? ',' : '').$poem->poet_cn}}@endsection
+@section('meta-og')
+    <meta property="og:title" content="{{$poem->title}}" />
+    <meta property="og:url" content="{{$poem->url}}" />
+    <meta property="og:image" content="{{$cover}}" />
+    <meta property="og:description" content="{{$firstLine}}" />
+    <meta property="og:site_name" content="PoemWiki 诗歌维基" />
+    <meta property="og:type" content="article" />
+    <meta property="og:article:author" content="" />
 
+
+    <meta property="twitter:card" content="summary" />
+    <meta property="twitter:image" content="{{$cover}}" />
+    <meta property="twitter:title" content="{{$poem->title}}" />
+    <meta property="twitter:creator" content="{{$poem->poet}}" />
+    <meta property="twitter:site" content="PoemWiki 诗歌维基" />
+    <meta property="twitter:description" content="{{$firstLine}}" />
+@endsection
 
 
     <section class="poem" itemscope itemtype="https://schema.org/Article" itemid="{{ $poem->fake_id }}">
