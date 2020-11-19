@@ -73,7 +73,9 @@
                 <p class="review-form-h">@lang('Write Review')</p>
                 <div class="review-form-btn"><a href="#" class="btn close-review">@lang('Close')</a><button class="btn btn-wire" type="submit" wire:click="submit()">@lang('Submit')</button></div>
             </div>
-            <input name="title" type="text" class="review-title" placeholder="@lang('Title')" wire:model.lazy="title">
+{{--   see:  https://laracasts.com/discuss/channels/laravel/how-to-bind-ckeditor-value-to-laravel-livewire-component?page=1#reply=607889       --}}
+            <input name="title" type="text" class="review-title" placeholder="@lang('Title')" wire:model.debounce.999999ms="title"
+                   wire:key="review-title">
 
             <div id="content-warpper">
                 <textarea id="review-content" name="content" cols="30" rows="10" class="review-content medium-editor-textarea"
