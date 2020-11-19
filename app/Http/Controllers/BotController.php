@@ -10,6 +10,7 @@ use App\Repositories\PoemRepository;
 use App\Repositories\ScoreRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Response;
 use Fukuball\Jieba\Jieba;
 use Fukuball\Jieba\Finalseg;
@@ -56,7 +57,7 @@ class BotController extends Controller {
         $originWords = '';
         if (is_array($keyword)) {
             $originWords = implode(' ', $keyword);
-            $sql = 'SELECT (select 1 from wx_post WHERE poem_id=p.id) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
+            $sql = 'SELECT (select 1 from wx_post WHERE poem_id=p.id limit 1) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
 `from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
@@ -83,7 +84,7 @@ class BotController extends Controller {
         } else {
             $originWords = $keyword;
             $q = $poeDB->prepare(<<<'SQL'
-        SELECT (select 1 from wx_post WHERE poem_id=p.id) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
+        SELECT (select 1 from wx_post WHERE poem_id=p.id limit 1) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
 `from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
@@ -194,6 +195,9 @@ SQL
                 //        print_r($stmt->errorCode());
                 //        print_r($stmt->errorInfo());
             }
+        } else {
+            Log::error('Bot search failed.');
+            Log::error($q->errorInfo());
         }
 
 
