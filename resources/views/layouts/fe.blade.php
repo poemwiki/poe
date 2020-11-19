@@ -13,6 +13,8 @@
 
     @include('layouts.icon')
 
+    @yield('meta-og')
+
     <title>@yield('title') - {{config('app.name')}}</title>
 
     <!-- Fonts -->
