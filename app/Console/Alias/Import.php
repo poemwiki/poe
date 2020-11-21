@@ -104,8 +104,9 @@ class Import extends Command {
             ['type', '=', Wikidata::TYPE['poet']],
             ['id', '>=', $fromId],
             ['id', '<=', $toId],
-        ])->get();
-        $this->_process($poets);
+        ])->orderBy('id')->chunk(400, function($poets) {
+            $this->_process($poets);
+        });
     }
 
 }
