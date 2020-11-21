@@ -131,9 +131,6 @@ SQL
                 $data = $res[0];
                 $post = (object)$res[0];
 
-                $wxPost = $this->findWxPost($poeDB, $post->id);
-                $data['wxPost'] = $wxPost;
-
                 $nation = $post->dynasty
                     ? "[$post->dynasty] "
                     : (($post->nation && $post->nation !== '中国') ? "[$post->nation] " : '');
@@ -161,7 +158,6 @@ SQL
                 if ($timeStr <> '') array_push($parts, $timeStr);
 
                 if ($post->translator) array_push($parts, '翻译 / ' . trim($post->translator));
-                if (!empty($wxPost) && isset($wxPost['recommender'])) array_push($pars, '评论 / ' . $wxPost['recommender']);
 
                 // links & score
                 $url = (isset($post->length) && $post->length > 500)
