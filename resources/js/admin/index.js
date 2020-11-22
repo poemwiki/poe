@@ -10,3 +10,4 @@ import './nation';
 import './tag';
 import './category';
 import './author';
+import './user';

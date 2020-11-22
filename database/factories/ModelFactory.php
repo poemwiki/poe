@@ -179,3 +179,23 @@ $factory->define(App\Models\Score::class, static function (Faker\Generator $fake
         
     ];
 });
+/** @var  \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Models\User::class, static function (Faker\Generator $faker) {
+    return [
+        'avatar' => $faker->sentence,
+        'created_at' => $faker->dateTime,
+        'email' => $faker->email,
+        'email_verified_at' => $faker->dateTime,
+        'invite_code' => $faker->sentence,
+        'invite_max' => $faker->boolean(),
+        'invited_by' => $faker->sentence,
+        'is_active' => $faker->boolean(),
+        'is_admin' => $faker->boolean(),
+        'name' => $faker->firstName,
+        'password' => bcrypt($faker->password),
+        'remember_token' => null,
+        'updated_at' => $faker->dateTime,
+        
+        
+    ];
+});

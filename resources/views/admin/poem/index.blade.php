@@ -51,13 +51,13 @@
 
                                         <th is='sortable' :column="'id'">{{ trans('admin.poem.columns.id') }}</th>
                                         <th is='sortable' :column="'title'">{{ trans('admin.poem.columns.title') }}</th>
-                                        <th is='sortable' :column="'language'">{{ trans('admin.poem.columns.language') }}</th>
+                                        <th is='sortable' :column="'language_id'">{{ trans('admin.poem.columns.language_id') }}</th>
                                         <th is='sortable' :column="'is_original'">{{ trans('admin.poem.columns.is_original') }}</th>
                                         <th is='sortable' :column="'nation'">{{ trans('admin.poem.columns.nation') }}</th>
                                         <th is='sortable' :column="'poet'">{{ trans('admin.poem.columns.poet') }}</th>
                                         <th is='sortable' :column="'poet_cn'">{{ trans('admin.poem.columns.poet_cn') }}</th>
                                         <th is='sortable' :column="'translator'">{{ trans('admin.poem.columns.translator') }}</th>
-                                        <th is='sortable' :column="'dynasty'">{{ trans('admin.poem.columns.dynasty') }}</th>
+                                        <th is='sortable' :column="'updated_at'">{{ trans('admin.poem.columns.updated_at') }}</th>
                                         <th>{{ trans('admin.actions.operation') }}</th>
                                     </tr>
                                     <tr v-show="(clickedBulkItemsCount > 0) || isClickedAll">
@@ -82,13 +82,13 @@
 
                                     <td>@{{ item.id }}</td>
                                         <td>@{{ item.title }}</td>
-                                        <td>@{{ item.language }}</td>
+                                        <td>@{{ item.language_id }}</td>
                                         <td>@{{ item.is_original }}</td>
                                         <td>@{{ item.nation }}</td>
                                         <td>@{{ item.poet }}</td>
                                         <td>@{{ item.poet_cn }}</td>
                                         <td>@{{ item.translator }}</td>
-                                        <td>@{{ item.dynasty }}</td>
+                                        <td>@{{ item.updated_at | datetime }}</td>
 
                                         <td>
                                             <div class="row no-gutters">

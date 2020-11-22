@@ -38,10 +38,15 @@ class PoemController extends Controller
             $request,
 
             // set columns to query
-            ['id', 'title', 'language', 'is_original', 'poet', 'poet_cn', 'bedtime_post_id', 'bedtime_post_title', 'length', 'translator', 'from', 'year', 'month', 'date', 'dynasty', 'nation', 'need_confirm', 'is_lock', 'content_id'],
+            ['id', 'title', 'updated_at', 'language_id', 'is_original', 'poet', 'poet_cn', 'bedtime_post_id', 'bedtime_post_title', 'length', 'translator', 'from', 'year', 'month', 'date', 'location', 'dynasty', 'nation', 'need_confirm', 'is_lock', 'content_id'],
 
             // set columns to searchIn
-            ['id', 'title', 'poet', 'poet_cn', 'bedtime_post_title', 'poem', 'translator', 'from', 'year', 'month', 'date', 'dynasty', 'nation']
+            ['id', 'title', 'poet', 'poet_cn', 'bedtime_post_title', 'poem', 'translator', 'from', 'year', 'month', 'date', 'dynasty', 'nation'],
+
+            function ($query) {
+                $query->orderBy('updated_at', 'desc');
+            }
+
         );
 
         if ($request->ajax()) {

@@ -283,6 +283,23 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 });
 
 
+/* Auto-generated admin routes */
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
+    Route::prefix('admin')->namespace('Admin')->name('admin/')->group(static function() {
+        Route::prefix('users')->name('users/')->group(static function() {
+            Route::get('/',                                             'UsersController@index')->name('index');
+            Route::get('/create',                                       'UsersController@create')->name('create');
+            Route::post('/',                                            'UsersController@store')->name('store');
+            Route::get('/{user}/edit',                                  'UsersController@edit')->name('edit');
+            Route::post('/bulk-destroy',                                'UsersController@bulkDestroy')->name('bulk-destroy');
+            Route::post('/{user}',                                      'UsersController@update')->name('update');
+            Route::delete('/{user}',                                    'UsersController@destroy')->name('destroy');
+        });
+    });
+});
+
+
+
 Route::get('/q/{keyword}', 'QueryController@search')->name('search');
 Route::any('/query', 'QueryController@query')->name('query');
 Route::get('/{id}', 'PoemController@showPoem')->name('poem');
