@@ -58,7 +58,7 @@ class BotController extends Controller {
         if (is_array($keyword)) {
             $originWords = implode(' ', $keyword);
             $sql = 'SELECT (select 1 from wx_post WHERE poem_id=p.id limit 1) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
-`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`
+`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
@@ -85,7 +85,7 @@ class BotController extends Controller {
             $originWords = $keyword;
             $q = $poeDB->prepare(<<<'SQL'
         SELECT (select 1 from wx_post WHERE poem_id=p.id limit 1) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
-`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`
+`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
@@ -148,14 +148,26 @@ SQL
                 if($post->subtitle) array_push($parts, "\n    ".$post->subtitle);
                 array_push($parts, "\n".$content."\n");
 
+
                 // poem's other properties
-                array_push($parts, $writer);
 
                 $timeStr = '';
                 if ($post->year) $timeStr .= $post->year . '年';
                 if ($post->month) $timeStr .= $post->month . '月';
                 if ($post->date) $timeStr .= $post->date . '日';
-                if ($timeStr <> '') array_push($parts, $timeStr);
+
+                if ($post->location) {
+                    if ($timeStr <> '') {
+                        array_push($parts, "$timeStr, $post->location\n");
+                    } else {
+                        array_push($parts, $post->location."\n");
+                    }
+                } else {
+                    array_push($parts, $timeStr."\n");
+                }
+
+                array_push($parts, $writer);
+
 
                 if ($post->translator) array_push($parts, '翻译 / ' . trim($post->translator));
 
