@@ -13,7 +13,7 @@ Vue.component('poem-form', {
     return {
       form: {
         title: '',
-        language_id: null,
+        language_id: 1,
         is_original: 1,
         poet: '',
         poet_cn: '',
@@ -26,6 +26,7 @@ Vue.component('poem-form', {
         year:  '' ,
         // month:  '' ,
         // date:  '' ,
+        location:  '' ,
         dynasty: '',
         nation: '',
         // need_confirm:  false ,
@@ -55,6 +56,7 @@ Vue.component('poem-form', {
     this.form.year = this.$el.querySelector('[name="year"]').getAttribute('value') || this.form.year;
     this.form.month = this.$el.querySelector('[name="month"]').getAttribute('value') || this.form.month;
     this.form.date = this.$el.querySelector('[name="date"]').getAttribute('value') || this.form.date;
+    this.form.location = this.$el.querySelector('[name="location"]').getAttribute('value') || this.form.location;
     this.form.is_original = this.$el.querySelector('[name="is_original_fake_element"]').getAttribute('value') || this.form.is_original;
     this.form.bedtime_post_id = this.$el.querySelector('[name="bedtime_post_id"]')?.getAttribute('value') || this.form.bedtime_post_id;
     this.form.bedtime_post_title = this.$el.querySelector('[name="bedtime_post_title"]')?.getAttribute('value') || this.form.bedtime_post_title;

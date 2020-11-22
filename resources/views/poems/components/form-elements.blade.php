@@ -294,6 +294,22 @@
     </div>
 </div>
 
+<div class="form-group row"
+     :class="{'has-danger': errors.has('location') }">
+    <label for="location" class="col-form-label text-md-right"
+           :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.location') }}</label>
+    <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
+        <input type="text" v-model="form.location"
+               v-validate="''"
+               value="{{$originalPoem->location ?? $translatedPoem->location ?? ''}}"
+               data-vv-as="{{ trans('admin.poem.columns.location') }}"
+               @input="validate($event)" class="form-control"
+               :class="{'form-control-danger': errors.has('location'), 'form-control-success': fields.location && fields.location.valid}"
+               id="location" name="location" placeholder="">
+        <div v-if="errors.has('location')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('location') }}</div>
+    </div>
+</div>
+
 
 @if(Auth::user()->is_admin)
 <div class="form-group row"

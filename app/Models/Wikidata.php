@@ -20,6 +20,17 @@ class Wikidata extends Model {
         'language' => '2',
         'genre' => '3',
     ];
+    const PROP = [
+        'birthdate' => 'P569',
+        'deathdate' => 'P570',
+        'gender' => 'P21',
+        'countries' => 'P27',
+        'occupations' => 'P106',
+        'languages' => 'P1412',
+        'time_period' => 'P2348',
+        'native_label' => 'P1705',
+        'images' => 'P18'
+    ];
 
     public $translatable = [
         'label_lang',

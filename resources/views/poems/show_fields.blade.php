@@ -104,6 +104,11 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                         @endif
                     @endif
 
+                    @if($poem->location)
+                        <dt>@lang('admin.poem.columns.location')</dt>
+                        <dd>{{$poem->location}}</dd>
+                    @endif
+
                     <dt>@lang('admin.poem.columns.poet')</dt>
                     <dd itemscope itemtype="https://schema.org/Person">@if($nation)<span itemprop="nationality"
                         class="poem-nation">{{$nation}}</span>@endif

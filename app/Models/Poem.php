@@ -47,6 +47,7 @@ class Poem extends Model implements Searchable {
         'year',
         'month',
         'date',
+        'location',
         'dynasty',
         'nation',
         'need_confirm',
@@ -81,6 +82,7 @@ class Poem extends Model implements Searchable {
         'year' => 'string',
         'month' => 'string',
         'date' => 'string',
+        'location' => 'string',
         'dynasty' => 'string',
         'nation' => 'string',
         'need_confirm' => 'integer',
@@ -303,7 +305,7 @@ class Poem extends Model implements Searchable {
      * @return string
      */
     public function getUrlAttribute() {
-        return route('p/show', ['fakeId' => $this->fake_id]);
+        return route('poem', ['id' => $this->id]);
     }
 
     /**

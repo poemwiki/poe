@@ -41,6 +41,7 @@ class StorePoem extends FormRequest {
             'year' => ['nullable', 'string'],
             'month' => ['nullable', 'string'],
             'date' => ['nullable', 'string'],
+            'location' => ['nullable', 'string'],
             'dynasty' => ['nullable', 'string'],
             'nation' => ['nullable', 'string'],
             'need_confirm' => ['nullable', 'boolean'],
