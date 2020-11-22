@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Content;
+use App\Traits\HasFakeId;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 
@@ -18,6 +19,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Poem extends Model implements Searchable {
     use SoftDeletes;
     use LogsActivity;
+    use HasFakeId;
 
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
@@ -25,8 +27,6 @@ class Poem extends Model implements Searchable {
 
     protected $table = 'poem';
 
-    const FAKEID_KEY = 'PoemWikikiWmeoP'; // Symmetric-key for xor
-    const FAKEID_SPARSE = 96969696969;
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
@@ -59,6 +59,7 @@ class Poem extends Model implements Searchable {
         'genre_id',
         'poet_wikidata_id',
         'translator_wikidata_id',
+        'short_url'
     ];
 
     /**
@@ -95,6 +96,7 @@ class Poem extends Model implements Searchable {
         'genre_id' => 'integer',
         'poet_wikidata_id' => 'integer',
         'translator_wikidata_id' => 'integer',
+        'short_url' => 'string',
     ];
 
 
@@ -294,38 +296,14 @@ class Poem extends Model implements Searchable {
 
     // TODO poem hasMany translators
 
-    /**
-     * @return string A xor encrypted string
-     */
-    public function getFakeIdAttribute() {
-        return self::getFakeId($this->id);
-    }
 
     /**
      * @return string
      */
     public function getUrlAttribute() {
-        return route('poem', ['id' => $this->id]);
+        return route('p/show', ['fakeId' => $this->fakeId]);
     }
 
-    /**
-     * @return string A xor encrypted string
-     */
-    public static function getFakeId($id) {
-        return base64_encode(($id * self::FAKEID_SPARSE) ^ mb_ord(self::FAKEID_KEY));
-    }
-
-    /**
-     * @param $fakeId
-     * @return false|int The decrypted id of poem
-     */
-    public static function getIdFromFakeId($fakeId) {
-        $decoded = base64_decode($fakeId);
-        if (!is_numeric($decoded)) {
-            return false;
-        }
-        return ($decoded ^ mb_ord(self::FAKEID_KEY)) / self::FAKEID_SPARSE;
-    }
 
     public function getSearchResult(): SearchResult {
         $url = route('poem', $this->id);

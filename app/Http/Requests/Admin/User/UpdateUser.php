@@ -30,13 +30,14 @@ class UpdateUser extends FormRequest
             'email' => ['sometimes', 'email', 'string'],
             'email_verified_at' => ['nullable', 'date'],
             'invite_code' => ['sometimes', 'string'],
-            'invite_max' => ['sometimes', 'boolean'],
-            'invited_by' => ['nullable', 'string'],
+            'invite_max' => ['sometimes', 'integer'],
+            'invited_by' => ['nullable', 'integer'],
             'is_active' => ['sometimes', 'boolean'],
             'is_admin' => ['sometimes', 'boolean'],
+            'is_v' => ['sometimes', 'boolean'],
             'name' => ['sometimes', 'string'],
             'password' => ['sometimes', 'confirmed', 'min:7', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9]).*$/', 'string'],
-            
+
         ];
     }
 

@@ -23,10 +23,11 @@ class AuthorController extends Controller {
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function show($id) {
+    public function show($fakeId) {
+        $id = Author::getIdFromFakeId($fakeId);
+        $author = Author::findOrFail($id);
         $poemsAsPoet = Poem::where(['poet_id' => $id])->get();
         $poemsAsTranslator = Poem::where(['translator_id' => $id])->get();
-        $author = Author::findOrFail($id);
 
         $from = request()->get('from');
         $fromPoetName = '';

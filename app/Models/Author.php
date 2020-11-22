@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasFakeId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasTranslations;
@@ -11,6 +12,7 @@ use Spatie\Searchable\SearchResult;
 class Author extends Model implements Searchable {
     use SoftDeletes;
     use HasTranslations;
+    use HasFakeId;
 
     protected $table = 'author';
 
@@ -58,11 +60,20 @@ class Author extends Model implements Searchable {
     public function translatedPoems() {
         return $this->hasMany(\App\Models\Poem::class, 'translator_id', 'id');
     }
+    public function user() {
+        return $this->hasOne(\App\User, 'id', 'user_id');
+    }
 
     /* ************************ ACCESSOR ************************* */
 
     public function getResourceUrlAttribute() {
         return url('/admin/authors/' . $this->getKey());
+    }
+    /**
+     * @return string
+     */
+    public function getUrlAttribute() {
+        return route('author/show', ['fakeId' => $this->fakeId]);
     }
 
     public static function searchPoems() {
@@ -70,7 +81,7 @@ class Author extends Model implements Searchable {
     }
 
     public function getSearchResult(): SearchResult {
-        $url = route('author/show', $this->id);
+        $url = route('author/show', ['fakeId' => $this->fakeId]);
 
         return new SearchResult(
             $this,

@@ -30,7 +30,7 @@
                                     </div>
                                     <div class="col-sm-auto form-group ">
                                         <select class="form-control" v-model="pagination.state.per_page">
-                                            
+
                                             <option value="10">10</option>
                                             <option value="25">25</option>
                                             <option value="100">100</option>
@@ -49,12 +49,10 @@
                                             </label>
                                         </th>
 
-                                        <th is='sortable' :column="'describe_lang'">{{ trans('admin.author.columns.describe_lang') }}</th>
                                         <th is='sortable' :column="'id'">{{ trans('admin.author.columns.id') }}</th>
                                         <th is='sortable' :column="'name_lang'">{{ trans('admin.author.columns.name_lang') }}</th>
-                                        <th is='sortable' :column="'pic_url'">{{ trans('admin.author.columns.pic_url') }}</th>
                                         <th is='sortable' :column="'user_id'">{{ trans('admin.author.columns.user_id') }}</th>
-                                        <th is='sortable' :column="'wikipedia_url'">{{ trans('admin.author.columns.wikipedia_url') }}</th>
+                                        <th is='sortable' :column="'updated_at'">{{ trans('updated_at') }}</th>
 
                                         <th></th>
                                     </tr>
@@ -78,19 +76,20 @@
                                             </label>
                                         </td>
 
-                                    <td>@{{ item.describe_lang }}</td>
                                         <td>@{{ item.id }}</td>
                                         <td>@{{ item.name_lang }}</td>
-                                        <td>@{{ item.pic_url }}</td>
                                         <td>@{{ item.user_id }}</td>
-                                        <td>@{{ item.wikipedia_url }}</td>
-                                        
+                                        <td>@{{ item.updated_at | datetime}}</td>
+
                                         <td>
                                             <div class="row no-gutters">
                                                 <div class="col-auto">
+                                                    <a class="btn btn-sm btn-spinner btn-info" :href="item.resource_url + '/verify'" title="@lang('admin.author.actions.verify')" role="button"><i class="fa fa-user">@lang('admin.author.actions.verify')</i></a>
+                                                </div>
+                                                <div class="col-auto hidden">
                                                     <a class="btn btn-sm btn-spinner btn-info" :href="item.resource_url + '/edit'" title="{{ trans('brackets/admin-ui::admin.btn.edit') }}" role="button"><i class="fa fa-edit"></i></a>
                                                 </div>
-                                                <form class="col" @submit.prevent="deleteItem(item.resource_url)">
+                                                <form class="col hidden" @submit.prevent="deleteItem(item.resource_url)">
                                                     <button type="submit" class="btn btn-sm btn-danger" title="{{ trans('brackets/admin-ui::admin.btn.delete') }}"><i class="fa fa-trash-o"></i></button>
                                                 </form>
                                             </div>

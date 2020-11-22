@@ -10,6 +10,10 @@ class WxPost extends Model {
     public $timestamps = true;
 
     public $fillable = [
+        'title' => 'string',
+        'digest' => 'string',
+        'link' => 'string',
+        'short_url'
     ];
 
     /**
@@ -21,7 +25,8 @@ class WxPost extends Model {
         'id' => 'integer',
         'title' => 'string',
         'digest' => 'string',
-        'link' => 'string'
+        'link' => 'string',
+        'short_url' => 'string'
     ];
 
     /**

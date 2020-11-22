@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Poem;
 use App\Repositories\PoemRepository;
 use App\User;
 use Illuminate\Support\Facades\Route;
@@ -72,28 +73,6 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
     });
 });
 
-//Route::resource('poems', 'PoemController');
-Route::prefix('poems')->name('poems/')->group(static function() {
-    Route::get('/random',      'PoemController@random')->name('random');
-    Route::get('/search',      'PoemController@index')->name('index');
-    Route::get('/create',      'PoemController@create')->name('create');
-    Route::post('/store',           'PoemController@store')->name('store');
-    Route::get('/edit/{fakeId}', 'PoemController@edit')->name('edit');
-    Route::post('/update/{fakeId}',     'PoemController@update')->name('update');
-    Route::get('/{fakeId}',    'PoemController@show')->name('show');
-    Route::get('/contribution/{fakeId}',    'PoemController@showContributions')->name('contribution');
-});
-
-Route::prefix('p')->name('p/')->group(static function() {
-    Route::get('/{fakeId}',    'PoemController@show')->name('show');
-});
-
-Route::prefix('author')->name('author/')->group(static function() {
-    Route::get('/{id}',    'AuthorController@show')->name('show');
-});
-
-Route::get('/new', 'PoemController@create')->name('new');
-
 
 /* Auto-generated admin routes */
 Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->group(static function () {
@@ -125,28 +104,6 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
     });
 });
 
-
-//Route::get('/login-wechat', function () {
-//    $user = session('wechat.oauth_user.default'); // 拿到授权用户资料
-//    if(request()->input('code'))
-//        dd($user);
-//    return $user;
-//})->name('login-wechat')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
-
-if(User::isWechat()) {
-    Route::any('/login', [\App\Http\Controllers\Auth\LoginWechatController::class, 'login'])
-        ->name('login')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
-} else {
-    Route::get('/login', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])
-        ->name('login');
-}
-
-Route::get('/union-login', function () {
-    if(User::isWechat()) {
-        return redirect(route('login-wechat'));
-    }
-    return redirect(route('login'));
-})->name('union-login');
 
 
 
@@ -259,6 +216,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/create',                                       'AuthorController@create')->name('create');
             Route::post('/',                                            'AuthorController@store')->name('store');
             Route::get('/{author}/edit',                                'AuthorController@edit')->name('edit');
+            Route::get('/{author}/verify',                                'AuthorController@verify')->name('verify');
             Route::post('/bulk-destroy',                                'AuthorController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{author}',                                    'AuthorController@update')->name('update');
             Route::delete('/{author}',                                  'AuthorController@destroy')->name('destroy');
@@ -291,6 +249,7 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
             Route::get('/create',                                       'UsersController@create')->name('create');
             Route::post('/',                                            'UsersController@store')->name('store');
             Route::get('/{user}/edit',                                  'UsersController@edit')->name('edit');
+            Route::get('/{user}/addV',                                  'UsersController@addV')->name('addV');
             Route::post('/bulk-destroy',                                'UsersController@bulkDestroy')->name('bulk-destroy');
             Route::post('/{user}',                                      'UsersController@update')->name('update');
             Route::delete('/{user}',                                    'UsersController@destroy')->name('destroy');
@@ -299,7 +258,61 @@ Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->gro
 });
 
 
+//Route::resource('poems', 'PoemController');
+Route::prefix('poems')->name('poems/')->group(static function() {
+    Route::get('/random',      'PoemController@random')->name('random');
+    Route::get('/search',      'PoemController@index')->name('index');
+    Route::get('/create',      'PoemController@create')->name('create');
+    Route::post('/store',           'PoemController@store')->name('store');
+    Route::get('/edit/{fakeId}', 'PoemController@edit')->name('edit');
+    Route::post('/update/{fakeId}',     'PoemController@update')->name('update');
+    Route::get('/{fakeId}',    'PoemController@show')->name('show');
+    Route::get('/contribution/{fakeId}',    'PoemController@showContributions')->name('contribution');
+});
 
+Route::get('/new', 'PoemController@create')->name('new');
+
+Route::prefix('p')->name('p/')->group(static function() {
+    Route::get('/{fakeId}',    'PoemController@show')->name('show');
+});
+
+
+Route::prefix('author')->name('author/')->group(static function() {
+    Route::get('/{fakeId}',    'AuthorController@show')->name('show');
+});
+
+
+
+//Route::get('/login-wechat', function () {
+//    $user = session('wechat.oauth_user.default'); // 拿到授权用户资料
+//    if(request()->input('code'))
+//        dd($user);
+//    return $user;
+//})->name('login-wechat')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
+
+if(User::isWechat()) {
+    Route::any('/login', [\App\Http\Controllers\Auth\LoginWechatController::class, 'login'])
+        ->name('login')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
+} else {
+    Route::get('/login', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])
+        ->name('login');
+}
+
+Route::get('/union-login', function () {
+    if(User::isWechat()) {
+        return redirect(route('login-wechat'));
+    }
+    return redirect(route('login'));
+})->name('union-login');
+
+
+Route::any('/q', 'QueryController@query')->name('query');
 Route::get('/q/{keyword}', 'QueryController@search')->name('search');
 Route::any('/query', 'QueryController@query')->name('query');
-Route::get('/{id}', 'PoemController@showPoem')->name('poem');
+
+Route::get('/{id}', function ($id) {
+    if($id <= 3200) {
+        return redirect(route('p/show', ['fakeId' => Poem::getFakeId($id)]));
+    }
+    return redirect('/');
+})->name('poem');

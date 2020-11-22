@@ -45,27 +45,7 @@
     @endforeach
 </div>
 
-<div class="row">
-    @foreach($locales as $locale)
-        <div class="col-md" v-show="shouldShowLangGroup('{{ $locale }}')" v-cloak>
-            <div class="form-group row align-items-center" :class="{'has-danger': errors.has('wikipedia_url_{{ $locale }}'), 'has-success': fields['wikipedia_url_{{ $locale }}'] && fields['wikipedia_url_{{ $locale }}'].valid }">
-                <label for="wikipedia_url_{{ $locale }}" class="col-md-2 col-form-label text-md-right">{{ trans('admin.author.columns.wikipedia_url') }}</label>
-                <div class="col-md-9" :class="{'col-xl-8': !isFormLocalized }">
-                    <input type="text" v-model="form.wikipedia_url['{{ $locale }}']" v-validate="''" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('wikipedia_url_{{ $locale }}'), 'form-control-success': fields['wikipedia_url_{{ $locale }}'] && fields['wikipedia_url_{{ $locale }}'].valid }" id="wikipedia_url_{{ $locale }}" name="wikipedia_url_{{ $locale }}" placeholder="{{ trans('admin.author.columns.wikipedia_url') }}">
-                    <div v-if="errors.has('wikipedia_url_{{ $locale }}')" class="form-control-feedback form-text" v-cloak>{{'{{'}} errors.first('wikipedia_url_{{ $locale }}') }}</div>
-                </div>
-            </div>
-        </div>
-    @endforeach
-</div>
 
-<div class="form-group row align-items-center" :class="{'has-danger': errors.has('pic_url'), 'has-success': fields.pic_url && fields.pic_url.valid }">
-    <label for="pic_url" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.author.columns.pic_url') }}</label>
-        <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
-        <input type="text" v-model="form.pic_url" v-validate="''" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('pic_url'), 'form-control-success': fields.pic_url && fields.pic_url.valid}" id="pic_url" name="pic_url" placeholder="{{ trans('admin.author.columns.pic_url') }}">
-        <div v-if="errors.has('pic_url')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('pic_url') }}</div>
-    </div>
-</div>
 
 <div class="form-group row align-items-center" :class="{'has-danger': errors.has('user_id'), 'has-success': fields.user_id && fields.user_id.valid }">
     <label for="user_id" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.author.columns.user_id') }}</label>

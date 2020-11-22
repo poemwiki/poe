@@ -152,9 +152,9 @@ SQL
                 // poem's other properties
 
                 $timeStr = '';
-                if ($post->year) $timeStr .= $post->year . '年';
-                if ($post->month) $timeStr .= $post->month . '月';
-                if ($post->date) $timeStr .= $post->date . '日';
+                if ($post->year) $timeStr .= $post->year . '.';
+                if ($post->month) $timeStr .= $post->month . '.';
+                if ($post->date) $timeStr .= $post->date;
 
                 if ($post->location) {
                     if ($timeStr <> '') {

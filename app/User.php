@@ -16,7 +16,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'invite_code', 'invited_by', 'avatar'
+        'name', 'email', 'password', 'invite_code', 'invited_by', 'avatar', 'is_v'
     ];
 
     /**
@@ -42,7 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     protected $dates = [
         'last_online_at'
     ];
-    protected $appends = ['last_online_at'];
+    protected $appends = ['last_online_at', 'resource_url'];
 
 
     /**
@@ -62,6 +62,16 @@ class User extends Authenticatable implements MustVerifyEmail {
      **/
     public function reviews() {
         return $this->hasMany(\App\Models\review::class, 'user_id', 'id');
+    }
+
+    public function getResourceUrlAttribute() {
+        return url('/admin/users/' . $this->getKey());
+    }
+    /**
+     * @return string
+     */
+    public function getUrlAttribute() {
+        return route('user/show', ['id' => $this->id]);
     }
 
     public function getNameAttribute() {

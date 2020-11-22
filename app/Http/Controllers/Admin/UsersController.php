@@ -37,7 +37,7 @@ class UsersController extends Controller
             $request,
 
             // set columns to query
-            ['id', 'name', 'email', 'email_verified_at', 'is_admin', 'updated_at'],
+            ['id', 'name', 'email', 'email_verified_at', 'is_admin', 'updated_at', 'is_v'],
 
             // set columns to searchIn
             ['email', 'id', 'name'],
@@ -120,6 +120,16 @@ class UsersController extends Controller
 
 
         return view('admin.user.edit', [
+            'user' => $user,
+        ]);
+    }
+
+    public function addV(User $user)
+    {
+        $this->authorize('admin.user.edit', $user);
+
+
+        return view('admin.user.addV', [
             'user' => $user,
         ]);
     }

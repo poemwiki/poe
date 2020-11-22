@@ -118,6 +118,7 @@ section.poem {
           display: inline;
         }
       }
+      .poem-time:before{content: initial;}
 
       .poem-nation {
         margin-right: .4em;

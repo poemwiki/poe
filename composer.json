@@ -43,7 +43,8 @@
     "renatomarinho/laravel-page-speed": "^1.9",
     "spatie/laravel-activitylog": "^3.16",
     "spatie/laravel-searchable": "^1.7",
-    "spatie/laravel-validation-rules": "^2.7"
+    "spatie/laravel-validation-rules": "^2.7",
+    "ext-gmp": "*"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.7",

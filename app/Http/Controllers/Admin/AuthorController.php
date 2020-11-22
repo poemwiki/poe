@@ -21,8 +21,7 @@ use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
-class AuthorController extends Controller
-{
+class AuthorController extends Controller {
 
     /**
      * Display a listing of the resource.
@@ -30,18 +29,21 @@ class AuthorController extends Controller
      * @param IndexAuthor $request
      * @return array|Factory|View
      */
-    public function index(IndexAuthor $request)
-    {
+    public function index(IndexAuthor $request) {
         // create and AdminListing instance for a specific model and
         $data = AdminListing::create(Author::class)->processRequestAndGet(
-            // pass the request with params
+        // pass the request with params
             $request,
 
             // set columns to query
-            ['describe_lang', 'id', 'name_lang', 'pic_url', 'user_id', 'wikipedia_url'],
+            ['id', 'name_lang', 'user_id', 'updated_at'],
 
             // set columns to searchIn
-            ['describe_lang', 'id', 'name_lang', 'pic_url', 'wikidata_id', 'wikipedia_url']
+            ['id', 'name_lang'],
+
+            function ($query) {
+                $query->orderBy('updated_at', 'desc');
+            }
         );
 
         if ($request->ajax()) {
@@ -59,11 +61,10 @@ class AuthorController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @throws AuthorizationException
      * @return Factory|View
+     * @throws AuthorizationException
      */
-    public function create()
-    {
+    public function create() {
         $this->authorize('admin.author.create');
 
         return view('admin.author.create');
@@ -75,8 +76,7 @@ class AuthorController extends Controller
      * @param StoreAuthor $request
      * @return array|RedirectResponse|Redirector
      */
-    public function store(StoreAuthor $request)
-    {
+    public function store(StoreAuthor $request) {
         // Sanitize input
         $sanitized = $request->getSanitized();
 
@@ -94,11 +94,10 @@ class AuthorController extends Controller
      * Display the specified resource.
      *
      * @param Author $author
-     * @throws AuthorizationException
      * @return void
+     * @throws AuthorizationException
      */
-    public function show(Author $author)
-    {
+    public function show(Author $author) {
         $this->authorize('admin.author.show', $author);
 
         // TODO your code goes here
@@ -108,15 +107,29 @@ class AuthorController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param Author $author
-     * @throws AuthorizationException
      * @return Factory|View
+     * @throws AuthorizationException
      */
-    public function edit(Author $author)
-    {
+    public function edit(Author $author) {
         $this->authorize('admin.author.edit', $author);
 
 
         return view('admin.author.edit', [
+            'author' => $author,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param Author $author
+     * @return Factory|View
+     * @throws AuthorizationException
+     */
+    public function verify(Author $author) {
+        $this->authorize('admin.author.edit', $author);
+
+        return view('admin.author.verify', [
             'author' => $author,
         ]);
     }
@@ -128,8 +141,7 @@ class AuthorController extends Controller
      * @param Author $author
      * @return array|RedirectResponse|Redirector
      */
-    public function update(UpdateAuthor $request, Author $author)
-    {
+    public function update(UpdateAuthor $request, Author $author) {
         // Sanitize input
         $sanitized = $request->getSanitized();
 
@@ -151,11 +163,10 @@ class AuthorController extends Controller
      *
      * @param DestroyAuthor $request
      * @param Author $author
-     * @throws Exception
      * @return ResponseFactory|RedirectResponse|Response
+     * @throws Exception
      */
-    public function destroy(DestroyAuthor $request, Author $author)
-    {
+    public function destroy(DestroyAuthor $request, Author $author) {
         $author->delete();
 
         if ($request->ajax()) {
@@ -169,11 +180,10 @@ class AuthorController extends Controller
      * Remove the specified resources from storage.
      *
      * @param BulkDestroyAuthor $request
-     * @throws Exception
      * @return Response|bool
+     * @throws Exception
      */
-    public function bulkDestroy(BulkDestroyAuthor $request) : Response
-    {
+    public function bulkDestroy(BulkDestroyAuthor $request): Response {
         DB::transaction(static function () use ($request) {
             collect($request->data['ids'])
                 ->chunk(1000)
@@ -181,7 +191,7 @@ class AuthorController extends Controller
                     DB::table('authors')->whereIn('id', $bulkChunk)
                         ->update([
                             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s')
-                    ]);
+                        ]);
 
                     // TODO your code goes here
                 });

@@ -28,7 +28,8 @@ class StoreAuthor extends TranslatableFormRequest
             'pic_url' => ['nullable', 'string'],
             'user_id' => ['nullable', 'string'],
             'wikidata_id' => ['nullable', 'string'],
-            
+            'wikidata_url' => ['nullable', 'string'],
+
         ];
     }
 
@@ -41,8 +42,7 @@ class StoreAuthor extends TranslatableFormRequest
         return [
             'describe_lang' => ['nullable', 'string'],
             'name_lang' => ['nullable', 'string'],
-            'wikipedia_url' => ['nullable', 'string'],
-            
+
         ];
     }
 
