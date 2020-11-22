@@ -127,6 +127,14 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->avatar ?? self::getGravatar($this->email);
     }
 
+    public function getVerifiedAvatarHtml() {
+        $html =<<<HTML
+<div class="avatar verify-avatar" title="$this->name" style="background-image: url(&quot;/images/verified.svg&quot;), url(&quot;$this->avatarUrl&quot;);"></div>
+HTML;
+        return $html;
+
+    }
+
     public function getLastOnlineAtAttribute() {
         $redis = Redis::connection();
         return $redis->get('online_' . $this->id);

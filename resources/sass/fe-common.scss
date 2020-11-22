@@ -216,3 +216,11 @@ main{
   transform: translateY(0);
   opacity: 1!important;
 }
+
+.verify-avatar {
+  background-repeat: no-repeat;
+  background-position: 100% 100%,0;
+  background-size: 40px,98px;
+  width: 102px;
+  height: 106px;
+}

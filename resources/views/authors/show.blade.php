@@ -7,7 +7,16 @@
 
 @section('content')
     <article class="poet">
-        <h1>{{$poetName}}</h1>
+        <h1>{{$poetName}} </h1>
+
+        <div class="author-relate">
+
+            @if($author->user)
+                {!!$author->user->getVerifiedAvatarHtml()!!}
+                <span>此作者页已关联到用户 {{$author->user->name}}@PoemWiki</span>
+            @endif
+        </div>
+
         <div class="poet-gallery">
             @if($author->pic_url)
             @foreach($author->pic_url as $url)

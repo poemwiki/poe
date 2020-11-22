@@ -12,6 +12,9 @@
 article.poet{
   padding: 1rem 1.6rem 2rem;
 
+  .author-relate {
+    color: $gray;
+  }
   .poet-gallery{
     display: flex;
     flex-wrap: nowrap;

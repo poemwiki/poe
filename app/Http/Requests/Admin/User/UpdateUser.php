@@ -27,7 +27,7 @@ class UpdateUser extends FormRequest
     {
         return [
             'avatar' => ['nullable', 'string'],
-            'email' => ['sometimes', 'email', 'string'],
+            // 'email' => ['sometimes', 'email', 'string'],
             'email_verified_at' => ['nullable', 'date'],
             'invite_code' => ['sometimes', 'string'],
             'invite_max' => ['sometimes', 'integer'],

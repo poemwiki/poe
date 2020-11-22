@@ -61,7 +61,7 @@ class Author extends Model implements Searchable {
         return $this->hasMany(\App\Models\Poem::class, 'translator_id', 'id');
     }
     public function user() {
-        return $this->hasOne(\App\User, 'id', 'user_id');
+        return $this->hasOne(\App\User::class, 'id', 'user_id');
     }
 
     /* ************************ ACCESSOR ************************* */
