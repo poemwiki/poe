@@ -90,8 +90,8 @@
 </section>
 
 @push('scripts')
-<script src="js/lib/zepto.min.js"></script>
-<script src="js/review.js"></script>
+<script src="/js/lib/zepto.min.js"></script>
+<script src="/js/review.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
@@ -116,6 +116,7 @@
                 unwrapTags: []
             },
             autoLink: true,
+            targetBlank: true,
             // elementsContainer: $('#content-warpper').get('0'),
             placeholder: {
                 /* This example includes the default options for placeholder,
