@@ -7,7 +7,7 @@ use Eloquent as Model;
 class WxPost extends Model {
 
     public $table = 'wx_post';
-    public $timestamps = true;
+    public $timestamps = false;
 
     public $fillable = [
         'title' => 'string',
@@ -16,13 +16,16 @@ class WxPost extends Model {
         'short_url'
     ];
 
+    public $primaryKey = 'aid';
+    public $incrementing = false;
+
     /**
      * The attributes that should be casted to native types.
      *
      * @var array
      */
     protected $casts = [
-        'id' => 'integer',
+        'aid' => 'string',
         'title' => 'string',
         'digest' => 'string',
         'link' => 'string',

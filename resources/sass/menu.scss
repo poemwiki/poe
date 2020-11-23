@@ -76,7 +76,7 @@ nav.header-fixed {
     }
     .user-logo{
       opacity: 0;
-      transition: opacity .4s ease-in;
+      transition: opacity .1s ease-in;
     }
     .search-logo{
       top: 0;
@@ -85,15 +85,16 @@ nav.header-fixed {
       display: block;
       height: 6rem;
       width: 6rem;
+      transition: opacity 2s ease-in;
     }
   }
   .search-logo{
     opacity: 0;
-    transition: opacity 2s ease-in;
+    transition: opacity .2s ease-in;
   }
   .user-logo{
     opacity: 1;
-    transition: opacity .4s ease-in;
+    transition: opacity .2s ease-in;
   }
   .site-logo {
     opacity: 1;

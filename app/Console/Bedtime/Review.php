@@ -43,14 +43,14 @@ class Review extends Command {
     public function handle() {
         // $this->addBedtimeScore(3054, 44);
         $this->addBedtimeReview(
-            $this->argument('fromTimestamp') ?? Date::createFromDate(2020, 8, 21)->getTimestamp(),
-            $this->argument('toTimestamp') ?? Date::createFromDate(2020, 12, 15)->getTimestamp()
+            $this->argument('fromTimestamp') ?? Date::createFromDate(2016, 4, 10, 'Asia/ShangHai')->getTimestamp(),
+            $this->argument('toTimestamp') ?? Date::createFromDate(2016, 4, 18, 'Asia/ShangHai')->getTimestamp()
         );
         return 0;
     }
 
 
-    public function addBedtimeReview($minCreateTime = 0, $maxCreateTime = 0, $userId = 44) {
+    public function addBedtimeReview($minUpdateTime = 0, $maxUpdateTime = 0, $userId = 44) {
         $config = [
             'app_id' => env('WECHAT_OFFICIAL_ACCOUNT_APPID'),
             'secret' => env('WECHAT_OFFICIAL_ACCOUNT_SECRET'),
@@ -61,20 +61,24 @@ class Review extends Command {
 
         $app = Factory::officialAccount($config);
 
-        WxPost::whereBetween('create_time', [$minCreateTime, $maxCreateTime])->whereNotNull('poem_id')
+        WxPost::whereBetween('update_time', [$minUpdateTime, $maxUpdateTime])
+            ->whereNotNull('poem_id')
             ->get()->each(function ($post) use ($userId, $app) {
 
-                $shortUrl = $app->url->shorten($post->link);
+                $link = Str::of($post->link)->replaceMatches('@&chksm=[^#&]*@', '')
+                    ->replace('#rd', '')
+                    ->replace('#wechat_redirect', '');
+
+                $shortUrl = $app->url->shorten($link);
                 if($shortUrl->errcode === 0) {
                     $link = $shortUrl->short_url;
-                } else {
-                    $link = Str::of($post->link)->replaceMatches('@&chksm=[^#&]*@', '')
-                        ->replace('#rd', '')
-                        ->replace('#wechat_redirect', '');
+                    $post->short_url = $link;
+                    $post->save();
                 }
+
                 Log::info('Add bedtimepoem review link: ' . $link);
 
-                ReviewModel::updateOrInsert([
+                $res = ReviewModel::updateOrInsert([
                     'poem_id' => $post->poem_id,
                     'user_id' => $userId
                 ], [
