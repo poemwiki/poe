@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 
+
 trait HasFakeId {
 
     static $FAKEID_KEY = 'PoemWikikiWmeoP'; // Symmetric-key for xor
@@ -11,6 +12,9 @@ trait HasFakeId {
      * @return string A xor encrypted string
      */
     public static function getFakeId($id) {
+        if (!is_numeric($id)) {
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException();
+        }
         return base64_encode(gmp_xor(gmp_mul($id, gmp_init(self::$FAKEID_SPARSE)), mb_ord(self::$FAKEID_KEY)));
     }
 

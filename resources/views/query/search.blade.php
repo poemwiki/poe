@@ -1,6 +1,6 @@
 @extends('layouts.fe')
 
-@section('title'){{$keyword}} @lang('search.result')@endsection
+@section('title'){{$keyword ?? ''}} @lang('search.result')@endsection
 @section('author')
     PoemWiki
 @endsection
@@ -12,22 +12,28 @@
     <div class="search-box-wrapper">
         <form class="search-box" method="get" action="{{route('query')}}">
             @csrf
-            <input type="text" name="keyword" placeholder="Search PoemWiki" value="{{$keyword}}">
-            <button class="btn btn-wire" type="submit">Search</button>
+            <input type="text" name="keyword" placeholder="@lang('search.Please input keywords here')" value="{{$keyword ?? ''}}">
+            <button class="btn btn-wire" type="submit">@lang('Search')</button>
         </form>
     </div>
 
 
+    @if(isset($keyword))
     <h1>@lang('search.result of', ['keyword' => $keyword])</h1>
+    @endif
 
+    @if(isset($res))
     <p class="search-count">@lang('search.count', ['count' => $res->count()])</p>
+    @endif
 
-    <aside>
-        @if(!$authorCount)
+    <aside class="hidden">
+        @if(isset($authorCount) && !$authorCount)
             <a href="" class="btn">@lang('Add Author') {{$keyword}}</a>
             <a href="" class="btn">@lang('Add Poem') {{$keyword}}</a>
         @endif
     </aside>
+
+    @if(isset($res))
     @foreach($res->groupByType() as $type => $modelSearchResults)
     <div class="search-group">
         <h2>@lang('search.result-'.$type)</h2>
@@ -51,7 +57,7 @@
                         <a class="item-link title-bar title font-song no-bg" target="_blank" href="{{$item->url}}">{!!
                     Str::of(trim($item->title) ? trim($item->title) : '无题')
                         ->surround('span')!!}</a>
-                        <a class="first-line no-bg" href="{{$item->url}}">{!!Str::of($item->searchable->poem)->firstLine()->surround('span', function ($i) {
+                        <a class="first-line no-bg" target="_blank" href="{{$item->url}}">{!!Str::of($item->searchable->poem)->firstLine()->surround('span', function ($i) {
                             return 'style="transition-delay:'.($i*20).'ms"';
                     })!!}</a>
                     </div>
@@ -61,6 +67,7 @@
         </ol>
     </div>
     @endforeach
+    @endif
 
 </div>
 

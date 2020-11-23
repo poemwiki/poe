@@ -45,11 +45,11 @@ article.poet{
   position: relative;
   width: 100%;
   >a.title{
-    padding: 0;
+    padding: 1em 0 0 0;
     width: 100%;
     display: inline-block;
     color: $blue;
-    line-height: 2em;
+    line-height: 1.2em;
     overflow-y: hidden;
 
     &>span{
@@ -104,7 +104,7 @@ article.poet{
       padding-left: 0;
       list-style: none;
       .item{
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
         display: flex;
         .title{
           line-height: 1.6em;

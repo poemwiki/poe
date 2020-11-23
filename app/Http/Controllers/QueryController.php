@@ -16,6 +16,10 @@ class QueryController extends Controller {
 
     // public function __construct() {
     // }
+    public function index(){
+        return view('query.search')->with([
+        ]);
+    }
 
     public function search(string $keyword){
         $keyword = Str::of($keyword)

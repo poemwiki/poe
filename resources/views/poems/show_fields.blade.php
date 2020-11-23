@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
             $nav.classList.remove('show-title');
         }
     });
-    $nav.addEventListener('click', function () {
+    $nav.addEventListener('dbclick', function () {
         window.scrollTo({top:0});
     });
 });

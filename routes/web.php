@@ -290,7 +290,7 @@ Route::prefix('author')->name('author/')->group(static function() {
 //    return $user;
 //})->name('login-wechat')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
 
-if(User::isWechat()) {
+if(User::isWechat() && config('app.env') !== 'local') {
     Route::any('/login', [\App\Http\Controllers\Auth\LoginWechatController::class, 'login'])
         ->name('login')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
 } else {
@@ -299,14 +299,14 @@ if(User::isWechat()) {
 }
 
 Route::get('/union-login', function () {
-    if(User::isWechat()) {
+    if(User::isWechat() && config('app.env') !== 'local') {
         return redirect(route('login-wechat'));
     }
     return redirect(route('login'));
 })->name('union-login');
 
 
-Route::any('/q', 'QueryController@query')->name('query');
+Route::any('/q', 'QueryController@index')->name('query');
 Route::get('/q/{keyword}', 'QueryController@search')->name('search');
 Route::any('/query', 'QueryController@query')->name('query');
 

@@ -306,12 +306,10 @@ class Poem extends Model implements Searchable {
 
 
     public function getSearchResult(): SearchResult {
-        $url = route('poem', $this->id);
-
         return new SearchResult(
             $this,
             $this->title,
-            $url
+            $this->url
         );
     }
 }
