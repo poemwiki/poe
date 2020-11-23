@@ -157,12 +157,12 @@ SQL
                 if ($post->date) $timeStr .= $post->date;
 
                 if ($post->location) {
-                    if ($timeStr <> '') {
+                    if ($timeStr) {
                         array_push($parts, "$timeStr, $post->location\n");
                     } else {
                         array_push($parts, $post->location."\n");
                     }
-                } else {
+                } else if ($timeStr){
                     array_push($parts, $timeStr."\n");
                 }
 
