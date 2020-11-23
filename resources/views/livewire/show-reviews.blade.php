@@ -40,7 +40,7 @@
                 @endif
                 <h2 class="review-title">{{$review->title}}</h2>
 
-                <p class="review-content">{!! nl2br($review->content) !!}</p>
+                <div class="review-content">{!! strip_tags(nl2br($review->content), '<p><br><a>') !!}</div>
 
 
                 @auth
@@ -108,11 +108,10 @@
                 placeholderText: '请粘贴或输入链接',
             },
             paste: {
+                cleanPastedHTML: false,
                 forcePlainText: true,
-                cleanPastedHTML: true,
                 cleanReplacements: [],
                 cleanAttrs: ['class', 'style', 'dir'],
-                cleanTags: ['meta', 'script', 'b', 'strong', 'style'],
                 unwrapTags: []
             },
             autoLink: true,

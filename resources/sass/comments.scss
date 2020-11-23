@@ -207,6 +207,9 @@ section.reviews{
       >.review-content{
         color: $ui-text-color;
         font-size: $font-size-sm;
+        p {
+          font-size: $font-size-sm;
+        }
       }
       .review-none{
         height: 16rem;
