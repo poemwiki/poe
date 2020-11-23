@@ -22,3 +22,5 @@ fields_sample.json
 /public/js
 /public/img/avatars/*
 /public/vendor/swaggervel/*
+
+/storage/poems_hezhibin
