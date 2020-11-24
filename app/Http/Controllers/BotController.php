@@ -8,6 +8,7 @@ use App\Models\Language;
 use App\Models\Poem;
 use App\Repositories\PoemRepository;
 use App\Repositories\ScoreRepository;
+use EasyWeChat\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
@@ -15,15 +16,32 @@ use Response;
 use Fukuball\Jieba\Jieba;
 use Fukuball\Jieba\Finalseg;
 use \PDO as PDO;
+use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 class BotController extends Controller {
     /** @var  PoemRepository */
     private $poemRepository;
+    /**
+     * @var \EasyWeChat\OfficialAccount\Application
+     */
+    private $wechatApp;
 
     public function __construct() {
         ini_set('memory_limit', '300M');
         Jieba::init(array('mode' => 'default', 'dict' => 'small'));
         Finalseg::init();
+
+        $config = [
+            'app_id' => env('WECHAT_OFFICIAL_ACCOUNT_APPID'),
+            'secret' => env('WECHAT_OFFICIAL_ACCOUNT_SECRET'),
+
+            // 指定 API 调用返回结果的类型：array(default)/collection/object/raw/自定义类名
+            'response_type' => 'object',
+        ];
+
+        $this->wechatApp = Factory::officialAccount($config);
+        $cache = new RedisAdapter(app('redis')->connection()->client());
+        $this->wechatApp->rebind('cache', $cache);
     }
 
     /**
@@ -58,7 +76,7 @@ class BotController extends Controller {
         if (is_array($keyword)) {
             $originWords = implode(' ', $keyword);
             $sql = 'SELECT (select 1 from wx_post WHERE poem_id=p.id limit 1) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
-`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`
+`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`, `short_url`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
@@ -85,7 +103,7 @@ class BotController extends Controller {
             $originWords = $keyword;
             $q = $poeDB->prepare(<<<'SQL'
         SELECT (select 1 from wx_post WHERE poem_id=p.id limit 1) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
-`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`
+`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`, `short_url`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
@@ -175,9 +193,17 @@ SQL
                 if ($post->translator) array_push($parts, '翻译 / ' . trim($post->translator));
 
                 // links & score
-                $url = (isset($post->length) && $post->length > 500)
-                    ? "https://poemwiki.org/" . $post->id
-                    : "poemwiki.org/" . $post->id;
+                if(!$post->short_url) {
+                    $url = $this->shorten(route('poems/show', Poem::getFakeId($post->id)), function ($link) use ($post){
+                        $p = Poem::find($post->id);
+                        if(empty($p)) return;
+
+                        $p->short_url = $link;
+                        $p->save();
+                    });
+                } else {
+                    $url = $post->short_url;
+                }
                 $wikiLink = "\n\n诗歌维基：$url";
 
                 $scoreRepo = new ScoreRepository(app());
@@ -193,7 +219,7 @@ SQL
 
                 if($count >= 2 || is_array($keyword)) {
                     $word = is_array($keyword) ? $keyword[0] : $keyword;
-                    $more = "更多关于 $word 的诗：" . route('search', $word);
+                    $more = "\n更多\"$word\"的诗：" . $this->shorten(route('search', $word));
                     array_push($parts, $more);
                 }
 
@@ -271,5 +297,14 @@ SQL;
         return strstr($keyword, ' ')
             ? explode(' ', $keyword)
             : $keyword;
+    }
+
+    private function shorten($link, $cb = null) {
+        $shortUrl = $this->wechatApp->url->shorten($link);
+        if($shortUrl->errcode === 0) {
+            if(is_callable($cb)) call_user_func($cb, $shortUrl->short_url);
+            return $shortUrl->short_url;
+        }
+        return $link;
     }
 }
