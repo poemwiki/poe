@@ -9,7 +9,7 @@ $poetName = '';
 if($poem->poet_cn) {
     $poetName = $poem->poet_cn;
     if ($poem->poet_cn !== $poem->poet) {
-        $poetName .= '&nbsp;('.$poem->poet.')';
+        $poetName .= ' ('.$poem->poet.')';
     }
 } else {
     $poetName = $poem->poet;
