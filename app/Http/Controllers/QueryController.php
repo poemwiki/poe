@@ -17,11 +17,12 @@ class QueryController extends Controller {
     // public function __construct() {
     // }
     public function index(){
-        return view('query.search')->with([
-        ]);
+        return view('query.search');
     }
 
-    public function search(string $keyword){
+    public function search($keyword){
+        if($keyword === '' || is_null($keyword)) return view('query.search');
+
         $keyword = Str::of($keyword)
             // ->replace('·', ' ')
             ->replaceMatches('@[[:punct:]]+@u', ' ')

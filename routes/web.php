@@ -306,8 +306,8 @@ Route::get('/union-login', function () {
 })->name('union-login');
 
 
-Route::any('/q', 'QueryController@index')->name('query');
-Route::get('/q/{keyword}', 'QueryController@search')->name('search');
+Route::any('/q', 'QueryController@index')->name('q');
+Route::get('/q/{keyword?}', 'QueryController@search')->name('search');
 Route::any('/query', 'QueryController@query')->name('query');
 
 Route::get('/{id}', function ($id) {
