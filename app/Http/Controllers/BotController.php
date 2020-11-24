@@ -68,7 +68,7 @@ class BotController extends Controller {
         OR `poet` like :keyword3_$idx OR `poet_cn` like :keyword4_$idx OR `translator` like :keyword5_$idx) AND";
             }
             $sql = trim($sql, 'AND') . ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR`need_confirm`<>1)
-        ORDER BY wx desc, `selected_count`,`last_selected_time`,length(`poem`) limit 0,1';
+        ORDER BY wx desc, `selected_count`,`last_selected_time`,length(`poem`) limit 0,2';
             $poeDB->prepare($sql);
 
             $q = $poeDB->prepare($sql);
@@ -91,7 +91,7 @@ class BotController extends Controller {
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
         WHERE (`poem` like :keyword1 OR `title` like :keyword2
         OR `poet` like :keyword3 OR `poet_cn` like :keyword4 OR `translator` like :keyword5) AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1)
-        ORDER BY wx desc, `selected_count`,`last_selected_time`,length(`poem`) limit 0,1
+        ORDER BY wx desc, `selected_count`,`last_selected_time`,length(`poem`) limit 0,2
 SQL
             );
             $word = '%' . $keyword . '%';
@@ -112,9 +112,10 @@ SQL
         if ($q->execute()) {
             $code = 0;
             $res = $q->fetchAll(PDO::FETCH_ASSOC);
+            $count = count($res);
 
             // TODO put this into blade
-            if (count($res) == 0) {
+            if ($count == 0) {
                 $emoji = Arr::random(['😓', '😅', '😢', '😂', '😭呜呜 ', '', '🙁️', '😫', '😶', '😬', '😔', '😒', '😠', '😊', '😹','🙁','🙃']);
                 $sorry = Arr::random(['Sorry', '对不起', '抱歉', '不好意思', '不好意思哈', 'Soooorry']);
                 $notFound = Arr::random(['没查到', '没搜着', '没找到', '没找着']);
@@ -152,8 +153,10 @@ SQL
                 // poem's other properties
 
                 $timeStr = '';
-                if ($post->year) $timeStr .= $post->year . '.';
-                if ($post->month) $timeStr .= $post->month . '.';
+                if ($post->year) $timeStr .= $post->year;
+                if ($post->year && $post->month) $timeStr .= '.';
+                if ($post->month) $timeStr .= $post->month;
+                if ($post->month && $post->date) $timeStr .= '.';
                 if ($post->date) $timeStr .= $post->date;
 
                 if ($post->location) {
@@ -162,7 +165,7 @@ SQL
                     } else {
                         array_push($parts, $post->location."\n");
                     }
-                } else if ($timeStr){
+                } else if ($timeStr) {
                     array_push($parts, $timeStr."\n");
                 }
 
@@ -186,6 +189,12 @@ SQL
                 } else {
                     $wikiScore = "点这里：$url 做第一个给这首诗打分的人";
                     array_push($parts, "\n\n$wikiScore");
+                }
+
+                if($count >= 2 || is_array($keyword)) {
+                    $word = is_array($keyword) ? $keyword[0] : $keyword;
+                    $more = "更多关于 $word 的诗：" . route('search', $word);
+                    array_push($parts, $more);
                 }
 
                 $poem = implode("\n", $parts);
