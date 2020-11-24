@@ -11,7 +11,7 @@
             @endif
         </li>
         @auth
-            <li class="flex-center-vertically search-logo" id="search-logo"><a class="no-bg" href="/q"></a></li>
+            <li class="flex-center-vertically search-logo" id="search-logo"><a class="no-bg" href="{{route('q')}}"></a></li>
         @endauth
     </ul>
 </nav>
