@@ -3,7 +3,6 @@
 namespace App\Traits;
 
 use Brackets\Translatable\Traits\HasTranslations as ParentHasTranslations;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
 trait HasTranslations {
@@ -28,8 +27,14 @@ trait HasTranslations {
     }
 
     public function getTranslated(string $key, string $locale) {
-
         $translation = $this->getTranslation($key, $locale, false);
+        if(!empty($translation)) {
+            return $translation;
+        }
+
+        $lowerLocale = strtolower($locale);
+
+        $translation = $this->getTranslation($key, $lowerLocale, false);
         if(!empty($translation)) {
             return $translation;
         }
@@ -40,10 +45,10 @@ trait HasTranslations {
         $lastFallback = array_key_first($translations);
         $zhFallback = ['zh', 'zh-cn', 'zh-hans', 'zh-Hans-CN', 'zh-hant', 'zh-hk', 'zh-tw', 'zh-yue', 'zh-sg', $lastFallback];
         $zhTFallback = ['zh-hant', 'zh-hk', 'zh-tw', 'zh-yue', 'zh', 'zh-cn', 'zh-hans', 'zh-Hans-CN', 'zh-sg', $lastFallback];
-        if (in_array($locale, $zhFallback)){
+        if (in_array($lowerLocale, $zhFallback)){
             return $this->getFallbackTranslation($key, $zhFallback);
         }
-        if (in_array($locale, $zhTFallback)){
+        if (in_array($lowerLocale, $zhTFallback)){
             return $this->getFallbackTranslation($key, $zhTFallback);
         }
 
@@ -81,13 +86,4 @@ trait HasTranslations {
         return $this->setTranslation($key, $this->getLocale(), $value);
     }
 
-    /**
-     * Get current locale of the model
-     *
-     * @return string
-     */
-    public function getLocale() {
-        $locale = $this->locale ?? App::getLocale();
-        return strtolower($locale);
-    }
 }
