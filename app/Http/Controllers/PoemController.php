@@ -8,8 +8,8 @@ use App\Http\Requests\Admin\Poem\StorePoem;
 use App\Http\Requests\Admin\Poem\UpdatePoem;
 use App\Models\ActivityLog;
 use App\Models\Genre;
-use App\Models\Language;
 use App\Models\Poem;
+use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use Auth;
 use Brackets\AdminListing\Facades\AdminListing;
@@ -99,10 +99,9 @@ class PoemController extends Controller
             $originalPoem = $this->poemRepository->getPoemFromFakeId($o);
         }
 
-
         return view('poems.create', [
             'userName' => $user->name,
-            'languageList' => Language::all(),
+            'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::all(),
             'translatedPoem' => $translatedPoem ?? null,
             'originalPoem' => $originalPoem ?? null
@@ -155,7 +154,7 @@ class PoemController extends Controller
         return view('poems.edit', [
             'poem' => $poem,
             'userName' => $user->name,
-            'languageList' => Language::all(),
+            'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::all()
         ]);
     }
