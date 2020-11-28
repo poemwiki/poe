@@ -66,12 +66,4 @@ class Language extends Model {
         return $this->hasMany(\App\Models\Poem::class, 'language_id', 'id');
     }
 
-    public static function ids() {
-        $langs = self::select('id')->get()->toArray();
-        $idList = [];
-        foreach ($langs as $value) {
-            $idList[] = $value['id'];
-        };
-        return $idList;
-    }
 }

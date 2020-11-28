@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasTranslations;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Genre extends Model {
@@ -16,7 +16,7 @@ class Genre extends Model {
     protected static $logOnlyDirty = true;
     protected static $ignoreChangedAttributes = ['created_at'];
 
-    protected $table = 'genre';
+    public $table = 'genre';
 
     protected $fillable = [
         'describe_lang',
@@ -37,8 +37,7 @@ class Genre extends Model {
     // these attributes are translatable
     public $translatable = [
         'describe_lang',
-        'name_lang',
-
+        'name_lang'
     ];
 
     protected $appends = ['resource_url'];

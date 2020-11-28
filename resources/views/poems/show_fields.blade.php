@@ -21,7 +21,7 @@ $graphemeLength = max(array_map(function($line) {
 
 $softWrap = true;
 $maxLengthConf = config('app.language_line_length_max');
-if ($poem->language_id) {
+if ($poem->language_id && isset($maxLengthConf[$poem->language_id])) {
     $maxLength = $maxLengthConf[$poem->language_id];
 } else {
     $maxLength = config('app.default_soft_wrap_length');

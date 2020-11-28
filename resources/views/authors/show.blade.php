@@ -7,7 +7,7 @@
 
 @section('content')
     <article class="poet">
-        <h1>{{$poetName}} </h1>
+        <h1>{{$author->name_lang}} </h1>
 
         <div class="author-relate">
 

@@ -43,4 +43,8 @@ class LanguageRepository extends BaseRepository {
     public function model() {
         return Language::class;
     }
+
+    public static function allInUse() {
+        return Language::where('name', '<>', '')->get();
+    }
 }

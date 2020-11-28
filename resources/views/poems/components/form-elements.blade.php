@@ -199,7 +199,7 @@
                 data-vv-as="{{ trans('admin.poem.columns.language_id') }}" data-vv-name="language_id"
                 name="language_id_fake_element">
             @foreach($languageList as $lang)
-                <option value="{{$lang->id}}" :selected="form.language_id=={{$lang->id}}">{{ $lang->name }}</option>
+                <option value="{{$lang->id}}" :selected="form.language_id=={{$lang->id}}">{{ $lang->name_lang }} ({{ $lang->name }})</option>
             @endforeach
         </select>
         <input type="hidden" name="language_id" :value="form.language_id">
