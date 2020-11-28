@@ -5,7 +5,6 @@
 @section('author')
     PoemWiki
 @endsection
-
 @section('content')
 <h2>{{($poem->poet_cn ?? $poem->poet)}}  <a href="{{$poem->url}}">{{$poem->title}}</a> @lang('poem.edit history')</h2>
 <ol class="contribution collapsed">
@@ -42,7 +41,7 @@
         </li>
     @endforeach
 
-    @if(count($logs)<1 or $logs[0]->description === 'updated')
+    @if(count($logs)<1)
         <li title="{{$poem->created_at}}">@lang('poem.initial upload') PoemWiki</li>
     @endif
 </ol>
