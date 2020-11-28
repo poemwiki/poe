@@ -41,8 +41,9 @@ class AuthorController extends Controller {
             // set columns to searchIn
             ['id', 'name_lang'],
 
-            function ($query) {
-                $query->orderBy('updated_at', 'desc');
+            function ($query) use ($request) {
+                if(!$request->input('orderBy'))
+                    $query->orderBy('updated_at', 'desc');
             }
         );
 

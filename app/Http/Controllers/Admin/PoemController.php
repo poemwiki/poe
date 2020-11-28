@@ -43,8 +43,9 @@ class PoemController extends Controller
             // set columns to searchIn
             ['id', 'title', 'poet', 'poet_cn', 'bedtime_post_title', 'poem', 'translator', 'from', 'year', 'month', 'date', 'dynasty', 'nation'],
 
-            function ($query) {
-                $query->orderBy('updated_at', 'desc');
+            function ($query) use ($request) {
+                if(!$request->input('orderBy'))
+                    $query->orderBy('updated_at', 'desc');
             }
 
         );

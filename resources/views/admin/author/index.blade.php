@@ -77,7 +77,7 @@
                                         </td>
 
                                         <td>@{{ item.id }}</td>
-                                        <td>@{{ item.name_lang }}</td>
+                                        <td><a :href="item.url" target="_blank">@{{ item.name_lang }}</a></td>
                                         <td>@{{ item.user_id }}</td>
                                         <td>@{{ item.updated_at | datetime}}</td>
 

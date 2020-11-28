@@ -52,7 +52,7 @@ class Author extends Model implements Searchable {
         'pic_url' => 'json'
     ];
 
-    protected $appends = ['resource_url'];
+    protected $appends = ['resource_url', 'url'];
 
     public function poems() {
         return $this->hasMany(\App\Models\Poem::class, 'poet_id', 'id');

@@ -42,8 +42,9 @@ class UsersController extends Controller
             // set columns to searchIn
             ['email', 'id', 'name'],
 
-            function ($query) {
-                $query->orderBy('updated_at', 'desc');
+            function ($query) use ($request) {
+                if(!$request->input('orderBy'))
+                    $query->orderBy('updated_at', 'desc');
             }
         );
 
