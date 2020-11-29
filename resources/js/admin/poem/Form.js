@@ -16,10 +16,9 @@ Vue.component('poem-form', {
         language_id: 1,
         is_original: 1,
         poet: '',
-        poet_cn: '',
         bedtime_post_id:  '' ,
         bedtime_post_title:  '' ,
-        poem: '',
+        poem: "\n\n\n\n\n",
         length: '',
         translator: '',
         from:  '' ,
@@ -27,14 +26,14 @@ Vue.component('poem-form', {
         // month:  '' ,
         // date:  '' ,
         location:  '' ,
-        dynasty: '',
-        nation: '',
         // need_confirm:  false ,
         // is_lock:  false ,
         // content_id:  '' ,
         original_id: '',
         translated_id: '',
         genre_id: '',
+        poet_id: '',
+        translator_id: '',
       },
 
       cmOptions: {
@@ -48,10 +47,7 @@ Vue.component('poem-form', {
   },
 
   mounted: function() {
-    this.form.poet_cn = this.$el.querySelector('[name="poet_cn"]').getAttribute('value') || this.form.poet_cn;
     this.form.poet = this.$el.querySelector('[name="poet"]').getAttribute('value') || this.form.poet;
-    this.form.nation = this.$el.querySelector('[name="nation"]').getAttribute('value') || this.form.nation;
-    this.form.dynasty = this.$el.querySelector('[name="dynasty"]').getAttribute('value') || this.form.dynasty;
     this.form.from = this.$el.querySelector('[name="from"]').getAttribute('value') || this.form.from;
     this.form.year = this.$el.querySelector('[name="year"]').getAttribute('value') || this.form.year;
     this.form.month = this.$el.querySelector('[name="month"]').getAttribute('value') || this.form.month;
@@ -63,6 +59,8 @@ Vue.component('poem-form', {
     this.form.original_id = this.$el.querySelector('[name="original_id"]')?.getAttribute('value') || this.form.original_id;
     this.form.translated_id = this.$el.querySelector('[name="translated_id"]')?.getAttribute('value') || this.form.translated_id;
     this.form.genre_id = this.$el.querySelector('[name="genre_id"]')?.getAttribute('value') || this.form.genre_id;
+    this.form.poet_id = this.$el.querySelector('[name="poet_id"]').getAttribute('value') || this.form.poet_id;
+    this.form.translator_id = this.$el.querySelector('[name="translator_id"]').getAttribute('value') || this.form.translator_id;
 
   },
 
