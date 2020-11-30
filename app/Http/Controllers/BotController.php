@@ -140,8 +140,7 @@ SQL
                 $ne = Arr::random(['相关内容', '', '呢']);
                 $welcome = Arr::random([
                     "欢迎你来上传关于“${originWords}”的诗，",
-                    "你来这里上传一些关于“${originWords}”的诗如何，",
-                    "你来这里上传一些关于“${originWords}”的诗如何，",
+                    "你来上传一些关于“${originWords}”的诗如何，"
                 ]);
                 $click = Arr::random(['点这里：','点击：','👉','➡️']);
                 $link = 'poemwiki.org/new';
