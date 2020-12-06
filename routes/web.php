@@ -279,6 +279,8 @@ Route::prefix('p')->name('p/')->group(static function() {
 
 Route::prefix('author')->name('author/')->group(static function() {
     Route::get('/{fakeId}',    'AuthorController@show')->name('show');
+    Route::get('/edit/{fakeId}',    'AuthorController@edit')->name('edit');
+    Route::post('/update/{fakeId}',    'AuthorController@update')->name('update');
 });
 
 
@@ -309,6 +311,11 @@ Route::get('/union-login', function () {
 Route::any('/q', 'QueryController@index')->name('q');
 Route::get('/q/{keyword?}', 'QueryController@search')->name('search');
 Route::any('/query', 'QueryController@query')->name('query');
+
+
+Route::any('/calendar', 'CalendarController@index')->name('calendar');
+Route::any('/calendar/q/{month}/{day}', 'CalendarController@query')->name('calendar.query');
+
 
 Route::get('/{id}', function ($id) {
     if($id <= 3200) {

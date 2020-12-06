@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import 'variables';
+@import '~bootstrap/scss/bootstrap-reboot';
+@import 'css/MajorMonoDisplayFont.css';
+@import 'css/starability-slot.css';
+
+
+@import "fe-common";
+
+main {
+  flex: 1;
+  #calendar-page {
+    padding-top: 1.6rem;
+    .fc-right{display: none}
+
+    .wrapper {
+      .birth,.death{
+        th {
+          width: 33%;
+        }
+      }
+    }
+  }
+}

@@ -11,7 +11,7 @@ return [
     |
     */
     'locales' => [
-        'en',
         'zh-CN',
+        'en',
     ],
 ];

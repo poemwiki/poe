@@ -36,7 +36,18 @@ mix.js('resources/js/app.js', 'public/js')
 mix.js('resources/js/review.js', 'public/js');
 
 mix.js(['resources/js/admin/admin.js'], 'public/js')
-    .sass('resources/sass/admin/admin.scss', 'public/css');
+  .sass('resources/sass/admin/admin.scss', 'public/css');
+
+mix.js(['resources/js/author/author.js'], 'public/js')
+  .sass('resources/sass/form.scss', 'public/css');
+
+mix.js(['resources/js/calendar/calendar.js'], 'public/js')
+  .sass('resources/sass/calendar.scss', 'public/css')
+  .options({
+    postCss: [
+      require("tailwindcss")()
+    ]
+});
 
 mix.copyDirectory('resources/js/lib', 'public/js/lib');
 mix.copyDirectory('resources/sass/vendor', 'public/css/vendor');
