@@ -20,6 +20,7 @@
     <!-- Fonts -->
     <link href="{{ asset('css/post.css') }}" rel="stylesheet">
 
+    @stack('styles')
     @livewireStyles
 
     @include('layouts.analyze')
@@ -48,6 +49,16 @@
                 });
             }
         });
+
+        function WeixinJSBridgeReady() {
+          window.isMini = window.__wxjs_environment === 'miniprogram';
+          console.log(window.__wxjs_environment === 'miniprogram');
+        }
+        if (!window.WeixinJSBridge || !WeixinJSBridge.invoke) {
+          document.addEventListener('WeixinJSBridgeReady', WeixinJSBridgeReady, false)
+        } else {
+          ready()
+        }
     </script>
 </body>
 
