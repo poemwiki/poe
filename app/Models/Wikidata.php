@@ -33,7 +33,6 @@ class Wikidata extends Model {
     ];
 
     public $translatable = [
-        'label_lang',
     ];
 
     // TODO log activity for command execution
