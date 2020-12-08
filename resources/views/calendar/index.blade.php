@@ -16,8 +16,8 @@
     <lunar-full-calendar :config="config" ref="calendar"
                          @day-click="selected"></lunar-full-calendar>
 
-    <div class="wrapper">
-      <section class="birth w-full lg:w-1/2">
+    <div class="wrapper lg:flex lg:flex-row lg:gap-x-4">
+      <section class="birth w-full lg:flex-initial">
         <h2 class="mt-8 text-center font-bold">生于@{{month}}月@{{day}}日的诗人</h2>
         <table class="w-full border-collapse border text-sm leading-10">
           <thead>
@@ -41,7 +41,7 @@
         </table>
       </section>
 
-      <section class="death w-full lg:w-1/2">
+      <section class="death w-full lg:flex-initial">
         <h2 class="mt-8 text-center font-bold">卒于@{{month}}月@{{day}}日的诗人</h2>
         <table class="mb-8 w-full border-collapse	border text-sm leading-10">
           <thead>
