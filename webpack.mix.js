@@ -1,6 +1,7 @@
 const path = require('path');
 const mix = require('laravel-mix');
-
+require('laravel-mix-tailwind');
+require('laravel-mix-purgecss');
 
 
 mix.webpackConfig({
@@ -9,6 +10,9 @@ mix.webpackConfig({
       "@": ".."
     }
   },
+});
+mix.options({
+  processCssUrls: false
 });
 if ( ! mix.inProduction()) {
   mix.webpackConfig({
@@ -43,11 +47,9 @@ mix.js(['resources/js/author/author.js'], 'public/js')
 
 mix.js(['resources/js/calendar/calendar.js'], 'public/js')
   .sass('resources/sass/calendar.scss', 'public/css')
-  .options({
-    postCss: [
-      require("tailwindcss")()
-    ]
-});
+  .tailwind()
+  .purgeCss();
+
 
 mix.copyDirectory('resources/js/lib', 'public/js/lib');
 mix.copyDirectory('resources/sass/vendor', 'public/css/vendor');
