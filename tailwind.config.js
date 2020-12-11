@@ -20,6 +20,16 @@ module.exports = {
       '6xl': '4 * 16px',
       '7xl': '5 * 16px',
     },
+    screens: {
+      'xxs': {'min': '0px', 'max': '319px'},
+      'xs': {'min': '320px', 'max': '479px'},   // Mobile devices.
+      'sm': {'min': '480px', 'max': '767px'},   // iPads, Tablets.
+      'md': {'min': '768px', 'max': '1023px'},  // Small screens, laptops.
+      'lg': {'min': '1024px', 'max': '1280px'}, // Desktops, large screens.
+      'xl': {'min': '1281px'}                   // Extra large screens, TV.
+    },
+    // colors: colors,
+    // textColors: colors,
     extend: {},
   },
   variants: {
@@ -27,5 +37,7 @@ module.exports = {
       backgroundColor: ['odd', 'even'],
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'),
+  ],
 }
