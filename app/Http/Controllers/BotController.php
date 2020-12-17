@@ -153,7 +153,8 @@ SQL
                     ? "[$post->dynasty] "
                     : (($post->nation && $post->nation !== '中国') ? "[$post->nation] " : '');
 
-                $content = preg_replace('@[\r\n]{3,}@', "\n\n", $post->poem);
+                $od = opencc_open("t2s.json");
+                $content = opencc_convert(preg_replace('@[\r\n]{3,}@', "\n\n", $post->poem), $od);
 
                 $writer = '作者 / ' .($post->poet_cn
                     ?  $nation . ($post->poet_cn ?? $post->poet)
@@ -161,7 +162,8 @@ SQL
 
 
                 // poem content
-                $parts = ['▍ ' . $post->title];
+                $parts = ['▍ ' . opencc_convert($post->title, $od)];
+                opencc_close($od);
                 if($post->preface) array_push($parts, '        '. $post->preface);
                 if($post->subtitle) array_push($parts, "\n    ".$post->subtitle);
                 array_push($parts, "\n".$content."\n");
