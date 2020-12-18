@@ -8,6 +8,8 @@
 @section('content')
     <article class="poet">
         <h1>{{$author->name_lang}} </h1>
+        <a class="edit btn"
+           href="{{ Auth::check() ? route('author/edit', $author->fakeId) : route('login', ['ref' => route('author/edit', $author->fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
 
         <div class="author-relate">
 

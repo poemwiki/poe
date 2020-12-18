@@ -220,7 +220,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
     </nav>
 
 @push('scripts')
-<script src="{{ asset('js/lib/color-hash.js') }}"></script>
+<script src="{{ asset('/js/lib/color-hash.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var colorHash = new ColorHash({lightness: 0.6, saturation: 0.86});

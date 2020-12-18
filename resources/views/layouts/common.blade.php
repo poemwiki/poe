@@ -21,9 +21,11 @@
 
     @include('layouts.analyze')
 </head>
-<body class="position-ref">
+<body>
     @include('layouts.fe-menu')
-    <main>@yield('content')</main>
+    <div class="main-wrapper relative">
+      <main class="absolute">@yield('content')</main>
+    </div>
 
     @stack('scripts')
 

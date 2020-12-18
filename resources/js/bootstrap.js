@@ -1,5 +1,10 @@
 window._ = require('lodash');
 
+import jQuery from 'jquery';
+import Vue from 'vue';
+window.Vue = Vue;
+
+window.$ = window.jQuery = jQuery;
 /**
  * We'll load jQuery and the Bootstrap jQuery plugin which provides support
  * for JavaScript based Bootstrap features such as modals and tabs. This
@@ -39,17 +44,16 @@ axios.create = function createPatchedAxios(conf) {
 const responseInterceptor = [
   res => res.data,
   error => {
-
     if(error.response.status === 429) {
-      alert('Too many request! Try again later.');
+      console.error(error.response);
+      alert(error.response.statusText);
       return;
     }
+
     if(error.response.status !== 200) {
-      console.error('Unkown error. Try again later.');
-      console.error(error.response.status);
-      console.error(error.response.data);
+      console.error(error.response);
     }
-    console.error(error.response.data.message);
+    console.error(error.response.statusText);
   }
 ];
 
