@@ -38,7 +38,7 @@ class DynastyController extends Controller
             $request,
 
             // set columns to query
-            ['describe_lang', 'f_id', 'id', 'name', 'name_lang'],
+            ['id', 'f_id', 'name', 'name_lang'],
 
             // set columns to searchIn
             ['describe_lang', 'id', 'name', 'name_lang', 'wikidata_id']
