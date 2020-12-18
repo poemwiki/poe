@@ -1,0 +1,59 @@
+/* purgecss start ignore */
+@tailwind  base;
+@tailwind  components;
+/* purgecss end ignore */
+
+@tailwind utilities;
+
+@import 'variables';
+//@import '~bootstrap/scss/bootstrap-reboot';
+@import 'css/MajorMonoDisplayFont.css';
+@import 'css/starability-slot.css';
+
+
+@import "form-common";
+
+
+.wiki-form{
+  font-size: $font-size;
+  label {
+    @apply mt-4 block w-full text-base font-bold px-0.5;
+    &.required:after {
+      content: '*';
+      vertical-align: middle;
+      margin-left: .5em;
+      @apply text-red-500;
+    }
+  }
+  input[type=text] {
+    @apply mt-0 block w-full px-0.5 border-0 border-b border-gray-200 focus:ring-0 focus:border-black text-base placeholder-gray-300;
+  }
+  select {
+    @apply block w-full mt-0 px-0.5 border-0 border-b border-gray-200 focus:ring-0 focus:border-black text-base placeholder-gray-300;
+  }
+  textarea {
+    @apply mt-0 block w-full px-0.5 rounded-md border border-gray-200 focus:ring-0 focus:border-black text-base placeholder-gray-300;
+  }
+  .form-control-feedback {
+    @apply px-0.5 text-gray-300;
+    min-height: 2.4rem;
+    transition: opacity 1s;
+  }
+}
+
+main {
+  flex: 1;
+  padding: 1.6rem 1.6rem 2rem;
+}
+.card {
+  border: none;
+  .card-header {
+    @apply text-xl font-bold;
+    a {
+      padding: 0;
+    }
+  }
+
+  .form-control{
+  }
+}

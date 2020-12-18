@@ -1,26 +1,27 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Admin\Author\UpdateAuthor;
 use App\Models\Author;
+use App\Models\Dynasty;
+use App\Models\Nation;
 use App\Models\Poem;
-use App\Repositories\PoemRepository;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Repositories\AuthorRepository;
+use Illuminate\Routing\Redirector;
 
 
 class AuthorController extends Controller {
-    /** @var  PoemRepository */
-    private $poemRepository;
+    /** @var  AuthorRepository */
+    private $authorRepository;
 
-    public function __construct(PoemRepository $poemRepo) {
+    public function __construct(AuthorRepository $poemRepo) {
         $this->middleware('auth')->except(['show', 'random']);
-        $this->poemRepository = $poemRepo;
+        $this->authorRepository = $poemRepo;
     }
 
     /**
-     * Display the specified Poet
-     *
-     * @param int $fakeId
-     *
+     * Display the specified author
+     * @param string $fakeId
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function show($fakeId) {
@@ -52,6 +53,46 @@ class AuthorController extends Controller {
             'poemsAsTranslator' => $poemsAsTranslator,
             'fromPoetName' => $fromPoetName
         ]);
+    }
+
+
+    /**
+     * @param string $fakeId
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function edit($fakeId) {
+        $id = Author::getIdFromFakeId($fakeId);
+        $author = Author::select(['id', 'name_lang', 'describe_lang'])->findOrFail($id);
+
+        return view('authors.edit', [
+            'author' => $author,
+            'nationList' => Nation::select('name_lang', 'id')->get(),
+            'dynastyList' => Dynasty::select('name_lang', 'id')->get(),
+        ]);
+    }
+
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param UpdateAuthor $request
+     * @return array|RedirectResponse|Redirector
+     */
+    public function update($fakeId, UpdateAuthor $request) {
+        // Sanitize input
+        $sanitized = $request->getSanitized();
+
+        $id = Author::getIdFromFakeId($fakeId);
+        $this->authorRepository->update($sanitized, $id);
+
+        if ($request->ajax()) {
+            return [
+                'redirect' => url('admin/authors'),
+                'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
+            ];
+        }
+
+        return redirect('admin/authors');
     }
 
 }

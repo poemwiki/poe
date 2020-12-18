@@ -9,6 +9,8 @@ use App\Http\Requests\Admin\Author\IndexAuthor;
 use App\Http\Requests\Admin\Author\StoreAuthor;
 use App\Http\Requests\Admin\Author\UpdateAuthor;
 use App\Models\Author;
+use App\Models\Dynasty;
+use App\Models\Nation;
 use Brackets\AdminListing\Facades\AdminListing;
 use Carbon\Carbon;
 use Exception;
@@ -114,9 +116,10 @@ class AuthorController extends Controller {
     public function edit(Author $author) {
         $this->authorize('admin.author.edit', $author);
 
-
         return view('admin.author.edit', [
             'author' => $author,
+            'nationList' => Nation::select('name_lang', 'id')->get(),
+            'dynastyList' => Dynasty::select('name_lang', 'id')->get(),
         ]);
     }
 

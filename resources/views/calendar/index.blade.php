@@ -6,18 +6,18 @@
 @endsection
 
 @push('styles')
-  <link href="{{ asset('css/calendar.css') }}" rel="stylesheet">
+  <link href="{{ mix('css/calendar.css') }}" rel="stylesheet">
 @endpush
 
 @section('content')
 
-  <div id="calendar-page">
+  <div id="calendar-page" class="page">
 
-    <lunar-full-calendar :config="config" ref="calendar"
+    <lunar-full-calendar :config="config" ref="calendar" :events="events"
                          @day-click="selected"></lunar-full-calendar>
 
-    <div class="wrapper lg:flex lg:flex-row lg:gap-x-4">
-      <section class="birth w-full lg:flex-initial">
+    <div class="wrapper md:flex md:flex-row md:gap-x-4">
+      <section class="birth w-full md:flex-initial" v-cloak v-show="birth">
         <h2 class="mt-8 text-center font-bold">生于@{{month}}月@{{day}}日的诗人</h2>
         <table class="w-full border-collapse border text-sm leading-10">
           <thead>
@@ -27,8 +27,8 @@
               <th class="text-right">诞辰周年</th>
             </tr>
           </thead>
+
           <tbody>
-            <vue-element-loading :active="!birth" spinner="bar-fade-scale" color="#00f"/>
             <tr class="border odd:bg-gray-100 hover:bg-blue-100" v-for="poet in birth" :key="poet.id">
               <td :data-id="poet.id">@{{poet.name_cn}}</td>
               <td class="text-right"
@@ -41,7 +41,7 @@
         </table>
       </section>
 
-      <section class="death w-full lg:flex-initial">
+      <section class="death w-full md:flex-initial" v-cloak v-show="death">
         <h2 class="mt-8 text-center font-bold">卒于@{{month}}月@{{day}}日的诗人</h2>
         <table class="mb-8 w-full border-collapse	border text-sm leading-10">
           <thead>
@@ -51,8 +51,8 @@
               <th class="text-right">忌辰周年</th>
             </tr>
           </thead>
+
           <tbody>
-          <vue-element-loading :active="!death" spinner="bar-fade-scale" color="#00f"/>
             <tr class="border odd:bg-gray-100 hover:bg-blue-100" v-for="poet in death" :key="poet.id">
               <td>@{{poet.name_cn}}</td>
               <td class="text-right"
@@ -67,8 +67,10 @@
     </div>
 
 
+
+    <vue-element-loading :active="loading" spinner="bar-fade-scale" color="#00f"/>
     @push('scripts')
-      <script src="{{ asset('js/calendar.js') }}"></script>
+      <script src="{{ mix('js/calendar.js') }}"></script>
     @endpush
   </div>
 

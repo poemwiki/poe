@@ -18,7 +18,7 @@
     <title>@yield('title') - {{config('app.name')}}</title>
 
     <!-- Fonts -->
-    <link href="{{ asset('css/post.css') }}" rel="stylesheet">
+    <link href="{{ mix('/css/post.css') }}" rel="stylesheet">
 
     @stack('styles')
     @livewireStyles
