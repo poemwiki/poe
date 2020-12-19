@@ -35,7 +35,12 @@ class Dynasty extends Model
 
     ];
 
-    protected $appends = ['resource_url'];
+    protected $appends = ['resource_url', 'children'];
+
+
+    public function children() {
+        return $this->hasMany(\App\Models\Dynasty::class, 'f_id', 'id');
+    }
 
     /* ************************ ACCESSOR ************************* */
 

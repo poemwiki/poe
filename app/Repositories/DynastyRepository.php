@@ -44,6 +44,6 @@ class DynastyRepository extends BaseRepository {
     }
 
     public static function allInUse() {
-        return Dynasty::select('name_lang', 'id', 'f_id', 'describe_lang')->where('f_id', '=', '0')->with('children')->orderBy('id', 'desc')->get();
+        return Dynasty::select('name_lang', 'id', 'f_id', 'describe_lang')->where('f_id', '=', '0')->orderBy('id', 'desc')->get();
     }
 }
