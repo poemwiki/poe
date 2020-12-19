@@ -12,8 +12,8 @@ class AddFieldsForAuthor extends Migration {
      */
     public function up() {
         Schema::table('author', function (Blueprint $table) {
-            $table->string('nation_id')->nullable();
-            $table->string('dynasty_id')->nullable();
+            $table->unsignedBigInteger('nation_id')->nullable();
+            $table->unsignedBigInteger('dynasty_id')->nullable();
             $table->string('short_url')->nullable();
         });
     }
