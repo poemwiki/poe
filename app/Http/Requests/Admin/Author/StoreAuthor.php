@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\Author;
 
 use Brackets\Translatable\TranslatableFormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +16,7 @@ class StoreAuthor extends TranslatableFormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('admin.author.create');
+        return Gate::allows('admin.author.create') || Gate::allows('web.author.change', Auth::user());
     }
 
 /**

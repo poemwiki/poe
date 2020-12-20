@@ -12,6 +12,13 @@ class Controller extends BaseController {
 
 
     public function response($data, string $message = '', int $code = 0) {
+        if(is_string($data)) {
+            return [
+                'redirect' => $data,
+                'message' => $message,
+                'code' => $code
+            ];
+        }
         return compact('data', 'message', 'code');
     }
 }

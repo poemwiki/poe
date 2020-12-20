@@ -1,67 +1,62 @@
-@php
-  $langs = \App\Repositories\LanguageRepository::allInUse();
 
-  $localeCol = $langs->filter(function ($item) use($locales) {
-    return in_array($item->locale, $locales->toArray());
-  })->pluck('name_lang', 'locale');
-
-/** @var \App\Models\Author $author */
-
-@endphp
 
 <div class="row">
-  @foreach($locales as $locale)
-    <div class="col-md" v-show="shouldShowLangGroup('{{ $locale }}')" v-cloak>
+
+    <div v-for="locale in locales" :v-key="locale" v-show="shouldShowLangGroup(locale)" v-cloak class="col-md">
       <div class="form-group row align-items-center"
-           :class="{'has-danger': errors.has('name_lang_{{ $locale }}'), 'has-success': fields['name_lang_{{ $locale }}'] && fields['name_lang_{{ $locale }}'].valid }">
-        <label for="name_lang_{{ $locale }}"
+           :class="{'has-danger': errors.has('name_lang_' + locale), 'has-success': fields['name_lang_' + locale] && fields['name_lang_' + locale].valid }">
+        <label :for="'name_lang_' + locale"
                class="col-md-2 col-form-label text-md-right required">{{ trans('admin.author.columns.name_lang') }}
-          ({{$localeCol->get($locale)}})</label>
+          (@{{lang.locales[locale]}})</label>
         <div>
           <input type="text"
-                 v-model="form.name_lang['{{ $locale }}']"
-                 value="{{$author->getTranslated('name_lang', $locale)}}"
-                 v-validate="'required'" @input="validate($event)"
-                 class=""
-                 :class="{'form-control-danger': errors.has('name_lang_{{ $locale }}'), 'form-control-success': fields['name_lang_{{ $locale }}'] && fields['name_lang_{{ $locale }}'].valid }"
-                 id="name_lang_{{ $locale }}" name="name_lang_{{ $locale }}"
+                 v-model="form.name_lang[locale]"
+                 v-validate="locale == defaultLocale ? 'required' : ''"
+                 @input="validate($event)"
+                 :class="{
+                    'form-control-danger': errors.has('name_lang_' + locale),
+                    'form-control-success': fields['name_lang_' + locale] && fields['name_lang_' + locale].valid
+                 }"
+                 :id="'name_lang_' + locale" :name="'name_lang_' + locale"
                  placeholder="{{ trans('admin.author.columns.name_lang') }}">
 
-            <div v-visible="errors.has('name_lang_{{ $locale }}')" class="form-control-feedback form-text" v-cloak>{{'{{'}}
-              errors.first('name_lang_{{ $locale }}') }}
+            <div v-visible="errors.has('name_lang_' + locale)" class="form-control-feedback form-text" v-cloak>{{'{{'}}
+              errors.first('name_lang_' + locale) }}
             </div>
 
         </div>
       </div>
     </div>
-  @endforeach
+
 </div>
 
 <div class="row">
-  @foreach($locales as $locale)
-    <div class="col-md" v-show="shouldShowLangGroup('{{ $locale }}')" v-cloak>
+
+    <div v-for="locale in locales" :v-key="locale" v-show="shouldShowLangGroup(locale)" v-cloak class="col-md">
       <div class="form-group row align-items-center"
-           :class="{'has-danger': errors.has('describe_lang_{{ $locale }}'), 'has-success': fields['describe_lang_{{ $locale }}'] && fields['describe_lang_{{ $locale }}'].valid }">
-        <label for="describe_lang_{{ $locale }}"
+           :class="{'has-danger': errors.has('describe_lang_' + locale), 'has-success': fields['describe_lang_' + locale] && fields['describe_lang_' + locale].valid }">
+        <label :for="'describe_lang_' + locale"
                class="col-md-2 col-form-label text-md-right">{{ trans('admin.author.columns.describe_lang') }}
-          ({{$localeCol->get($locale)}})</label>
+          (@{{lang.locales[locale]}})</label>
         <div>
           <textarea type="text"
-                    v-model="form.describe_lang['{{ $locale }}']"
-                    value="{{$author->getTranslated('describe_lang', $locale)}}"
-                    v-validate="''" @input="validate($event)"
-                    class=""
-                    :class="{'form-control-danger': errors.has('describe_lang_{{ $locale }}'), 'form-control-success': fields['describe_lang_{{ $locale }}'] && fields['describe_lang_{{ $locale }}'].valid }"
+                    v-model="form.describe_lang[locale]"
+                    v-validate="''"
+                    @input="validate($event)"
+                    :class="{
+                        'form-control-danger': errors.has('describe_lang_' + locale),
+                        'form-control-success': fields['describe_lang_' + locale] && fields['describe_lang_' + locale].valid
+                      }"
                     rows="6"
-                    id="describe_lang_{{ $locale }}" name="describe_lang_{{ $locale }}"
+                    :id="'describe_lang_' + locale" :name="'describe_lang_' + locale"
                     placeholder="{{ trans('admin.author.columns.describe_lang') }}"></textarea>
           <div class="form-control-feedback form-text" v-cloak>{{'{{'}}
-            errors.first('describe_lang_{{ $locale }}') }}
+            errors.first('describe_lang_' + locale) }}
           </div>
         </div>
       </div>
     </div>
-  @endforeach
+
 </div>
 
 

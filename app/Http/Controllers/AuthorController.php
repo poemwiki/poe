@@ -63,7 +63,7 @@ class AuthorController extends Controller {
      */
     public function edit($fakeId) {
         $id = Author::getIdFromFakeId($fakeId);
-        $author = Author::select(['id', 'name_lang', 'describe_lang'])->findOrFail($id);
+        $author = Author::select(['id', 'name_lang', 'describe_lang', 'dynasty_id', 'nation_id'])->findOrFail($id);
 
         return view('authors.edit', [
             'author' => $author,
@@ -74,9 +74,15 @@ class AuthorController extends Controller {
     }
 
     public function trans() {
+        $langs = \App\Repositories\LanguageRepository::allInUse();
+
+        $locale = $langs->filter(function ($item) {
+            return in_array($item->locale, config('translatable.locales'));
+        })->pluck('name_lang', 'locale');
         return [
             'Save' => trans('Save'),
-            'Saving' => trans('Saving')
+            'Saving' => trans('Saving'),
+            'locales' => $locale
         ];
     }
 
@@ -94,9 +100,8 @@ class AuthorController extends Controller {
         $id = Author::getIdFromFakeId($fakeId);
         $this->authorRepository->update($sanitized, $id);
 
-        return $this->response([
-            'redirect' => route('author/show', $fakeId)
-        ], trans('brackets/admin-ui::admin.operation.succeeded'), 0);
+        return $this->response(
+            [], trans('brackets/admin-ui::admin.operation.succeeded'));
     }
 
     /**
@@ -121,10 +126,11 @@ class AuthorController extends Controller {
         $sanitized = $request->getSanitized();
 
         // Store the Poem
-        $poem = Author::create($sanitized);
+        $author = Author::create($sanitized);
 
-        return $this->response([
-            'redirect' => route('poems/edit', Poem::getFakeId($poem->id))
-        ], trans('brackets/admin-ui::admin.operation.succeeded'), 0);
+        return $this->response(
+            route('author/show', $author->fakeId),
+            trans('brackets/admin-ui::admin.operation.succeeded')
+        );
     }
 }

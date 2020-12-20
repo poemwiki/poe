@@ -30,7 +30,7 @@ class QueryController extends Controller {
             ->trim();//->lower();
         // dd($keyword);
 
-        DB::enableQueryLog();
+        // DB::enableQueryLog();
         $searchResults = (new Search())
             ->registerModel(Author::class, function(ModelSearchAspect $modelSearchAspect) {
                 return $modelSearchAspect
@@ -48,10 +48,14 @@ class QueryController extends Controller {
         $authorCount = $searchResults->filter(function ($item) {
             return $item->type === 'author';
         })->count();
+        $poemCount = $searchResults->filter(function ($item) {
+            return $item->type === 'poem';
+        })->count();
         return view('query.search')->with([
             'res' => $searchResults,
             'keyword' => $keyword,
-            'authorCount' => $authorCount
+            'authorCount' => $authorCount,
+            'poemCount' => $poemCount
         ]);
     }
 

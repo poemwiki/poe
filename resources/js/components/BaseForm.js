@@ -37,7 +37,8 @@ var BaseForm = {
     defaultLocale: {
       type: String,
       default: function _default() {
-        return this.locales instanceof Array && this.locales.length > 0 ? this.locales[0] : '';
+        return document.documentElement.lang ? document.documentElement.lang
+          : (this.locales instanceof Array && this.locales.length > 0 ? this.locales[0] : '');
       }
     },
     sendEmptyLocales: {
@@ -199,7 +200,7 @@ var BaseForm = {
         _this4.submiting = true;
 
         return axios.post(_this4.action, _this4.getPostData()).then(function (response) {
-          return _this4.onSuccess(response.data);
+          return _this4.onSuccess(response);
         }).catch(function (errors) {
           return _this4.onFail(errors.response.data);
         });

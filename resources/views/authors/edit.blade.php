@@ -23,7 +23,7 @@
               novalidate>
 
           <div class="card-header">
-            <i class="fa fa-pencil"></i> {{ trans('admin.author.actions.edit') }}
+            <i class="fa fa-pencil"></i> {{ trans('admin.author.actions.edit') }}&emsp;
             <a target="_blank" href="{{$author->url}}">{{ $author->name_lang }}</a>
           </div>
 

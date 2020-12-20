@@ -1,6 +1,6 @@
 @extends('layouts.fe-form')
 
-@section('title', trans('admin.author.actions.create') )
+@section('title', trans('Add Author') )
 
 @section('form')
 
@@ -19,7 +19,7 @@
               novalidate>
 
           <div class="card-header">
-            <i class="fa fa-pencil"></i> {{ trans('admin.author.actions.create') }}
+            <i class="fa fa-pencil"></i> @lang('Add Author')
           </div>
 
           <div class="card-body">

@@ -11,38 +11,45 @@ Vue.component('author-form', {
   data: function () {
     return {
       form: {
-        name_lang: '',
+        name_lang: this.getLocalizedFormDefaults(),
+        describe_lang: this.getLocalizedFormDefaults(),
         nation_id: '',
         dynasty_id: ''
       }
     }
   },
 
-  mounted: function() {
-    for(const locale of this.locales) {
-      for(const field of ['name_lang', 'describe_lang']) {
-        const fieldName = field + '_' + locale;
-        this.form[field][locale] = this.$el.querySelector('[name="'+fieldName+'"]').getAttribute('value') || this.form[field][locale];
+  watch: {
+    'form.nation_id': function (newId, old) {
+      if(newId !== 1) {
+        this.form.dynasty_id = '';
       }
     }
-    this.form.nation_id = this.$el.querySelector('[name="nation_id"]').getAttribute('value') || this.form.nation_id;
-    this.form.dynasty_id = this.$el.querySelector('[name="dynasty_id"]').getAttribute('value') || this.form.dynasty_id;
+  },
 
+  mounted: function() {
+    // this.form.nation_id = this.$el.querySelector('[name="nation_id"]').getAttribute('value') || this.form.nation_id;
+    // this.form.dynasty_id = this.$el.querySelector('[name="dynasty_id"]').getAttribute('value') || this.form.dynasty_id;
   },
 
   methods: {
     onSuccess: function onSuccess(data) {
-      this.submiting = false;
+
       if (data.code === 0) {
         this.$notify({
           type: 'success',
           title: '操作成功',
-          text: '您的修改已提交。'
+          text: '您的修改已提交。' + (data.redirect ? '正在跳转到作者页...' : '')
         });
         if(data.redirect){
-          location.href = data.redirect;
+          setTimeout(() => {
+            this.submiting = false;
+            location.href = data.redirect;
+          }, 2000);
+          return;
         }
       }
+      this.submiting = false;
     }
   },
   computed: {

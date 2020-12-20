@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Content;
 use App\Traits\HasFakeId;
+use Illuminate\Support\Str;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 
@@ -119,12 +120,15 @@ class Poem extends Model implements Searchable {
         //        'is_lock' => 'required'
     ];
 
-    protected $appends = ['resource_url'];
+    protected $appends = ['resource_url', 'first_line'];
 
     /* ************************ ACCESSOR ************************* */
 
     public function getResourceUrlAttribute() {
         return url('/admin/poems/' . $this->getKey());
+    }
+    public function getFirstLineAttribute() {
+        return Str::of($this->poem)->firstLine();
     }
 
     public static function boot() {

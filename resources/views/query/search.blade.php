@@ -11,7 +11,7 @@
 @endpush
 
 @section('content')
-<div class="search">
+<div class="search page">
 
     <div class="search-box-wrapper">
         <form class="search-box wiki-form" method="get" action="{{route('query')}}">
@@ -31,10 +31,12 @@
     @endif
 
     <aside class="">
-        @if(isset($authorCount) && !$authorCount)
-            <a href="{{route('author/create')}}" class="btn">@lang('Add Author') {{$keyword}}</a>
-            <a href="{{route('new')}}" class="btn">@lang('Add Poem') {{$keyword}}</a>
-        @endif
+      @if(isset($authorCount) && !$authorCount)
+        <a href="{{route('author/create')}}" class="btn">@lang('Add Author') {{$keyword}}</a>
+      @endif
+      @if(isset($poemCount) && !$poemCount)
+        <a href="{{route('new')}}" class="btn">@lang('Add Poem') {{$keyword}}</a>
+      @endif
     </aside>
 
     @if(isset($res))
@@ -61,7 +63,7 @@
                         <a class="item-link title-bar title font-song no-bg" target="_blank" href="{{$item->url}}">{!!
                     Str::of(trim($item->title) ? trim($item->title) : '无题')
                         ->surround('span')!!}</a>
-                        <a class="first-line no-bg" target="_blank" href="{{$item->url}}">{!!Str::of($item->searchable->poem)->firstLine()->surround('span', function ($i) {
+                        <a class="first-line no-bg" target="_blank" href="{{$item->url}}">{!!$item->searchable->firstLine->surround('span', function ($i) {
                             return 'style="transition-delay:'.($i*20).'ms"';
                     })!!}
                           <span class="text-gray-400 float-right">{{$item->searchable->author ? $item->searchable->author->name_lang : $item->searchable->poet}}</span></a>
