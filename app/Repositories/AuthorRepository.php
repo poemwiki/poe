@@ -38,7 +38,7 @@ class AuthorRepository extends BaseRepository {
     /**
      * Configure the Model
      **/
-    public function model() {
+    public static function model() {
         return Author::class;
     }
 }

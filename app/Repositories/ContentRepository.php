@@ -37,7 +37,7 @@ class ContentRepository extends BaseRepository
     /**
      * Configure the Model
      **/
-    public function model()
+    public static function model()
     {
         return Content::class;
     }
