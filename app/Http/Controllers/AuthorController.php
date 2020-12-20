@@ -1,12 +1,13 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Admin\Author\StoreAuthor;
 use App\Http\Requests\Admin\Author\UpdateAuthor;
 use App\Models\Author;
-use App\Models\Dynasty;
 use App\Models\Nation;
 use App\Models\Poem;
 use App\Repositories\AuthorRepository;
+use App\Repositories\DynastyRepository;
 use Illuminate\Routing\Redirector;
 
 
@@ -66,9 +67,17 @@ class AuthorController extends Controller {
 
         return view('authors.edit', [
             'author' => $author,
+            'trans' => $this->trans(),
             'nationList' => Nation::select('name_lang', 'id')->get(),
-            'dynastyList' => Dynasty::select('name_lang', 'id')->get(),
+            'dynastyList' => DynastyRepository::allInUse(),
         ]);
+    }
+
+    public function trans() {
+        return [
+            'Save' => trans('Save'),
+            'Saving' => trans('Saving')
+        ];
     }
 
 
@@ -85,14 +94,37 @@ class AuthorController extends Controller {
         $id = Author::getIdFromFakeId($fakeId);
         $this->authorRepository->update($sanitized, $id);
 
-        if ($request->ajax()) {
-            return [
-                'redirect' => url('admin/authors'),
-                'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
-            ];
-        }
-
-        return redirect('admin/authors');
+        return $this->response([
+            'redirect' => route('author/show', $fakeId)
+        ], trans('brackets/admin-ui::admin.operation.succeeded'), 0);
     }
 
+    /**
+     * Show the form for creating a new author.
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function create() {
+        return view('authors.create', [
+            'trans' => $this->trans(),
+            'nationList' => Nation::select('name_lang', 'id')->get(),
+            'dynastyList' => DynastyRepository::allInUse(),
+        ]);
+    }
+
+    /**
+     * Store a newly created author in storage.
+     * @param StoreAuthor $request
+     * @return string
+     */
+    public function store(StoreAuthor $request) {
+        // Sanitize input
+        $sanitized = $request->getSanitized();
+
+        // Store the Poem
+        $poem = Author::create($sanitized);
+
+        return $this->response([
+            'redirect' => route('poems/edit', Poem::getFakeId($poem->id))
+        ], trans('brackets/admin-ui::admin.operation.succeeded'), 0);
+    }
 }

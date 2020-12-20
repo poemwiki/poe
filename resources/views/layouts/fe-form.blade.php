@@ -1,45 +1,24 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="format-detection" content="telephone=no">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="author" content="PoemWiki,@yield('author')">
-  <meta name="description" content="PoemWiki">
-    @include('layouts.icon')
-    @include('layouts.analyze')
+@extends('layouts.common')
 
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+@section('author')
+  PoemWiki
+@endsection
 
-    {{-- TODO translatable suffix --}}
-    <title>@yield('title', 'PoemWiki') - {{config('app.name')}}</title>
+@push('styles')
+  <link href="{{ mix('/css/form.css') }}" rel="stylesheet">
+@endpush
 
-    <link href="{{ mix('/css/form.css') }}" rel="stylesheet">
-    @yield('styles')
+@section('content')
 
-</head>
-
-<body class="position-ref">
-@include('layouts.fe-menu')
-<main>
 
   <div id="app" :class="{'loading': loading}">
     <div class="modals">
       <v-dialog/>
     </div>
     <div>
-      <notifications position="bottom right" :duration="2000" />
+      <notifications position="bottom right" :duration="2000"/>
     </div>
 
-    @yield('body')
-  </div>
-</main>
+    @yield('form')
 
-
-@stack('scripts')
-
-@yield('bottom-scripts')
-</body>
-
-</html>
+@endsection

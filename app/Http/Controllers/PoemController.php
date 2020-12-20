@@ -101,7 +101,6 @@ class PoemController extends Controller
         }
 
         return view('poems.create', [
-            'userName' => $user->name,
             'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::select('name_lang', 'id')->get(),
             'translatedPoem' => $translatedPoem ?? null,

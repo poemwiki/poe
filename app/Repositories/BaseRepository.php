@@ -39,7 +39,7 @@ abstract class BaseRepository {
      *
      * @return string
      */
-    abstract public function model();
+    abstract public static function model();
 
     /**
      * Get a new query builder for the model's table.
@@ -483,7 +483,7 @@ abstract class BaseRepository {
         return $query->get($columns);
     }
 
-    public function ids() {
-        return $this->newQuery()->select('id')->get()->pluck('id');
+    public static function ids() {
+        return app()->make(static::model())->select('id')->get()->pluck('id');
     }
 }

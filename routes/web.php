@@ -266,8 +266,8 @@ Route::prefix('poems')->name('poems/')->group(static function() {
     Route::post('/store',           'PoemController@store')->name('store');
     Route::get('/edit/{fakeId}', 'PoemController@edit')->name('edit');
     Route::post('/update/{fakeId}',     'PoemController@update')->name('update');
-    Route::get('/{fakeId}',    'PoemController@show')->name('show');
     Route::get('/contribution/{fakeId}',    'PoemController@showContributions')->name('contribution');
+    Route::get('/{fakeId}',    'PoemController@show')->name('show');
 });
 
 Route::get('/new', 'PoemController@create')->name('new');
@@ -278,9 +278,11 @@ Route::prefix('p')->name('p/')->group(static function() {
 
 
 Route::prefix('author')->name('author/')->group(static function() {
-    Route::get('/{fakeId}',    'AuthorController@show')->name('show');
+    Route::get('/create',    'AuthorController@create')->name('create');
     Route::get('/edit/{fakeId}',    'AuthorController@edit')->name('edit');
     Route::post('/update/{fakeId}',    'AuthorController@update')->name('update');
+    Route::post('/store',    'AuthorController@store')->name('store');
+    Route::get('/{fakeId}',    'AuthorController@show')->name('show');
 });
 
 

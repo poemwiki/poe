@@ -26,7 +26,13 @@
             @endforeach
             @endif
         </div>
-        <p class="poet-brief">简介：{{$poetDesc}}</p>
+      @if($author->nation)
+      <p class="poet-brief">@lang('admin.author.columns.nation_id')：{{$author->nation->name_lang}}</p>
+      @endif
+      @if($author->dynasty)
+        <p class="poet-brief">@lang('admin.author.columns.dynasty_id')：{{$author->dynasty->name_lang}}</p>
+      @endif
+      <p class="poet-brief">@lang('Introduction')：{{$poetDesc}}</p>
 
         @if($poemsAsPoet->isNotEmpty())
         <h2>

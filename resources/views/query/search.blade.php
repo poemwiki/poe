@@ -1,16 +1,20 @@
-@extends('layouts.fe')
+@extends('layouts.common')
 
 @section('title'){{$keyword ?? ''}} @lang('search.result')@endsection
 @section('author')
     PoemWiki
 @endsection
 
-@section('content')
 
+@push('styles')
+  <link href="{{ mix('/css/search.css') }}" rel="stylesheet">
+@endpush
+
+@section('content')
 <div class="search">
 
     <div class="search-box-wrapper">
-        <form class="search-box" method="get" action="{{route('query')}}">
+        <form class="search-box wiki-form" method="get" action="{{route('query')}}">
             @csrf
             <input type="text" name="keyword" placeholder="@lang('search.Please input keywords here')" value="{{$keyword ?? ''}}">
             <button class="btn btn-wire" type="submit">@lang('Search')</button>
@@ -26,10 +30,10 @@
     <p class="search-count">@lang('search.count', ['count' => $res->count()])</p>
     @endif
 
-    <aside class="hidden">
+    <aside class="">
         @if(isset($authorCount) && !$authorCount)
-            <a href="" class="btn">@lang('Add Author') {{$keyword}}</a>
-            <a href="" class="btn">@lang('Add Poem') {{$keyword}}</a>
+            <a href="{{route('author/create')}}" class="btn">@lang('Add Author') {{$keyword}}</a>
+            <a href="{{route('new')}}" class="btn">@lang('Add Poem') {{$keyword}}</a>
         @endif
     </aside>
 
@@ -59,7 +63,8 @@
                         ->surround('span')!!}</a>
                         <a class="first-line no-bg" target="_blank" href="{{$item->url}}">{!!Str::of($item->searchable->poem)->firstLine()->surround('span', function ($i) {
                             return 'style="transition-delay:'.($i*20).'ms"';
-                    })!!}</a>
+                    })!!}
+                          <span class="text-gray-400 float-right">{{$item->searchable->author ? $item->searchable->author->name_lang : $item->searchable->poet}}</span></a>
                     </div>
                 @endif
             </li>

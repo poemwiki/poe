@@ -23,7 +23,8 @@ class Author extends Model implements Searchable {
         'user_id',
         'wikidata_id',
         'wikipedia_url',
-
+        'nation_id',
+        'dynasty_id',
     ];
 
 
@@ -49,7 +50,9 @@ class Author extends Model implements Searchable {
         'id' => 'integer',
         'wikidata_id' => 'integer',
         'user_id' => 'integer',
-        'pic_url' => 'json'
+        'pic_url' => 'json',
+        'nation_id' => 'integer',
+        'dynasty_id' => 'integer',
     ];
 
     protected $appends = ['resource_url', 'url'];
@@ -62,6 +65,12 @@ class Author extends Model implements Searchable {
     }
     public function user() {
         return $this->hasOne(\App\User::class, 'id', 'user_id');
+    }
+    public function nation() {
+        return $this->belongsTo(\App\Models\Nation::class, 'nation_id', 'id');
+    }
+    public function dynasty() {
+        return $this->belongsTo(\App\Models\Dynasty::class, 'dynasty_id', 'id');
     }
 
     /* ************************ ACCESSOR ************************* */

@@ -40,11 +40,15 @@ class LanguageRepository extends BaseRepository {
     /**
      * Configure the Model
      **/
-    public function model() {
+    public static function model() {
         return Language::class;
     }
 
     public static function allInUse() {
         return Language::where('name', '<>', '')->get();
+    }
+
+    public static function idsInUse() {
+        return static::model()->select('id')->where('name', '<>', '')->get()->pluck('id');
     }
 }

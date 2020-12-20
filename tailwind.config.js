@@ -5,6 +5,10 @@ module.exports = {
     './resources/**/*.vue',
   ],
   darkMode: false, // or 'media' or 'class'
+  colors: {
+    primary: '#004afe',
+    // ...
+  },
   theme: {
     fontSize: {
       xs: '12px',

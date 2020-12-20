@@ -3,8 +3,9 @@
 namespace App\Http\Requests\Admin\Poem;
 
 use App\Models\Genre;
-use App\Models\Language;
 use App\Models\Poem;
+use App\Repositories\AuthorRepository;
+use App\Repositories\LanguageRepository;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -32,7 +33,7 @@ class UpdatePoem extends FormRequest
         return [
             'id' => ['integer'],
             'title' => ['nullable', 'string'],
-            'language_id' => Rule::in(Language::ids()),
+            'language_id' => Rule::in(LanguageRepository::ids()),
             'is_original' => ['nullable', 'boolean'],
             'poet' => ['nullable', 'string'],
             'poet_cn' => ['nullable', 'string'],
@@ -55,6 +56,8 @@ class UpdatePoem extends FormRequest
             'preface' => ['nullable', 'string', 'max:64'],
             'subtitle' => ['nullable', 'string', 'max:32'],
             'genre_id' => ['nullable', Rule::in(Genre::ids())],
+            'poet_id' => ['nullable', Rule::in(AuthorRepository::ids())],
+            'translator_id' => ['nullable', Rule::in(AuthorRepository::ids())],
         ];
     }
 

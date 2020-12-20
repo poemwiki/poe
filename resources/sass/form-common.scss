@@ -1,3 +1,41 @@
+/* purgecss start ignore */
+@tailwind  base;
+@tailwind  components;
+/* purgecss end ignore */
+
+@tailwind utilities;
+
+@import 'variables';
+//@import '~bootstrap/scss/bootstrap-reboot';
+//@import 'css/MajorMonoDisplayFont.css';
+//@import 'css/starability-slot.css';
+
+input[type],select {
+  @apply text-base;
+}
+
+.wiki-form{
+  @apply text-base;
+  label {
+    @apply mt-4 block w-full text-base font-bold px-0.5;
+    &.required:after {
+      content: '*';
+      vertical-align: middle;
+      margin-left: .5em;
+      @apply text-red-500;
+    }
+  }
+  input[type=text],textarea,select {
+    @apply mt-0 block w-full px-0.5 border-0 border-b border-gray-200 focus:ring-0 focus:border-black text-base placeholder-gray-300;
+  }
+
+  .form-control-feedback {
+    @apply px-0.5 text-gray-300;
+    min-height: 2.4rem;
+    transition: opacity 1s;
+  }
+}
+
 @import 'menu';
 [v-cloak] {
   display: none !important;
@@ -84,14 +122,6 @@ a {
 
 .btn-grey {
   color: gray;
-}
-
-.hidden {
-  display: none!important;
-}
-
-.no-select {
-  user-select: none;
 }
 
 .soft-wrap {
@@ -218,12 +248,27 @@ main {
 
 .error-page{
   >.message{
-    line-height: calc(100vh - 6rem);
+    line-height: calc(100vh - 12rem);
     font-weight: bolder;
     text-align: center;
   }
 }
 
+
+.title {
+  font-size: $font-size-larger;
+  font-weight: bolder;
+  vertical-align: unset;
+  margin: 0;
+
+  &.title-bar:before {
+    content: '▍';
+    vertical-align: unset;
+    animation: fadein 5s ease;
+    color: rgba(255, 255, 255, 0);
+    color: var(--main-color);
+  }
+}
 .first-line{
   display: block;
   font-size: $font-size-sm;

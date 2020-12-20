@@ -28,6 +28,12 @@ var BaseForm = {
     locales: {
       type: Array
     },
+    trans: {
+      type: Object,
+      default: function _default() {
+        return {};
+      }
+    },
     defaultLocale: {
       type: String,
       default: function _default() {
@@ -70,7 +76,6 @@ var BaseForm = {
     if (!_.isEmpty(this.data)) {
       this.form = this.data;
     }
-
     window.addEventListener('resize', this.onResize);
   },
 
@@ -78,6 +83,7 @@ var BaseForm = {
 
     return {
       form: {},
+      lang: this.trans,
       mediaCollections: [],
       isFormLocalized: false,
       currentLocale: '',
@@ -192,7 +198,7 @@ var BaseForm = {
 
         _this4.submiting = true;
 
-        axios.post(_this4.action, _this4.getPostData()).then(function (response) {
+        return axios.post(_this4.action, _this4.getPostData()).then(function (response) {
           return _this4.onSuccess(response.data);
         }).catch(function (errors) {
           return _this4.onFail(errors.response.data);
@@ -201,8 +207,15 @@ var BaseForm = {
     },
     onSuccess: function onSuccess(data) {
       this.submiting = false;
-      if (data.redirect) {
-        window.location.replace(data.redirect);
+      if (data.code === 0) {
+        this.$notify({
+          type: 'success',
+          title: '操作成功',
+          text: '您的修改已提交。'
+        });
+        if(data.redirect){
+          location.href = data.redirect;
+        }
       }
     },
     onFail: function onFail(data) {

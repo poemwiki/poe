@@ -1,9 +1,6 @@
 @extends('layouts.fe-form')
 
-@php
-/** @var \App\Models\Author $author */
-@endphp
-@section('title', trans('admin.author.actions.edit') .' - '.$author->name_lang )
+@section('title', trans('admin.author.actions.create') )
 
 @section('form')
 
@@ -12,8 +9,7 @@
 
       <author-form
         class="wiki-form"
-        :action="'{{ route('author/update', [$author->fake_id]) }}'"
-        :data="{{ $author->toJsonAllLocales()}}"
+        :action="'{{ route('author/store') }}'"
         :locales="{{ json_encode($locales) }}"
         :trans="{{json_encode($trans)}}"
         v-cloak
@@ -23,8 +19,7 @@
               novalidate>
 
           <div class="card-header">
-            <i class="fa fa-pencil"></i> {{ trans('admin.author.actions.edit') }}
-            <a target="_blank" href="{{$author->url}}">{{ $author->name_lang }}</a>
+            <i class="fa fa-pencil"></i> {{ trans('admin.author.actions.create') }}
           </div>
 
           <div class="card-body">

@@ -25,7 +25,7 @@ class QueryController extends Controller {
 
         $keyword = Str::of($keyword)
             // ->replace('·', ' ')
-            ->replaceMatches('@[[:punct:]]+@u', ' ')
+            // ->replaceMatches('@[[:punct:]]+@u', ' ')
             ->replaceMatches('@\s+@u', ' ')
             ->trim();//->lower();
         // dd($keyword);

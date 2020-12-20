@@ -1,12 +1,4 @@
-@import 'variables';
-@import '~bootstrap/scss/bootstrap-reboot';
-@import 'css/MajorMonoDisplayFont.css';
-@import 'css/starability-slot.css';
-
-
-@import "fe-common";
-@import "poem";
-@import "comments";
+@import "form-common";
 
 // poet page
 article.poet{
@@ -84,6 +76,7 @@ article.poet{
   .search-box{
     margin: 2rem 0;
     input{
+      display: inline;
       width: 50%;
       margin-right: 1em;
     }
@@ -91,6 +84,8 @@ article.poet{
 
   >h1 {
     font-size: $font-size-larger;
+    font-weight: bolder;
+    margin: 2rem 0 0;
   }
   .search-count {
     color: $gray-lighter;
@@ -99,6 +94,8 @@ article.poet{
   .search-group {
     h2{
       font-size: $font-size-h2;
+      font-weight: bolder;
+      margin: 2rem 0 1rem;
     }
     ol{
       padding-left: 0;
@@ -109,6 +106,9 @@ article.poet{
         .title{
           line-height: 1.6em;
           margin-top: -.3em;
+        }
+        &:first-child .title {
+          padding-top: 0;
         }
 
         .item-left {}

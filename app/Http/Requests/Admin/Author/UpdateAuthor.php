@@ -3,22 +3,21 @@
 namespace App\Http\Requests\Admin\Author;
 
 use Brackets\Translatable\TranslatableFormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
-class UpdateAuthor extends TranslatableFormRequest
-{
+class UpdateAuthor extends TranslatableFormRequest {
     /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
      */
-    public function authorize(): bool
-    {
-        return Gate::allows('admin.author.edit', $this->author);
+    public function authorize(): bool {
+        return Gate::allows('admin.author.edit', $this->author) || Gate::allows('web.author.change', Auth::user());
     }
 
-/**
+    /**
      * Get the validation rules that apply to the requests untranslatable fields.
      *
      * @return array
@@ -27,9 +26,9 @@ class UpdateAuthor extends TranslatableFormRequest
         return [
             'pic_url' => ['nullable', 'string'],
             'user_id' => ['nullable', 'string'],
-            'wikidata_id' => ['nullable', 'string'],
-            
-
+            'wikidata_id' => ['nullable', 'int'],
+            'nation_id' => ['nullable', 'int'],
+            'dynasty_id' => ['nullable', 'int'],
         ];
     }
 
@@ -42,8 +41,6 @@ class UpdateAuthor extends TranslatableFormRequest
         return [
             'describe_lang' => ['nullable', 'string'],
             'name_lang' => ['nullable', 'string'],
-            'wikipedia_url' => ['nullable', 'string'],
-            
         ];
     }
 
@@ -52,8 +49,7 @@ class UpdateAuthor extends TranslatableFormRequest
      *
      * @return array
      */
-    public function getSanitized(): array
-    {
+    public function getSanitized(): array {
         $sanitized = $this->validated();
 
 

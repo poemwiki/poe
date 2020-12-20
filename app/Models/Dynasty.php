@@ -35,7 +35,7 @@ class Dynasty extends Model
 
     ];
 
-    protected $appends = ['resource_url', 'children'];
+    protected $appends = ['resource_url'];
 
 
     public function children() {

@@ -24,7 +24,7 @@ class CalendarController extends Controller {
             if($cache) return $cache;
         }
 
-        $json = $this->json([
+        $json = $this->response([
             'birth' => $this->queryDate($month, $day, 'birth', $offset = 0),
             'death' => $this->queryDate($month, $day, 'death', $offset = 0)
         ]);

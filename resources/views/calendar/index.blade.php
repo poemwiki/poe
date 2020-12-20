@@ -6,7 +6,7 @@
 @endsection
 
 @push('styles')
-  <link href="{{ mix('css/calendar.css') }}" rel="stylesheet">
+  <link href="{{ mix('/css/calendar.css') }}" rel="stylesheet">
 @endpush
 
 @section('content')
@@ -70,7 +70,7 @@
 
     <vue-element-loading :active="loading" spinner="bar-fade-scale" color="#00f"/>
     @push('scripts')
-      <script src="{{ mix('js/calendar.js') }}"></script>
+      <script src="{{ mix('/js/calendar.js') }}"></script>
     @endpush
   </div>
 
