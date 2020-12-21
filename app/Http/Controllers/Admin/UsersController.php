@@ -20,8 +20,7 @@ use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
-class UsersController extends Controller
-{
+class UsersController extends Controller {
 
     /**
      * Display a listing of the resource.
@@ -29,11 +28,10 @@ class UsersController extends Controller
      * @param IndexUser $request
      * @return array|Factory|View
      */
-    public function index(IndexUser $request)
-    {
+    public function index(IndexUser $request) {
         // create and AdminListing instance for a specific model and
         $data = AdminListing::create(User::class)->processRequestAndGet(
-            // pass the request with params
+        // pass the request with params
             $request,
 
             // set columns to query
@@ -43,7 +41,7 @@ class UsersController extends Controller
             ['email', 'id', 'name'],
 
             function ($query) use ($request) {
-                if(!$request->input('orderBy'))
+                if (!$request->input('orderBy'))
                     $query->orderBy('updated_at', 'desc');
             }
         );
@@ -63,11 +61,10 @@ class UsersController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @throws AuthorizationException
      * @return Factory|View
+     * @throws AuthorizationException
      */
-    public function create()
-    {
+    public function create() {
         $this->authorize('admin.user.create');
 
         return view('admin.user.create');
@@ -79,8 +76,7 @@ class UsersController extends Controller
      * @param StoreUser $request
      * @return array|RedirectResponse|Redirector
      */
-    public function store(StoreUser $request)
-    {
+    public function store(StoreUser $request) {
         // Sanitize input
         $sanitized = $request->getSanitized();
 
@@ -98,11 +94,10 @@ class UsersController extends Controller
      * Display the specified resource.
      *
      * @param User $user
-     * @throws AuthorizationException
      * @return void
+     * @throws AuthorizationException
      */
-    public function show(User $user)
-    {
+    public function show(User $user) {
         $this->authorize('admin.user.show', $user);
 
         // TODO your code goes here
@@ -112,11 +107,10 @@ class UsersController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param User $user
-     * @throws AuthorizationException
      * @return Factory|View
+     * @throws AuthorizationException
      */
-    public function edit(User $user)
-    {
+    public function edit(User $user) {
         $this->authorize('admin.user.edit', $user);
 
 
@@ -125,8 +119,7 @@ class UsersController extends Controller
         ]);
     }
 
-    public function addV(User $user)
-    {
+    public function addV(User $user) {
         $this->authorize('admin.user.edit', $user);
 
 
@@ -142,8 +135,7 @@ class UsersController extends Controller
      * @param User $user
      * @return array|RedirectResponse|Redirector
      */
-    public function update(UpdateUser $request, User $user)
-    {
+    public function update(UpdateUser $request, User $user) {
         // Sanitize input
         $sanitized = $request->getSanitized();
 
@@ -165,11 +157,10 @@ class UsersController extends Controller
      *
      * @param DestroyUser $request
      * @param User $user
-     * @throws Exception
      * @return ResponseFactory|RedirectResponse|Response
+     * @throws Exception
      */
-    public function destroy(DestroyUser $request, User $user)
-    {
+    public function destroy(DestroyUser $request, User $user) {
         $user->delete();
 
         if ($request->ajax()) {
@@ -183,11 +174,10 @@ class UsersController extends Controller
      * Remove the specified resources from storage.
      *
      * @param BulkDestroyUser $request
-     * @throws Exception
      * @return Response|bool
+     * @throws Exception
      */
-    public function bulkDestroy(BulkDestroyUser $request) : Response
-    {
+    public function bulkDestroy(BulkDestroyUser $request): Response {
         DB::transaction(static function () use ($request) {
             collect($request->data['ids'])
                 ->chunk(1000)
