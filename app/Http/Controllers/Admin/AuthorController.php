@@ -11,7 +11,7 @@ use App\Http\Requests\Admin\Author\UpdateAuthor;
 use App\Models\Author;
 use App\Models\Dynasty;
 use App\Models\Nation;
-use Brackets\AdminListing\Facades\AdminListing;
+use App\Http\Listing;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -33,7 +33,7 @@ class AuthorController extends Controller {
      */
     public function index(IndexAuthor $request) {
         // create and AdminListing instance for a specific model and
-        $data = AdminListing::create(Author::class)->processRequestAndGet(
+        $data = Listing::create(Author::class)->processRequestAndGet(
         // pass the request with params
             $request,
 
@@ -41,12 +41,14 @@ class AuthorController extends Controller {
             ['id', 'name_lang', 'user_id', 'updated_at'],
 
             // set columns to searchIn
-            ['id', 'name_lang'],
+            ['name_lang', 'id'],
 
             function ($query) use ($request) {
                 if(!$request->input('orderBy'))
                     $query->orderBy('updated_at', 'desc');
-            }
+            },
+
+            app()->getLocale()
         );
 
         if ($request->ajax()) {

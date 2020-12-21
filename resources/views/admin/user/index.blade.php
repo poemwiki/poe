@@ -49,12 +49,12 @@
                                             </label>
                                         </th>
 
-                                        <th is='sortable' :column="'id'">{{ trans('id') }}</th>
                                         <th is='sortable' :column="'name'">{{ trans('admin.user.columns.name') }}</th>
+                                        <th is='sortable' :column="'id'">{{ trans('id') }}</th>
                                         <th is='sortable' :column="'email'">{{ trans('admin.user.columns.email') }}</th>
                                         <th is='sortable' :column="'is_admin'">{{ trans('admin.user.columns.is_admin') }}</th>
                                         <th is='sortable' :column="'is_v'">{{ trans('admin.user.columns.is_v') }}</th>
-                                        <th is='sortable' :column="'updated_at'">{{ trans('updated_at') }}</th>
+                                        <th is='sortable' :column="'updated_at'">{{ trans('admin.user.columns.updated_at') }}</th>
 
                                         <th></th>
                                     </tr>
@@ -78,8 +78,8 @@
                                             </label>
                                         </td>
 
-                                        <td>@{{ item.id }}</td>
                                         <td>@{{ item.name }}</td>
+                                        <td>@{{ item.id }}</td>
                                         <td>@{{ item.email }}</td>
                                         <td>@{{ item.is_admin }}</td>
                                         <td>@{{ item.is_v }}</td>

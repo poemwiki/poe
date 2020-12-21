@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\Admin\Author;
 
+use Brackets\Translatable\TranslatableFormRequest;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
-class IndexAuthor extends FormRequest
+class IndexAuthor extends TranslatableFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,12 +26,11 @@ class IndexAuthor extends FormRequest
     public function rules(): array
     {
         return [
-            'orderBy' => 'in:describe_lang,id,name_lang,pic_url,user_id,wikipedia_url|nullable',
+            'orderBy' => 'in:updated_at,describe_lang,id,name_lang,pic_url,user_id,wikipedia_url|nullable',
             'orderDirection' => 'in:asc,desc|nullable',
             'search' => 'string|nullable',
             'page' => 'integer|nullable',
             'per_page' => 'integer|nullable',
-
         ];
     }
 }

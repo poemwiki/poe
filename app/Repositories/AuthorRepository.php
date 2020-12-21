@@ -16,8 +16,8 @@ class AuthorRepository extends BaseRepository {
      * @var array
      */
     protected $fieldSearchable = [
-        'name',
-        'name_cn'
+        'name_lang',
+        'id'
     ];
 
     /**
@@ -32,7 +32,7 @@ class AuthorRepository extends BaseRepository {
     public static function findByName($name) {
         $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
         return Author::select(['id', 'name_lang'])
-            ->whereRaw('LOWER(your_table.your_column) LIKE ' . $value)->first()->toArray();
+            ->whereRaw('LOWER(author.name_lang) LIKE ' . $value)->first()->toArray();
     }
 
     /**
