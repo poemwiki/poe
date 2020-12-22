@@ -1,8 +1,9 @@
 nav.header-fixed {
   width: 100%;
-  position: fixed;
-  left: initial;
+  position: absolute;
+  left: 50%;
   top: 0;
+  transform: translate(-50%, -100%);
   z-index: 10;
   background-color: $bg-color;
   border-bottom: 1px solid $gray-lighter;
@@ -129,4 +130,9 @@ nav.header-fixed {
     }
   }
 
+}
+@media (min-width: theme('screens.md.min')) {
+  nav.header-fixed {
+    width: theme('screens.md.min');
+  }
 }

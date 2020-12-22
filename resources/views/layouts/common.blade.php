@@ -21,7 +21,7 @@
 
     @include('layouts.analyze')
 </head>
-<body>
+<body class="relative">
     @include('layouts.fe-menu')
     <div class="main-wrapper relative">
       <main class="absolute">@yield('content')</main>

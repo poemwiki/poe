@@ -237,15 +237,12 @@ main {
 }
 
 
+main>.page {
+  padding: 2rem 1.6rem;
+}
 @media (min-width: theme('screens.md.min')) {
   main>.page {
     width: theme('screens.md.min');
-    padding: 2rem 0;
-  }
-}
-@media (max-width: theme('screens.md.min')) {
-  main>.page {
-    padding: 2rem 1.6rem;
   }
 }
 
