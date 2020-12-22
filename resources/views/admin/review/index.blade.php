@@ -51,10 +51,11 @@
 
                                         <th is='sortable' :column="'content'">{{ trans('admin.review.columns.content') }}</th>
                                         <th is='sortable' :column="'id'">{{ trans('admin.review.columns.id') }}</th>
-                                        <th is='sortable' :column="'like'">{{ trans('admin.review.columns.like') }}</th>
+{{--                                        <th is='sortable' :column="'like'">{{ trans('admin.review.columns.like') }}</th>--}}
                                         <th is='sortable' :column="'poem_title'">{{ trans('admin.review.columns.poem_id') }}</th>
 {{--                                        <th is='sortable' :column="'title'">{{ trans('admin.review.columns.title') }}</th>--}}
                                         <th is='sortable' :column="'user_name'">{{ trans('admin.review.columns.user_id') }}</th>
+                                        <th is='sortable' :column="'updated_at'">{{ trans('updated_at') }}</th>
 
                                         <th></th>
                                     </tr>
@@ -80,10 +81,11 @@
 
                                         <td v-html="item.content"></td>
                                         <td>@{{ item.id }}</td>
-                                        <td>@{{ item.like }}</td>
+{{--                                        <td>@{{ item.like }}</td>--}}
                                         <td><a :href="'/' + item.poem_id" target="_blank">@{{ item.poem_title }}</a></td>
 {{--                                        <td>@{{ item.title }}</td>--}}
                                         <td>@{{ item.user_name }}</td>
+                                        <td>@{{ item.updated_at }}</td>
 
                                         <td>
                                             <div class="row no-gutters">

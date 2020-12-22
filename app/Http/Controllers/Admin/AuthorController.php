@@ -38,7 +38,7 @@ class AuthorController extends Controller {
             $request,
 
             // set columns to query
-            ['id', 'name_lang', 'user_id', 'updated_at'],
+            ['id', 'name_lang', 'user_id', 'updated_at', 'users.name as user_name'],
 
             // set columns to searchIn
             ['name_lang', 'id'],
@@ -46,6 +46,8 @@ class AuthorController extends Controller {
             function ($query) use ($request) {
                 if(!$request->input('orderBy'))
                     $query->orderBy('updated_at', 'desc');
+
+                $query->leftJoin('users', 'author.user_id', '=', 'users.id');
             },
 
             app()->getLocale()
