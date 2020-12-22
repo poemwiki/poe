@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Listing;
 use App\Http\Requests\Admin\Review\BulkDestroyReview;
 use App\Http\Requests\Admin\Review\DestroyReview;
 use App\Http\Requests\Admin\Review\IndexReview;
 use App\Http\Requests\Admin\Review\StoreReview;
 use App\Http\Requests\Admin\Review\UpdateReview;
 use App\Models\Review;
-use Brackets\AdminListing\Facades\AdminListing;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -33,15 +33,25 @@ class ReviewController extends Controller
     public function index(IndexReview $request)
     {
         // create and AdminListing instance for a specific model and
-        $data = AdminListing::create(Review::class)->processRequestAndGet(
+        $data = Listing::create(Review::class)->processRequestAndGet(
             // pass the request with params
             $request,
 
             // set columns to query
-            ['content_id', 'id', 'like', 'poem_id', 'title', 'user_id'],
+            ['content', 'id', 'like', 'poem_id', 'poem.title as poem_title', 'title', 'user_id', 'users.name as user_name', 'updated_at'],
 
             // set columns to searchIn
-            ['content', 'id', 'title']
+            ['content', 'id', 'title', 'user_id', 'users.name', 'poem.title'],
+
+
+            function ($query) use ($request) {
+                if(!$request->input('orderBy'))
+                    $query->orderBy('updated_at', 'desc');
+
+                // $query->with('user');
+                $query->leftJoin('users', 'review.user_id', '=', 'users.id');
+                $query->leftJoin('poem', 'review.poem_id', '=', 'poem.id');
+            }
         );
 
         if ($request->ajax()) {

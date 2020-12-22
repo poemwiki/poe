@@ -30,7 +30,7 @@
                                     </div>
                                     <div class="col-sm-auto form-group ">
                                         <select class="form-control" v-model="pagination.state.per_page">
-                                            
+
                                             <option value="10">10</option>
                                             <option value="25">25</option>
                                             <option value="100">100</option>
@@ -39,7 +39,7 @@
                                 </div>
                             </form>
 
-                            <table class="table table-hover table-listing">
+                            <table class="table table-hover table-listing" width="100%">
                                 <thead>
                                     <tr>
                                         <th class="bulk-checkbox">
@@ -49,12 +49,12 @@
                                             </label>
                                         </th>
 
-                                        <th is='sortable' :column="'content_id'">{{ trans('admin.review.columns.content_id') }}</th>
+                                        <th is='sortable' :column="'content'">{{ trans('admin.review.columns.content') }}</th>
                                         <th is='sortable' :column="'id'">{{ trans('admin.review.columns.id') }}</th>
                                         <th is='sortable' :column="'like'">{{ trans('admin.review.columns.like') }}</th>
-                                        <th is='sortable' :column="'poem_id'">{{ trans('admin.review.columns.poem_id') }}</th>
-                                        <th is='sortable' :column="'title'">{{ trans('admin.review.columns.title') }}</th>
-                                        <th is='sortable' :column="'user_id'">{{ trans('admin.review.columns.user_id') }}</th>
+                                        <th is='sortable' :column="'poem_title'">{{ trans('admin.review.columns.poem_id') }}</th>
+{{--                                        <th is='sortable' :column="'title'">{{ trans('admin.review.columns.title') }}</th>--}}
+                                        <th is='sortable' :column="'user_name'">{{ trans('admin.review.columns.user_id') }}</th>
 
                                         <th></th>
                                     </tr>
@@ -78,13 +78,13 @@
                                             </label>
                                         </td>
 
-                                    <td>@{{ item.content_id }}</td>
+                                        <td v-html="item.content"></td>
                                         <td>@{{ item.id }}</td>
                                         <td>@{{ item.like }}</td>
-                                        <td>@{{ item.poem_id }}</td>
-                                        <td>@{{ item.title }}</td>
-                                        <td>@{{ item.user_id }}</td>
-                                        
+                                        <td><a :href="'/' + item.poem_id" target="_blank">@{{ item.poem_title }}</a></td>
+{{--                                        <td>@{{ item.title }}</td>--}}
+                                        <td>@{{ item.user_name }}</td>
+
                                         <td>
                                             <div class="row no-gutters">
                                                 <div class="col-auto">

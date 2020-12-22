@@ -51,9 +51,9 @@ class Review extends Model {
     /**
      * @return string
      */
-    //    public function getUrlAttribute() {
-    //        return route('review/show', ['id' => $this->id]);
-    //    }
+    public function getUnameAttribute() {
+       return $this->user->name;
+    }
 
 
     /**
@@ -74,7 +74,7 @@ class Review extends Model {
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasOne
      **/
-    public function content() {
-        return $this->hasOne(\App\Models\Content::class, 'id', 'content_id');
-    }
+    // public function content() {
+    //     return $this->hasOne(\App\Models\Content::class, 'id', 'content_id');
+    // }
 }
