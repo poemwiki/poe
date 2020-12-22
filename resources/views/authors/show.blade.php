@@ -14,7 +14,7 @@
         <div class="author-relate">
 
             @if($author->user)
-                {!!$author->user->getVerifiedAvatarHtml()!!}
+            <div class="avatar-wrapper">{!!$author->user->getVerifiedAvatarHtml()!!}</div>
                 <span>此作者页已关联到用户 {{$author->user->name}}@PoemWiki</span>
             @endif
         </div>
