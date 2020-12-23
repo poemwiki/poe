@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Author;
 use App\Models\Poem;
+use App\Repositories\NationRepository;
 use App\Repositories\PoemRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -18,6 +19,10 @@ class QueryController extends Controller {
     // }
     public function index(){
         return view('query.search');
+    }
+
+    public function nation($keyword) {
+        return $this->response(NationRepository::searchByName($keyword));
     }
 
     public function search($keyword){
