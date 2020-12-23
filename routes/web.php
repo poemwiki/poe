@@ -311,9 +311,8 @@ Route::get('/union-login', function () {
 
 
 Route::any('/q', 'QueryController@index')->name('q');
-Route::any('/q/nation/{keyword?}', 'QueryController@nation')->name('queryNation');
-Route::any('/q/nationId/{keyword?}', 'QueryController@nationId')->name('queryNationId');
-Route::any('/q/author/{keyword?}', 'QueryController@author')->name('queryAuthor');
+Route::any('/q/nation/{keyword}/{id?}', 'QueryController@nation')->name('queryNation');
+Route::any('/q/author/{keyword}/{id?}', 'QueryController@author')->name('queryAuthor');
 Route::any('/q/poem/{keyword?}', 'QueryController@poem')->name('queryPoem');
 Route::get('/q/{keyword?}', 'QueryController@search')->name('search');
 Route::any('/query', 'QueryController@query')->name('query');

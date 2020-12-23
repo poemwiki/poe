@@ -21,7 +21,7 @@ Vue.component('author-form', {
         nation_id: '',
         dynasty_id: ''
       },
-      nationList: []
+      nationList: this.defaultNation
     }
   },
 
@@ -34,7 +34,6 @@ Vue.component('author-form', {
   },
 
   mounted: function() {
-    this.nationList = this.defaultNation;
   },
 
   methods: {
@@ -46,7 +45,7 @@ Vue.component('author-form', {
     },
     searchNation: _.debounce((loading, search, vm) => {
       axios(
-        `/q/nation/${encodeURI(search)}`
+        `/q/nation/${encodeURI(search)}/${vm.form.nation_id}`
       ).then(res => {
         console.log(res);
         if(res.data.length)
@@ -54,6 +53,7 @@ Vue.component('author-form', {
         loading(false);
       });
     }, 350),
+
     onSuccess: function onSuccess(data) {
 
       if (data.code === 0) {

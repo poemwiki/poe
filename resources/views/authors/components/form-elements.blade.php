@@ -66,8 +66,8 @@
          :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.author.columns.nation_id') }}</label>
 
   <div>
-    <v-select :options="nationList" label="name_lang" :reduce="name_lang => name_lang.id" :filterable="false" @search="onSearchNation"
-
+    <v-select :options="nationList" label="name_lang" :reduce="name_lang => name_lang.id" :filterable="false"
+              @search="onSearchNation"
               v-model="form.nation_id"
               :class="{'form-control-danger': errors.has('nation_id'), 'form-control-success': fields.nation_id && fields.nation_id.valid}"
               v-validate="''"

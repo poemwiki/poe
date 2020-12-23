@@ -36,10 +36,13 @@ class NationRepository extends BaseRepository {
         return Nation::select(['id', 'name_lang'])
             ->whereRaw('LOWER(nation.name_lang) LIKE ' . $value)->first()->toArray();
     }
-    public static function searchByName($name) {
+    public static function searchByName($name, $id) {
         $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
-        return Nation::select(['id', 'name_lang'])
-            ->whereRaw("JSON_SEARCH(lower(`name_lang`), 'all', $value)")->get()->toArray();
+        $query = Nation::select(['id', 'name_lang'])
+            ->whereRaw("JSON_SEARCH(lower(`name_lang`), 'one', $value)");
+        if(is_numeric($id))
+            $query->union(Nation::find($id)->select(['id', 'name_lang']));
+        return $query->get()->toArray();
     }
 
     /**

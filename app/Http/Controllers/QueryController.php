@@ -23,14 +23,11 @@ class QueryController extends Controller {
         return view('query.search');
     }
 
-    public function nation($keyword) {
-        return $this->response(NationRepository::searchByName($keyword));
+    public function nation($keyword, $id) {
+        return $this->response(NationRepository::searchByName($keyword, $id));
     }
-    public function nationId($id) {
-        return $this->response(Nation::find($id));
-    }
-    public function author($keyword) {
-        return $this->response(AuthorRepository::searchByName($keyword));
+    public function author($keyword, $id) {
+        return $this->response(AuthorRepository::searchByName($keyword, $id));
     }
 
     // TODO support multiple word search like bot search, order by relative
