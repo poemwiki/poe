@@ -47,7 +47,6 @@ Vue.component('author-form', {
       axios(
         `/q/nation/${encodeURI(search)}/${vm.form.nation_id}`
       ).then(res => {
-        console.log(res);
         if(res.data.length)
           vm.nationList = res.data;
         loading(false);
