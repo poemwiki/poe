@@ -66,11 +66,13 @@ class AuthorController extends Controller {
         $id = Author::getIdFromFakeId($fakeId);
         $author = Author::select(['id', 'name_lang', 'describe_lang', 'dynasty_id', 'nation_id'])->findOrFail($id);
 
+        // dd(Nation::where('id', $author->nation_id)->orWhere('id', '>', 0)->limit(10)->get()->toArray());
         return view('authors.edit', [
             'author' => $author,
             'trans' => $this->trans(),
             'nationList' => NationRepository::allInUse(),
-            'defaultNation' => Nation::where('id', $author->nation_id)->get()->toArray(),
+            // 'defaultNation' => Nation::where('id', $author->nation_id)->get()->toArray(),
+            'defaultNation' => Nation::where('id', $author->nation_id)->union(Nation::limit(10))->get()->toArray(),
             'dynastyList' => DynastyRepository::allInUse(),
         ]);
     }
@@ -114,6 +116,7 @@ class AuthorController extends Controller {
         return view('authors.create', [
             'trans' => $this->trans(),
             'dynastyList' => DynastyRepository::allInUse(),
+            'defaultNation' => Nation::limit(10)->get()->toArray(),
         ]);
     }
 
