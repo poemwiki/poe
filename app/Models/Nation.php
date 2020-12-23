@@ -15,10 +15,8 @@ class Nation extends Model {
     protected $fillable = [
         'describe_lang',
         'f_id',
-        'name',
         'name_lang',
         'wikidata_id',
-
     ];
 
 
