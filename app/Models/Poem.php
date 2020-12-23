@@ -284,6 +284,7 @@ class Poem extends Model implements Searchable {
     public function poetThroughWikidata() {
         return $this->belongsTo(\App\Models\Author::class, 'poet_wikidata_id', 'wikidata_id');
     }
+    // TODO poem hasMany translators
     public function translatorAuthor() {
         return $this->belongsTo(\App\Models\Author::class, 'translator_id', 'id');
     }
@@ -291,14 +292,6 @@ class Poem extends Model implements Searchable {
         return $this->belongsTo(\App\Models\Author::class, 'translator_wikidata_id', 'wikidata_id');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\hasOne
-     **/
-    public function author() {
-        return $this->hasOne(\App\Models\Author::class, 'id', 'poet_id');
-    }
-
-    // TODO poem hasMany translators
 
 
     /**

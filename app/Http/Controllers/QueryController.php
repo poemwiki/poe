@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Author;
+use App\Models\Nation;
 use App\Models\Poem;
+use App\Repositories\AuthorRepository;
 use App\Repositories\NationRepository;
 use App\Repositories\PoemRepository;
 use Illuminate\Http\Request;
@@ -24,7 +26,19 @@ class QueryController extends Controller {
     public function nation($keyword) {
         return $this->response(NationRepository::searchByName($keyword));
     }
+    public function nationId($id) {
+        return $this->response(Nation::find($id));
+    }
+    public function author($keyword) {
+        return $this->response(AuthorRepository::searchByName($keyword));
+    }
 
+    // TODO support multiple word search like bot search, order by relative
+    public function poem($keyword) {
+        return $this->response(PoemRepository::searchByName($keyword));
+    }
+
+    // TODO support multiple word search like bot search, order by relative
     public function search($keyword){
         if($keyword === '' || is_null($keyword)) return view('query.search');
 

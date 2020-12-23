@@ -2,12 +2,17 @@ import Vue from 'vue';
 // import '../bootstrap.js';
 import VueElementLoading from 'vue-element-loading';
 import BaseForm from '../components/BaseForm';
+import vSelect from 'vue-select';
+vSelect.props.reduce.default = function (option) {
+  return option.id;
+};
 
 Vue.component('author-form', {
   components: {
-    VueElementLoading
+    VueElementLoading, vSelect
   },
   mixins: [BaseForm],
+  props: ['dynastyList', 'defaultNation'],
   data: function () {
     return {
       form: {
@@ -15,7 +20,8 @@ Vue.component('author-form', {
         describe_lang: this.getLocalizedFormDefaults(),
         nation_id: '',
         dynasty_id: ''
-      }
+      },
+      nationList: []
     }
   },
 
@@ -28,11 +34,26 @@ Vue.component('author-form', {
   },
 
   mounted: function() {
-    // this.form.nation_id = this.$el.querySelector('[name="nation_id"]').getAttribute('value') || this.form.nation_id;
-    // this.form.dynasty_id = this.$el.querySelector('[name="dynasty_id"]').getAttribute('value') || this.form.dynasty_id;
+    this.nationList = this.defaultNation;
   },
 
   methods: {
+    onSearchNation: function(keyword, loading) {
+        if(keyword.length) {
+          loading(true);
+          this.searchNation(loading, keyword, this);
+        }
+    },
+    searchNation: _.debounce((loading, search, vm) => {
+      axios(
+        `/q/nation/${encodeURI(search)}`
+      ).then(res => {
+        console.log(res);
+        if(res.data.length)
+          vm.nationList = res.data;
+        loading(false);
+      });
+    }, 350),
     onSuccess: function onSuccess(data) {
 
       if (data.code === 0) {

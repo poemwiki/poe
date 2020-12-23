@@ -66,7 +66,7 @@
                         <a class="first-line no-bg" target="_blank" href="{{$item->url}}">{!!$item->searchable->firstLine->surround('span', function ($i) {
                             return 'style="transition-delay:'.($i*20).'ms"';
                     })!!}
-                          <span class="text-gray-400 float-right">{{$item->searchable->author ? $item->searchable->author->name_lang : $item->searchable->poet}}</span></a>
+                          <span class="text-gray-400 float-right">{{$item->searchable->poet_author ? $item->searchable->poet_author->name_lang : $item->searchable->poet}}</span></a>
                     </div>
                 @endif
             </li>

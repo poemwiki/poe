@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Poem;
 use App\Repositories\BaseRepository;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class PoemRepository
@@ -87,6 +88,27 @@ class PoemRepository extends BaseRepository
         return Poem::query()->with('wx', 'lang')
             ->inRandomOrder()
             ->take($num);
+    }
+
+    /**
+     *
+     * @param $name
+     * @return array
+     */
+    public static function searchByName($name) {
+        $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
+        return Poem::query()->select(['title', 'poet_id', 'translator_id'])
+            ->whereRaw("lower(`title`) LIKE $value ")
+            ->orWhereHas('poetAuthor', function($q) use ($value) {
+                $q->where(function($q) use ($value) {
+                    $q->whereRaw("JSON_SEARCH(lower(`name_lang`), 'all', $value)");
+                });
+            })
+            ->orWhereHas('translatorAuthor', function($q) use ($value) {
+                $q->where(function($q) use ($value) {
+                    $q->whereRaw("JSON_SEARCH(lower(`name_lang`), 'all', $value)");
+                });
+            })->with('poetAuthor')->get()->toArray();
     }
 
     /**

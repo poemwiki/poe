@@ -8,6 +8,7 @@ use App\Models\Nation;
 use App\Models\Poem;
 use App\Repositories\AuthorRepository;
 use App\Repositories\DynastyRepository;
+use App\Repositories\NationRepository;
 use Illuminate\Routing\Redirector;
 
 
@@ -68,7 +69,8 @@ class AuthorController extends Controller {
         return view('authors.edit', [
             'author' => $author,
             'trans' => $this->trans(),
-            'nationList' => Nation::select('name_lang', 'id')->get(),
+            'nationList' => NationRepository::allInUse(),
+            'defaultNation' => Nation::where('id', $author->nation_id)->get()->toArray(),
             'dynastyList' => DynastyRepository::allInUse(),
         ]);
     }
@@ -111,7 +113,6 @@ class AuthorController extends Controller {
     public function create() {
         return view('authors.create', [
             'trans' => $this->trans(),
-            'nationList' => Nation::select('name_lang', 'id')->get(),
             'dynastyList' => DynastyRepository::allInUse(),
         ]);
     }

@@ -12,6 +12,7 @@
         :action="'{{ route('author/store') }}'"
         :locales="{{ json_encode($locales) }}"
         :trans="{{json_encode($trans)}}"
+        :dynasty-list="{{json_encode($dynastyList)}}"
         v-cloak
         inline-template>
 

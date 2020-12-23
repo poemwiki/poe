@@ -6,6 +6,7 @@
 @tailwind utilities;
 
 @import 'variables';
+@import "vue-select/src/scss/vue-select.scss";
 //@import '~bootstrap/scss/bootstrap-reboot';
 //@import 'css/MajorMonoDisplayFont.css';
 //@import 'css/starability-slot.css';
@@ -100,7 +101,7 @@ a {
   color: $blue;
   background-color: transparent;
   display: inline-block;
-  margin-right: 1em;
+  margin-left: 1em;
   line-height: 1.2em;
   &:focus{
     outline: none;
@@ -226,8 +227,9 @@ body{
 // see https://www.zhangxinxu.com/wordpress/2015/01/css-page-scrollbar-toggle-center-no-jumping/
 main {
   width: 100%;
+  height: calc(100vh - 6rem);
   padding-left: calc(100vw - 100%);
-  overflow: hidden;
+  overflow: hidden visible;
   z-index: 2;
   //position: sticky;
   background-color: $bg-color;
