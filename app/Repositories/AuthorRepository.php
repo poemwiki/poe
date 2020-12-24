@@ -34,7 +34,7 @@ class AuthorRepository extends BaseRepository {
         return Author::select(['id', 'name_lang'])
             ->whereRaw('LOWER(author.name_lang) LIKE ' . $value)->first()->toArray();
     }
-    public static function searchByName($name, $id) {
+    public static function searchByName($name, $id=null) {
         $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
         $query = Author::select(['id', 'name_lang'])
             ->whereRaw("JSON_SEARCH(lower(`name_lang`), 'all', $value)")->get()->toArray();
