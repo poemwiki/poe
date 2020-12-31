@@ -6,6 +6,7 @@ use App\Traits\HasFakeId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasTranslations;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 
@@ -13,6 +14,11 @@ class Author extends Model implements Searchable {
     use SoftDeletes;
     use HasTranslations;
     use HasFakeId;
+    use LogsActivity;
+
+    protected static $logFillable = true;
+    protected static $logOnlyDirty = true;
+    protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length'];
 
     protected $table = 'author';
 
@@ -53,9 +59,11 @@ class Author extends Model implements Searchable {
         'pic_url' => 'json',
         'nation_id' => 'integer',
         'dynasty_id' => 'integer',
+        // 'name_lang' => 'array',
+        // 'describe_lang' => 'array'
     ];
 
-    protected $appends = ['resource_url', 'url'];
+    protected $appends = ['resource_url', 'url', 'label', 'label_en', 'label_cn'];
 
     public function poems() {
         return $this->hasMany(\App\Models\Poem::class, 'poet_id', 'id');
@@ -72,6 +80,15 @@ class Author extends Model implements Searchable {
     public function dynasty() {
         return $this->belongsTo(\App\Models\Dynasty::class, 'dynasty_id', 'id');
     }
+    public function wikiData() {
+        return $this->hasOne(\App\Models\Wikidata::class, 'id', 'wikidata_id');
+    }
+    public function getWikiDataNationId() {
+        $countries = $this->wikiData->getClaim(Wikidata::PROP['countries']);
+        if(!$countries) return null;
+
+        return str_replace('Q', '', $countries[0]->mainsnak->datavalue->value->id);
+    }
 
     /* ************************ ACCESSOR ************************* */
 
@@ -83,6 +100,15 @@ class Author extends Model implements Searchable {
      */
     public function getUrlAttribute() {
         return route('author/show', ['fakeId' => $this->fakeId]);
+    }
+    public function getLabelAttribute() {
+        return $this->getTranslated('name_lang', 'en') . "（" . $this->getTranslated('name_lang', 'zh-CN') . "）";
+    }
+    public function getLabelEnAttribute() {
+        return $this->getTranslated('name_lang', 'en');
+    }
+    public function getLabelCNAttribute() {
+        return $this->getTranslated('name_lang', 'zh-CN');
     }
 
     public static function searchPoems() {
