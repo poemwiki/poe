@@ -34,7 +34,7 @@ input[type],select {
   }
 
   .form-control-feedback {
-    @apply px-0.5 text-gray-300;
+    @apply px-0.5 text-red-500;
     min-height: 2.4rem;
     transition: opacity 1s;
   }
