@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreatePoemRequest;
-use App\Http\Requests\UpdatePoemRequest;
-use App\Models\Language;
+use App\Models\ActivityLog;
 use App\Models\Poem;
 use App\Repositories\PoemRepository;
 use App\Repositories\ScoreRepository;
+use App\User;
 use EasyWeChat\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Response;
 use Fukuball\Jieba\Jieba;
@@ -44,21 +44,101 @@ class BotController extends Controller {
         $this->wechatApp->rebind('cache', $cache);
     }
 
+    public function data($poeDB, $chatroom) {
+        $dataMsg = [];
+
+        // TODO move query to
+        // app('App\Http\Controllers\QueryController')->getMonthPoemCount();
+        $logToQuery = [
+            ['subject' => ActivityLog::SUBJECT['poem'], 'msg' => '上传诗歌数'],
+            ['subject' => ActivityLog::SUBJECT['score'], 'msg' => '新增评分数'],
+            ['subject' => ActivityLog::SUBJECT['review'], 'msg' => '新增评论数'],
+        ];
+
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $startOfMonthShort = $startOfMonth->format('n.j');
+        $endOfMonth = Carbon::now()->endOfMonth();
+        $endOfMonthShort = $endOfMonth->format('n.j');
+        $startPreviousMonth = Carbon::now()->startOfMonth()->subMonth();
+        $startPreviousMonthShort = $startPreviousMonth->format('n.j');
+        $endPreviousMonth = Carbon::now()->subMonth()->endOfMonth();
+        $endPreviousMonthShort = $endPreviousMonth->format('n.j');
+
+        foreach ($logToQuery as $log) {
+
+            $monthCount = ActivityLog::where('subject_type', '=', $log['subject'])
+                ->where('created_at', '>=', $startOfMonth)
+                ->where('created_at', '<=', $endOfMonth)
+                ->where('description', '=', 'created')
+                ->count();
+
+            array_push($dataMsg, "$startOfMonthShort ~ $endOfMonthShort\t{$log['msg']} $monthCount");
+
+            // app('App\Http\Controllers\QueryController')->getMonthPoemCount();
+            $previousMonthCount = ActivityLog::where('subject_type', '=', $log['subject'])
+                ->where('created_at', '>=', $startPreviousMonth)
+                ->where('created_at', '<=', $endPreviousMonth)
+                ->where('description', '=', 'created')
+                ->count();
+            array_push($dataMsg, "$startPreviousMonthShort ~ $endPreviousMonthShort\t{$log['msg']} $previousMonthCount");
+        }
+
+
+        // 新增用户
+        $monthCount = User::where('created_at', '>=', $startOfMonth)
+            ->where('created_at', '<=', $endOfMonth)
+            ->count();
+        array_push($dataMsg, "$startOfMonthShort ~ $endOfMonthShort\t新增用户数 $monthCount");
+        $previousMonthCount = User::where('created_at', '>=', $startPreviousMonth)
+            ->where('created_at', '<=', $endPreviousMonth)
+            ->count();
+        array_push($dataMsg, "$startPreviousMonthShort ~ $endPreviousMonthShort\t新增用户数 $previousMonthCount");
+
+        // 机器人回复次数
+
+        $this->_log($poeDB, $chatroom, 'data', null);
+
+        $msg = [
+            'code' => 0,
+            'poem' => implode("\n", $dataMsg),
+            'data' => []
+        ];
+        if(isset($_GET['poemwiki'])) {
+            return implode("<br>", $dataMsg);
+        }
+        return Response::json($msg);
+    }
+
+    private function _log($poeDB, $chatroom, $subject_type, $subject_id) {
+        $stmt = $poeDB->prepare('INSERT INTO `bot_reply_log` SET `created_at`=:created_at,
+                `subject_id`=:subject_id, `subject_type`=:subject_type, `chatroom_id`=:chatroom_id');
+        $stmt->bindValue(':subject_id', null);
+        $stmt->bindValue(':chatroom_id', $chatroom);
+        $stmt->bindValue(':created_at', now());
+        $stmt->bindValue(':subject_type', 'data');
+        $stmt->execute();
+
+        if($stmt->errorCode() !== '00000') {
+            Log::error('error while insert to bot reply');
+            Log::error($stmt->errorInfo());
+        }
+    }
+
     /**
      * Display a listing of the Poem.
      *
      * @param Request $request
      *
-     * @return Response
      */
     public function index(Request $request) {
         $chatroom = $request->input('chatroom', '');
         $maxLength = $request->input('maxLength', 800);
         $msg = $request->input('keyword', '云朵');
 
+        $dataMode = in_array($msg, ['数据', '搜数据', 'data']) && in_array($chatroom, ['R:10696051632015143', 'R:10696051758570234']);
         $keyword = $this->getKeywords($msg);
 
-        if (empty($keyword)) {
+        if (empty($keyword) && !$dataMode) {
             return Response::json([
                 'code' => -2,
                 'poem' => '抱歉，没有匹配到关键词。',
@@ -71,6 +151,9 @@ class BotController extends Controller {
             config('database.connections.mysql.password'), [
                 PDO::ATTR_EMULATE_PREPARES => TRUE
             ]);
+        if ($dataMode) {
+            return $this->data($poeDB, $chatroom);
+        }
 
         $originWords = '';
         if (is_array($keyword)) {
@@ -195,7 +278,8 @@ SQL
 
                 // links & score
                 if(!$post->short_url) {
-                    $url = $this->shorten(route('poems/show', Poem::getFakeId($post->id)), function ($link) use ($post){
+                    // TODO use poems/show url instead of exposing poem id
+                    $url = $this->shorten(route('poem', $post->id), function ($link) use ($post){
                         $p = Poem::find($post->id);
                         if(empty($p)) return;
 
@@ -238,6 +322,8 @@ SQL
                 $stmt->execute();
                 //        print_r($stmt->errorCode());
                 //        print_r($stmt->errorInfo());
+
+                $this->_log($poeDB, $chatroom, \App\Models\Poem::class, $post->id);
             }
         } else {
             Log::error('Bot search failed.');
@@ -301,6 +387,8 @@ SQL;
     }
 
     private function shorten($link, $cb = null) {
+        // TODO enable shorten until it accessible under China Mobile 4G network
+        return $link;
         $shortUrl = $this->wechatApp->url->shorten($link);
         if($shortUrl->errcode === 0) {
             if(is_callable($cb)) call_user_func($cb, $shortUrl->short_url);

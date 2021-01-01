@@ -3,6 +3,12 @@ namespace App\Models;
 use Spatie\Activitylog\Models\Activity;
 
 class ActivityLog extends Activity{
+    const SUBJECT = [
+        'poem' => 'App\\Models\\Poem',
+        'score' => 'App\\Models\\Score',
+        'review' => 'App\\Models\\Review',
+        'userBind' => 'App\\Models\\UserBind',
+    ];
     public static function findByPoem(Poem $poem) {
         return Activity::where(['subject_type' => 'App\Models\Poem', 'subject_id' => $poem->id])
             ->orderBy('id', 'desc')
