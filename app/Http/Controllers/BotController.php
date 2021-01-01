@@ -8,10 +8,14 @@ use App\Repositories\PoemRepository;
 use App\Repositories\ScoreRepository;
 use App\User;
 use EasyWeChat\Factory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Response;
 use Fukuball\Jieba\Jieba;
 use Fukuball\Jieba\Finalseg;
@@ -56,13 +60,11 @@ class BotController extends Controller {
         ];
 
         $startOfMonth = Carbon::now()->startOfMonth();
-        $startOfMonthShort = $startOfMonth->format('n.j');
         $endOfMonth = Carbon::now()->endOfMonth();
-        $endOfMonthShort = $endOfMonth->format('n.j');
+        $monthDuration = $this->_pad($startOfMonth->format('n.j'), 4) . '~' .$this->_pad($endOfMonth->format('n.j'));
         $startPreviousMonth = Carbon::now()->startOfMonth()->subMonth();
-        $startPreviousMonthShort = $startPreviousMonth->format('n.j');
         $endPreviousMonth = Carbon::now()->subMonth()->endOfMonth();
-        $endPreviousMonthShort = $endPreviousMonth->format('n.j');
+        $monthPreviousDuration = $this->_pad($startPreviousMonth->format('n.j'), 4) . '~' .$this->_pad($endPreviousMonth->format('n.j'));
 
         foreach ($logToQuery as $log) {
 
@@ -72,7 +74,7 @@ class BotController extends Controller {
                 ->where('description', '=', 'created')
                 ->count();
 
-            array_push($dataMsg, "$startOfMonthShort ~ $endOfMonthShort\t{$log['msg']} $monthCount");
+            array_push($dataMsg, "$monthDuration {$log['msg']} $monthCount");
 
             // app('App\Http\Controllers\QueryController')->getMonthPoemCount();
             $previousMonthCount = ActivityLog::where('subject_type', '=', $log['subject'])
@@ -80,7 +82,7 @@ class BotController extends Controller {
                 ->where('created_at', '<=', $endPreviousMonth)
                 ->where('description', '=', 'created')
                 ->count();
-            array_push($dataMsg, "$startPreviousMonthShort ~ $endPreviousMonthShort\t{$log['msg']} $previousMonthCount");
+            array_push($dataMsg, "$monthPreviousDuration {$log['msg']} $previousMonthCount");
         }
 
 
@@ -88,11 +90,11 @@ class BotController extends Controller {
         $monthCount = User::where('created_at', '>=', $startOfMonth)
             ->where('created_at', '<=', $endOfMonth)
             ->count();
-        array_push($dataMsg, "$startOfMonthShort ~ $endOfMonthShort\t新增用户数 $monthCount");
+        array_push($dataMsg, "$monthDuration 新增用户数 $monthCount");
         $previousMonthCount = User::where('created_at', '>=', $startPreviousMonth)
             ->where('created_at', '<=', $endPreviousMonth)
             ->count();
-        array_push($dataMsg, "$startPreviousMonthShort ~ $endPreviousMonthShort\t新增用户数 $previousMonthCount");
+        array_push($dataMsg, "$monthPreviousDuration 新增用户数 $previousMonthCount");
 
         // 机器人回复次数
 
@@ -104,7 +106,7 @@ class BotController extends Controller {
             'data' => []
         ];
         if(isset($_GET['poemwiki'])) {
-            return implode("<br>", $dataMsg);
+            return implode("\n", $dataMsg);
         }
         return Response::json($msg);
     }
@@ -124,6 +126,74 @@ class BotController extends Controller {
         }
     }
 
+    private function _pad($str, $length=5) {
+        return Str::padLeft($str, $length);
+    }
+    private function _boldNum($str) {
+        return str_replace([0,1,2,3,4,5,6,7,8,9], ['𝟎','𝟏','𝟐','𝟑','𝟒','𝟓','𝟔','𝟕','𝟖','𝟗'], $str);
+    }
+
+    public function top($poeDB, $chatroom) {
+        $dataMsg = [];
+
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+        $monthDuration = $this->_pad($startOfMonth->format('n.j'), 4) . '~' .$this->_pad($endOfMonth->format('n.j'));
+        $startPreviousMonth = Carbon::now()->startOfMonth()->subMonth();
+        $endPreviousMonth = Carbon::now()->subMonth()->endOfMonth();
+        $monthPreviousDuration = $this->_pad($startPreviousMonth->format('n.j'), 4) . '~' .$this->_pad($endPreviousMonth->format('n.j'));
+
+        $monthCount = Poem::where('created_at', '>=', $startOfMonth)
+            ->where('created_at', '<=', $endOfMonth)
+            ->count('id');
+        array_push($dataMsg, "$monthDuration 新增诗歌数 $monthCount");
+
+        $previousMonthCount = Poem::where('created_at', '>=', $startPreviousMonth)
+            ->where('created_at', '<=', $endPreviousMonth)
+            ->count('id');
+        array_push($dataMsg, "$monthPreviousDuration 新增诗歌数 $previousMonthCount");
+
+        $total = Poem::count('id');
+        array_push($dataMsg, "累计诗歌数 $total");
+
+        $sql = <<<SQL
+SELECT causer_id as userID, users.name as `name`, count(*) as `pcount` FROM activity_log as a
+LEFT JOIN users on causer_id=users.id
+WHERE subject_type=? and description="created"
+  AND causer_type=?
+and a.created_at>=? AND a.created_at<=?
+GROUP BY (causer_id)
+ORDER BY `pcount` desc
+LIMIT 10
+SQL;
+        // DB::enableQueryLog();
+        $res = DB::select($sql, [
+            Poem::class,
+            User::class,
+            $startOfMonth->format('Y-m-d H:i:s'),
+            $endOfMonth->format('Y-m-d H:i:s')
+        ]);
+        // print_r($res);
+        // print_r( DB::getQueryLog());
+        array_push($dataMsg, "\n本月上传诗歌 Top 10");
+        array_push($dataMsg, "上传数量 用户名");
+        foreach ($res as $line) {
+            array_push($dataMsg, $this->_pad($line->pcount, 4) . ' ' . str_replace('[from-wechat]', '', $line->name));
+        }
+
+        $this->_log($poeDB, $chatroom, 'data', null);
+
+        $msg = [
+            'code' => 0,
+            'poem' => implode("\n", $dataMsg),
+            'data' => []
+        ];
+        if(isset($_GET['poemwiki'])) {
+            return implode("\n", $dataMsg);
+        }
+        return Response::json($msg);
+    }
+
     /**
      * Display a listing of the Poem.
      *
@@ -135,10 +205,11 @@ class BotController extends Controller {
         $maxLength = $request->input('maxLength', 800);
         $msg = $request->input('keyword', '云朵');
 
-        $dataMode = in_array($msg, ['数据', '搜数据', 'data']) && in_array($chatroom, ['R:10696051632015143', 'R:10696051758570234']);
+        $topMode = preg_match("@top($|\s)@i", $msg);
+        $dataMode = in_array($msg, ['数据', 'data']);
         $keyword = $this->getKeywords($msg);
 
-        if (empty($keyword) && !$dataMode) {
+        if (empty($keyword) && !$dataMode && !$topMode) {
             return Response::json([
                 'code' => -2,
                 'poem' => '抱歉，没有匹配到关键词。',
@@ -153,6 +224,9 @@ class BotController extends Controller {
             ]);
         if ($dataMode) {
             return $this->data($poeDB, $chatroom);
+        }
+        if ($topMode) {
+            return $this->top($poeDB, $chatroom);
         }
 
         $originWords = '';
@@ -217,7 +291,7 @@ SQL
 
             // TODO put this into blade
             if ($count == 0) {
-                $emoji = Arr::random(['😓', '😅', '😢', '😂', '😭呜呜 ', '', '🙁️', '😫', '😶', '😬', '😔', '😒', '😠', '😊', '😹','🙁','🙃']);
+                $emoji = Arr::random(['😓', '😅', '😢', '😂', '😭呜呜 ', '', '🙁️', '😫', '😶', '😬', '😔', '😒', '😠', '😊', '😹','🙁','🙃','[裂开]','[苦涩]','[叹气]']);
                 $sorry = Arr::random(['Sorry', '对不起', '抱歉', '不好意思', '不好意思哈', 'Soooorry']);
                 $notFound = Arr::random(['没查到', '没搜着', '没找到', '没找着']);
                 $ne = Arr::random(['相关内容', '', '呢']);
