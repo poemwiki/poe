@@ -28,9 +28,17 @@ class Wikidata extends Model {
         'occupations' => 'P106',
         'languages' => 'P1412',
         'time_period' => 'P2348',
+        'native_language' => 'P103',
         'native_label' => 'P1705',
+        'name_in_native_language' => 'P1559',
+        'named as' => 'P1810', // name by which a subject is recorded in a database or mentioned as a contributor of a work
         'images' => 'P18'
     ];
+    const LOCALE_FALLBACK = [
+        'zh' => ['zh', 'zh-cn', 'zh-hans', 'zh-Hans-CN', 'zh-hant', 'zh-hk', 'zh-tw', 'zh-yue', 'zh-sg'],
+        'zh-CN' => ['zh-hant', 'zh-hk', 'zh-tw', 'zh-yue', 'zh', 'zh-cn', 'zh-hans', 'zh-Hans-CN', 'zh-sg']
+    ];
+    const PIC_URL_BASE = 'https://upload.wikimedia.org/wikipedia/commons/';
 
     public $translatable = [
     ];
@@ -51,5 +59,24 @@ class Wikidata extends Model {
         'type',
         'label_lang',
     ];
+
+    public function getClaim($prop) {
+        return json_decode($this->data)->claims->$prop ?? null;
+    }
+    public function getLabel($locale) {
+        return json_decode($this->data)->labels->$locale->value ?? '';
+    }
+    public function getAliases($locale) {
+        return json_decode($this->data)->aliases->$locale->value ?? '';
+    }
+    public function getSiteLink($locale) {
+        $wikiname = $locale.'wiki';
+        $title = json_decode($this->data)->sitelinks->$wikiname->title ?? '';
+        if(!$title) return '';
+        return 'https://'.$locale.'.wikipedia.org/wiki/' . str_replace(' ', '_', $title);
+    }
+    public function getUrlAttribute() {
+        return $this->getSiteLink(app()->getLocale() === 'en' ? 'en' : 'zh');
+    }
 
 }

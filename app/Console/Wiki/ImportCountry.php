@@ -11,24 +11,23 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class Import extends Command {
-    const CHUNK_SIZE = 46;
+class ImportCountry extends Command {
+    const CHUNK_SIZE = 10;
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'wiki:import {fromId?} {--id=}';
+    protected $signature = 'wiki:importCountry {fromId?} {--id=}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Retrieve newest poet data from wikidata entity API, and update wikidata table.';
+    protected $description = 'Retrieve newest country data from wikidata entity API, and update wikidata table.';
     protected $entityApiUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=';
-    protected $picUrlBase = 'https://upload.wikimedia.org/wikipedia/commons/';
 
     /**
      * Create a new command instance.
@@ -48,7 +47,7 @@ class Import extends Command {
         // YOU NEED TO IMPORT wikidata_poet from JSON file
         // then run wiki:translate to initial wikidata
 
-        $fromId = $this->argument('fromId') ?? 87902;
+        $fromId = $this->argument('fromId') ?? 0;
 
         $wikidataId = $this->option('id');
         if (App::runningInConsole() && !$this->option('id')) {
@@ -69,7 +68,7 @@ class Import extends Command {
     public function import(int $fromId = 0) {
         $poets = Wikidata::query()->where([
             ['id', '>=', $fromId],
-            ['type', '=', Wikidata::TYPE['poet']],
+            ['type', '=', Wikidata::TYPE['country']]
         ])->orderBy('id');
 
         $bar = $this->output->createProgressBar($poets->count());
@@ -104,7 +103,10 @@ class Import extends Command {
 
 
         $this->info('Fetching: ' . $this->entityApiUrl . $qIds);
-        $response = Http::withOptions($options)->timeout(30)->retry(5, 10)->get($this->entityApiUrl . $qIds);
+        $response = Http::withOptions($options)->withHeaders([
+            'Accept' => 'application/sparql-results+json',
+            'User-Agent' => 'PoemWiki-bot/0.1 (https://poemwiki.org; poemwiki@126.com) PHP/' . PHP_VERSION, // TODO adjust this; see https://w.wiki/CX6
+        ])->timeout(30)->retry(5, 10)->get($this->entityApiUrl . $qIds);
         $body = (string)$response->getBody();
         $data = json_decode($body);
 
@@ -115,7 +117,7 @@ class Import extends Command {
             $entity = $data->entities->$entityId;
             $insert = [
                 'id' => $id,
-                'type' => Wikidata::TYPE['poet'],
+                'type' => Wikidata::TYPE['country'],
                 'data' => json_encode($entity)
             ];
             DB::table('wikidata')->updateOrInsert(['id' => $id], $insert);

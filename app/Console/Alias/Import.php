@@ -2,6 +2,8 @@
 
 namespace App\Console\Alias;
 
+use App\Models\Author;
+use App\Models\Language;
 use App\Models\Wikidata;
 use Illuminate\Console\Command;
 use Illuminate\Database\Query\Builder;
@@ -70,7 +72,7 @@ class Import extends Command {
             $entity = json_decode($poet->data);
 
             DB::table('alias')->where('wikidata_id', $poet->id)->delete();
-            $author = DB::table('author')->select('id')->where('wikidata_id', $poet->id)->first();
+            $author = Author::select('id')->where('wikidata_id', $poet->id)->first(); // use Author instead of DB::table('author') here, because author is soft-delete
 
             $all = collect(isset($entity->labels) ? $entity->labels : []);
 
@@ -79,9 +81,11 @@ class Import extends Command {
             }
 
             $all->unique('value')->each(function ($item) use($poet, $author) {
-
+                $language = Language::where('locale', '=', $item->language)->first();
                 // insert alias data into alias
                 $insert = [
+                    'locale' => $item->language,
+                    'language_id' => $language ? $language->id : null,
                     'name' => $item->value,
                     'wikidata_id' => $poet->id,
                     'author_id' => $author ? $author->id : null,
