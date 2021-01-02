@@ -9,7 +9,7 @@ import VeeValidate, { Validator } from 'vee-validate';
 import zh_CN from "vee-validate/dist/locale/zh_CN";
 import en from "vee-validate/dist/locale/en";
 import VueCookie from 'vue-cookie';
-import VModal from 'vue-js-modal'
+import VModal from 'vue-js-modal';
 
 
 // Vue.component('multiselect', Multiselect);

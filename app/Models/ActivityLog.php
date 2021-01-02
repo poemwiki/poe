@@ -9,8 +9,9 @@ class ActivityLog extends Activity{
         'review' => 'App\\Models\\Review',
         'userBind' => 'App\\Models\\UserBind',
     ];
+
     public static function findByPoem(Poem $poem) {
-        return Activity::where(['subject_type' => 'App\Models\Poem', 'subject_id' => $poem->id])
+        return Activity::where(['subject_type' => Poem::class, 'subject_id' => $poem->id])
             ->orderBy('id', 'desc')
             ->get()
             ->filter(function ($log) {

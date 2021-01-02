@@ -8,6 +8,7 @@ use App\Models\Nation;
 use App\Models\Poem;
 use App\Repositories\AuthorRepository;
 use App\Repositories\DynastyRepository;
+use App\Repositories\LanguageRepository;
 use App\Repositories\NationRepository;
 use Illuminate\Routing\Redirector;
 
@@ -78,7 +79,7 @@ class AuthorController extends Controller {
     }
 
     public function trans() {
-        $langs = \App\Repositories\LanguageRepository::allInUse();
+        $langs = LanguageRepository::allInUse();
 
         $locale = $langs->filter(function ($item) {
             return in_array($item->locale, config('translatable.locales'));
@@ -95,7 +96,7 @@ class AuthorController extends Controller {
      * Update the specified resource in storage.
      *
      * @param UpdateAuthor $request
-     * @return array|RedirectResponse|Redirector
+     * @return array
      */
     public function update($fakeId, UpdateAuthor $request) {
         // Sanitize input
@@ -104,8 +105,7 @@ class AuthorController extends Controller {
         $id = Author::getIdFromFakeId($fakeId);
         $this->authorRepository->update($sanitized, $id);
 
-        return $this->response(
-            [], trans('brackets/admin-ui::admin.operation.succeeded'));
+        return $this->responseSuccess();
     }
 
     /**
@@ -123,7 +123,7 @@ class AuthorController extends Controller {
     /**
      * Store a newly created author in storage.
      * @param StoreAuthor $request
-     * @return string
+     * @return array
      */
     public function store(StoreAuthor $request) {
         // Sanitize input
@@ -132,9 +132,6 @@ class AuthorController extends Controller {
         // Store the Poem
         $author = Author::create($sanitized);
 
-        return $this->response(
-            route('author/show', $author->fakeId),
-            trans('brackets/admin-ui::admin.operation.succeeded')
-        );
+        return $this->responseSuccess(route('author/show', $author->fakeId));
     }
 }
