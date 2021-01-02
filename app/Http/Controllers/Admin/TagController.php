@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Listing;
 use App\Http\Requests\Admin\Tag\BulkDestroyTag;
 use App\Http\Requests\Admin\Tag\DestroyTag;
 use App\Http\Requests\Admin\Tag\IndexTag;
 use App\Http\Requests\Admin\Tag\StoreTag;
 use App\Http\Requests\Admin\Tag\UpdateTag;
 use App\Models\Tag;
-use Brackets\AdminListing\Facades\AdminListing;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -33,15 +33,24 @@ class TagController extends Controller
     public function index(IndexTag $request)
     {
         // create and AdminListing instance for a specific model and
-        $data = AdminListing::create(Tag::class)->processRequestAndGet(
+        $data = Listing::create(Tag::class)->processRequestAndGet(
             // pass the request with params
             $request,
 
             // set columns to query
-            ['category_id', 'describe_lang', 'id', 'name', 'name_lang'],
+            ['category_id', 'describe_lang', 'id', 'name', 'name_lang', 'tag.updated_at', 'category.name_lang as category'],
 
             // set columns to searchIn
-            ['describe_lang', 'id', 'name', 'name_lang', 'wikidata_id']
+            ['describe_lang', 'id', 'name', 'name_lang'],
+
+            function ($query) use ($request) {
+                if(!$request->input('orderBy'))
+                    $query->orderBy('tag.updated_at', 'desc');
+
+                $query->leftJoin('category', 'category.id', '=', 'tag.category_id');
+            },
+
+            app()->getLocale()
         );
 
         if ($request->ajax()) {

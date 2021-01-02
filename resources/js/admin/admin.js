@@ -31,6 +31,11 @@ if (lang === 'zh-CN') {
 } else {
   Validator.localize("en", en);
 }
+Vue.filter('lang', function (value) {
+  if (!value) return '';
+  value = JSON.parse(value.toString())
+  return value[lang];
+});
 
 Vue.component('datetime', flatPickr);
 Vue.use(VModal, { dialog: true, dynamic: true, injectModalsContainer: true });
