@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin\Poem;
 
 use App\Models\Genre;
 use App\Models\Poem;
+use App\Models\Wikidata;
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use Illuminate\Foundation\Http\FormRequest;
@@ -55,9 +56,11 @@ class UpdatePoem extends FormRequest
             'original_id' => ['nullable', 'integer', 'exists:'.\App\Models\Poem::class.',id'],
             'preface' => ['nullable', 'string', 'max:64'],
             'subtitle' => ['nullable', 'string', 'max:32'],
-            'genre_id' => ['nullable', Rule::in(Genre::ids())],
-            'poet_id' => ['nullable', Rule::in(AuthorRepository::ids())],
-            'translator_id' => ['nullable', Rule::in(AuthorRepository::ids())],
+            'genre_id' => ['nullable', 'exists:'.\App\Models\Genre::class.',id'],
+            'poet_id' => ['nullable', Rule::in(array_merge(AuthorRepository::ids()->toArray(), ['new']))],
+            'poet_wikidata_id' => ['nullable', 'exists:'.\App\Models\Wikidata::class.',id'],
+            'translator_id' => ['nullable', Rule::in(array_merge(AuthorRepository::ids()->toArray(), ['new']))],
+            'translator_wikidata_id' => ['nullable', 'exists:'.\App\Models\Wikidata::class.',id'],
         ];
     }
 
@@ -69,7 +72,18 @@ class UpdatePoem extends FormRequest
     public function getSanitized(): array
     {
         $sanitized = $this->validated();
-
+        // TODO if poet_id starts with new_, create new author
+        // 由于前端用户可能在未加载全部搜索结果的情况下，点选新建的作者名，造成重复创建 Author，
+        // 故此处暂时不创建新作者，不写入 poem.poet_id,
+        // 只将作者名写入 poem.poet
+        if($sanitized['poet_id'] === 'new') {
+            $sanitized['poet_id'] = null;
+            $sanitized['poet_wikidata_id'] = null;
+        }
+        if($sanitized['translator_id'] === 'new') {
+            $sanitized['translator_id'] = null;
+            $sanitized['translator_wikidata_id'] = null;
+        }
 
         //Add your code for manipulation with request data here
 
