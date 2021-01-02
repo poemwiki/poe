@@ -45,7 +45,7 @@ class AppServiceProvider extends ServiceProvider {
 
         Stringable::macro('isTranslatableJson', function () {
             json_decode($this->value);
-            return $this->startWith('{') && $this->endsWith('}') && (json_last_error() == JSON_ERROR_NONE);
+            return starts_with($this->value, '{') && ends_with($this->value, '}') && (json_last_error() == JSON_ERROR_NONE);
         });
 
         Stringable::macro('addLinks', function () {

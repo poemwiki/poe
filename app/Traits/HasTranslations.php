@@ -73,7 +73,7 @@ trait HasTranslations {
 
         // if $value is valid json string, write it to field instead of write it as a translation
         if ($this->isTranslatableAttribute($key) && is_string($value) && Str::of($value)->isTranslatableJson()) {
-            return parent::setAttribute($key, $value);
+            return parent::setAttribute($key, json_decode($value));
         }
 
         // Pass arrays and untranslatable attributes to the parent method.
