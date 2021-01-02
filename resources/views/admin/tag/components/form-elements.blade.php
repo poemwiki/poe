@@ -48,7 +48,29 @@
 <div class="form-group row align-items-center" :class="{'has-danger': errors.has('category_id'), 'has-success': fields.category_id && fields.category_id.valid }">
     <label for="category_id" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.tag.columns.category_id') }}</label>
         <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
-        <input type="text" v-model="form.category_id" v-validate="''" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('category_id'), 'form-control-success': fields.category_id && fields.category_id.valid}" id="category_id" name="category_id" placeholder="{{ trans('admin.tag.columns.category_id') }}">
+
+          <multiselect
+            v-model="selected" :multiple="false"
+            :options="categoryList"
+            :searchable="false"
+            :allow-empty="true"
+            label="name"
+            placeholder="Select one"
+            track-by="name"
+            @select="onSelect"
+            :close-on-select="true" :clear-on-select="false" :preserve-search="true"
+
+            v-validate="'required'"
+            data-vv-as="{{ trans('admin.tag.columns.category_id') }}" data-vv-name="category_id"
+          >
+            <template slot="singleLabel" slot-scope="{ option }"><strong>@{{ option.name }}</strong></template>
+          </multiselect>
+
+        <input type="hidden" v-model="form.category_id" v-validate="''"
+               @input="validate($event)"
+               class="form-control" :class="{'form-control-danger': errors.has('category_id'), 'form-control-success': fields.category_id && fields.category_id.valid}"
+               id="category_id" name="category_id"
+               placeholder="{{ trans('admin.tag.columns.category_id') }}">
         <div v-if="errors.has('category_id')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('category_id') }}</div>
     </div>
 </div>

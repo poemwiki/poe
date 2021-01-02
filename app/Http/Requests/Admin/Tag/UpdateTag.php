@@ -25,10 +25,10 @@ class UpdateTag extends TranslatableFormRequest
      */
     public function untranslatableRules(): array {
         return [
-            'category_id' => ['nullable', 'string'],
+            'category_id' => ['required', 'integer'],
             'name' => ['sometimes', Rule::unique('tag', 'name')->ignore($this->tag->getKey(), $this->tag->getKeyName()), 'string'],
             'wikidata_id' => ['nullable', 'string'],
-            
+
 
         ];
     }
@@ -42,7 +42,7 @@ class UpdateTag extends TranslatableFormRequest
         return [
             'describe_lang' => ['nullable', 'string'],
             'name_lang' => ['sometimes', 'string'],
-            
+
         ];
     }
 

@@ -21,8 +21,7 @@ use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
-class TagController extends Controller
-{
+class TagController extends Controller {
 
     /**
      * Display a listing of the resource.
@@ -30,11 +29,10 @@ class TagController extends Controller
      * @param IndexTag $request
      * @return array|Factory|View
      */
-    public function index(IndexTag $request)
-    {
+    public function index(IndexTag $request) {
         // create and AdminListing instance for a specific model and
         $data = Listing::create(Tag::class)->processRequestAndGet(
-            // pass the request with params
+        // pass the request with params
             $request,
 
             // set columns to query
@@ -44,7 +42,7 @@ class TagController extends Controller
             ['describe_lang', 'id', 'name', 'name_lang'],
 
             function ($query) use ($request) {
-                if(!$request->input('orderBy'))
+                if (!$request->input('orderBy'))
                     $query->orderBy('tag.updated_at', 'desc');
 
                 $query->leftJoin('category', 'category.id', '=', 'tag.category_id');
@@ -68,14 +66,15 @@ class TagController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @throws AuthorizationException
      * @return Factory|View
+     * @throws AuthorizationException
      */
-    public function create()
-    {
+    public function create() {
         $this->authorize('admin.tag.create');
 
-        return view('admin.tag.create');
+        return view('admin.tag.create', [
+            'categories' => \App\Repositories\CategoryRepository::allInUse(),
+        ]);
     }
 
     /**
@@ -84,8 +83,7 @@ class TagController extends Controller
      * @param StoreTag $request
      * @return array|RedirectResponse|Redirector
      */
-    public function store(StoreTag $request)
-    {
+    public function store(StoreTag $request) {
         // Sanitize input
         $sanitized = $request->getSanitized();
 
@@ -103,11 +101,10 @@ class TagController extends Controller
      * Display the specified resource.
      *
      * @param Tag $tag
-     * @throws AuthorizationException
      * @return void
+     * @throws AuthorizationException
      */
-    public function show(Tag $tag)
-    {
+    public function show(Tag $tag) {
         $this->authorize('admin.tag.show', $tag);
 
         // TODO your code goes here
@@ -117,15 +114,14 @@ class TagController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param Tag $tag
-     * @throws AuthorizationException
      * @return Factory|View
+     * @throws AuthorizationException
      */
-    public function edit(Tag $tag)
-    {
+    public function edit(Tag $tag) {
         $this->authorize('admin.tag.edit', $tag);
 
-
         return view('admin.tag.edit', [
+            'categories' => \App\Repositories\CategoryRepository::allInUse(),
             'tag' => $tag,
         ]);
     }
@@ -137,8 +133,7 @@ class TagController extends Controller
      * @param Tag $tag
      * @return array|RedirectResponse|Redirector
      */
-    public function update(UpdateTag $request, Tag $tag)
-    {
+    public function update(UpdateTag $request, Tag $tag) {
         // Sanitize input
         $sanitized = $request->getSanitized();
 
@@ -160,11 +155,10 @@ class TagController extends Controller
      *
      * @param DestroyTag $request
      * @param Tag $tag
-     * @throws Exception
      * @return ResponseFactory|RedirectResponse|Response
+     * @throws Exception
      */
-    public function destroy(DestroyTag $request, Tag $tag)
-    {
+    public function destroy(DestroyTag $request, Tag $tag) {
         $tag->delete();
 
         if ($request->ajax()) {
@@ -178,11 +172,10 @@ class TagController extends Controller
      * Remove the specified resources from storage.
      *
      * @param BulkDestroyTag $request
-     * @throws Exception
      * @return Response|bool
+     * @throws Exception
      */
-    public function bulkDestroy(BulkDestroyTag $request) : Response
-    {
+    public function bulkDestroy(BulkDestroyTag $request): Response {
         DB::transaction(static function () use ($request) {
             collect($request->data['ids'])
                 ->chunk(1000)
@@ -190,7 +183,7 @@ class TagController extends Controller
                     DB::table('tags')->whereIn('id', $bulkChunk)
                         ->update([
                             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s')
-                    ]);
+                        ]);
 
                     // TODO your code goes here
                 });
