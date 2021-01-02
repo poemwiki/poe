@@ -10,6 +10,8 @@ use App\Models\ActivityLog;
 use App\Models\Author;
 use App\Models\Genre;
 use App\Models\Poem;
+use App\Models\Wikidata;
+use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use Auth;
@@ -20,6 +22,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -30,10 +33,13 @@ class PoemController extends Controller
 {
     /** @var  PoemRepository */
     private $poemRepository;
+    /** @var  AuthorRepository */
+    private $authorRepository;
 
-    public function __construct(PoemRepository $poemRepo) {
+    public function __construct(PoemRepository $poemRepo, AuthorRepository $authorRepository) {
         $this->middleware('auth')->except(['show', 'showPoem', 'random', 'showContributions']);
         $this->poemRepository = $poemRepo;
+        $this->authorRepository = $authorRepository;
     }
 
     private function _poem(Poem $poem){
@@ -101,11 +107,12 @@ class PoemController extends Controller
         }
 
         return view('poems.create', [
+            'trans' => $this->trans(),
             'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::select('name_lang', 'id')->get(),
             'translatedPoem' => $translatedPoem ?? null,
             'originalPoem' => $originalPoem ?? null,
-            'authorList' => Author::select('name_lang', 'id')->get()
+            'defaultAuthors' => Author::select('name_lang', 'id')->limit(10)->get()->toArray(),
         ]);
     }
     /**
@@ -129,15 +136,21 @@ class PoemController extends Controller
             }
         }
 
-        if ($request->ajax()) {
-            return [
-                'code' => 0,
-                'redirect' => route('poems/edit', Poem::getFakeId($poem->id)),
-                'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
-            ];
-        }
+        return $this->responseSuccess(route('poems/edit', Poem::getFakeId($poem->id)));
+    }
 
-        return redirect('poems/edit', $poem->fake_id);
+
+    public function trans() {
+        $langs = LanguageRepository::allInUse();
+
+        $locale = $langs->filter(function ($item) {
+            return in_array($item->locale, config('translatable.locales'));
+        })->pluck('name_lang', 'locale');
+        return [
+            'Save' => trans('Save'),
+            'Saving' => trans('Saving'),
+            'locales' => $locale
+        ];
     }
 
     /**
@@ -150,14 +163,20 @@ class PoemController extends Controller
     public function edit($fakeId) {
         $user = Auth::user();
 
-        $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
+        $poem = $this->poemRepository->getPoemFromFakeId($fakeId, [
+            'id', 'title', 'language_id', 'is_original', 'original_id', 'poet', 'poet_cn', 'bedtime_post_id', 'bedtime_post_title',
+            'poem', 'translator', 'from', 'year', 'month', 'date', 'dynasty', 'nation', 'preface', 'subtitle', 'genre_id',
+            'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id'
+        ]);
 
         return view('poems.edit', [
             'poem' => $poem,
             'userName' => $user->name,
+            'trans' => $this->trans(),
             'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::select('name_lang', 'id')->get(),
-            'authorList' => Author::select('name_lang', 'id')->get()
+            'defaultAuthors' => Author::select('name_lang', 'id')->whereIn('id', [$poem->poet_id, $poem->translator_id])
+                ->union(Author::select('name_lang', 'id')->limit(10))->get()->toArray(),
         ]);
     }
 
@@ -166,24 +185,43 @@ class PoemController extends Controller
      *
      * @param UpdatePoem $request
      * @param Poem $poem
-     * @return array|RedirectResponse|Redirector
+     * @return array
      */
     public function update($fakeId, UpdatePoem $request) {
         // Sanitize input
         $sanitized = $request->getSanitized();
 
+        // if wikidata_id valid and not null, create a author by wikidata_id
+        if(is_numeric($sanitized['poet_wikidata_id']) && is_null($sanitized['poet_id'])) {
+            $authorExisted = $this->getExistedAuthor($sanitized['poet_wikidata_id']);
+            $sanitized['poet_id'] = $authorExisted->id;
+        }
+        if(is_numeric($sanitized['translator_wikidata_id']) && is_null($sanitized['translator_id'])) {
+            $authorExisted = $this->getExistedAuthor($sanitized['translator_wikidata_id']);
+            $sanitized['translator_id'] = $authorExisted->id;
+        }
+
         // Update changed values Poem
         $id = Poem::getIdFromFakeId($fakeId);
         $this->poemRepository->update($sanitized, $id);
 
-        if ($request->ajax()) {
-            return [
-                'code' => 0,
-                'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
-            ];
-        }
+        return $this->responseSuccess();
+    }
 
-        return redirect('poems/edit', Poem::getFakeId($id));
+    /**
+     * TODO move it to AuthorRepositoy
+     * @param $poet_wikidata_id
+     * @return Author
+     */
+    private function getExistedAuthor($poet_wikidata_id): Author {
+        $authorExisted = Author::where('wikidata_id', '=', $poet_wikidata_id)->count();
+
+        if (!$authorExisted) {
+            $wiki = Wikidata::find($poet_wikidata_id);
+            $authorExisted = $this->authorRepository->importFromWikidata($wiki);
+            Artisan::call('alias:import', ['--id' => $poet_wikidata_id]);
+        }
+        return $authorExisted;
     }
 
 }

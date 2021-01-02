@@ -118,8 +118,11 @@ class PoemRepository extends BaseRepository
         return self::random(1)->first();
     }
 
-    public function getPoemFromFakeId($fakeId){
+    public function getPoemFromFakeId($fakeId, $select = null){
         $id = Poem::getIdFromFakeId($fakeId);
-        return $this->newQuery()->with('wx', 'lang')->findOrFail($id);
+        // return $this->newQuery()->with('wx', 'lang')->findOrFail($id);
+        if($select)
+            return $this->newQuery()->select($select)->findOrFail($id);
+        return $this->newQuery()->findOrFail($id);
     }
 }

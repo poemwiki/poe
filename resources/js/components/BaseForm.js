@@ -180,12 +180,13 @@ var BaseForm = {
     onSubmit: function onSubmit() {
       var _this4 = this;
 
-      return this.$validator.validateAll().then(function (result) {
+      return this.$validator.validateAll().then(result => {
         if (!result) {
+          console.log(this.errors.items);
           _this4.$notify({
             type: 'error',
             title: 'Error!',
-            text: 'The form contains invalid fields.'
+            text: this.errors.items[0].msg
           });
           return false;
         }

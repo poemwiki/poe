@@ -44,6 +44,7 @@ mix.js(['resources/js/admin/admin.js'], 'public/js')
   .sass('resources/sass/admin/admin.scss', 'public/css');
 
 mix.js(['resources/js/author/author.js'], 'public/js')
+  .js(['resources/js/poem/index.js'], 'public/js/poem.js')
   .sass('resources/sass/form.scss', 'public/css');
 
 mix.js(['resources/js/calendar/calendar.js'], 'public/js')

@@ -47,21 +47,7 @@ Vue.component('poem-form', {
   },
 
   mounted: function() {
-    this.form.poet = this.$el.querySelector('[name="poet"]').getAttribute('value') || this.form.poet;
-    this.form.from = this.$el.querySelector('[name="from"]').getAttribute('value') || this.form.from;
-    this.form.year = this.$el.querySelector('[name="year"]').getAttribute('value') || this.form.year;
-    this.form.month = this.$el.querySelector('[name="month"]').getAttribute('value') || this.form.month;
-    this.form.date = this.$el.querySelector('[name="date"]').getAttribute('value') || this.form.date;
-    this.form.location = this.$el.querySelector('[name="location"]').getAttribute('value') || this.form.location;
-    this.form.is_original = this.$el.querySelector('[name="is_original_fake_element"]').getAttribute('value') || this.form.is_original;
-    this.form.bedtime_post_id = this.$el.querySelector('[name="bedtime_post_id"]')?.getAttribute('value') || this.form.bedtime_post_id;
-    this.form.bedtime_post_title = this.$el.querySelector('[name="bedtime_post_title"]')?.getAttribute('value') || this.form.bedtime_post_title;
-    this.form.original_id = this.$el.querySelector('[name="original_id"]')?.getAttribute('value') || this.form.original_id;
-    this.form.translated_id = this.$el.querySelector('[name="translated_id"]')?.getAttribute('value') || this.form.translated_id;
-    this.form.genre_id = this.$el.querySelector('[name="genre_id"]')?.getAttribute('value') || this.form.genre_id;
-    this.form.poet_id = this.$el.querySelector('[name="poet_id"]').getAttribute('value') || this.form.poet_id;
-    this.form.translator_id = this.$el.querySelector('[name="translator_id"]').getAttribute('value') || this.form.translator_id;
-
+    // this.form.is_original = this.$el.querySelector('[name="is_original_fake_element"]').getAttribute('value') || this.form.is_original;
   },
 
   methods: {

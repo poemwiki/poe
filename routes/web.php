@@ -323,7 +323,7 @@ Route::any('/calendar/q/{month}/{day}', 'CalendarController@query')->name('calen
 
 
 Route::get('/{id}', function ($id) {
-    if($id <= 3200) {
+    if($id <= 10000) {
         return redirect(route('p/show', ['fakeId' => Poem::getFakeId($id)]));
     }
     return redirect('/');

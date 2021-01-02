@@ -44,13 +44,12 @@ axios.create = function createPatchedAxios(conf) {
 const responseInterceptor = [
   res => res.data,
   error => {
-    if(error.response.status === 429) {
-      console.error(error.response);
-      alert(error.response.statusText);
-      return;
-    }
-
     if(error.response.status !== 200) {
+      Vue.notify({
+        type: 'error',
+        title: 'Error!',
+        text: error.response.statusText
+      });
       console.error(error.response);
     }
     console.error(error.response.statusText);

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Content;
 use App\Traits\HasFakeId;
+use Illuminate\Database\Eloquent\JsonEncodingException;
 use Illuminate\Support\Str;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
@@ -60,7 +61,8 @@ class Poem extends Model implements Searchable {
         'genre_id',
         'poet_wikidata_id',
         'translator_wikidata_id',
-        'short_url'
+        'short_url',
+        'poet_id', 'translator_id'
     ];
 
     /**
@@ -301,6 +303,27 @@ class Poem extends Model implements Searchable {
         return route('p/show', ['fakeId' => $this->fakeId]);
     }
 
+    /**
+     * Convert the model instance to JSON.
+     *
+     * @param  int  $options
+     * @return string
+     *
+     * @throws \Illuminate\Database\Eloquent\JsonEncodingException
+     */
+    public function toFillableJson($options = 0) {
+        $allowedFields = $this->fillable;
+        $fillable = array_filter($this->jsonSerialize(), function ($item, $key) use ($allowedFields)  {
+            return in_array($key, $allowedFields);
+        }, ARRAY_FILTER_USE_BOTH);
+        $json = json_encode($fillable, $options);
+
+        if (JSON_ERROR_NONE !== json_last_error()) {
+            throw JsonEncodingException::forModel($this, json_last_error_msg());
+        }
+
+        return $json;
+    }
 
     public function getSearchResult(): SearchResult {
         return new SearchResult(
