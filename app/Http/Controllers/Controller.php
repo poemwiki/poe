@@ -21,4 +21,9 @@ class Controller extends BaseController {
         }
         return compact('data', 'message', 'code');
     }
+
+    public function responseSuccess($data=[], $message = null) {
+        return $this->response(
+            $data, $message ?? trans('success'));
+    }
 }

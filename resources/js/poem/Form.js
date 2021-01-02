@@ -40,6 +40,8 @@ Vue.component('poem-form', {
         genre_id: '',
         poet_id: null,
         translator_id: null,
+        poet_wikidata_id: null,
+        translator_wikidata_id: null,
       },
 
       authorList: this.defaultAuthors,
@@ -85,6 +87,10 @@ Vue.component('poem-form', {
   },
 
   methods: {
+    isNew: function(id) {
+      return _.startsWith(id, 'new_');
+    },
+
     getPostData: function getPostData() {
       let data = _.clone(this.form);
       if(_.startsWith(data.poet_id, 'Q')) {
@@ -96,28 +102,57 @@ Vue.component('poem-form', {
         data.translator_id = null;
       }
 
-      if(_.startsWith(data.poet_id, 'new_')) {
+      if(this.isNew(data.poet_id)) {
         data.poet_id = 'new';
+        data.poet_wikidata_id = null; // you need to set wikidata_id null here because initial wikidata_id may not null
       }
-      if(_.startsWith(data.translator_id, 'new_')) {
+      if(this.isNew(data.translator_id)) {
         data.translator_id = 'new';
+        data.translator_wikidata_id = null;
       }
       return data;
     },
+
     onSelectPoet: function(option) {
       this.form.poet = option.label_en;
       this.form.poet_cn = option.label_cn;
+      if(this.isNew(this.form.poet_id)) {
+        this.form.poet_wikidata_id = null;
+      }
       console.log('selected poet', option, this.form.poet, this.form.poet_cn, this.form.poet_id);
     },
     onSelectTranslator: function(option) {
       this.form.translator = option.label_en;
+      if(this.isNew(this.form.translator_id)) {
+        this.form.translator_wikidata_id = null;
+      }
       console.log('selected translator', option, this.form.translator, this.form.translator_id);
     },
+
+    onSearchPoetFocus: function(query, loading) {
+      console.log('poet input focus');
+      loading = loading || this.$refs.poet.toggleLoading;
+      if(this.isNew(this.form.poet_id) && query === undefined) {
+        loading(true);
+        this.searchAuthor('poet_id', loading, this.form.poet, this);
+      }
+    },
+    onSearchTranslatorFocus: function(query, loading) {
+      console.log('translator input focus');
+      loading = loading || this.$refs.translator.toggleLoading;
+      if(this.isNew(this.form.translator_id) && query === undefined) {
+        loading(true);
+        this.searchTranslator('translator_id', loading, this.form.translator, this);
+      }
+    },
+
     onSearchPoet: function(keyword, loading) {
       if(keyword.length) {
         this.form.poet = keyword;
         loading(true);
         this.searchAuthor('poet_id', loading, keyword, this);
+      } else {
+        this.searchAuthor('poet_id', loading, this.form.poet, this);
       }
     },
     onSearchTranslator: function(keyword, loading) {
@@ -127,18 +162,20 @@ Vue.component('poem-form', {
         this.searchTranslator('translator_id', loading, keyword, this);
       }
     },
+
     searchAuthor: _.debounce((field, loading, search, vm) => {
+      console.log('searching');
       axios(
         `/q/author/${encodeURI(search)}/${vm.form[field]}`
       ).then(res => {
         if(res?.data?.length) {
           vm.authorList = res.data;
-          if(_.startsWith(vm.form.poet_id, 'new_')) {
+          if(vm.isNew(vm.form.poet_id)) {
             vm.authorList.push(vm.newAuthor);
           }
         }
 
-        console.log(res?.data?.length, _.map(vm.authorList, 'id'), _.map(vm.authorList, 'label'));
+        console.log('search result: ', res?.data?.length, _.map(vm.authorList, 'id'), _.map(vm.authorList, 'label'));
         loading(false);
       });
     }, 450),
@@ -148,7 +185,7 @@ Vue.component('poem-form', {
       ).then(res => {
         if(res?.data?.length) {
           vm.translatorList = res.data;
-          if(_.startsWith(vm.form.translator_id, 'new_')) {
+          if(vm.isNew(vm.form.translator_id)) {
             vm.translatorList.push(vm.newTranslator);
           }
         }

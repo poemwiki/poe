@@ -176,7 +176,10 @@ class PoemController extends Controller
             'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::select('name_lang', 'id')->get(),
             'defaultAuthors' => Author::select('name_lang', 'id')->whereIn('id', [$poem->poet_id, $poem->translator_id])
-                ->union(Author::select('name_lang', 'id')->limit(10))->get()->toArray(),
+                ->union(Author::select('name_lang', 'id')->limit(10))->get()->map(function ($item) {
+                    $item['source'] = 'PoemWiki';
+                    return $item;
+                })->toArray(),
         ]);
     }
 
@@ -193,12 +196,10 @@ class PoemController extends Controller
 
         // if wikidata_id valid and not null, create a author by wikidata_id
         if(is_numeric($sanitized['poet_wikidata_id']) && is_null($sanitized['poet_id'])) {
-            $authorExisted = $this->getExistedAuthor($sanitized['poet_wikidata_id']);
-            $sanitized['poet_id'] = $authorExisted->id;
+            $sanitized['poet_id'] = $this->getExistedAuthorId($sanitized['poet_wikidata_id']);
         }
         if(is_numeric($sanitized['translator_wikidata_id']) && is_null($sanitized['translator_id'])) {
-            $authorExisted = $this->getExistedAuthor($sanitized['translator_wikidata_id']);
-            $sanitized['translator_id'] = $authorExisted->id;
+            $sanitized['translator_id'] = $this->getExistedAuthorId($sanitized['translator_wikidata_id']);
         }
 
         // Update changed values Poem
@@ -211,17 +212,16 @@ class PoemController extends Controller
     /**
      * TODO move it to AuthorRepositoy
      * @param $poet_wikidata_id
-     * @return Author
      */
-    private function getExistedAuthor($poet_wikidata_id): Author {
-        $authorExisted = Author::where('wikidata_id', '=', $poet_wikidata_id)->count();
+    private function getExistedAuthorId($poet_wikidata_id) : Int {
+        $authorExisted = Author::where('wikidata_id', '=', $poet_wikidata_id)->first();
 
         if (!$authorExisted) {
             $wiki = Wikidata::find($poet_wikidata_id);
             $authorExisted = $this->authorRepository->importFromWikidata($wiki);
             Artisan::call('alias:import', ['--id' => $poet_wikidata_id]);
         }
-        return $authorExisted;
+        return $authorExisted->id ?? $authorExisted;
     }
 
 }

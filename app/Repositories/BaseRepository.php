@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use Illuminate\Container\Container as Application;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 
@@ -16,6 +17,8 @@ abstract class BaseRepository {
      * @var Application
      */
     protected $app;
+
+    const SEARCH_LIMIT = 10;
 
     /**
      * @param Application $app
@@ -141,7 +144,7 @@ abstract class BaseRepository {
      *
      * @param array $attributes
      * @param array $values
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return \Illuminate\Database\Eloquent\Model|static
      */
     public function updateOrCreate(array $attributes, array $values = []) {
         return $this->newQuery()->updateOrCreate($attributes, $values);

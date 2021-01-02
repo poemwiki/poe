@@ -83,6 +83,9 @@ class Author extends Model implements Searchable {
     public function wikiData() {
         return $this->hasOne(\App\Models\Wikidata::class, 'id', 'wikidata_id');
     }
+    public function alias() {
+        return $this->hasMany(\App\Models\Alias::class, 'author_id', 'id');
+    }
 
     public function getWikiDataNationId() {
         $countries = $this->wikiData->getClaim(Wikidata::PROP['countries']);

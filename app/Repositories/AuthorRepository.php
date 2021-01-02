@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Alias;
 use App\Models\Author;
 use App\Models\Wikidata;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -20,6 +21,36 @@ class AuthorRepository extends BaseRepository {
         'name_lang',
         'id'
     ];
+
+    /**
+     * @param string $name
+     * @param array|null $authorId
+     * @param int $excludeAuthorId author_id that should be ignored
+     * @return Collection
+     */
+    private static function _searchAlias(string $name, $authorIds=[], $excludeAuthorId): Collection {
+        $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
+        $query = Alias::selectRaw('wikidata_id, min(wikidata_id) as id, min(name) as name, author_id')
+            ->whereRaw("lower(`name`) LIKE $value");
+
+        if (is_array($authorIds) && !empty($authorIds))
+            $query->whereIn('author_id', $authorIds);
+
+        if (is_null($authorIds))
+            $query->whereNull('author_id');
+
+        if (is_numeric($excludeAuthorId)) {
+            $query->where('author_id', '<>', $excludeAuthorId);
+        }
+
+        $res = $query->groupBy(['wikidata_id', 'author_id'])->limit(self::SEARCH_LIMIT)->get()
+            ->map->only('QID', 'label_en', 'label_cn', 'label', 'url', 'author_id')->map(function ($item) {
+                $item['id'] = $item['author_id'] ?? $item['QID']; // don't replace this with select concat('Q', wikidata_id) as id, because it will be casted into integer
+                $item['source'] = $item['author_id'] ? 'PoemWiki' : 'Wikidata';
+                return $item;
+            });
+        return $res;
+    }
 
     /**
      * Return searchable fields
@@ -47,27 +78,27 @@ class AuthorRepository extends BaseRepository {
         return $query->get()->toArray();
     }
 
-    public static function searchByAlias($name, $id=null) {
-        $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
-        $query = Alias::selectRaw('wikidata_id, min(wikidata_id) as id, min(name) as name')
-            ->whereRaw("lower(`name`) LIKE $value");
+    public static function searchByAlias($name, $authorId=null) {
+        $res = self::_searchAlias($name, [$authorId]);
 
-        if(is_numeric($id))
-            $query->where('author_id', '<>', $id);
-
-        $res = $query->groupBy('wikidata_id')->limit(10)->get()
-            ->map->only('QID', 'label_en', 'label_cn', 'label', 'url')->map(function ($item) {
-
-                $item['id'] = $item['QID']; // don't replace this with select concat('Q', wikidata_id) as id, because it will be casted into integer
-                return $item;
-            });
-
-        if(is_numeric($id)) {
-            $res = Author::select(['id', 'name_lang'])->where('id', '=', $id)->get()
-                ->map->only('id', 'label_en', 'label_cn', 'label', 'url')->concat($res);
-        }
-        // dd($res->toArray());
         return $res->toArray();
+    }
+
+    public static function searchLabel($name, $authorId=null) {
+        if(is_numeric($authorId)) {
+            $resById = Author::select(['id', 'name_lang'])->where('id', '=', $authorId)->get()
+                ->map->only('id', 'label_en', 'label_cn', 'label', 'url')->map(function ($item) {
+                    $item['source'] = 'PoemWiki';
+                    return $item;
+                });;
+        }
+
+        $aliasRes = self::_searchAlias($name, [], $authorId);
+
+        if(isset($resById))
+            $aliasRes = $resById->concat($aliasRes);
+
+        return $aliasRes->toArray();
     }
 
     /**
@@ -118,7 +149,7 @@ class AuthorRepository extends BaseRepository {
             "created_at" => now(),
             "updated_at" => now(),
         ];
-        $author = Author::updateOrCreate(['wikidata_id' => $wiki->id], $insert);
+        $author = $this->updateOrCreate(['wikidata_id' => $wiki->id], $insert);
 
         return $author;
     }

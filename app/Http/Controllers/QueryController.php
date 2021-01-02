@@ -27,7 +27,7 @@ class QueryController extends Controller {
         return $this->response(NationRepository::searchByName($keyword, $id));
     }
     public function author($keyword, $id) {
-        return $this->response(AuthorRepository::searchByAlias($keyword, $id));
+        return $this->response(AuthorRepository::searchLabel($keyword, $id));
     }
 
     // TODO support multiple word search like bot search, order by relative

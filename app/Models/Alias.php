@@ -27,6 +27,11 @@ class Alias extends Model {
 
     protected $appends = ['QID', 'url', 'label', 'label_en', 'label_cn'];
 
+
+    public function author() {
+        return $this->belongsTo(\App\Models\Author::class, 'author_id', 'id');
+    }
+
     /* ************************ ACCESSOR ************************* */
 
     public function getResourceUrlAttribute() {
@@ -38,8 +43,11 @@ class Alias extends Model {
 
     // todo label should be name(current locale name with same wikidata_id)
     public function getLabelAttribute() {
-        $cn = $this->label_cn;
-        return ($cn !== $this->name && $cn) ? "{$this->name}（{$cn}）" : $this->name;
+        $authorMainName = $this->author ? ($this->author->name_lang ?: $this->author->getTranslated('name_lang', 'zh')) : null;
+
+        return ($authorMainName !== $this->name && $authorMainName)
+            ? "{$authorMainName}（{$this->name}）"
+            : $this->name;
     }
     public function getLabelEnAttribute() {
         return $this->wikidata->getLabel('en');

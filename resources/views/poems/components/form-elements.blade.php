@@ -96,20 +96,28 @@
               taggable :create-option="label => ({
                 label: label,
                 id: 'new_' + label,
+                source: '',
                 label_en: label,
                 label_cn: label,
                 url: ''
                })"
               @option:selected="onSelectPoet"
               @search="onSearchPoet"
+              @search:focus="onSearchPoetFocus"
 
               ref="poet"
               v-model="form.poet_id"
               :class="{'form-control-danger': errors.has('poet_id'), 'form-control-success': fields.poet_id && fields.poet_id.valid, 'poet-selector': true}"
+              class="relative"
               v-validate="'required'"
-              data-vv-as="{{ trans('admin.author.columns.poet_id') }}" data-vv-name="poet_id"
+              data-vv-as="{{ trans('admin.poem.columns.poet_id') }}" data-vv-name="poet_id"
               name="poet_id_fake_element"
-    ></v-select>
+    >
+      <template slot="option" slot-scope="option">
+        @{{ option.label }}
+        <span :class="'author-option ' + option.source" class="absolute right-3 inline-block text-right text-gray-400 w-28">@{{option.source}}</span>
+      </template>
+    </v-select>
 
     <input type="hidden" name="poet_id" :value="form.poet_id">
 
@@ -208,15 +216,22 @@
                })"
               @option:selected="onSelectTranslator"
               @search="onSearchTranslator"
+              @search:focus="onSearchTranslatorFocus"
 
               ref="translator"
               id="translator_id"
               v-model="form.translator_id"
               :class="{'form-control-danger': errors.has('translator_id'), 'form-control-success': fields.translator_id && fields.translator_id.valid}"
+              class="relative"
               v-validate="''"
-              data-vv-as="{{ trans('admin.author.columns.translator_id') }}" data-vv-name="translator_id"
+              data-vv-as="{{ trans('admin.poem.columns.translator_id') }}" data-vv-name="translator_id"
               name="translator_id_fake_element"
-    ></v-select>
+    >
+      <template slot="option" slot-scope="option">
+        @{{ option.label }}
+        <span :class="'author-option ' + option.source" class="absolute right-3 inline-block text-right text-gray-400 w-28">@{{option.source}}</span>
+      </template>
+    </v-select>
 
     <input type="hidden" name="translator_id" :value="form.translator_id">
 
