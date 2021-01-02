@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Author;
 
+use App\Repositories\NationRepository;
 use Brackets\Translatable\TranslatableFormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -27,8 +28,8 @@ class UpdateAuthor extends TranslatableFormRequest {
             'pic_url' => ['nullable', 'string'],
             'user_id' => ['nullable', 'string'],
             'wikidata_id' => ['nullable', 'int'],
-            'nation_id' => ['nullable', 'int'],
-            'dynasty_id' => ['nullable', 'int'],
+            'nation_id' => ['nullable', Rule::in(NationRepository::ids())],
+            'dynasty_id' => ['nullable', Rule::in(DynastyRepository::ids())],
         ];
     }
 
