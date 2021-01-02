@@ -1,7 +1,7 @@
 @extends('layouts.fe-form')
 
 @php
-  /** @var \App\Models\Author $author */
+  /** @var \App\Models\Poem $poem */
 @endphp
 @section('title', trans('admin.poem.actions.edit') .' - '.$poem->title )
 

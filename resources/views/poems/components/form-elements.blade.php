@@ -5,12 +5,11 @@
             {{ trans('poem.original work') }}
         </label>
         《<a href="{{$originalPoem->url}}">{{ $originalPoem->title }}</a>》
-        <input type="hidden" name="original_id" :value="{{$originalPoem->id}}">
+        <input type="hidden" name="original_id"  v-model="form.original_id">
     </div>
 @endif
-@if(isset($translatedPoem))
-    <input type="hidden" name="translated_id" :value="{{$translatedPoem->id}}">
-@endif
+
+    <input type="hidden" name="translated_id" v-model="form.translated_id">
 
 <div class="form-group row"
      :class="{'has-danger': errors.has('title'), 'has-success': fields.title && fields.title.valid }">
@@ -101,6 +100,7 @@
                 label_cn: label,
                 url: ''
                })"
+              :disabled="(form.translated_id || form.original_id) > 0"
               @option:selected="onSelectPoet"
               @search="onSearchPoet"
               @search:focus="onSearchPoetFocus"
@@ -125,7 +125,7 @@
   </div>
 </div>
 
-{{--poet_cn--}}
+{{--poet_cn TODO poet_cn should be poet_name_translated (the translated name coresspond to current language_id) --}}
 <div class="form-group row"
      :class="{'hidden' : _.isNumber(form.poet_id), 'has-danger': errors.has('poet_cn') }">
   <label for="poet_cn" class="col-form-label text-md-right"

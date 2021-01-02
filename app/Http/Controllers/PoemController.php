@@ -97,24 +97,48 @@ class PoemController extends Controller
      * @return Factory|View
      */
     public function create() {
-        $user = Auth::user();
-
+        $preset = null;
+        $poem = new Poem();
         if($t = request()->get('translated_fake_id')) {
             $translatedPoem = $this->poemRepository->getPoemFromFakeId($t);
+            $preset = $translatedPoem;
+            $poem->translated_id = $translatedPoem->id;
+            $poem->is_original = 1;
         }
         if($o = request()->get('original_fake_id')) {
             $originalPoem = $this->poemRepository->getPoemFromFakeId($o);
+            $preset = $originalPoem;
+            $poem->original_id = $originalPoem->id;
+            $poem->is_original = 0;
+        }
+
+        if($preset) {
+            $poem->scenario = 'preset';
+            $poem->poet_id = $preset->poet_id;
+            $poem->poet_wikidata_id = $preset->poet_wikidata_id;
+            $poem->poet = $preset->poet;
+            $poem->poet_cn = $preset->poet_cn;
+            $poem->genre_id = $preset->genre_id;
+            $poem->bedtime_post_id = $preset->bedtime_post_id;
+            $poem->bedtime_post_title = $preset->bedtime_post_title;
+            $poem->year = $preset->year;
+            $poem->month = $preset->month;
+            $poem->date = $preset->date;
+            $poem->translator_id = null;
+            $poem->translator_wikidata_id = null;
         }
 
         return view('poems.create', [
+            'poem' => $poem,
             'trans' => $this->trans(),
             'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::select('name_lang', 'id')->get(),
-            'translatedPoem' => $translatedPoem ?? null,
-            'originalPoem' => $originalPoem ?? null,
+            'translatedPoem' => $translatedPoem ?? null, // TODO don't pass translatedPoem
+            'originalPoem' => $originalPoem ?? null, // TODO don't pass originalPoem
             'defaultAuthors' => Author::select('name_lang', 'id')->limit(10)->get()->toArray(),
         ]);
     }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -124,6 +148,14 @@ class PoemController extends Controller
     public function store(StorePoem $request) {
         // Sanitize input
         $sanitized = $request->getSanitized();
+
+        // if wikidata_id valid and not null, create a author by wikidata_id
+        if(is_numeric($sanitized['poet_wikidata_id']) && is_null($sanitized['poet_id'])) {
+            $sanitized['poet_id'] = $this->getExistedAuthorId($sanitized['poet_wikidata_id']);
+        }
+        if(is_numeric($sanitized['translator_wikidata_id']) && is_null($sanitized['translator_id'])) {
+            $sanitized['translator_id'] = $this->getExistedAuthorId($sanitized['translator_wikidata_id']);
+        }
 
         // Store the Poem
         $poem = Poem::create($sanitized);
@@ -136,7 +168,8 @@ class PoemController extends Controller
             }
         }
 
-        return $this->responseSuccess(route('poems/edit', Poem::getFakeId($poem->id)));
+        return $this->responseSuccess();
+        // return $this->responseSuccess(route('poems/show', Poem::getFakeId($poem->id)));
     }
 
 
@@ -161,8 +194,6 @@ class PoemController extends Controller
      * @return Factory|View
      */
     public function edit($fakeId) {
-        $user = Auth::user();
-
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId, [
             'id', 'title', 'language_id', 'is_original', 'original_id', 'poet', 'poet_cn', 'bedtime_post_id', 'bedtime_post_title',
             'poem', 'translator', 'from', 'year', 'month', 'date', 'dynasty', 'nation', 'preface', 'subtitle', 'genre_id',
@@ -171,7 +202,6 @@ class PoemController extends Controller
 
         return view('poems.edit', [
             'poem' => $poem,
-            'userName' => $user->name,
             'trans' => $this->trans(),
             'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::select('name_lang', 'id')->get(),

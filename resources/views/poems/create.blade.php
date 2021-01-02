@@ -1,5 +1,8 @@
 @extends('layouts.fe-form')
 
+@php
+  /** @var \App\Models\Poem $poem */
+@endphp
 @section('title', trans('admin.poem.actions.create'))
 {{--@section('poemTitle', $poem->title)--}}
 
@@ -11,6 +14,7 @@
       <poem-form
         id="poem-form"
         :action="'{{ url('poems/store') }}'"
+        @if($poem->scenario) :data="{{ $poem->toJson() /*TODO pass fillable attributes only*/}}" @endif
         :trans="{{json_encode($trans)}}"
         :locales="{{ json_encode($locales) }}"
         :default-authors="{{ json_encode($defaultAuthors) }}"

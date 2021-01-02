@@ -26,7 +26,7 @@ class StorePoem extends FormRequest {
      */
     public function rules(): array {
         return [
-            'title' => ['nullable', 'string'],
+            'title' => ['required', 'string'],
             'language_id' => Rule::in(LanguageRepository::ids()),
             'is_original' => ['nullable', 'boolean'],
             'poet' => ['nullable', 'string'],
@@ -47,7 +47,7 @@ class StorePoem extends FormRequest {
             'is_lock' => ['nullable', 'boolean'],
             'content_id' => ['nullable', 'integer'],
             'original_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
-            'translated_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
+            'translated_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'], // TODO use fake ID here
             'preface' => ['nullable', 'string', 'max:64'],
             'subtitle' => ['nullable', 'string', 'max:32'],
             'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
@@ -70,11 +70,11 @@ class StorePoem extends FormRequest {
         // 由于前端用户可能在未加载全部搜索结果的情况下，点选新建的作者名，造成重复创建 Author，
         // 故此处暂时不创建新作者，不写入 poem.poet_id,
         // 只将作者名写入 poem.poet
-        if ($sanitized['poet_id'] === 'new') {
+        if (isset($sanitized['poet_id']) && $sanitized['poet_id'] === 'new') {
             $sanitized['poet_id'] = null;
             $sanitized['poet_wikidata_id'] = null;
         }
-        if ($sanitized['translator_id'] === 'new') {
+        if (isset($sanitized['translator_id']) && $sanitized['translator_id'] === 'new') {
             $sanitized['translator_id'] = null;
             $sanitized['translator_wikidata_id'] = null;
         }

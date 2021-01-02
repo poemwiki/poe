@@ -69,11 +69,11 @@ class UpdatePoem extends FormRequest {
         // 由于前端用户可能在未加载全部搜索结果的情况下，点选新建的作者名，造成重复创建 Author，
         // 故此处暂时不创建新作者，不写入 poem.poet_id,
         // 只将作者名写入 poem.poet
-        if ($sanitized['poet_id'] === 'new') {
+        if (isset($sanitized['poet_id']) && $sanitized['poet_id'] === 'new') {
             $sanitized['poet_id'] = null;
             $sanitized['poet_wikidata_id'] = null;
         }
-        if ($sanitized['translator_id'] === 'new') {
+        if (isset($sanitized['translator_id']) && $sanitized['translator_id'] === 'new') {
             $sanitized['translator_id'] = null;
             $sanitized['translator_wikidata_id'] = null;
         }
