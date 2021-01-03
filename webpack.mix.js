@@ -1,7 +1,7 @@
 const path = require('path');
 const mix = require('laravel-mix');
 require('laravel-mix-tailwind');
-require('laravel-mix-purgecss');
+// require('laravel-mix-purgecss');
 
 
 mix.webpackConfig({
@@ -49,8 +49,8 @@ mix.js(['resources/js/author/author.js'], 'public/js')
 
 mix.js(['resources/js/calendar/calendar.js'], 'public/js')
   .sass('resources/sass/calendar.scss', 'public/css')
-  .tailwind()
-  .purgeCss();
+  .tailwind();
+  // .purgeCss(); // purge too many things
 
 
 mix.copyDirectory('resources/js/lib', 'public/js/lib');
