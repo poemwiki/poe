@@ -49,8 +49,6 @@ class AuthorController extends Controller {
 
 
         return view('authors.show')->with([
-            'poetDesc' => $author->describe_lang,
-            'poetName' => $author->name_lang,
             'author' => $author,
             'poemsAsPoet' => $poemsAsPoet,
             'poemsAsTranslator' => $poemsAsTranslator,

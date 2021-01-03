@@ -1,6 +1,6 @@
 @extends('layouts.fe')
 
-@section('title'){{$poetName}}@endsection
+@section('title'){{$author->name_lang}}@endsection
 @section('author')
     PoemWiki
 @endsection
@@ -22,7 +22,7 @@
         <div class="poet-gallery">
             @if($author->pic_url)
             @foreach($author->pic_url as $url)
-                <img class="poet-pic" src="{{$url}}" alt="image of {{$poetName}}">
+                <img class="poet-pic" src="{{$url}}" alt="image of {{$author->name_lang}}">
             @endforeach
             @endif
         </div>
@@ -32,14 +32,14 @@
       @if($author->dynasty)
         <p class="poet-brief">@lang('admin.author.columns.dynasty_id')：{{$author->dynasty->name_lang}}</p>
       @endif
-      <p class="poet-brief">@lang('Introduction')：{{$poetDesc}}</p>
+      <p class="poet-brief" style="white-space: pre-line;">@lang('Introduction')：{{$author->describe_lang}}</p>
 
         @if($poemsAsPoet->isNotEmpty())
         <h2>
-            @if($fromPoetName && $poetName !== $fromPoetName)
-                {{$poetName .' ('. $fromPoetName .')'}} 的诗歌
+            @if($fromPoetName && $author->name_lang !== $fromPoetName)
+                {{$author->name_lang .' ('. $fromPoetName .')'}} 的诗歌
             @else
-                {{$poetName}} 的诗歌
+                {{$author->name_lang}} 的诗歌
             @endif
         </h2>
         @endif
@@ -57,7 +57,7 @@
         </ul>
 
         @if($poemsAsTranslator->isNotEmpty())
-        <h2>{{$poetName}} 的译作</h2>
+        <h2>{{$author->name_lang}} 的译作</h2>
         @endif
         <ul>
             @foreach($poemsAsTranslator as $poem)
