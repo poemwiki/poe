@@ -67,6 +67,8 @@ class AuthorController extends Controller {
         $id = Author::getIdFromFakeId($fakeId);
         $author = Author::select(['id', 'name_lang', 'describe_lang', 'dynasty_id', 'nation_id'])->findOrFail($id);
 
+        $author->name_lang = $author->name_lang ?: $author->getTranslated('name_lang', 'zh-CN');
+        $author->describe_lang = $author->describe_lang ?: $author->getTranslated('describe_lang', 'zh-CN');
         // dd(Nation::where('id', $author->nation_id)->orWhere('id', '>', 0)->limit(10)->get()->toArray());
         return view('authors.edit', [
             'author' => $author,

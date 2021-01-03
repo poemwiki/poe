@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 use Illuminate\Support\ServiceProvider;
 
@@ -45,7 +46,7 @@ class AppServiceProvider extends ServiceProvider {
 
         Stringable::macro('isTranslatableJson', function () {
             json_decode($this->value);
-            return starts_with($this->value, '{') && ends_with($this->value, '}') && (json_last_error() == JSON_ERROR_NONE);
+            return Str::startsWith($this->value, '{') && Str::endsWith($this->value, '}') && (json_last_error() == JSON_ERROR_NONE);
         });
 
         Stringable::macro('addLinks', function () {

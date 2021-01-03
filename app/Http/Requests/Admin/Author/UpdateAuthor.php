@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Author;
 
+use App\Repositories\DynastyRepository;
 use App\Repositories\NationRepository;
 use Brackets\Translatable\TranslatableFormRequest;
 use Illuminate\Support\Facades\Auth;
