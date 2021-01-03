@@ -18,8 +18,8 @@ Vue.component('author-form', {
       form: {
         name_lang: this.getLocalizedFormDefaults(),
         describe_lang: this.getLocalizedFormDefaults(),
-        nation_id: '',
-        dynasty_id: ''
+        nation_id: null,
+        dynasty_id: null
       },
       nationList: this.defaultNation
     }
@@ -27,7 +27,8 @@ Vue.component('author-form', {
 
   watch: {
     'form.nation_id': function (newId, old) {
-      if(newId !== 1) {
+      if(newId !== 32) {
+        console.log(newId);
         this.form.dynasty_id = '';
       }
     }

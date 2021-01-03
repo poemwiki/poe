@@ -91,7 +91,7 @@
   <div>
     <v-select :options="dynastyList" label="name_lang" :reduce="name_lang => name_lang.id"
               v-model="form.dynasty_id"
-              :disabled="form.nation_id!==1"
+              :disabled="form.nation_id!==32"
               :class="{'form-control-danger': errors.has('dynasty_id'), 'form-control-success': fields.dynasty_id && fields.dynasty_id.valid}"
               id="dynasty_id"
               v-validate="''"
