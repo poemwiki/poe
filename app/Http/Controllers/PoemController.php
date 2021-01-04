@@ -45,7 +45,7 @@ class PoemController extends Controller
     private function _poem(Poem $poem){
         $randomPoem = $this->poemRepository->randomOne();
 
-        $logs = ActivityLog::findByPoem($poem);
+        $logs = $poem->activityLogs;
 
         return view('poems.show')->with([
             'poem' => $poem,
@@ -76,12 +76,10 @@ class PoemController extends Controller
 
     public function showContributions($fakeId) {
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
-        $logs = ActivityLog::findByPoem($poem);
 
         return view('poems.contribution')->with([
             'poem' => $poem,
-            'randomPoemUrl' => '/',
-            'logs' => $logs
+            'randomPoemUrl' => '/'
         ]);
     }
 

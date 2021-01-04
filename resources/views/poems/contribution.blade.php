@@ -8,14 +8,15 @@
 @section('content')
 <h2>{{($poem->poet_cn ?? $poem->poet)}}  <a href="{{$poem->url}}">{{$poem->title}}</a> @lang('poem.edit history')</h2>
 <ol class="contribution collapsed">
-    @foreach($logs as $key=>$log)
-        <li @if($key!==0 && $key!==count($logs)-1)
+    @foreach($poem->activityLogs as $key=>$log)
+        <li @if($key!==0 && $key!==count($poem->activityLogs)-1)
             class="log-middle"
             @endif>
             @php
                 $newVal = $log->properties->get('attributes');
                 $oldVal = $log->properties->get('old');
                 $props = array_keys($newVal ?? []);
+                //dd($logs);
             @endphp
             <span title="{{$log->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($log->created_at)->format('Y-m-d')}}</span> {{$log->causer_type === "App\User" ? \App\User::find($log->causer_id)->name : '系统'}} {{trans('poem.change type '.$log->description)}}
 
@@ -26,13 +27,13 @@
                     @endif
                     <br>
                     @if($prop === 'poem')
-                        {{trans('admin.poem.columns.'.$prop)}}
+                        <span class="field">{{trans('admin.poem.columns.'.$prop)}}</span>
                     @elseif($prop === 'content_id')
 
                     @elseif($prop === 'original_id')
-                        {{trans('poem.original poem')}}
+                        <span class="field">{{trans('poem.original poem')}}</span>
                     @else
-                        {{trans('admin.poem.columns.'.$prop)}} [ <del>{{$oldVal[$prop]}}</del> -> {{$newVal[$prop]}} ]
+                        <span class="field">{{trans('admin.poem.columns.'.$prop)}}</span> [ <del>{{$oldVal[$prop]}}</del> -> {{$newVal[$prop]}} ]
                     @endif
                 @endforeach
             @elseif($log->description === 'created')
@@ -41,8 +42,17 @@
         </li>
     @endforeach
 
-    @if(count($logs)<1)
-        <li title="{{$poem->created_at}}">@lang('poem.initial upload') PoemWiki</li>
+    @if(count($poem->activityLogs)<1 or $poem->activityLogs->last()->description !== 'created')
+        <li title="{{$poem->created_at}}"><span class="field">@lang('poem.initial upload')</span> PoemWiki</li>
     @endif
 </ol>
 @endsection
+
+@push('styles')
+  <style>
+    .field{
+      display: inline-block;
+      min-width: 6em;
+    }
+  </style>
+@endpush

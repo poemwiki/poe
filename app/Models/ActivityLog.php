@@ -1,8 +1,17 @@
 <?php
+
 namespace App\Models;
+
+use Illuminate\Support\Collection;
 use Spatie\Activitylog\Models\Activity;
 
-class ActivityLog extends Activity{
+/*
+ * This model will be used to log activity.
+ * It should be implements the Spatie\Activitylog\Contracts\Activity interface
+ * and extend Illuminate\Database\Eloquent\Model.
+ */
+
+class ActivityLog extends Activity {
     const SUBJECT = [
         'poem' => 'App\\Models\\Poem',
         'score' => 'App\\Models\\Score',
@@ -10,20 +19,39 @@ class ActivityLog extends Activity{
         'userBind' => 'App\\Models\\UserBind',
     ];
 
-    public static function findByPoem(Poem $poem) {
-        return Activity::where(['subject_type' => Poem::class, 'subject_id' => $poem->id])
-            ->orderBy('id', 'desc')
-            ->get()
-            ->filter(function ($log) {
-                if($log->description === 'updated') {
-                    $oldVal = (object)$log->properties->get('old');
-                    // TODO: it's an ugly way to filter the redundant update log after create,
-                    // it should not be written to db at the poem creation
-                    if($oldVal && property_exists($oldVal, 'poem') && is_null($oldVal->poem) && property_exists($oldVal, 'poet') && is_null($oldVal->poet) && property_exists($oldVal, 'title') && is_null($oldVal->title)){
-                        return false;
-                    }
+    // protected $appends = ['changes', 'logs'];
+
+    /**
+     * diff array for each updated attribute.
+     * if $this->description !== 'updated' , the diff array will be []
+     * eg: [
+     *   'poem' => ['old' => 'xx', 'new' => 'xxx'],
+     *   'title' => ['old' => 'a', 'new' => 'aa']
+     * ]
+     * @return array|bool
+     */
+    public function getDiffsAttribute() {
+        $oldVal = $this->change->get('old');
+        $diff = [];
+
+        if ($this->description === 'updated') {
+            $keys = array_keys($oldVal);
+            $newVal = $this->properties->get('attributes');
+            foreach ($keys as $key) {
+                if(isset($newVal[$key])) {
+                    $diff[$key] = [
+                        'old' => $oldVal[$key],
+                        'new' => $newVal[$key]
+                    ];
                 }
-                return true;
-            })->values();
+            }
+        }
+
+        return $diff;
     }
+
+    public function getChangeAttribute(): Collection {
+        return $this->changes();
+    }
+
 }

@@ -141,8 +141,8 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                         @php
                             //dd($logs);
                             /** @var \App\Models\ActivityLog[] $logs */
-                            $latestLog = $logs[0];
-                            $initialLog = $logs[count($logs) - 1];
+                            $latestLog = $logs->first();
+                            $initialLog = $logs->last();
                         @endphp
                         <li title="{{$latestLog->created_at}}"><a
                                 href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update') {{$latestLog->causer_type === "App\User" ? \App\User::find($latestLog->causer_id)->name : 'PoemWiki'}}</a>

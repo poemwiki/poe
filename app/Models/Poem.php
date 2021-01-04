@@ -303,6 +303,35 @@ class Poem extends Model implements Searchable {
         return route('p/show', ['fakeId' => $this->fakeId]);
     }
 
+    public function getActivityLogsAttribute() {
+        return $this->activities()->orderBy('created_at', 'desc')->get()->map(function ($activity) {
+            $oldVal = $activity->properties->get('old');
+
+            // TODO: it's an ugly way to filter the redundant update log after create,
+            // it should not be written to db at the poem creation
+            if ($oldVal && isset($oldVal['poem']) && is_null($oldVal['poem'])
+                && isset($oldVal['poet']) && is_null($oldVal['poet'])
+                && isset($oldVal['title']) && is_null($oldVal['title'])) {
+                return false;
+            }
+
+            if($activity->description === 'updated') {
+                $diffs = $activity->diffs;
+                $diffKeys = array_keys($activity->diffs);
+                foreach ($diffKeys as $key) {
+                    if(in_array($key, self::$ignoreChangedAttributes)) {
+                        unset($diffs[$key]);
+                    }
+                }
+                if(empty($diffs)) return false;
+            }
+
+            return $activity;
+        })->reject(function ($val) {
+            return $val === false;
+        });
+    }
+
     /**
      * Convert the model instance to JSON.
      *
