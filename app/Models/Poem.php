@@ -62,7 +62,8 @@ class Poem extends Model implements Searchable {
         'poet_wikidata_id',
         'translator_wikidata_id',
         'short_url',
-        'poet_id', 'translator_id'
+        'poet_id', 'translator_id',
+        'upload_user_id'
     ];
 
     /**
@@ -100,6 +101,7 @@ class Poem extends Model implements Searchable {
         'poet_wikidata_id' => 'integer',
         'translator_wikidata_id' => 'integer',
         'short_url' => 'string',
+        'upload_user_id' => 'integer'
     ];
 
 

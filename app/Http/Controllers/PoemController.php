@@ -155,6 +155,8 @@ class PoemController extends Controller
             $sanitized['translator_id'] = $this->getExistedAuthorId($sanitized['translator_wikidata_id']);
         }
 
+        $sanitized['upload_user_id'] = $request->user()->id;
+
         // Store the Poem
         $poem = Poem::create($sanitized);
 
