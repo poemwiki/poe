@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Content;
+use App\Repositories\ScoreRepository;
 use App\Traits\HasFakeId;
 use Illuminate\Database\Eloquent\JsonEncodingException;
 use Illuminate\Support\Str;
@@ -101,7 +102,8 @@ class Poem extends Model implements Searchable {
         'poet_wikidata_id' => 'integer',
         'translator_wikidata_id' => 'integer',
         'short_url' => 'string',
-        'upload_user_id' => 'integer'
+        'upload_user_id' => 'integer',
+        'score' => 'float'
     ];
 
 
@@ -296,6 +298,10 @@ class Poem extends Model implements Searchable {
         return $this->belongsTo(\App\Models\Author::class, 'translator_wikidata_id', 'wikidata_id');
     }
 
+    public function tags() {
+        return $this->morphToMany(\App\Models\Tag::class, 'taggable');
+    }
+
 
 
     /**
@@ -303,6 +309,20 @@ class Poem extends Model implements Searchable {
      */
     public function getUrlAttribute() {
         return route('p/show', ['fakeId' => $this->fakeId]);
+    }
+
+    public function getTotalScoreAttribute() {
+        return $this->score ?: ScoreRepository::calc($this->id);
+    }
+
+    /**
+     * get score between campaign start and end time
+     * TODO update poem.score after each score updated/created
+     * @param Campaign $campaign
+     * @return array
+     */
+    public function getCampaignScore(Campaign $campaign) {
+        return ScoreRepository::calc($this->id, $campaign->start, $campaign->end);
     }
 
     public function getActivityLogsAttribute() {

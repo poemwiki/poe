@@ -54,15 +54,17 @@ class Score extends Component {
     }
 
     public function remove() {
-        $res = $this->scoreRepository->find(['poem_id' => $this->poem->id, 'user_id' => Auth::user()->id])->delete();
+        \Illuminate\Support\Facades\Log::info('score removed: poem_id=' . $this->poem->id);
+        $res = \App\Models\Score::where(['poem_id' => $this->poem->id, 'user_id' => Auth::user()->id])->first();
         if ($res) {
+            $res->delete();
             $this->rating = null;
         }
     }
 
     public function render() {
         return view('livewire.score', [
-            'score' => $this->scoreRepository->calcScoreByPoem($this->poem)
+            'score' => $this->poem->totalScore
         ]);
     }
 }

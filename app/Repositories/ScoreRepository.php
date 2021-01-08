@@ -95,10 +95,26 @@ class ScoreRepository extends BaseRepository {
      * @return array
      */
     public function calcScoreByPoemId($poemId): array {
-        $res = $this->allQuery()->where(['poem_id' => $poemId])->get();
-        $scores = $res;//->toArray();
+        return self::calc($poemId);
+    }
 
-        $groupCount = $res->groupBy('score')->map(function ($item) {
+    /**
+     * @param $poemId
+     * @param null $start
+     * @param null $end
+     * @return array
+     */
+    public static function calc($poemId, $start = null, $end = null) {
+        $query = Score::query()->where(['poem_id' => $poemId]);
+        if($start) {
+            $query->where('updated_at', '>=', $start);
+        }
+        if($end) {
+            $query->where('updated_at', '<=', $end);
+        }
+
+        $scores = $query->get();
+        $groupCount = $scores->groupBy('score')->map(function ($item) {
             return collect($item)->count();
         });
 
