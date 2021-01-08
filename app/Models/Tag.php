@@ -35,11 +35,13 @@ class Tag extends Model {
 
     ];
 
-    protected $appends = ['resource_url'];
+    // protected $appends = ['resource_url'];
 
     /* ************************ ACCESSOR ************************* */
 
-    public function getResourceUrlAttribute() {
-        return url('/admin/tags/' . $this->getKey());
-    }
+    // public function getResourceUrlAttribute() {
+    //     return url('/admin/tags/' . $this->getKey());
+    // }
+
+    // tag poem M:M
 }

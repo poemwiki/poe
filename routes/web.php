@@ -322,6 +322,18 @@ Route::any('/calendar', 'CalendarController@index')->name('calendar');
 Route::any('/calendar/q/{month}/{day}', 'CalendarController@query')->name('calendar.query');
 
 
+Route::middleware(['api'])->group(static function () {
+    Route::prefix('api')->namespace('Api')->name('api/')->group(static function() {
+        Route::prefix('campaign')->name('campaign/')->group(static function() {
+            Route::get('/', '\App\Http\Controllers\API\CampaignAPIController@index')->name('index');
+        });
+        Route::prefix('poem')->name('poem/')->group(static function() {
+            Route::get('/', '\App\Http\Controllers\API\PoemAPIController@index')->name('index');
+        });
+    });
+});
+
+
 Route::get('/{id}', function ($id) {
     if($id <= 10000) {
         return redirect(route('p/show', ['fakeId' => Poem::getFakeId($id)]));
