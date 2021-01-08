@@ -13,6 +13,7 @@ class Taggable extends Migration {
     public function up() {
         Schema::table('poem', function (Blueprint $table) {
             $table->unsignedBigInteger('upload_user_id')->nullable();
+            $table->unsignedDecimal('score', 4, 2)->nullable();
         });
         Schema::create('taggable', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned();
@@ -34,6 +35,7 @@ class Taggable extends Migration {
         Schema::drop('taggable');
         Schema::table('poem', function (Blueprint $table) {
             $table->dropColumn('upload_user_id');
+            $table->dropColumn('score');
         });
     }
 }

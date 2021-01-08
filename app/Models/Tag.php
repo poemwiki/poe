@@ -44,4 +44,7 @@ class Tag extends Model {
     // }
 
     // tag poem M:M
+    public function poems() {
+        return $this->morphedByMany(\App\Models\Poem::class, 'taggable');
+    }
 }

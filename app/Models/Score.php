@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Repositories\ScoreRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -32,6 +33,36 @@ class Score extends Model {
     ];
 
     protected $appends = ['resource_url'];
+
+
+    public static function boot() {
+        parent::boot();
+
+        self::created(function ($model) {
+            $poem = Poem::find($model->poem_id);
+            $poem->timestamps = false;
+            $score = ScoreRepository::calc($model->poem_id);
+            $poem->score = $score['score'] ?: null;
+            $poem->save();
+        });
+
+        self::updated(function ($model) {
+            $poem = Poem::find($model->poem_id);
+            $poem->timestamps = false;
+            $score = ScoreRepository::calc($model->poem_id);
+            $poem->score = $score['score'] ?: null;
+            $poem->save();
+        });
+
+        self::deleted(function ($model) {
+            $poem = Poem::find($model->poem_id);
+            $poem->timestamps = false;
+            $score = ScoreRepository::calc($model->poem_id);
+            $poem->score = $score['score'] ?: null;
+            $poem->save();
+        });
+    }
+
 
     /* ************************ ACCESSOR ************************* */
 

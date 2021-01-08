@@ -64,7 +64,7 @@ class Score extends Component {
 
     public function render() {
         return view('livewire.score', [
-            'score' => $this->poem->totalScore
+            'score' => $this->poem->scoreArray
         ]);
     }
 }

@@ -26,10 +26,9 @@ class Poem extends Model implements Searchable {
 
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
-    protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length'];
+    protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score' ];
 
     protected $table = 'poem';
-
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
@@ -312,7 +311,11 @@ class Poem extends Model implements Searchable {
     }
 
     public function getTotalScoreAttribute() {
-        return $this->score ?: ScoreRepository::calc($this->id);
+        return $this->score ?: ScoreRepository::calc($this->id)['score'];
+    }
+
+    public function getScoreArrayAttribute() {
+        return ScoreRepository::calc($this->id);
     }
 
     /**
