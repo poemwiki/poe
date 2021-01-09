@@ -22,6 +22,10 @@ class Tag extends Model {
     ];
 
 
+    protected $casts = [
+        'id' => 'integer',
+    ];
+
     protected $dates = [
         'created_at',
         'deleted_at',
@@ -45,6 +49,6 @@ class Tag extends Model {
 
     // tag poem M:M
     public function poems() {
-        return $this->morphedByMany(\App\Models\Poem::class, 'taggable');
+        return $this->morphedByMany(\App\Models\Poem::class, 'taggable', 'taggable');
     }
 }

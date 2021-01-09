@@ -301,6 +301,10 @@ class Poem extends Model implements Searchable {
         return $this->morphToMany(\App\Models\Tag::class, 'taggable');
     }
 
+    public function uploader() {
+        return $this->belongsTo(\App\User::class, 'upload_user_id', 'id');
+    }
+
 
 
     /**

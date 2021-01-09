@@ -125,4 +125,13 @@ class PoemRepository extends BaseRepository
             return $this->newQuery()->select($select)->findOrFail($id);
         return $this->newQuery()->findOrFail($id);
     }
+
+    public function getByTagId($tagId) {
+        return \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems->map(function ($item) {
+            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->updated_at ?? $item->created_at)->diffForHumans(now());
+            $item['poet_image'] = $item->uploader->avatarUrl;
+            return $item;
+        });
+    }
+
 }
