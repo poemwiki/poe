@@ -4,7 +4,9 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
+use App\Models\Poem;
 use App\Repositories\PoemRepository;
+use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
 use Illuminate\Http\Request;
 
@@ -15,12 +17,12 @@ use Illuminate\Http\Request;
 class PoemAPIController extends Controller {
     /** @var  PoemRepository */
     private $poemRepository;
-    /** @var  ScoreRepository */
-    private $scoreRepository;
+    /** @var  ReviewRepository */
+    private $reviewRepository;
 
-    public function __construct(PoemRepository $poemRepository, ScoreRepository $scoreRepository) {
+    public function __construct(PoemRepository $poemRepository, ReviewRepository $reviewRepository) {
         $this->poemRepository = $poemRepository;
-        $this->scoreRepository = $scoreRepository;
+        $this->reviewRepository = $reviewRepository;
     }
 
     public function index(Request $request) {
@@ -28,19 +30,15 @@ class PoemAPIController extends Controller {
         if(is_numeric($request->input('tagId'))) {
             return $this->responseSuccess($this->poemRepository->getByTagId($request->input('tagId'))->toArray());
         }
-        // $items = $this->poemRepository->allInUse();
-        //
-        // return $this->responseSuccess($items->toArray());
     }
 
-    public function show($id) {
+    public function detail($id) {
         /** @var Poem $item */
-        $item = $this->poemRepository->find($id);
+        $item = Poem::find($id);
+        $res = $item->toArray();
+        $res['poet_image'] = $item->uploader->avatarUrl;
+        $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item, 100);
 
-        if (empty($item)) {
-            return $this->sendError('Language not found');
-        }
-
-        return $this->responseSuccess($item->toArray());
+        return $this->responseSuccess($res);
     }
 }

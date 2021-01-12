@@ -329,6 +329,7 @@ Route::middleware(['api'])->group(static function () {
         });
         Route::prefix('poem')->name('poem/')->group(static function() {
             Route::get('/', '\App\Http\Controllers\API\PoemAPIController@index')->name('index');
+            Route::get('/detail/{id}', '\App\Http\Controllers\API\PoemAPIController@detail')->name('detail');
         });
     });
 });
