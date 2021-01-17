@@ -3,16 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+use Laravel\Passport\HasApiTokens;
+
 class UserBind extends Model {
+    use HasApiTokens, Notifiable;
+
     protected $table = 'user_bind_info';
     const BIND_REF = [
         'wechat' => 0,
-        'wechat-scan' => 1
+        'wechat-scan' => 1,
+        'weapp' => 2,
     ];
 
     use LogsActivity;
+
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
     protected static $ignoreChangedAttributes = ['created_at'];
@@ -33,7 +40,8 @@ class UserBind extends Model {
         'gender',
         'info',
         'tel',
-        'email'
+        'email',
+        'weapp_session_key',
     ];
 
     public static function boot() {
@@ -66,8 +74,11 @@ class UserBind extends Model {
      *
      * @return string
      */
-    public static function crc32($str)
-    {
+    public static function crc32($str) {
         return sprintf("%u", crc32($str));
+    }
+
+    public function findForPassport($openId) {
+        return $this->where('open_id', $openId)->first();
     }
 }

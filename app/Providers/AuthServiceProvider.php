@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Laravel\Passport\Passport;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -35,6 +37,17 @@ class AuthServiceProvider extends ServiceProvider
             // if($author->user_id) {return $poem->user_id === $user->id}
             return isset($user->id);
         });
+
+        Passport::routes();
+
+        // token有效期
+
+        Passport::tokensExpireIn(Carbon::now()->addDays(90));
+
+        // 可刷新token时间
+
+        // Passport::refreshTokensExpireIn(Carbon::now()->addDays(2));
+
 //        Gate::define('web.score.create', function ($user) {
 //            return isset($user->id);
 //        });

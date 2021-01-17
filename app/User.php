@@ -3,12 +3,15 @@
 namespace App;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Redis;
+use Laravel\Passport\HasApiTokens;
+use Spatie\Activitylog\ActivitylogServiceProvider;
 
 class User extends Authenticatable implements MustVerifyEmail {
-    use Notifiable;
+    use HasApiTokens, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -64,6 +67,11 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasMany(\App\Models\review::class, 'user_id', 'id');
     }
 
+    public function activityLogs(): MorphMany {
+        return $this->morphMany(ActivitylogServiceProvider::determineActivityModel(), 'causer');
+    }
+
+
     public function getResourceUrlAttribute() {
         return url('/admin/users/' . $this->getKey());
     }
@@ -75,7 +83,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public function getNameAttribute() {
-        return str_replace('[from-wechat]', '', $this->attributes['name']);
+        return preg_replace('@\[from-.+\]$@', '', $this->attributes['name']);
     }
 
     public static function inviteFromStr($inviteCode) {
