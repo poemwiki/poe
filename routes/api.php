@@ -33,7 +33,7 @@ Route::middleware(['api'])->group(static function () {
 Route::middleware(['auth:api', 'api'])->group(static function () {
     Route::prefix('v1')->name('api')->group(static function() {
         Route::prefix('user')->name('user/')->group(static function() {
-            Route::post('/profile', '\App\Http\Controllers\API\ScoreAPIController@index')->name('profile');
+            Route::post('/profile', [\App\Http\Controllers\API\UserAPIController::class, 'update'])->name('profile');
             Route::post('/decrypt', [\App\Http\Controllers\API\LoginWeAppController::class, 'decrypt'])->name('weapp-decrypt');
         });
         // Route::prefix('score')->name('score/')->group(static function() {
