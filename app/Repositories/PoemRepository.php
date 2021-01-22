@@ -86,6 +86,7 @@ class PoemRepository extends BaseRepository
      */
     public static function random($num = 1) {
         return Poem::query()->with('wx', 'lang')
+            ->doesntHave('tags')
             ->inRandomOrder()
             ->take($num);
     }
