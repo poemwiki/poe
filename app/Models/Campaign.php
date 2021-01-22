@@ -19,7 +19,8 @@ class Campaign extends Model {
         'name_lang',
         'start',
         'end',
-        'image'
+        'image',
+        'settings'
     ];
 
 
@@ -36,6 +37,10 @@ class Campaign extends Model {
         'name_lang',
     ];
 
+    public $casts = [
+        'settings' => 'json'
+    ];
+
     /**
      * The relationships that should always be loaded.
      *
@@ -43,7 +48,7 @@ class Campaign extends Model {
      */
     protected $with = ['tag'];
 
-    protected $appends = ['tag_name', 'image_url'];
+    protected $appends = ['tag_name', 'image_url', 'masters'];
 
     /* ************************ ACCESSOR ************************* */
 
@@ -55,6 +60,15 @@ class Campaign extends Model {
     }
     public function getImageUrlAttribute() {
         return asset($this->image);
+    }
+    public function getMastersAttribute() {
+        $masters = $this->settings['masters'];
+        if(!$masters) return null;
+
+        return array_map(function ($item) {
+            $item['avatar'] = asset($item['avatar']);
+            return $item;
+        }, $masters);
     }
 
     public function tag() {
