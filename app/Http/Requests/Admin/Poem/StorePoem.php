@@ -79,7 +79,7 @@ class StorePoem extends FormRequest {
             $sanitized['translator_wikidata_id'] = null;
         }
 
-        //Add your code for manipulation with request data here
+        $sanitized['upload_user_id'] = Auth::user()->id;
 
         return $sanitized;
     }

@@ -36,6 +36,10 @@ Route::middleware(['auth:api', 'api'])->group(static function () {
             Route::post('/profile', [\App\Http\Controllers\API\UserAPIController::class, 'update'])->name('profile');
             Route::post('/decrypt', [\App\Http\Controllers\API\LoginWeAppController::class, 'decrypt'])->name('weapp-decrypt');
         });
+        Route::prefix('poem')->name('poem/')->group(static function() {
+            Route::post('/store', [\App\Http\Controllers\API\PoemAPIController::class, 'store'])->name('store');
+            Route::get('/mine', [\App\Http\Controllers\API\PoemAPIController::class, 'mine'])->name('mine');
+        });
         // Route::prefix('score')->name('score/')->group(static function() {
         //     Route::get('/', '\App\Http\Controllers\API\ScoreAPIController@index')->name('index');
         // });

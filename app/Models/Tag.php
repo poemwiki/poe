@@ -51,4 +51,8 @@ class Tag extends Model {
     public function poems() {
         return $this->morphedByMany(\App\Models\Poem::class, 'taggable', 'taggable');
     }
+
+    public function campaign() {
+        return $this->hasOne(\App\Models\Campaign::class, 'tag_id', 'id');
+    }
 }

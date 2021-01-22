@@ -34,6 +34,11 @@ class Poem extends Model implements Searchable {
     const UPDATED_AT = 'updated_at';
 
 
+    protected $attributes = [
+        'language_id' => 1,
+        'is_original' => 1
+    ];
+
     public $fillable = [
         'title',
         'language_id',
@@ -62,8 +67,10 @@ class Poem extends Model implements Searchable {
         'poet_wikidata_id',
         'translator_wikidata_id',
         'short_url',
-        'poet_id', 'translator_id',
-        'upload_user_id'
+        'poet_id',
+        'translator_id',
+        'upload_user_id',
+        'is_owner_uploaded'
     ];
 
     /**
@@ -102,7 +109,8 @@ class Poem extends Model implements Searchable {
         'translator_wikidata_id' => 'integer',
         'short_url' => 'string',
         'upload_user_id' => 'integer',
-        'score' => 'float'
+        'score' => 'float',
+        'is_owner_uploaded' => 'integer'
     ];
 
 
@@ -298,7 +306,7 @@ class Poem extends Model implements Searchable {
     }
 
     public function tags() {
-        return $this->morphToMany(\App\Models\Tag::class, 'taggable');
+        return $this->morphToMany(\App\Models\Tag::class, 'taggable', 'taggable');
     }
 
     public function uploader() {

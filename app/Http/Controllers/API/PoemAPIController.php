@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreatePoemRequest;
 use App\Models\Campaign;
 use App\Models\Poem;
+use App\Models\Tag;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
@@ -26,10 +28,15 @@ class PoemAPIController extends Controller {
     }
 
     public function index(Request $request) {
-        // todo pagination
+        // TODO pagination
+        // TODO order by
         if(is_numeric($request->input('tagId'))) {
             return $this->responseSuccess($this->poemRepository->getByTagId($request->input('tagId'))->toArray());
         }
+    }
+
+    public function mine(Request $request) {
+        return $this->responseSuccess($this->poemRepository->getByOwner($request->user()->id));
     }
 
     public function detail($id) {
@@ -40,5 +47,15 @@ class PoemAPIController extends Controller {
         $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item, 100);
 
         return $this->responseSuccess($res);
+    }
+
+    public function store(CreatePoemRequest $request) {
+        $this->responseSuccess([]);
+        $sanitized = $request->getSanitized();
+
+        $poem = Poem::create($sanitized);
+        $poem->tags()->save(Tag::find($sanitized['tag_id']));
+
+        return $this->responseSuccess();
     }
 }

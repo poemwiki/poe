@@ -27,9 +27,18 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
+        Gate::define('api.poem.create', function ($user) {
+            return isset($user->id);
+        });
+        Gate::define('api.poem.update', function ($user) {
+            // TODO 如果声明原创，则只有作者账号或管理员可更改
+            return isset($user->id);
+        });
+
         Gate::define('web.poem.change', function ($user) {
             // TODO only allow poem.poetAuthor.user to change his own poem
             // if($poem->user_id) {return $poem->user_id === $user->id}
+            // TODO 如果声明原创，则只有作者账号或管理员可更改
             return isset($user->id);
         });
         Gate::define('web.author.change', function ($user) {
