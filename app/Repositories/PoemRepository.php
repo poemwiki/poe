@@ -85,8 +85,12 @@ class PoemRepository extends BaseRepository
     LIMIT 1
      */
     public static function random($num = 1) {
+        // TODO 选取策略： 1. 优先选取 poem.bedtime_post_id 不为空的 poem
+        // 2. 评分和评论数
+        // 3. poem.length
+        // 4. 最近未推送给当前用户的
         return Poem::query()->with('wx', 'lang')
-            ->doesntHave('tags')
+            ->where('is_owner_uploaded', '<>', 1) // TODO 1. 如果显示声明原创的诗歌，是否需要跟普通诗歌区分开？ 2. 对声明原创的诗歌，只允许上传用户编辑
             ->inRandomOrder()
             ->take($num);
     }
@@ -129,6 +133,17 @@ class PoemRepository extends BaseRepository
 
     public function getByTagId($tagId) {
         return \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems->map(function ($item) {
+            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->updated_at ?? $item->created_at)->diffForHumans(now());
+            $item['poet_image'] = $item->uploader->avatarUrl;
+            return $item;
+        });
+    }
+
+    public function getByOwner($userId) {
+        return self::newQuery()->where([
+            ['is_owner_uploaded', '=', '1'],
+            ['upload_user_id', '=', $userId],
+        ])->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->updated_at ?? $item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             return $item;
