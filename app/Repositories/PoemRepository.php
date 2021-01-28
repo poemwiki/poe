@@ -89,8 +89,7 @@ class PoemRepository extends BaseRepository
         // 2. 评分和评论数
         // 3. poem.length
         // 4. 最近未推送给当前用户的
-        return Poem::query()->with('wx', 'lang')
-            ->where('is_owner_uploaded', '<>', 1) // TODO 1. 如果显示声明原创的诗歌，是否需要跟普通诗歌区分开？ 2. 对声明原创的诗歌，只允许上传用户编辑
+        return Poem::query()->with('wx', 'lang') // TODO 1. 如果显示声明原创的诗歌，是否需要跟普通诗歌区分开？ 2. 对声明原创的诗歌，gate 中定义只允许上传用户编辑
             ->inRandomOrder()
             ->take($num);
     }
@@ -131,10 +130,11 @@ class PoemRepository extends BaseRepository
         return $this->newQuery()->findOrFail($id);
     }
 
-    public function getByTagId($tagId) {
-        return \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems->map(function ($item) {
+    public function getByTagId($tagId, $orderBy) {
+        return \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems()->orderByDesc($orderBy)->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->updated_at ?? $item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
+            $item['poet'] = $item->uploader->name;
             return $item;
         });
     }
@@ -143,9 +143,10 @@ class PoemRepository extends BaseRepository
         return self::newQuery()->where([
             ['is_owner_uploaded', '=', '1'],
             ['upload_user_id', '=', $userId],
-        ])->get()->map(function ($item) {
+        ])->orderByDesc('updated_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->updated_at ?? $item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
+            $item['poet'] = $item->uploader->name;
             return $item;
         });
     }

@@ -134,8 +134,21 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                         <dd itemprop="isPartOf" class="poem-from">{{$poem->from}}</dd><br>
                     @endif
                 </dl>
-                <a class="edit btn"
-                   href="{{ Auth::check() ? route('poems/edit', $fakeId) : route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
+
+                @auth
+                  @if(!$poem->is_owner_uploaded or ($poem->is_owner_uploaded && Auth::user()->id === $poem->upload_user_id))
+                  <a class="edit btn"
+                     href="{{ route('poems/edit', $fakeId) }}">@lang('poem.correct errors or edit')</a>
+                  @endif
+                @endauth
+
+                @guest
+                  @if(!$poem->is_owner_uploaded)
+                    <a class="edit btn"
+                       href="{{ route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
+                  @endif
+                @endguest
+
                 <ol class="contribution">
                     @if(count($logs) >= 1)
                         @php

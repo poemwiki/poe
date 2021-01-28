@@ -30,8 +30,10 @@ class PoemAPIController extends Controller {
     public function index(Request $request) {
         // TODO pagination
         // TODO order by
-        if(is_numeric($request->input('tagId'))) {
-            return $this->responseSuccess($this->poemRepository->getByTagId($request->input('tagId'))->toArray());
+        $tagId = $request->input('tagId');
+        $orderBy = $request->input('orderBy', 'created_at');
+        if(is_numeric($tagId)) {
+            return $this->responseSuccess($this->poemRepository->getByTagId($tagId, $orderBy)->toArray());
         }
     }
 
@@ -45,6 +47,11 @@ class PoemAPIController extends Controller {
         $res = $item->toArray();
         $res['poet_image'] = $item->uploader->avatarUrl;
         $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item, 100);
+        $res['related'] = $this->poemRepository->random(2)
+            ->where('id', '<>', $id)
+            ->whereHas('tags', function ($query) use ($item) {
+                $query->where('tag_id', '=', $item->tags[0]->id);
+            })->get()->toArray();
 
         return $this->responseSuccess($res);
     }
