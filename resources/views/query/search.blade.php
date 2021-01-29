@@ -54,7 +54,7 @@
                     @endif
                     <div class="item-right title-list-item">
                         <a class="item-link title no-bg" href="{{ $item->url }}">{{ $item->title }}</a>
-                        <p class="item-desc">{{$item->searchable->describe_lang}}</p>
+                      <p class="item-desc block-with-text"><a class="item-link no-bg" href="{{ $item->url }}">{{mb_substr($item->searchable->describe_lang, 0, 200)}}</a></p>
                     </div>
 
                 @else
