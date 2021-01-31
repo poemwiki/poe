@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -27,21 +28,24 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        Gate::define('api.poem.create', function ($user) {
+        Gate::define('api.poem.create', function (User $user) {
             return isset($user->id);
         });
-        Gate::define('api.poem.update', function ($user) {
+        Gate::define('api.poem.update', function (User $user) {
             // TODO 如果声明原创，则只有作者账号或管理员可更改
             return isset($user->id);
         });
+        Gate::define('api.review.create', function (User $user) {
+            return isset($user->id);
+        });
 
-        Gate::define('web.poem.change', function ($user) {
+        Gate::define('web.poem.change', function (User $user) {
             // TODO only allow poem.poetAuthor.user to change his own poem
             // if($poem->user_id) {return $poem->user_id === $user->id}
             // TODO 如果声明原创，则只有作者账号或管理员可更改
             return isset($user->id);
         });
-        Gate::define('web.author.change', function ($user) {
+        Gate::define('web.author.change', function (User $user) {
             // TODO only allow author.user to change his own author info, or need confirm by author.user
             // if($author->user_id) {return $poem->user_id === $user->id}
             return isset($user->id);

@@ -57,7 +57,6 @@ class PoemAPIController extends Controller {
     }
 
     public function store(CreatePoemRequest $request) {
-        $this->responseSuccess([]);
         $sanitized = $request->getSanitized();
 
         $poem = Poem::create($sanitized);
