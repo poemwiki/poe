@@ -53,7 +53,7 @@ class ReviewRepository extends BaseRepository {
         if ($poem->translatedPoems) {
             $poemIds = $poem->translatedPoems->pluck('id')->concat($poemIds)->all();
         }
-        $query = $this->allQuery()->whereIn('poem_id', $poemIds)->with('poem')->orderBy($order, $direction);
+        $query = $this->allQuery()->whereIn('poem_id', $poemIds)->with(['user'])->orderBy($order, $direction);
         return $query->paginate($perPage, $columns);
     }
 

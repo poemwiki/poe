@@ -14,7 +14,7 @@ mix.webpackConfig({
 mix.options({
   processCssUrls: false
 });
-if ( !mix.inProduction()) {
+if (!mix.inProduction()) {
   mix.webpackConfig({
     devtool: 'inline-source-map'
   })

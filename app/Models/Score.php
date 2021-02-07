@@ -22,6 +22,7 @@ class Score extends Model {
         'poem_id',
         'score',
         'user_id',
+        'weight'
     ];
 
 
@@ -32,7 +33,7 @@ class Score extends Model {
 
     ];
 
-    protected $appends = ['resource_url'];
+    protected $appends = [];
 
 
     public static function boot() {

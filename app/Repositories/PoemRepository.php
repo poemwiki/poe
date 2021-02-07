@@ -132,7 +132,7 @@ class PoemRepository extends BaseRepository
 
     public function getByTagId($tagId, $orderBy) {
         return \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems()->orderByDesc($orderBy)->get()->map(function ($item) {
-            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->updated_at ?? $item->created_at)->diffForHumans(now());
+            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->uploader->name;
             return $item;
@@ -143,8 +143,8 @@ class PoemRepository extends BaseRepository
         return self::newQuery()->where([
             ['is_owner_uploaded', '=', '1'],
             ['upload_user_id', '=', $userId],
-        ])->orderByDesc('updated_at')->get()->map(function ($item) {
-            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->updated_at ?? $item->created_at)->diffForHumans(now());
+        ])->orderByDesc('created_at')->get()->map(function ($item) {
+            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->uploader->name;
             return $item;

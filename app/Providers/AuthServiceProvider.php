@@ -38,6 +38,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('api.review.create', function (User $user) {
             return isset($user->id);
         });
+        Gate::define('api.score.create', function (User $user) {
+            return isset($user->id);
+        });
 
         Gate::define('web.poem.change', function (User $user) {
             // TODO only allow poem.poetAuthor.user to change his own poem

@@ -57,8 +57,20 @@ class ScoreRepository extends BaseRepository {
     }
 
     public function listByPoemsUsers($poemIds, $userIds, $columns = ['*']) {
-        $query = $this->allQuery()->whereIn('poem_id', $poemIds, 'and')
+        $query = $this->allQuery()->select($columns)->whereIn('poem_id', $poemIds, 'and')
             ->whereIn('user_id', $userIds);
+        return $query;
+    }
+
+    public function listByPoemsUser($poemIds, $userId, $columns = ['poem_id', 'score', 'weight']) {
+        $query = $this->allQuery()->select($columns)->whereIn('poem_id', $poemIds, 'and')
+            ->where('user_id', '=', $userId);
+        return $query;
+    }
+
+    public function listByUser($userId, $columns = ['poem_id', 'score']) {
+        $query = $this->allQuery()->select($columns)
+            ->where('user_id', '=', $userId);
         return $query;
     }
 

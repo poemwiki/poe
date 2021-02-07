@@ -43,8 +43,9 @@ Route::middleware(['auth:api', 'api'])->group(static function () {
         Route::prefix('review')->name('review/')->group(static function() {
             Route::post('/store', [\App\Http\Controllers\API\ReviewAPIController::class, 'store'])->name('store');
         });
-        // Route::prefix('score')->name('score/')->group(static function() {
-        //     Route::get('/', '\App\Http\Controllers\API\ReviewAPIController@index')->name('index');
-        // });
+        Route::prefix('score')->name('score/')->group(static function() {
+            Route::post('/store', [\App\Http\Controllers\API\ScoreAPIController::class, 'store'])->name('store');
+            Route::get('/mine', [\App\Http\Controllers\API\ScoreAPIController::class, 'mine'])->name('mine');
+        });
     });
 });
