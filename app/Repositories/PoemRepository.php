@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Poem;
+use App\Models\Score;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -131,10 +132,13 @@ class PoemRepository extends BaseRepository
     }
 
     public function getByTagId($tagId, $orderBy) {
-        return \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems()->orderByDesc($orderBy)->get()->map(function ($item) {
+        // TODO Poem::where() tag_id=$tagId, with(['uploader', 'scores'])
+        return \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems()->orderByDesc($orderBy)->get()->map(function ($item, $index) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->uploader->name;
+            $item['score_weight'] = ScoreRepository::calcWeight($item->id);
+            if($index <= 9) $item['rank'] = $index + 1;
             return $item;
         });
     }
