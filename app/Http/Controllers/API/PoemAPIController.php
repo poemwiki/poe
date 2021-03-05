@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Livewire\Score;
 use App\Http\Requests\CreatePoemRequest;
-use App\Http\Requests\DeletePoemRequest;
 use App\Models\Campaign;
 use App\Models\Poem;
 use App\Models\Tag;

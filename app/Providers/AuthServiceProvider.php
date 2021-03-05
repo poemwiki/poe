@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Poem;
 use App\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Carbon;
@@ -34,6 +35,13 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('api.poem.update', function (User $user) {
             // TODO 如果声明原创，则只有作者账号或管理员可更改
             return isset($user->id);
+        });
+        Gate::define('api.poem.delete', function (User $user, Poem $poem) {
+            // 如果声明原创，则只有作者账号或管理员可更改
+            if ($poem->is_owner_uploaded) {
+                return $user->id === $poem->upload_user_id or $user->is_admin;
+            }
+            return $user->is_admin;
         });
         Gate::define('api.review.create', function (User $user) {
             return isset($user->id);
