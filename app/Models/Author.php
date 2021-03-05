@@ -6,6 +6,7 @@ use App\Traits\HasFakeId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasTranslations;
+use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
@@ -86,6 +87,19 @@ class Author extends Model implements Searchable {
     public function alias() {
         return $this->hasMany(\App\Models\Alias::class, 'author_id', 'id');
     }
+
+    public static function boot() {
+        parent::boot();
+
+        self::created(function ($model) {
+            Artisan::call('alias:importFromAuthor', ['--id' => $model->id]);
+        });
+        self::updated(function ($model) {
+            Artisan::call('alias:importFromAuthor', ['--id' => $model->id]);
+        });
+
+    }
+
 
     public function getWikiDataNationId() {
         $countries = $this->wikiData->getClaim(Wikidata::PROP['countries']);

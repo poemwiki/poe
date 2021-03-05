@@ -90,7 +90,7 @@ class AuthorRepository extends BaseRepository {
                 ->map->only('id', 'label_en', 'label_cn', 'label', 'url')->map(function ($item) {
                     $item['source'] = 'PoemWiki';
                     return $item;
-                });;
+                });
         }
 
         $aliasRes = self::_searchAlias($name, [], $authorId);
