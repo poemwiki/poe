@@ -83,7 +83,7 @@ class ShowReviews extends Component {
 
     public function render() {
         // TODO paginate for reviews
-        $reviews = $this->reviewRepository->listByOriginalPoem($this->poem, 100);
+        $reviews = $this->reviewRepository->paginateByOriginalPoem($this->poem, 100);
         $userIds = [];
         $poemIds = [];
         foreach ($reviews as $review) {
