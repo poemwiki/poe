@@ -183,7 +183,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                         @else
                             <a href="{{$poem->originalPoem->url}}">
                                 <dt>{{$poem->originalPoem->lang ? $poem->originalPoem->lang->name_lang.'['.trans('poem.original work').']' : trans('poem.original work')}}</dt>
-                                <dd>{{$poem->originalPoem->poet}}</dd><br>
+                                <dd>{{$poem->originalPoem->poetAuthor ? $poem->originalPoem->poetAuthor->name_lang : $poem->originalPoem->poet}}</dd><br>
                             </a>
                         @endif
 
@@ -198,7 +198,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                         @foreach($poem->translatedPoems as $t)
                             <a href="{{$t->url}}">
                                 <dt>{{$t->lang->name_lang ?? trans('poem.other')}}</dt>
-                                <dd>{{$t->translator ?? '佚名'}}</dd><br>
+                                <dd>{{$t->translatorAuthor ? $t->translatorAuthor->name_lang : ($t->translator ?? '佚名')}}</dd><br>
                             </a>
                         @endforeach
                     @endif

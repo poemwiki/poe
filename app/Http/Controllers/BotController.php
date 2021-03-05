@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\Author;
 use App\Models\Poem;
 use App\Repositories\PoemRepository;
 use App\Repositories\ScoreRepository;
@@ -133,6 +134,11 @@ class BotController extends Controller {
         return str_replace([0,1,2,3,4,5,6,7,8,9], ['𝟎','𝟏','𝟐','𝟑','𝟒','𝟓','𝟔','𝟕','𝟖','𝟗'], $str);
     }
 
+    // get poem uploader wechat id?
+    private function getUploader($poemId) {
+
+    }
+
     public function top($poeDB, $chatroom) {
         $dataMsg = [];
 
@@ -233,7 +239,8 @@ SQL;
         if (is_array($keyword)) {
             $originWords = implode(' ', $keyword);
             $sql = 'SELECT (select 1 from wx_post WHERE poem_id=p.id limit 1) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
-`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`, `short_url`
+`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`, `short_url`,
+               `poet_id`, `translator_id`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
@@ -260,7 +267,8 @@ SQL;
             $originWords = $keyword;
             $q = $poeDB->prepare(<<<'SQL'
         SELECT (select 1 from wx_post WHERE poem_id=p.id limit 1) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
-`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`, `short_url`
+`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`, `short_url`,
+               `poet_id`, `translator_id`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
@@ -306,16 +314,36 @@ SQL
                 $data = $res[0];
                 $post = (object)$res[0];
 
-                $nation = $post->dynasty
-                    ? "[$post->dynasty] "
-                    : (($post->nation && $post->nation !== '中国') ? "[$post->nation] " : '');
+                if($post->poet_id) {
+                    $poetAuthor = Author::find($post->poet_id);
+                }
+                if($post->translator_id) {
+                    $translatorAuthor = Author::find($post->translator_id);
+                }
+
+                // TODO nation should be $poetAuthor->nation->name_lang
+                $nation = $poetAuthor && $poetAuthor->nation
+                    ? ($poetAuthor->nation->id !== 32
+                        ? "[{$poetAuthor->nation->name_lang}] "
+                        : ($poetAuthor->dynasty && $poetAuthor->dynasty->id !== 75
+                            ? "[{$poetAuthor->dynasty->name_lang}] "
+                            : ''
+                        )
+                    )
+                    : ($post->dynasty
+                        ? "[$post->dynasty] "
+                        : (($post->nation && $post->nation !== '中国') ? "[$post->nation] " : '')
+                    );
 
                 $od = opencc_open("t2s.json");
                 $content = opencc_convert(preg_replace('@[\r\n]{3,}@', "\n\n", $post->poem), $od);
 
-                $writer = '作者 / ' .($post->poet_cn
-                    ?  $nation . ($post->poet_cn ?? $post->poet)
-                    : ($post->poet ? $post->poet : ''));
+
+                if($poetAuthor) {
+                    $writer = '作者 / ' . $nation . $poetAuthor->name_lang;
+                } else {
+                    $writer = '作者 / ' . $post->poet_cn ?? $post->poet;
+                }
 
 
                 // poem content
@@ -348,7 +376,12 @@ SQL
                 array_push($parts, $writer);
 
 
-                if ($post->translator) array_push($parts, '翻译 / ' . trim($post->translator));
+                if($translatorAuthor) {
+                    $translator = '翻译 / ' . $nation . $translatorAuthor->name_lang;
+                } else {
+                    $translator = '翻译 / ' . trim($post->translator);
+                }
+                array_push($parts, $translator);
 
                 // links & score
                 if(!$post->short_url) {
