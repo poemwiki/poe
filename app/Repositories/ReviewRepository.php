@@ -43,7 +43,7 @@ class ReviewRepository extends BaseRepository {
         return $query->paginate($perPage, $columns);
     }
 
-    public function listByOriginalPoem(Poem $poem, $perPage = 10, $order = 'updated_at', $direction = 'desc', $columns = ['*']) {
+    public function paginateByOriginalPoem(Poem $poem, $perPage = 10, $order = 'updated_at', $direction = 'desc', $columns = ['*']) {
         $poemIds = [$poem->id];
         if ($poem->original_id) {
             $poemIds[] = $poem->original_id;
@@ -55,6 +55,20 @@ class ReviewRepository extends BaseRepository {
         }
         $query = $this->allQuery()->whereIn('poem_id', $poemIds)->with(['user'])->orderBy($order, $direction);
         return $query->paginate($perPage, $columns);
+    }
+
+    public function listByOriginalPoem(Poem $poem, $order = 'updated_at', $direction = 'desc', $columns = ['*']) {
+        $poemIds = [$poem->id];
+        if ($poem->original_id) {
+            $poemIds[] = $poem->original_id;
+            $op = Poem::where('original_id', $poem->original_id)->get();
+            $poemIds = $op->pluck('id')->concat($poemIds)->all();
+        }
+        if ($poem->translatedPoems) {
+            $poemIds = $poem->translatedPoems->pluck('id')->concat($poemIds)->all();
+        }
+        $query = $this->allQuery()->whereIn('poem_id', $poemIds)->with(['user'])->orderBy($order, $direction);
+        return $query;
     }
 
     public function listByPoem(Poem $poem, $perPage = 10, $order = 'updated_at', $direction = 'desc', $columns = ['*']) {

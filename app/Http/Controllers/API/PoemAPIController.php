@@ -3,14 +3,19 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Livewire\Score;
 use App\Http\Requests\CreatePoemRequest;
+use App\Http\Requests\DeletePoemRequest;
 use App\Models\Campaign;
 use App\Models\Poem;
 use App\Models\Tag;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\Process\Process;
 
 /**
  * Class LanguageController
@@ -46,7 +51,12 @@ class PoemAPIController extends Controller {
         $item = Poem::find($id);
         $res = $item->toArray();
         $res['poet_image'] = $item->uploader->avatarUrl;
-        $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item, 100);
+        $res['score_weight'] = round(ScoreRepository::calcWeight($id));
+        // dd(($res['score_weight']));
+        $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item)->get()->map(function ($item) {
+            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
+            return $item;
+        });
         $res['related'] = $this->poemRepository->random(2)
             ->where('id', '<>', $id)
             ->whereHas('tags', function ($query) use ($item) {
@@ -63,5 +73,26 @@ class PoemAPIController extends Controller {
         $poem->tags()->save(Tag::find($sanitized['tag_id']));
 
         return $this->responseSuccess();
+    }
+
+    public function delete($poemId) {
+        try {
+            $this->authorize('api.poem.delete', Poem::find($poemId));
+        } catch (AuthorizationException $e) {
+            return $this->responseFail();
+        }
+
+        $poem = Poem::find($poemId);
+        $poem->delete();
+
+        return $this->responseSuccess();
+    }
+
+    public function share($poemId) {
+        $poem = Poem::find($poemId);
+        $json = json_encode(['poem' => $poem->poem, 'title' => $poem->title]);
+
+        shell_exec("cd /Users/apple/dev/remotion-logo && npx remotion render src/index.tsx poem output/poem/{$poem->id}.png --png --overwrite --props='$json'");
+
     }
 }
