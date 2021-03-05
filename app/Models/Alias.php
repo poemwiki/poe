@@ -38,7 +38,7 @@ class Alias extends Model {
         return url('/admin/alias/' . $this->getKey());
     }
     public function getUrlAttribute() {
-        return $this->wikidata->getSiteLink(app()->getLocale() === 'en' ? 'en' : 'zh');
+        return $this->wikidata ? $this->wikidata->getSiteLink(app()->getLocale() === 'en' ? 'en' : 'zh') : null;
     }
 
     // todo label should be name(current locale name with same wikidata_id)
@@ -50,10 +50,12 @@ class Alias extends Model {
             : $this->name;
     }
     public function getLabelEnAttribute() {
-        return $this->wikidata->getLabel('en');
+        return $this->wikidata ? ($this->wikidata->getLabel('en') ?? null) : null;
     }
     public function getLabelCnAttribute() {
-        return $this->wikidata->getLabel('zh') ?? $this->wikidata->getLabel('zh-hant') ?? $this->wikidata->getLabel('lzh');
+        return $this->wikidata
+            ? ($this->wikidata->getLabel('zh') ?? $this->wikidata->getLabel('zh-hant') ?? $this->wikidata->getLabel('lzh') ?? null)
+            : null;
     }
     public function getQIDAttribute() {
         return 'Q'.$this->id;
