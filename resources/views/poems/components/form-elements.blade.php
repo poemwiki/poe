@@ -205,7 +205,7 @@
   <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
 
 
-    <input type="" name="translator" :value="form.translator">
+    <input type="hidden" name="translator" :value="form.translator">
     <v-select :options="translatorList" label="label" :reduce="label => label.id"
               taggable :create-option="label => ({
                 label: label,
