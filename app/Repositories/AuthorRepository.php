@@ -40,13 +40,16 @@ class AuthorRepository extends BaseRepository {
             $query->whereNull('author_id');
 
         if (is_numeric($excludeAuthorId)) {
-            $query->where('author_id', '<>', $excludeAuthorId);
+            $query->whereRaw("NOT(`author_id` <=> $excludeAuthorId)");
+            // NOT(nullable fields <=> sth) 等价于以下条件：
+            // $query->whereRaw("(`author_id` <> $excludeAuthorId or `author_id` is NULL)");
+            // 必须添加 or `author_id` is NULL 条件，否则查询不到 author_id 为 NULL 的数据。
         }
 
         $res = $query->groupBy(['wikidata_id', 'author_id'])->orderBy('author_id', 'desc')->limit(self::SEARCH_LIMIT)->get()
             ->map->only('QID', 'label_en', 'label_cn', 'label', 'url', 'author_id')->map(function ($item) {
                 $item['id'] = $item['author_id'] ?? $item['QID']; // don't replace this with select concat('Q', wikidata_id) as id, because it will be casted into integer
-                $item['source'] = $item['author_id'] ? 'PoemWiki' : 'Wikidata';
+                $item['source'] = $item['author_id'] ? '🔗 PoemWiki' : '🔗 Wikidata';
                 return $item;
             });
         return $res;
@@ -88,7 +91,7 @@ class AuthorRepository extends BaseRepository {
         if(is_numeric($authorId)) {
             $resById = Author::select(['id', 'name_lang'])->where('id', '=', $authorId)->get()
                 ->map->only('id', 'label_en', 'label_cn', 'label', 'url')->map(function ($item) {
-                    $item['source'] = 'PoemWiki';
+                    $item['source'] = '🔗 PoemWiki';
                     return $item;
                 });
         }

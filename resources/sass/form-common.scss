@@ -38,6 +38,12 @@ input[type],select {
     min-height: 2.4rem;
     transition: opacity 1s;
   }
+  .vs__dropdown-option--highlight {
+    .author-option-source {
+      background-color: $vs-state-active-bg;
+      color: $white;
+    }
+  }
 }
 
 @import 'menu';

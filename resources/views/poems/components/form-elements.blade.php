@@ -114,8 +114,10 @@
               name="poet_id_fake_element"
     >
       <template slot="option" slot-scope="option">
-        @{{ option.label }}
-        <span :class="'author-option ' + option.source" class="absolute right-3 inline-block text-right text-gray-400 w-28">@{{option.source}}</span>
+        <div :title="option.source ? '链接到作者页' : 'PoemWiki 暂无该作者，将链接到搜索页'" class="author-option">
+          @{{ option.label }}
+          <span :class="'author-option-source ' + option.source" class="absolute text-xs leading-loose right-2 bg-white inline-block text-right text-gray-400 w-28">@{{option.source}}</span>
+        </div>
       </template>
     </v-select>
 
