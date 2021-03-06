@@ -124,6 +124,16 @@ section.poem {
         margin-right: .4em;
       }
 
+      a.search-link:hover:after {
+        content: '\1F50D';
+        font-size: 10px;
+        display: inline-block;
+        width: 1.8em;
+        line-height: 2.4em;
+        text-indent: .4em;
+        background-color: #fff;
+      }
+
       &.poem-versions {
         a:hover > dt {
           color: $white;

@@ -113,7 +113,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                             @if($poem->poetAuthor)
                                 <a href="{{route('author/show',  ['fakeId' => $poem->poetAuthor->fakeId, 'from' => $poem->id])}}">{{$poem->poetAuthor->name_lang}}</a>
                             @else
-                                <a href="{{route('search', $poetName)}}">{{$poetName}}</a>
+                            <a href="{{route('search', $poetName)}}" class="search-link">{{$poetName}}</a>
                             @endif
                         </address>
                     </dd><br>
@@ -124,7 +124,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                         @if($poem->translatorAuthor)
                             <a href="{{route('author/show', ['fakeId' => $poem->translatorAuthor->fakeId])}}">{{$poem->translatorAuthor->name_lang}}</a>
                         @else
-                            <a href="{{route('search', $poem->translator)}}">{{$poem->translator}}</a>
+                            <a href="{{route('search', $poem->translator)}}" class="search-link">{{$poem->translator}}</a>
                         @endif
                         </dd><br>
                     @endif
