@@ -38,6 +38,16 @@ Vue.component('author-form', {
   },
 
   methods: {
+
+    getPostData: function () {
+      let data = _.clone(this.form);
+      if(data.name_lang.en === null) delete data.name_lang.en;
+      if(data.describe_lang.en === null) data.describe_lang.en = '';
+      if(data.describe_lang['zh-CN'] === null) data.describe_lang['zh-CN'] = '';
+
+      return data;
+    },
+
     onSearchNation: function(keyword, loading) {
         if(keyword.length) {
           loading(true);

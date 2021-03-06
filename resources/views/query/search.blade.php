@@ -31,12 +31,8 @@
     @endif
 
     <aside class="">
-      @if(isset($authorCount) && !$authorCount)
-        <a href="{{route('author/create')}}" class="btn">@lang('Add Author') {{$keyword}}</a>
-      @endif
-      @if(isset($poemCount) && !$poemCount)
-        <a href="{{route('new')}}" class="btn">@lang('Add Poem') {{$keyword}}</a>
-      @endif
+      <a href="{{route('author/create')}}" class="btn">@lang('Add Author') {{$keyword}}</a>
+      <a href="{{route('new')}}" class="btn">@lang('Add Poem') {{$keyword}}</a>
     </aside>
 
     @if(isset($res))

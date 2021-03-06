@@ -43,7 +43,7 @@ class AuthorRepository extends BaseRepository {
             $query->where('author_id', '<>', $excludeAuthorId);
         }
 
-        $res = $query->groupBy(['wikidata_id', 'author_id'])->limit(self::SEARCH_LIMIT)->get()
+        $res = $query->groupBy(['wikidata_id', 'author_id'])->orderBy('author_id', 'desc')->limit(self::SEARCH_LIMIT)->get()
             ->map->only('QID', 'label_en', 'label_cn', 'label', 'url', 'author_id')->map(function ($item) {
                 $item['id'] = $item['author_id'] ?? $item['QID']; // don't replace this with select concat('Q', wikidata_id) as id, because it will be casted into integer
                 $item['source'] = $item['author_id'] ? 'PoemWiki' : 'Wikidata';
