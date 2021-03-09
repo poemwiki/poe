@@ -38,6 +38,14 @@ input[type],select {
     min-height: 2.4rem;
     transition: opacity 1s;
   }
+
+  .vs__dropdown-menu {
+    overflow-x: hidden;
+  }
+
+  .author-option-source {
+    padding: 0 4px;
+  }
   .vs__dropdown-option--highlight {
     .author-option-source {
       background-color: $vs-state-active-bg;

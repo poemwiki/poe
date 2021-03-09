@@ -15,7 +15,6 @@ use Spatie\Searchable\SearchResult;
  * @property int $id
  * @property string $created_at
  * @property string $updated_at
- * @mixin \Eloquent
  * @package App
  */
 class Author extends Model implements Searchable {

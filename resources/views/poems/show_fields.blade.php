@@ -190,7 +190,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                         @foreach($poem->otherTranslatedPoems()->get() as $t)
                             <a href="{{$t->url}}">
                                 <dt>{{$t->lang->name_lang ?? trans('poem.other')}}</dt>
-                                <dd>{{$t->translator ?? '佚名'}}</dd><br>
+                                <dd>{{$t->translatorAuthor ? $t->translatorAuthor->name_lang : ($t->translator ?? '佚名')}}</dd><br>
                             </a>
                         @endforeach
 

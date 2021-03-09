@@ -30,10 +30,12 @@
     <p class="search-count">@lang('search.count', ['count' => $res->count()])</p>
     @endif
 
+    @if(isset($keyword))
     <aside class="">
       <a href="{{route('author/create')}}" class="btn">@lang('Add Author') {{$keyword}}</a>
       <a href="{{route('new')}}" class="btn">@lang('Add Poem') {{$keyword}}</a>
     </aside>
+    @endif
 
     @if(isset($res))
     @foreach($res->groupByType() as $type => $modelSearchResults)
