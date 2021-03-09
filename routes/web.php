@@ -321,12 +321,32 @@ Route::any('/query', 'QueryController@query')->name('query');
 Route::any('/calendar', 'CalendarController@index')->name('calendar');
 Route::any('/calendar/q/{month}/{day}', 'CalendarController@query')->name('calendar.query');
 
+Route::get('/page/{page}', function ($page) {
+    $view = 'page/'.$page;
+    if(view()->exists($view))
+        return view($view);
+    return abort(404);
+});
 
+Route::get('/poem-card/{id}.png', function ($id) {
+    $path = storage_path("app/public/poem-card/$id/element-0.png");
 
+    if (!File::exists($path)) {
+        abort(404);
+    }
 
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+})->name('poem-card');
 
 Route::get('/{id}', function ($id) {
-    if($id <= 10000) {
+    if($id <= 20000) {
+        // Bot return fakeId url, deprecate /{id} url
         return redirect(route('p/show', ['fakeId' => Poem::getFakeId($id)]));
     }
     return redirect('/');

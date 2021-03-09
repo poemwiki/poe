@@ -23,7 +23,11 @@ return [
     |
     */
     'skip' => [
+        '*.png',
+        '*.jpg',
+        '*.jpeg',
         'admin*',
+        'poem-card*',
         'captcha*',
         '*.xml',
         '*.less',

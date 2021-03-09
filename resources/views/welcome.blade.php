@@ -24,20 +24,20 @@
 
 
     <div class="content">
-        <div class="title m-b-md">
-            <a class="no-bg" href="{{ $poemUrl }}">PoemWiki</a>
-        </div>
+      <div class="title m-b-md">
+        <a class="no-bg" href="{{ $poemUrl }}">PoemWiki</a>
+      </div>
+    </div>
 
-
-        <div class="links">
-            <a class="no-bg hidden" href="/#">关于</a>
-            @auth
-              @if(Auth::user()->is_admin)
-                <a class="no-bg" href="/calendar">诗歌日历</a>
-              @endif
-            @endauth
-            <a class="no-bg" target="_blank" href="https://bedtimepoem.com">读首诗再睡觉</a>
-        </div>
+    <div class="links" style="position:absolute; bottom: 1em;">
+      <a class="no-bg" href="/q">搜索</a>
+      <a class="no-bg" href="/page/about">关于</a>
+      @auth
+        @if(Auth::user()->is_admin)
+          <a class="no-bg" href="/calendar">诗歌日历</a>
+        @endif
+      @endauth
+      <a class="no-bg" target="_blank" href="https://bedtimepoem.com">读首诗再睡觉</a>
     </div>
 </div>
 
