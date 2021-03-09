@@ -10,7 +10,14 @@ use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
-
+/**
+ * Class Author
+ * @property int $id
+ * @property string $created_at
+ * @property string $updated_at
+ * @mixin \Eloquent
+ * @package App
+ */
 class Author extends Model implements Searchable {
     use SoftDeletes;
     use HasTranslations;
