@@ -45,9 +45,7 @@ Vue.component('poem-form', {
       },
 
       authorList: this.defaultAuthors,
-      newAuthor: null,
       translatorList: _.clone(this.defaultAuthors),
-      newTranslator: null,
       cmOptions: {
         tabSize: 2,
         mode: 'text/plain',
@@ -63,24 +61,10 @@ Vue.component('poem-form', {
 
   mounted: function() {
     if(!this.form.poet_id && this.form.poet) {
-      this.newAuthor = {
-        id: 'new_' + this.form.poet,
-        label: (this.form.poet_cn && this.form.poet_cn!==this.form.poet) ? this.form.poet+'（'+this.form.poet_cn+'）' : this.form.poet,
-        label_en: this.form.poet,
-        label_cn: this.form.poet_cn,
-        url: ''
-      };
       this.authorList.push(this.newAuthor);
       this.form.poet_id = 'new_' + this.form.poet;
     }
     if(!this.form.translator_id && this.form.translator) {
-      this.newTranslator = {
-        id: 'new_' + this.form.translator,
-        label: this.form.translator,
-        label_en: this.form.translator,
-        label_cn: this.form.translator,
-        url: ''
-      };
       this.translatorList.push(this.newTranslator);
       this.form.translator_id = 'new_' + this.form.translator;
     }
@@ -224,6 +208,24 @@ Vue.component('poem-form', {
   computed: {
     codemirror() {
       return this.$refs.cmEditor.codemirror;
+    },
+    newAuthor() {
+      return {
+        id: 'new_' + this.form.poet,
+        label: this.form.poet,
+        label_en: this.form.poet,
+        label_cn: this.form.poet,
+        url: ''
+      }
+    },
+    newTranslator() {
+      return {
+        id: 'new_' + this.form.translator,
+        label: this.form.translator,
+        label_en: this.form.translator,
+        label_cn: this.form.translator,
+        url: ''
+      }
     }
   },
 
