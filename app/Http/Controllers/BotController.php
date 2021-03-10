@@ -322,7 +322,7 @@ SQL
                 }
 
                 // TODO nation should be $poetAuthor->nation->name_lang
-                $nation = $poetAuthor && $poetAuthor->nation
+                $nation = isset($poetAuthor) && $poetAuthor->nation
                     ? ($poetAuthor->nation->id !== 32
                         ? "[{$poetAuthor->nation->name_lang}] "
                         : ($poetAuthor->dynasty && $poetAuthor->dynasty->id !== 75
@@ -339,7 +339,7 @@ SQL
                 $content = opencc_convert(preg_replace('@[\r\n]{3,}@', "\n\n", $post->poem), $od);
 
 
-                if($poetAuthor) {
+                if(isset($poetAuthor)) {
                     $writer = '作者 / ' . $nation . $poetAuthor->name_lang;
                 } else {
                     $writer = '作者 / ' . $post->poet_cn ?? $post->poet;
@@ -376,12 +376,13 @@ SQL
                 array_push($parts, $writer);
 
 
-                if($translatorAuthor) {
+                if(isset($translatorAuthor)) {
                     $translator = '翻译 / ' . $nation . $translatorAuthor->name_lang;
-                } else {
-                    $translator = '翻译 / ' . trim($post->translator);
+                    array_push($parts, $translator);
+                } else if($translatorName = trim($post->translator)){
+                    $translator = '翻译 / ' . $translatorName;
+                    array_push($parts, $translator);
                 }
-                array_push($parts, $translator);
 
                 // links & score
                 if(!$post->short_url) {
