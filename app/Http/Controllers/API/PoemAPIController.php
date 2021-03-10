@@ -13,8 +13,6 @@ use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Symfony\Component\Process\Process;
 
 /**
  * Class LanguageController
@@ -88,10 +86,36 @@ class PoemAPIController extends Controller {
     }
 
     public function share($poemId) {
+        // just for test
+        // if(config('app.env') == 'local' && !isset($_GET['force'])) {
+        //     return $this->responseSuccess(['url' => 'http://pwiki.lol/poem-card/1.png']);
+        // }
+
+        // TODO check if $poem->image exists, if not then generate image
         $poem = Poem::find($poemId);
-        $json = json_encode(['poem' => $poem->poem, 'title' => $poem->title]);
 
-        shell_exec("cd /Users/apple/dev/remotion-logo && npx remotion render src/index.tsx poem output/poem/{$poem->id}.png --png --overwrite --props='$json'");
+        $postData = ['compositionId' => 'pure', 'poem' => $poem->poem, 'title' => $poem->title];
 
+        $options = array(
+            'http' => array(
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => "POST",
+                'content' => http_build_query($postData),
+                'timeout' => 30,
+            ),
+        );
+        $context = stream_context_create($options);
+        $img = file_get_contents("http://localhost:8888", false, $context);
+
+        $dir = storage_path('app/public/poem-card/' . $poem->id);
+        if(!is_dir($dir)) {
+            mkdir($dir);
+        }
+        $storeDir = $dir .'/element-0.png';
+        if(file_put_contents($storeDir, $img)) {
+            return $this->responseSuccess(['url' => route('poem-card', $poemId)]);
+        }
+
+        return $this->responseFail();
     }
 }
