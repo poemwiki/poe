@@ -328,11 +328,12 @@ Route::get('/page/{page}', function ($page) {
     return abort(404);
 });
 
-Route::get('/poem-card/{id}.png', function ($id) {
+Route::get('/poem-card/{id}', function ($id) {
     $path = storage_path("app/public/poem-card/$id/element-0.png");
 
     if (!File::exists($path)) {
         abort(404);
+        return;
     }
 
     $file = File::get($path);
