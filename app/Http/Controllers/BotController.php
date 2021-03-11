@@ -342,7 +342,7 @@ SQL
                 if(isset($poetAuthor)) {
                     $writer = '作者 / ' . $nation . $poetAuthor->name_lang;
                 } else {
-                    $writer = '作者 / ' . $post->poet_cn ?? $post->poet;
+                    $writer = '作者 / ' . ($post->poet_cn ?? $post->poet);
                 }
 
 
