@@ -7,7 +7,7 @@
 
 @section('content')
     <article class="poet">
-        <h1>{{$author->name_lang}} </h1>
+        <h1>{{$author->label}} </h1>
         <a class="edit btn"
            href="{{ Auth::check() ? route('author/edit', $author->fakeId) : route('login', ['ref' => route('author/edit', $author->fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
 
@@ -36,11 +36,7 @@
 
         @if($poemsAsPoet->isNotEmpty())
         <h2>
-            @if($fromPoetName && $author->name_lang !== $fromPoetName)
-                {{$author->name_lang .' ('. $fromPoetName .')'}} 的诗歌
-            @else
-                {{$author->name_lang}} 的诗歌
-            @endif
+              {{$author->label}} 的诗歌
         </h2>
         @endif
         <ul>
@@ -57,7 +53,7 @@
         </ul>
 
         @if($poemsAsTranslator->isNotEmpty())
-        <h2>{{$author->name_lang}} 的译作</h2>
+        <h2>{{$author->label}} 的译作</h2>
         @endif
         <ul>
             @foreach($poemsAsTranslator as $poem)
