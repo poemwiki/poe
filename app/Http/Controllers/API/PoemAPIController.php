@@ -95,6 +95,9 @@ class PoemAPIController extends Controller {
         $poem = Poem::find($poemId);
 
         $postData = ['compositionId' => 'pure', 'poem' => $poem->poem, 'title' => $poem->title];
+        if(isset($_GET['force'])) {
+            $postData['force'] = 1;
+        }
 
         $options = array(
             'http' => array(
