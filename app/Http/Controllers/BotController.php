@@ -377,7 +377,7 @@ SQL
 
 
                 if(isset($translatorAuthor)) {
-                    $translator = '翻译 / ' . $nation . $translatorAuthor->name_lang;
+                    $translator = '翻译 / ' . $translatorAuthor->name_lang;
                     array_push($parts, $translator);
                 } else if($translatorName = trim($post->translator)){
                     $translator = '翻译 / ' . $translatorName;
