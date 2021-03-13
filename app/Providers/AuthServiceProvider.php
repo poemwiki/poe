@@ -64,13 +64,9 @@ class AuthServiceProvider extends ServiceProvider
 
         Passport::routes();
 
-        // token有效期
-
-        Passport::tokensExpireIn(Carbon::now()->addDays(90));
-
-        // 可刷新token时间
-
-        // Passport::refreshTokensExpireIn(Carbon::now()->addDays(2));
+        Passport::tokensExpireIn(now()->addDays(90));
+        Passport::refreshTokensExpireIn(now()->addDays(120));
+        Passport::personalAccessTokensExpireIn(now()->addMonths(6));
 
 //        Gate::define('web.score.create', function ($user) {
 //            return isset($user->id);

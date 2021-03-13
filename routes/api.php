@@ -35,15 +35,18 @@ Route::middleware(['auth:api', 'api'])->group(static function () {
     Route::prefix('v1')->name('api')->group(static function() {
         Route::prefix('user')->name('user/')->group(static function() {
             Route::post('/profile', [\App\Http\Controllers\API\UserAPIController::class, 'update'])->name('profile');
+            // Route::post('/data', [\App\Http\Controllers\API\UserAPIController::class, 'data'])->name('data');
             Route::post('/decrypt', [\App\Http\Controllers\API\LoginWeAppController::class, 'decrypt'])->name('weapp-decrypt');
         });
         Route::prefix('poem')->name('poem/')->group(static function() {
             Route::post('/store', [\App\Http\Controllers\API\PoemAPIController::class, 'store'])->name('store');
             Route::get('/mine', [\App\Http\Controllers\API\PoemAPIController::class, 'mine'])->name('mine');
             Route::get('/delete/{poemId}', [\App\Http\Controllers\API\PoemAPIController::class, 'delete'])->name('delete');
+            Route::get('/related', [\App\Http\Controllers\API\PoemAPIController::class, 'related'])->name('related');
         });
         Route::prefix('review')->name('review/')->group(static function() {
             Route::post('/store', [\App\Http\Controllers\API\ReviewAPIController::class, 'store'])->name('store');
+            // Route::get('/mine', [\App\Http\Controllers\API\ReviewAPIController::class, 'mine'])->name('mine');
         });
         Route::prefix('score')->name('score/')->group(static function() {
             Route::post('/store', [\App\Http\Controllers\API\ScoreAPIController::class, 'store'])->name('store');

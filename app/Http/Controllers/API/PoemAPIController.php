@@ -43,6 +43,19 @@ class PoemAPIController extends Controller {
         return $this->responseSuccess($this->poemRepository->getByOwner($request->user()->id));
     }
 
+    public function relatedAll(Request $request) {
+        return $this->responseSuccess($this->poemRepository->getRelated($request->user()->id));
+    }
+
+    /**
+     * get related poem which has related campaign
+     * @param Request $request
+     * @return array
+     */
+    public function related(Request $request) {
+        return $this->responseSuccess($this->poemRepository->getRelated($request->user()->id, true));
+    }
+
     public function detail($id) {
         /** @var Poem $item */
         $item = Poem::find($id);

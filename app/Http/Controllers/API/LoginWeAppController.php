@@ -35,6 +35,10 @@ class LoginWeAppController extends Controller {
     public function login(Request $request) {
         Log::info('try weApp login', $request->toArray());
 
+        if(!isset($request->code) or is_null($request->code)) {
+            return $this->responseFail([], 'need code');
+        }
+
         $code = $request->code;
         // 根据 code 获取微信 openid 和 session_key
         $data = $this->weApp->auth->session($code);
@@ -93,13 +97,13 @@ class LoginWeAppController extends Controller {
 
         // 直接创建token并设置有效期
         $createToken = $userBind->user->createToken($weappOpenid);
-        $createToken->token->expires_at = Carbon::now()->addDays(30);
         $createToken->token->save();
+
         $token = $createToken->accessToken;
         return $this->responseSuccess([
             'access_token' => $token,
             'token_type' => "Bearer",
-            'expires_in' => Carbon::now()->addDays(30),
+            'expires_in' => $createToken->token->expires_at,
             'data' => $userBind->user,
         ]);
     }

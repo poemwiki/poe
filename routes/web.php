@@ -294,9 +294,12 @@ Route::prefix('author')->name('author/')->group(static function() {
 //    return $user;
 //})->name('login-wechat')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
 
-if(User::isWechat() && config('app.env') !== 'local') {
+if(User::isWechat()) {
     Route::any('/login', [\App\Http\Controllers\Auth\LoginWechatController::class, 'login'])
         ->name('login')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
+} else if(User::isWeApp()) {
+    Route::any('/login', [\App\Http\Controllers\API\LoginWeAppController::class, 'login'])
+        ->name('login');
 } else {
     Route::get('/login', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])
         ->name('login');

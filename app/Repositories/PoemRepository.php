@@ -2,7 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Models\Campaign;
 use App\Models\Poem;
+use App\Models\Review;
 use App\Models\Score;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
@@ -133,7 +135,8 @@ class PoemRepository extends BaseRepository
 
     public function getByTagId($tagId, $orderBy) {
         // TODO Poem::where() tag_id=$tagId, with(['uploader', 'scores'])
-        return \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems()->orderByDesc($orderBy)->get()->map(function ($item, $index) {
+        return \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems()
+            ->orderByDesc($orderBy)->get()->map(function ($item, $index) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->uploader->name;
@@ -148,6 +151,32 @@ class PoemRepository extends BaseRepository
             ['is_owner_uploaded', '=', '1'],
             ['upload_user_id', '=', $userId],
         ])->orderByDesc('created_at')->get()->map(function ($item) {
+            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
+            $item['poet_image'] = $item->uploader->avatarUrl;
+            $item['poet'] = $item->uploader->name;
+            return $item;
+        });
+    }
+
+    public function getRelated($userId, $isCampaignPoem=false) {
+        $q = self::newQuery();
+
+        if($isCampaignPoem) {
+            $tagIds = Campaign::select('tag_id')->pluck('tag_id');
+
+            $q->whereHas('tags', function ($q) use($tagIds) {
+                $q->whereIn('tag.id', $tagIds);
+            });
+        }
+
+        $q->where(function ($q) use ($userId) {
+            $q->whereHas('reviews', function($q) use ($userId) {
+                $q->where(['user_id' => $userId]);
+            })->orWhereHas('scores', function($q) use ($userId) {
+                $q->where(['user_id' => $userId]);
+            });
+        });
+        return $q->orderByDesc('created_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->uploader->name;

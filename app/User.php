@@ -92,7 +92,19 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public static function isWechat() {
-        if (isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false) {
+        if (isset($_SERVER['HTTP_USER_AGENT'])
+            && strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false
+            && !self::isWeApp()
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    public static function isWeApp() {
+        if (isset($_SERVER['HTTP_REFERER'])
+            && strpos($_SERVER['HTTP_REFERER'], env('WECHAT_MINI_PROGRAM_APPID')) !== false
+        ){
             return true;
         }
         return false;
