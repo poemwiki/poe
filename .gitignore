@@ -18,8 +18,8 @@ yarn-error.log
 .env.backup
 .phpunit.result.cache
 fields_sample.json
-/public/css
-/public/js
+#/public/css
+#/public/js
 /public/img/avatars/*
 /public/vendor/swaggervel/*
 
