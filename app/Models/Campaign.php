@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasTranslations;
@@ -62,12 +63,11 @@ class Campaign extends Model {
         return asset($this->image);
     }
     public function getMastersAttribute() {
-        $masters = $this->settings['masters'];
+        $masters = $this->settings['masters']; // master user ids
         if(!$masters) return null;
 
         return array_map(function ($item) {
-            $item['avatar'] = asset($item['avatar']);
-            return $item;
+            return User::select(['id', 'avatar', 'name'])->find($item);
         }, $masters);
     }
 

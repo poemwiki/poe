@@ -139,6 +139,8 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                   @if(!$poem->is_owner_uploaded or ($poem->is_owner_uploaded && Auth::user()->id === $poem->upload_user_id))
                   <a class="edit btn"
                      href="{{ route('poems/edit', $fakeId) }}">@lang('poem.correct errors or edit')</a>
+                  @else
+                    <dl class="poem-ugc"><dt>原创诗歌</dt></dl>
                   @endif
                 @endauth
 
@@ -146,6 +148,8 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                   @if(!$poem->is_owner_uploaded)
                     <a class="edit btn"
                        href="{{ route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
+                  @else
+                  <dl class="poem-ugc"><dt>原创诗歌</dt></dl>
                   @endif
                 @endguest
 

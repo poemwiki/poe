@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Poem;
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use Illuminate\Foundation\Http\FormRequest;
@@ -43,7 +44,16 @@ class CreateScoreRequest extends FormRequest {
 
         $user = Auth::user();
         $sanitized['user_id'] = $user->id;
-        $sanitized['weight'] = $user->is_v ? 100 : 1;
+        // TODO weight should from user.weight
+
+        $isMaster = false;
+        $tags = Poem::find($sanitized['poem_id'])->tags;
+        if($tags && $tags[0] && $tags[0]->campaign) {
+            $campaign = $tags[0]->campaign;
+            $isMaster = in_array($user->id, $campaign->settings['masters']);
+        }
+
+        $sanitized['weight'] = ($isMaster || $user->is_v) ? 100 : 1;
 
         return $sanitized;
     }

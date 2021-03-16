@@ -136,12 +136,12 @@ class PoemRepository extends BaseRepository
     public function getByTagId($tagId, $orderBy) {
         // TODO Poem::where() tag_id=$tagId, with(['uploader', 'scores'])
         return \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems()
-            ->orderByDesc($orderBy)->get()->map(function ($item, $index) {
+            ->orderByDesc($orderBy)->get()->map(function ($item, $index) use ($orderBy) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->uploader->name;
             $item['score_weight'] = ScoreRepository::calcWeight($item->id);
-            if($index <= 9) $item['rank'] = $index + 1;
+            if($index <= 9 && $orderBy === 'score') $item['rank'] = $index + 1;
             return $item;
         });
     }
@@ -154,11 +154,18 @@ class PoemRepository extends BaseRepository
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->uploader->name;
+            $item['score_weight'] = ScoreRepository::calcWeight($item->id);
             return $item;
         });
     }
 
-    public function getRelated($userId, $isCampaignPoem=false) {
+    /**
+     * @param $userId
+     * @param bool $isCampaignPoem
+     * @param bool $excludeSelf exclude poem that upload_user_id=userId. ONLY for $isCampaignPoem == true
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
+     */
+    public function getRelated($userId, $isCampaignPoem=false, $excludeSelf=true) {
         $q = self::newQuery();
 
         if($isCampaignPoem) {
@@ -167,7 +174,15 @@ class PoemRepository extends BaseRepository
             $q->whereHas('tags', function ($q) use($tagIds) {
                 $q->whereIn('tag.id', $tagIds);
             });
+
+            if($excludeSelf) {
+                $q->where([
+                    // ['is_owner_uploaded', '=', '1'],
+                    ['upload_user_id', '<>', $userId],
+                ]);
+            }
         }
+
 
         $q->where(function ($q) use ($userId) {
             $q->whereHas('reviews', function($q) use ($userId) {
@@ -180,6 +195,7 @@ class PoemRepository extends BaseRepository
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->uploader->name;
+            $item['score_weight'] = ScoreRepository::calcWeight($item->id);
             return $item;
         });
     }

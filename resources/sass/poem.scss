@@ -86,8 +86,7 @@ section.poem {
       }
     }
 
-
-    dl.poem-info {
+    dl.poem-info,dl.poem-ugc {
       line-height: 1em;
       margin: 3.2rem 0 0;
       font-size: $font-size-sm;
@@ -139,6 +138,9 @@ section.poem {
           color: $white;
         }
       }
+    }
+    dl.poem-ugc {
+      margin: 0
     }
 
     .btn.edit {
