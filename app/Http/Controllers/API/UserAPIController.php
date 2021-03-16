@@ -20,4 +20,9 @@ class UserAPIController extends Controller{
 
         return $this->responseSuccess($user);
     }
+
+    public function data(Request $request) {
+        $user = $request->user();
+        return $this->responseSuccess($user);
+    }
 }
