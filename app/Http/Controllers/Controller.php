@@ -27,8 +27,8 @@ class Controller extends BaseController {
             $data, $message ?? trans('success'));
     }
 
-    public function responseFail($data=[], $message = null) {
+    public function responseFail($data=[], $message = null, int $code=-1) {
         return $this->response(
-            $data, $message ?? trans('fail'), -1);
+            $data, $message ?? trans('fail'), $code);
     }
 }

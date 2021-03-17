@@ -11,6 +11,7 @@ use App\Models\Tag;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
+use EasyWeChat\Factory;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 
@@ -78,6 +79,16 @@ class PoemAPIController extends Controller {
 
     public function store(CreatePoemRequest $request) {
         $sanitized = $request->getSanitized();
+
+        $wechatApp = Factory::miniProgram([
+            'app_id' => env('WECHAT_MINI_PROGRAM_APPID'),
+            'secret' => env('WECHAT_MINI_PROGRAM_SECRET'),
+            'response_type' => 'object',
+        ]);
+        $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['poem']);
+        if($result->errcode) {
+            return $this->responseFail([], '请检查是否含有敏感词', -2);
+        }
 
         $poem = Poem::create($sanitized);
         $poem->tags()->save(Tag::find($sanitized['tag_id']));
