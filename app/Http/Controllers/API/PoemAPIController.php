@@ -118,7 +118,7 @@ class PoemAPIController extends Controller {
         // TODO check if $poem->image exists, if not then generate image
         $poem = Poem::find($poemId);
 
-        $postData = ['compositionId' => 'pure', 'poem' => $poem->poem, 'title' => $poem->title];
+        $postData = ['compositionId' => 'pure', 'poem' => $poem->poem, 'poet' => $poem->uploader->name, 'title' => $poem->title];
         if(isset($_GET['force'])) {
             $postData['force'] = 1;
         }
