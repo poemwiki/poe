@@ -141,7 +141,7 @@ class PoemRepository extends BaseRepository
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->uploader->name;
             $item['score_weight'] = ScoreRepository::calcWeight($item->id);
-            if($index <= 9 && $orderBy === 'score') $item['rank'] = $index + 1;
+            if($orderBy === 'score') $item['rank'] = $index + 1;
             return $item;
         });
     }
