@@ -26,27 +26,16 @@ use Symfony\Component\Cache\Adapter\RedisAdapter;
 class BotController extends Controller {
     /** @var  PoemRepository */
     private $poemRepository;
-    /**
-     * @var \EasyWeChat\OfficialAccount\Application
-     */
-    private $wechatApp;
+
+    protected $factor = [
+        'dushui' => 5,
+        'ugc' => 1
+    ];
 
     public function __construct() {
         ini_set('memory_limit', '300M');
         Jieba::init(array('mode' => 'default', 'dict' => 'small'));
         Finalseg::init();
-
-        $config = [
-            'app_id' => env('WECHAT_OFFICIAL_ACCOUNT_APPID'),
-            'secret' => env('WECHAT_OFFICIAL_ACCOUNT_SECRET'),
-
-            // 指定 API 调用返回结果的类型：array(default)/collection/object/raw/自定义类名
-            'response_type' => 'object',
-        ];
-
-        $this->wechatApp = Factory::officialAccount($config);
-        $cache = new RedisAdapter(app('redis')->connection()->client());
-        $this->wechatApp->rebind('cache', $cache);
     }
 
     public function data($poeDB, $chatroom) {
@@ -238,16 +227,23 @@ SQL;
         $originWords = '';
         if (is_array($keyword)) {
             $originWords = implode(' ', $keyword);
-            $sql = 'SELECT (select 1 from wx_post WHERE poem_id=p.id limit 1) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
-`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`, `short_url`,
+
+            $sql = <<<SQL
+SELECT (select {$this->factor['dushui']} from wx_post WHERE poem_id=p.id limit 1) as `wx`, p.`id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
+`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`, p.`short_url`,
                `poet_id`, `translator_id`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
-        WHERE ';
+        LEFT JOIN `author` poet_author
+        ON (poet_author.id = p.poet_id)
+        WHERE
+SQL;
             foreach ($keyword as $idx => $word) {
                 $sql .= "(`poem` like :keyword1_$idx OR `title` like :keyword2_$idx
-        OR `poet` like :keyword3_$idx OR `poet_cn` like :keyword4_$idx OR `translator` like :keyword5_$idx) AND";
+        OR `poet` like :keyword3_$idx OR `poet_cn` like :keyword4_$idx OR `translator` like :keyword5_$idx
+        OR JSON_SEARCH(lower(poet_author.`name_lang`), 'all', :keyword6_$idx)
+        ) AND";
             }
             $sql = trim($sql, 'AND') . ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR`need_confirm`<>1)
         ORDER BY wx desc, `selected_count`,`last_selected_time`,length(`poem`) limit 0,2';
@@ -261,19 +257,25 @@ SQL;
                 $q->bindValue(":keyword3_$idx", "%$word%", PDO::PARAM_STR);
                 $q->bindValue(":keyword4_$idx", "%$word%", PDO::PARAM_STR);
                 $q->bindValue(":keyword5_$idx", "%$word%", PDO::PARAM_STR);
+                $q->bindValue(":keyword6_$idx", "%$word%", PDO::PARAM_STR);
             }
 
         } else {
             $originWords = $keyword;
+
             $q = $poeDB->prepare(<<<'SQL'
-        SELECT (select 1 from wx_post WHERE poem_id=p.id limit 1) as `wx`, `id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
-`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`, `short_url`,
+        SELECT (select 1 from wx_post WHERE poem_id=p.id limit 1) as `wx`, p.`id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
+`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`, p.`short_url`,
                `poet_id`, `translator_id`
         FROM `poem` p
         LEFT JOIN `chatroom_poem_selected` selected
         ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
+        LEFT JOIN `author` poet_author
+        ON (poet_author.id = p.poet_id)
         WHERE (`poem` like :keyword1 OR `title` like :keyword2
-        OR `poet` like :keyword3 OR `poet_cn` like :keyword4 OR `translator` like :keyword5) AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1)
+            OR `poet` like :keyword3 OR `poet_cn` like :keyword4 OR `translator` like :keyword5
+            OR JSON_SEARCH(lower(poet_author.`name_lang`), 'all', :keyword6 )
+        ) AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1)
         ORDER BY wx desc, `selected_count`,`last_selected_time`,length(`poem`) limit 0,2
 SQL
             );
@@ -283,6 +285,7 @@ SQL
             $q->bindValue(':keyword3', $word, PDO::PARAM_STR);
             $q->bindValue(':keyword4', $word, PDO::PARAM_STR);
             $q->bindValue(':keyword5', $word, PDO::PARAM_STR);
+            $q->bindValue(":keyword6", $word, PDO::PARAM_STR);
         }
 
         $q->bindValue(':chatroomId', $chatroom, PDO::PARAM_STR);
@@ -292,6 +295,7 @@ SQL
         $code = -1;
         $poem = '';
         $data = [];
+        $msg = '';
         if ($q->execute()) {
             $code = 0;
             $res = $q->fetchAll(PDO::FETCH_ASSOC);
@@ -436,13 +440,15 @@ SQL
         } else {
             Log::error('Bot search failed.');
             Log::error($q->errorInfo());
+            $msg = $q->errorInfo();
         }
 
 
         $msg = [
             'code' => $code,
             'poem' => $poem,
-            'data' => $data
+            'data' => $data,
+            'msg' => $msg
         ];
 
         return Response::json($msg);
@@ -495,13 +501,24 @@ SQL;
     }
 
     private function shorten($link, $cb = null) {
-        // TODO enable shorten until it accessible under China Mobile 4G network
+        // TODO write short url to poem.short_url by command and get it here
         return $link;
-        $shortUrl = $this->wechatApp->url->shorten($link);
-        if($shortUrl->errcode === 0) {
-            if(is_callable($cb)) call_user_func($cb, $shortUrl->short_url);
-            return $shortUrl->short_url;
+
+        $origin = urlencode($link);
+        $key = '5ff0b8b0267b2c5266ebe43aad@a010882bddcd395d94f6ca22e6345d80';
+        $expire_date = urlencode('2046-04-26');
+        $request_url = "http://api.3w.cn/api.htm?format=json&url={$origin}&key={$key}&expireDate={$expire_date}&domain=4";
+        $result_str = file_get_contents($request_url);
+
+        $url = "";
+        if ($result_str) {
+            $result_arr = json_decode($result_str, true);
+
+            if ($result_arr && $result_arr['code'] == "0") {
+                return $result_arr['url'];
+            }
         }
+
         return $link;
     }
 }
