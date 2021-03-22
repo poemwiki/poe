@@ -6,8 +6,7 @@
 @endsection
 
 @section('content')
-  <p><b>PoemWiki（诗歌维基）</b>的宗旨是传播优秀诗歌</p>
-  <p><b>PoemWiki（诗歌维基）</b>是一个可评分，可评论，跨语种的诗歌资料库</p>
+  <p><b>PoemWiki 诗歌维基</b><br/>是一个开放的，跨语种的诗歌资料库</p>
 @endsection
 
 @push('styles')
@@ -18,6 +17,7 @@
       align-items: center;
       justify-content: center;
       height: 90vh;
+      padding: 1em;
     }
   </style>
 @endpush
