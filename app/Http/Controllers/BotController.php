@@ -28,7 +28,7 @@ class BotController extends Controller {
     private $poemRepository;
 
     protected $factor = [
-        'dushui' => 5,
+        'dushui' => 1.5,
         'ugc' => 1
     ];
 
@@ -224,29 +224,46 @@ SQL;
             return $this->top($poeDB, $chatroom);
         }
 
+        // TODO add search for translator author name
+        $subSql = <<<SQL
+SELECT
+    (select {$this->factor['dushui']} from wx_post WHERE poem_id=p.id limit 1) as `wx`,
+    (select {$this->factor['ugc']}) as `base`,
+    IF(`selected_count`, `selected_count`, 0) as times,
+    p.score,
+    p.`id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
+    `from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`,
+    `dynasty`, `preface`, `subtitle`, `location`, p.`short_url`,
+    `poet_id`, `translator_id`
+    FROM `poem` p
+    LEFT JOIN `chatroom_poem_selected` selected
+    ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
+    LEFT JOIN `author` poet_author
+    ON (poet_author.id = p.poet_id)
+    WHERE
+SQL;
+
         $originWords = '';
         if (is_array($keyword)) {
             $originWords = implode(' ', $keyword);
 
-            $sql = <<<SQL
-SELECT (select {$this->factor['dushui']} from wx_post WHERE poem_id=p.id limit 1) as `wx`, p.`id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
-`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`, p.`short_url`,
-               `poet_id`, `translator_id`
-        FROM `poem` p
-        LEFT JOIN `chatroom_poem_selected` selected
-        ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
-        LEFT JOIN `author` poet_author
-        ON (poet_author.id = p.poet_id)
-        WHERE
-SQL;
             foreach ($keyword as $idx => $word) {
-                $sql .= "(`poem` like :keyword1_$idx OR `title` like :keyword2_$idx
-        OR `poet` like :keyword3_$idx OR `poet_cn` like :keyword4_$idx OR `translator` like :keyword5_$idx
-        OR JSON_SEARCH(lower(poet_author.`name_lang`), 'all', :keyword6_$idx)
-        ) AND";
+                $subSql .= "(
+                    `poem` like :keyword1_$idx OR `title` like :keyword2_$idx
+                    OR `poet` like :keyword3_$idx OR `poet_cn` like :keyword4_$idx
+                    OR `translator` like :keyword5_$idx
+                    OR JSON_SEARCH(lower(poet_author.`name_lang`), 'all', :keyword6_$idx )
+                ) AND";
             }
-            $sql = trim($sql, 'AND') . ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR`need_confirm`<>1)
-        ORDER BY wx desc, `selected_count`,`last_selected_time`,length(`poem`) limit 0,2';
+            $subSql = trim($subSql, 'AND') . ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR`need_confirm`<>1)';
+
+            $sql = <<<SQL
+SELECT  (IF(ISNULL(`wx`), 0, `wx`)+`base`) * IF(ISNULL(score), 1, 1+score/5) / (1+times) as `rank`, t.* FROM (
+    $subSql
+) as t
+ORDER BY `rank` desc, t.times, t.length limit 0,2
+SQL;
+
             $poeDB->prepare($sql);
 
             $q = $poeDB->prepare($sql);
@@ -263,22 +280,21 @@ SQL;
         } else {
             $originWords = $keyword;
 
-            $q = $poeDB->prepare(<<<'SQL'
-        SELECT (select 1 from wx_post WHERE poem_id=p.id limit 1) as `wx`, p.`id`, `title`, `nation`, `poet`, `poet_cn`, `poem`, `translator`, `length`,
-`from`, `year`, `month` , `date`, `bedtime_post_id`, `selected_count`,`last_selected_time`, `dynasty`, `preface`, `subtitle`, `location`, p.`short_url`,
-               `poet_id`, `translator_id`
-        FROM `poem` p
-        LEFT JOIN `chatroom_poem_selected` selected
-        ON (selected.chatroom_id = :chatroomId and p.id=selected.poem_id)
-        LEFT JOIN `author` poet_author
-        ON (poet_author.id = p.poet_id)
-        WHERE (`poem` like :keyword1 OR `title` like :keyword2
-            OR `poet` like :keyword3 OR `poet_cn` like :keyword4 OR `translator` like :keyword5
-            OR JSON_SEARCH(lower(poet_author.`name_lang`), 'all', :keyword6 )
-        ) AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1)
-        ORDER BY wx desc, `selected_count`,`last_selected_time`,length(`poem`) limit 0,2
-SQL
-            );
+            $subSql .= '(
+                `poem` like :keyword1 OR `title` like :keyword2
+                OR `poet` like :keyword3 OR `poet_cn` like :keyword4
+                OR `translator` like :keyword5
+                OR JSON_SEARCH(lower(poet_author.`name_lang`), \'all\', :keyword6)
+            )';
+            $subSql .= ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1)';
+            $sql = <<<SQL
+SELECT  (IF(ISNULL(`wx`), 0, `wx`)+`base`) * IF(ISNULL(score), 1, 1+(score-3)/10) / (1+times) as `rank`, t.* FROM (
+    $subSql
+) as t
+ORDER BY `rank` desc, t.times, t.length limit 0,2
+SQL;
+            $q = $poeDB->prepare($sql);
+
             $word = '%' . $keyword . '%';
             $q->bindValue(':keyword1', $word, PDO::PARAM_STR);
             $q->bindValue(':keyword2', $word, PDO::PARAM_STR);
@@ -339,8 +355,7 @@ SQL
                         : (($post->nation && $post->nation !== '中国') ? "[$post->nation] " : '')
                     );
 
-                $od = opencc_open("t2s.json");
-                $content = opencc_convert(preg_replace('@[\r\n]{3,}@', "\n\n", $post->poem), $od);
+                $content = preg_replace('@[\r\n]{3,}@', "\n\n", $post->poem);
 
 
                 if(isset($poetAuthor)) {
@@ -351,8 +366,7 @@ SQL
 
 
                 // poem content
-                $parts = ['▍ ' . opencc_convert($post->title, $od)];
-                opencc_close($od);
+                $parts = ['▍ ' . $post->title];
                 if($post->preface) array_push($parts, '        '. $post->preface);
                 if($post->subtitle) array_push($parts, "\n    ".$post->subtitle);
                 array_push($parts, "\n".$content."\n");
@@ -420,7 +434,11 @@ SQL
                     array_push($parts, $more);
                 }
 
-                $poem = implode("\n", $parts);
+                // convert to simplified chinese
+                $od = opencc_open("t2s.json");
+                $poem = opencc_convert(implode("\n", $parts), $od);
+                opencc_close($od);
+
 
                 if ($post->last_selected_time) {
                     $stmt = $poeDB->prepare('UPDATE `chatroom_poem_selected` SET `selected_count`=1+`selected_count`
@@ -515,6 +533,7 @@ SQL;
             $result_arr = json_decode($result_str, true);
 
             if ($result_arr && $result_arr['code'] == "0") {
+                $cb($result_arr['url']);
                 return $result_arr['url'];
             }
         }
