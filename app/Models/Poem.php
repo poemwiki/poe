@@ -331,6 +331,20 @@ class Poem extends Model implements Searchable {
     }
 
     /**
+     * TODO enable set locales while getting poet name
+     * @return string
+     */
+    public function getPoetLabelAttribute() {
+        if ($this->is_owner_uploaded && $this->uploader) {
+            return $this->uploader->name;
+        } else if ($this->poetAuthor) {
+            return $this->poetAuthor->label;
+        } else {
+            return ($this->poet === $this->poet_cn or is_null($this->poet_cn)) ? $this->poet : $this->poet_cn."（$this->poet）";
+        }
+    }
+
+    /**
      * get score between campaign start and end time
      * TODO update poem.score after each score updated/created
      * @param Campaign $campaign
