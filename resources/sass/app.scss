@@ -25,12 +25,13 @@ html, body {
 }
 
 .links > a {
-  padding: 0 25px;
+  padding: 0 16px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: .1rem;
   text-decoration: none;
   text-transform: uppercase;
+  display: inline-block;
 }
 .top-right a{
   color: #fff;
