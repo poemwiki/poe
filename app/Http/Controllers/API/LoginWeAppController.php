@@ -48,7 +48,7 @@ class LoginWeAppController extends Controller {
         }
         Log::info('wechat server reply:', $data);
         $weappOpenid = $data['openid'];
-        $weixinSessionKey = $data['session_key'];
+        $weixinSessionKey = $data['session_key']; // 用于 this->decrypt 获取加密的用户信息
         $avatar = $request->avatar ?? '';
         $nickName = $request->nickName ?? '';
         $gender = $request->gender ?? 0;
@@ -58,27 +58,45 @@ class LoginWeAppController extends Controller {
 
         // 找到 openid 对应的用户
         // TODO 考虑解绑情况
-        $userBind = $this->getUserBindInfoByOpenID($weappOpenid, UserBind::BIND_REF['weapp'], 1);
+        $userBind = $this->getUserBindInfoByUnionID($data['unionid'], UserBind::BIND_REF['weapp'], 1);
         // 待解决的问题：微信服务端返回的 $data 中是否会包含 unionid？在何种情况下包含？
 
         if ($userBind) {
-            // 老用户
-            $attributes['updated_at'] = now();
-            $attributes['weapp_session_key'] = $weixinSessionKey;
-            // 更新用户数据
-            $userBind->update($attributes);
-        } else {
-            // 新用户
-            $newUser = User::create([
-                'name' => $nickName.'[from-weapp-tmp]',
-                'email' => $email,
+            // 已经登录过小程序
+            $attributes = [
+                'updated_at' => now(),
+                'open_id' => $weappOpenid,
                 'nickname' => $nickName,
                 'avatar' => $avatar,
                 'gender' => $gender,
-                'invite_code' => hash('crc32', sha1(2 . $email)),
-                'invited_by' => 2,
-                'password' => ''
-            ]);
+                'info' => json_encode($data),
+                'weapp_session_key' => $weixinSessionKey
+            ];
+            // 更新用户数据
+            $userBind->update($attributes);
+        } else {
+            // 从未注册过的用户
+            // 注册过网站，但还未用微信登录过，没有任何微信相关的 userBind
+            // 用微信登录过web版，还未登录过小程序，有相同 unionid 的 BIND_REF['wechat'] 的 userBind, 无 BIND_REF['weapp'] 的 userBind
+
+            $wechatBind = $this->getUserBindInfoByUnionID($data['unionid'], UserBind::BIND_REF['wechat'], 1);
+
+            if ($wechatBind) {
+                $newUser = $wechatBind->user;
+            } else {
+                // TODO user.name should be unique
+                $newUser = User::create([
+                    'name' => $nickName . '[from-weapp]',
+                    'email' => $email,
+                    'nickname' => $nickName,
+                    'avatar' => $avatar,
+                    'gender' => $gender,
+                    'invite_code' => hash('crc32', sha1(2 . $email)),
+                    'invited_by' => 2,
+                    'password' => ''
+                ]);
+                event(new Registered($newUser));
+            }
 
             $userBind = UserBind::create([
                 'open_id' => $weappOpenid,
@@ -119,15 +137,6 @@ class LoginWeAppController extends Controller {
         ])->first();
         $decrypted = $this->weApp->encryptor->decryptData($userBind->weapp_session_key, $detail['iv'], $detail['encryptedData']);
 
-        if($decrypted['unionId'])
-        // 如果已存在相同 union_id 的 userBind 记录 a，则将当前 userBind.user_id 更改为a.user_id
-        $existedUserBind = UserBind::where([
-            'bind_status' => 1,
-            'union_id' => $decrypted['unionId']
-        ])->first();
-        $userBind->user_id = $existedUserBind->user_id;
-        $userBind->save();
-
         return $this->responseSuccess([
             'user' => $userBind->user,
             'decrypted' => $decrypted
@@ -147,40 +156,45 @@ class LoginWeAppController extends Controller {
     /**
      * @param $openID
      * @param $bindRef
+     * @param int $bindStatus
      * TODO move it to BindInfoRepository
-     * @return array
+     * @return UserBind|null
      */
     public function getUserBindInfoByOpenID($openID, $bindRef = UserBind::BIND_REF['weapp'], $bindStatus=null) {
         try {
             $q = UserBind::where([
                 'open_id_crc32' => UserBind::crc32($openID),
                 'open_id' => $openID,
-                'bind_status' => $bindStatus,
-                'bind_ref' => $bindRef]);
-            if(is_null($bindStatus)) {
-                $q->where('bind_ref', '=', $bindRef);
+                'bind_ref' => $bindRef
+            ]);
+            if(!is_null($bindStatus)) {
+                $q->where('bind_status', '=', $bindStatus);
             }
-            $data = $q->first();
-            return $data;
+            return $q->first();
         } catch (\Exception $exception) {
-            return [];
+            return null;
         }
     }
 
+    /**
+     * @param $unionID
+     * @param int $bindRef
+     * @param int $bindStatus
+     * @return UserBind|null
+     */
     public function getUserBindInfoByUnionID($unionID, $bindRef = UserBind::BIND_REF['weapp'], $bindStatus=null) {
         try {
             $q = UserBind::where([
                 'union_id_crc32' => UserBind::crc32($unionID),
                 'union_id' => $unionID,
-                'bind_status' => $bindStatus,
-                'bind_ref' => $bindRef]);
-            if(is_null($bindStatus)) {
-                $q->where('bind_ref', '=', $bindRef);
+                'bind_ref' => $bindRef
+            ]);
+            if(!is_null($bindStatus)) {
+                $q->where('bind_status', '=', $bindStatus);
             }
-            $data = $q->first();
-            return $data;
+            return $q->first();
         } catch (\Exception $exception) {
-            return [];
+            return null;
         }
     }
 }
