@@ -37,7 +37,7 @@ class Kernel extends HttpKernel
      */
     protected $middlewareGroups = [
         'web' => [
-            'throttle:8|10,0.4',
+            'throttle:8|10,0.4', // 未登录用户每半分钟最多20次请求，已登录用户每半分钟最多25次
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
@@ -50,7 +50,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            'throttle:200,1',
+            'throttle:20|50,0.3',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\LastOnline::class
         ],
