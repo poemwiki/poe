@@ -54,5 +54,10 @@ class AppServiceProvider extends ServiceProvider {
             '%\b((https?://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))%s',
             '&nbsp;<a href="$1" target="_blank">$1</a>&nbsp;');
         });
+
+        // CRC32的修正方法，修正php x86模式下出现的负值情况
+        Stringable::macro('crc32', function () {
+            return sprintf("%u", crc32($this->value));
+        });
     }
 }

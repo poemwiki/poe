@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 use Laravel\Passport\HasApiTokens;
@@ -49,14 +50,13 @@ class UserBind extends Model {
 
         // TODO check if created same poem by hash
         self::creating(function ($model) {
-            $model->open_id_crc32 = self::crc32($model->open_id);
-            $model->union_id_crc32 = self::crc32($model->union_id);
+            $model->open_id_crc32 = Str::of($model->open_id)->crc32();
+            $model->union_id_crc32 = Str::of($model->union_id)->crc32();
         });
 
-
         self::updating(function ($model) {
-            $model->open_id_crc32 = self::crc32($model->open_id);
-            $model->union_id_crc32 = self::crc32($model->union_id);
+            $model->open_id_crc32 = Str::of($model->open_id)->crc32();
+            $model->union_id_crc32 = Str::of($model->union_id)->crc32();
         });
     }
 
@@ -67,16 +67,6 @@ class UserBind extends Model {
         return $this->belongsTo(\App\User::class, 'user_id', 'id');
     }
 
-    /**
-     * @desc CRC32的修正方法，修正php x86模式下出现的负值情况
-     *
-     * @param $str
-     *
-     * @return string
-     */
-    public static function crc32($str) {
-        return sprintf("%u", crc32($str));
-    }
 
     public function findForPassport($openId) {
         return $this->where('open_id', $openId)->first();
