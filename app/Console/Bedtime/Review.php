@@ -2,11 +2,12 @@
 
 namespace App\Console\Bedtime;
 
+use App\Models\Poem;
 use App\Models\Review as ReviewModel;
 use App\Models\Score;
 use App\Models\WxPost;
-use EasyWeChat\Factory;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -17,7 +18,7 @@ class Review extends Command {
      *
      * @var string
      */
-    protected $signature = 'bedtime:review {fromTimestamp?} {toTimestamp?}';
+    protected $signature = 'bedtime:review {fromTimestamp?} {toTimestamp?} {--id=}';
 
     /**
      * The console command description.
@@ -41,6 +42,18 @@ class Review extends Command {
      * @return int
      */
     public function handle() {
+        $poemId = $this->option('id');
+        if (App::runningInConsole() && !$this->option('id')) {
+            if ($this->choice('Do you wants specify a poem id?', ['yes', 'no'], 0) === 'yes') {
+                $authorId = $this->ask('Input author id: ');
+            }
+        }
+
+        if (is_numeric($poemId)) {
+            $this->addBedtimeReview(0, 0, 44, $poemId);
+            return 0;
+        }
+
         // $this->addBedtimeScore(3054, 44);
         $this->addBedtimeReview(
             $this->argument('fromTimestamp') ?? Date::createFromDate(2016, 4, 10, 'Asia/ShangHai')->getTimestamp(),
@@ -50,59 +63,48 @@ class Review extends Command {
     }
 
 
-    public function addBedtimeReview($minUpdateTime = 0, $maxUpdateTime = 0, $userId = 44) {
-        $config = [
-            'app_id' => env('WECHAT_OFFICIAL_ACCOUNT_APPID'),
-            'secret' => env('WECHAT_OFFICIAL_ACCOUNT_SECRET'),
+    public function addBedtimeReview($minUpdateTime = 0, $maxUpdateTime = 0, $userId = 44, $poemId = null) {
 
-            // 指定 API 调用返回结果的类型：array(default)/collection/object/raw/自定义类名
-            'response_type' => 'object',
-        ];
+        $q = is_numeric($poemId)
+            ? WxPost::where('poem_id', '=', $poemId)
+            : WxPost::whereBetween('update_time', [$minUpdateTime, $maxUpdateTime])
+                ->whereNotNull('poem_id');
 
-        $app = Factory::officialAccount($config);
+        $q->get()->each(function ($post) use ($userId) {
 
-        WxPost::whereBetween('update_time', [$minUpdateTime, $maxUpdateTime])
-            ->whereNotNull('poem_id')
-            ->get()->each(function ($post) use ($userId, $app) {
+            $link = Str::of($post->link)->replaceMatches('@&chksm=[^#&]*@', '')
+                ->replace('#rd', '')
+                ->replace('#wechat_redirect', '');
 
-                $link = Str::of($post->link)->replaceMatches('@&chksm=[^#&]*@', '')
-                    ->replace('#rd', '')
-                    ->replace('#wechat_redirect', '');
+            Log::info('Add bedtimepoem review link: ' . $link);
 
-                $shortUrl = $app->url->shorten($link);
-                if($shortUrl->errcode === 0) {
-                    $link = $shortUrl->short_url;
-                    $post->short_url = $link;
-                    $post->save();
-                }
-
-                Log::info('Add bedtimepoem review link: ' . $link);
-
-                $res = ReviewModel::updateOrInsert([
-                    'poem_id' => $post->poem_id,
-                    'user_id' => $userId
-                ], [
-                    'poem_id' => $post->poem_id,
-                    'user_id' => $userId,
-                    'content' => <<<blade
+            $res = ReviewModel::updateOrInsert([
+                'poem_id' => $post->poem_id,
+                'user_id' => $userId
+            ], [
+                'poem_id' => $post->poem_id,
+                'user_id' => $userId,
+                'content' => <<<blade
 我在《{$post->title}》&nbsp;&nbsp; <a href="{$link}" target="_blank">{$link}</a> &nbsp;&nbsp;这篇公众号文章里提到了这首诗
 blade,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            });
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        });
     }
 
     public function addBedtimeScore($maxId = 3054, $userId = 44) {
         $exceptIds = [514, 515, 516, 517, 518];
-        $data = [];
+
         for ($id = 1; $id <= $maxId; $id++) {
             if (in_array($id, $exceptIds)) continue;
-            $data[] = ['poem_id' => $id, 'user_id' => $userId, 'created_at' => now(), 'updated_at' => now(), 'score' => 5, 'weight' => 1.0];
+            if (!Poem::find($id)) continue;
+
+            $data = ['poem_id' => $id, 'user_id' => $userId, 'created_at' => now(), 'updated_at' => now(), 'score' => 5, 'weight' => 1.0];
+            Score::updateOrInsert([
+                'poem_id' => $id,
+                'user_id' => $userId
+            ], $data);
         }
-        Score::updateOrInsert([
-            'poem_id' => $id,
-            'user_id' => $userId
-        ], $data);
     }
 }
