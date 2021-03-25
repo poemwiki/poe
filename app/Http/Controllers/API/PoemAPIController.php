@@ -123,16 +123,7 @@ class PoemAPIController extends Controller {
             $postData['force'] = 1;
         }
 
-        $options = array(
-            'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => "POST",
-                'content' => http_build_query($postData),
-                'timeout' => 30,
-            ),
-        );
-        $context = stream_context_create($options);
-        $img = file_get_contents("http://localhost:8888", false, $context);
+        $img = file_get_contents_post("http://localhost:8888", $postData);
 
         $dir = storage_path('app/public/poem-card/' . $poem->id);
         if(!is_dir($dir)) {

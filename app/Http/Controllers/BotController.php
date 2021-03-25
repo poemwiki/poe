@@ -404,8 +404,11 @@ SQL;
 
                 // links & score
                 if(!$post->short_url) {
-                    // TODO use poems/show url instead of exposing poem id
-                    $url = $this->shorten(route('poem', $post->id), function ($link) use ($post){
+                    $longUrl = 'https://poemwiki.org/p/'.Poem::getFakeId($post->id);
+                    $url = short_url($longUrl, function ($link) use ($post, $longUrl){
+                        Log::info('shorted url:' . $link);
+                        if($link === $longUrl) return;
+
                         $p = Poem::find($post->id);
                         if(empty($p)) return;
 
@@ -430,7 +433,7 @@ SQL;
 
                 if($count >= 2 || is_array($keyword)) {
                     $word = is_array($keyword) ? $keyword[0] : $keyword;
-                    $more = "\n更多\"$word\"的诗：" . $this->shorten(route('search', $word));
+                    $more = "\n更多\"$word\"的诗：" . route('search', $word);
                     array_push($parts, $more);
                 }
 
@@ -516,28 +519,5 @@ SQL;
         return strstr($keyword, ' ')
             ? explode(' ', $keyword)
             : $keyword;
-    }
-
-    private function shorten($link, $cb = null) {
-        // TODO write short url to poem.short_url by command and get it here
-        return $link;
-
-        $origin = urlencode($link);
-        $key = '5ff0b8b0267b2c5266ebe43aad@a010882bddcd395d94f6ca22e6345d80';
-        $expire_date = urlencode('2046-04-26');
-        $request_url = "http://api.3w.cn/api.htm?format=json&url={$origin}&key={$key}&expireDate={$expire_date}&domain=4";
-        $result_str = file_get_contents($request_url);
-
-        $url = "";
-        if ($result_str) {
-            $result_arr = json_decode($result_str, true);
-
-            if ($result_arr && $result_arr['code'] == "0") {
-                $cb($result_arr['url']);
-                return $result_arr['url'];
-            }
-        }
-
-        return $link;
     }
 }
