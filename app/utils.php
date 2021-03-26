@@ -10,7 +10,7 @@ if (! function_exists('file_get_contents_post')) {
      * @return false|string
      * @throws Exception
      */
-    function file_get_contents_post($url, $data, $contentType = 'application/x-www-form-urlencoded', $timeout = 15) {
+    function file_get_contents_post(string $url, $data, string $contentType = 'application/x-www-form-urlencoded', $timeout = 15) {
 
         $options = [
             'http' => [
@@ -30,7 +30,7 @@ if (! function_exists('file_get_contents_post')) {
 }
 
 if (! function_exists('curl_post')) {
-    function curl_post($url, $data, $contentType = 'application/x-www-form-urlencoded') {
+    function curl_post(string $url, $data, string $contentType = 'application/x-www-form-urlencoded') {
         $ch = curl_init();
         //请求地址
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -63,11 +63,13 @@ if (! function_exists('curl_post')) {
 if (! function_exists('short_url')) {
     /**
      * get a short url from api.xiaomark.com started with https://sourl.cn
-     * @param $origin origin url should under these 3 domains: mp.weixin.qq.com, poemwiki.com, poemwiki.org
+     * @param $origin string Origin url should under these 3 domains: mp.weixin.qq.com, poemwiki.com, poemwiki.org
      * @param null $cb
      * @return mixed
      */
-    function short_url($origin, $cb = null) {
+    function short_url(string $origin, callable $cb = null) {
+        // TODO check redis if n_links_today <= 0, return $origin
+
         $request_url = 'https://api.xiaomark.com/v1/link/create';
         $data = [
             'apikey' => 'fccab0cf923086937191cb3d7a523772',
@@ -84,8 +86,9 @@ if (! function_exists('short_url')) {
 
         if ($result && $result['code'] == "0" && isset($result['data']['link'])) {
             $url = $result['data']['link']['url'];
+            // TODO save $result['data']['n_links_today'] to redis
             if(is_callable($cb)) {
-                $cb($url);
+                $cb($url, $result['data']['n_links_today'] ?? 0);
             }
             return $url;
         }

@@ -415,6 +415,9 @@ SQL;
                         $p->short_url = $link;
                         $p->save();
                     });
+                    if($url === $longUrl) {
+                        $url = 'https://poemwiki.org/'.$post->id;
+                    }
                 } else {
                     $url = $post->short_url;
                 }

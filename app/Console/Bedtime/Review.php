@@ -74,8 +74,11 @@ class Review extends Command {
 
             $link = Str::of($post->link)->replaceMatches('@&chksm=[^#&]*@', '')
                 ->replace('#rd', '')
-                ->replace('#wechat_redirect', '');
+                ->replace('#wechat_redirect', '')
+                ->replace('http://', 'https://');
 
+            $link = short_url($link);
+            // $link = short_url(str_replace('http://', 'https://', $link));
             Log::info('Add bedtimepoem review link: ' . $link);
 
             $res = ReviewModel::updateOrInsert([
