@@ -41,6 +41,7 @@ class Kernel extends ConsoleKernel
         $this->load(__DIR__.'/Commands');
         $this->load(__DIR__.'/Nation');
         $this->load(__DIR__.'/Wiki');
+        $this->load(__DIR__.'/Poem');
 
         require base_path('routes/console.php');
     }

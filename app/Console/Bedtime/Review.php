@@ -72,12 +72,18 @@ class Review extends Command {
 
         $q->get()->each(function ($post) use ($userId) {
 
-            $link = Str::of($post->link)->replaceMatches('@&chksm=[^#&]*@', '')
+            $origin = Str::of($post->link)->replaceMatches('@&chksm=[^#&]*@', '')
                 ->replace('#rd', '')
                 ->replace('#wechat_redirect', '')
                 ->replace('http://', 'https://');
 
-            $link = short_url($link);
+            $link = short_url($origin, function ($short) use ($origin, $post) {
+                if($short !== $origin) {
+                    $post->short_url = $short;
+                    $post->save();
+                }
+            });
+
             // $link = short_url(str_replace('http://', 'https://', $link));
             Log::info('Add bedtimepoem review link: ' . $link);
 
