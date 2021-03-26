@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Ramsey\Collection\Collection;
 use Spatie\Searchable\ModelSearchAspect;
 use Spatie\Searchable\Search;
 
@@ -52,7 +53,7 @@ class QueryController extends Controller {
                 return $modelSearchAspect
                     ->addSearchableAttribute('name_lang')
                     // ->has('poems')
-                    // ->with('poems')
+                    ->with('poems')
                     // ->with('translatedPoems')
                 ;
             })
@@ -60,18 +61,27 @@ class QueryController extends Controller {
             ->search($keyword);
 
         // dd(DB::getQueryLog());
-        // dd($searchResults);
-        $authorCount = $searchResults->filter(function ($item) {
-            return $item->type === 'author';
-        })->count();
-        $poemCount = $searchResults->filter(function ($item) {
-            return $item->type === 'poem';
-        })->count();
+        $results = $searchResults->groupByType();
+        $authors = $results->get('author') ?: [];
+        $poems = $results->get('poem') ?: [];
+
+        $shiftPoems = collect();
+        foreach ($authors as $author) {
+            foreach($author->searchable->poems as $poem) {
+                $shiftPoems->push($poem);
+            }
+        }
+
+        // TODO shiftPoems may contain some of $poems
+        foreach ($poems as $p) {
+            $shiftPoems->push($p->searchable);
+        }
+        $mergedPoems = $shiftPoems->unique('id');
+
         return view('query.search')->with([
-            'res' => $searchResults,
-            'keyword' => $keyword,
-            'authorCount' => $authorCount,
-            'poemCount' => $poemCount
+            'authors' => $authors,
+            'poems' => $mergedPoems,
+            'keyword' => $keyword
         ]);
     }
 
