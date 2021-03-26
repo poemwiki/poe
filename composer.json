@@ -46,7 +46,8 @@
     "spatie/laravel-activitylog": "^3.16",
     "spatie/laravel-searchable": "^1.7",
     "spatie/laravel-validation-rules": "^2.7",
-    "lcobucci/jwt": "^3.4"
+    "lcobucci/jwt": "^3.4",
+    "ext-curl": "*"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.7",
@@ -74,6 +75,9 @@
     "classmap": [
       "database/seeds",
       "database/factories"
+    ],
+    "files": [
+      "app/utils.php"
     ]
   },
   "autoload-dev": {
