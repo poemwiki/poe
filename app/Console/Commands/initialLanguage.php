@@ -12,7 +12,7 @@ class initialLanguage extends Command {
      *
      * @var string
      */
-    protected $signature = 'wiki:initialLanguage';
+    protected $signature = 'language:initial';
 
     /**
      * The console command description.

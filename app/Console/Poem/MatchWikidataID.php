@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Poem;
 
 use App\Models\Poem;
 use App\Models\Wikidata;
