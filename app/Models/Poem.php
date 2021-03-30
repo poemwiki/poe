@@ -159,9 +159,10 @@ class Poem extends Model implements Searchable {
                 'entry_id' => $model->id,
                 'type' => 0,
                 'content' => $model->poem,
-                'hash' => $hash,
-                'new_hash' => $hash,
-                'full_hash' => $fullHash
+                'hash_f' => null,             // parent pure content hash
+                'hash' => $hash,        // current pure content hash（用于去重）
+                'full_hash_f' => null,        // parent version's full hash
+                'full_hash' => $fullHash    // current version's full hash（用于追踪版本变化）
             ]);
 
             $model->content_id = $content->id;
@@ -172,16 +173,18 @@ class Poem extends Model implements Searchable {
             $model->poem = self::trimTailSpaces($model->poem);
             $model->length = grapheme_strlen($model->poem);
             $fullHash = self::contentFullHash($model->poem);
+            $oldFullHash = $model->content->full_hash ?? self::contentFullHash($model->content->content);
 
-            if ($fullHash !== $model->content->full_hash) {
-                // need update content
+            if ($fullHash !== $oldFullHash) {
+                // update content when full hash changed
                 $hash = self::contentHash($model->poem);
                 $content = Content::create([
                     'entry_id' => $model->id,
                     'type' => 0,
                     'content' => $model->poem,
+                    'hash_f' => $model->content->hash,
                     'hash' => $hash,
-                    'new_hash' => $hash,
+                    'full_hash_f' => $model->content->full_hash,
                     'full_hash' => $fullHash
                 ]);
                 $model->content_id = $content->id;
