@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 /**
  * @SWG\Definition(
@@ -75,8 +76,9 @@ class Content extends Model
 
     public $fillable = [
         'hash',
-        'new_hash',
+        'hash_f',
         'full_hash',
+        'full_hash_f',
         'type',
         'entry_id',
         'content'
@@ -90,8 +92,9 @@ class Content extends Model
     protected $casts = [
         'id' => 'integer',
         'hash' => 'string',
-        'new_hash' => 'string',
+        'hash_f' => 'string',
         'full_hash' => 'string',
+        'full_hash_f' => 'string',
         'type' => 'integer',
         'entry_id' => 'integer',
         'content' => 'string'
@@ -111,5 +114,20 @@ class Content extends Model
         'content' => 'required'
     ];
 
+    public static function boot() {
+        parent::boot();
+
+        // TODO check if created same poem by hash
+        self::creating(function ($model) {
+            $model->hash_crc32 = Str::crc32($model->hash);
+            $model->full_hash_crc32 = Str::crc32($model->full_hash);
+        });
+
+        // self::created(function ($model) {
+        // });
+
+        // self::updating(function ($model) {
+        // });
+    }
 
 }

@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\Poem;
 use PHPUnit\Framework\TestCase;
+use Illuminate\Support\Str;
 
 class ContentHashTest extends TestCase
 {
@@ -14,11 +15,11 @@ class ContentHashTest extends TestCase
      */
     public function testNoSpaceTest()
     {
-        $this->assertEquals('', Poem::noSpace(''));
-        $this->assertEquals('', Poem::noSpace(' '));
-        $this->assertEquals('', Poem::noSpace('  '));
-        $this->assertEquals('ssf', Poem::noSpace(" s\n
+        $this->assertEquals('', Str::noSpace(''));
+        $this->assertEquals('', Str::noSpace(' '));
+        $this->assertEquals('', Str::noSpace('  '));
+        $this->assertEquals('ssf', Str::noSpace(" s\n
         sf"));
-        $this->assertEquals('ssf', Poem::noSpace(" s　　sf "));
+        $this->assertEquals('ssf', Str::noSpace(" s　　sf "));
     }
 }

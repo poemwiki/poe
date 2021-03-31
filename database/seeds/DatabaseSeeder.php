@@ -3,6 +3,7 @@
 use App\Models\Content;
 use App\Models\Poem;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,7 +17,7 @@ class DatabaseSeeder extends Seeder
 
         foreach($poems as $poem) {
 //            if($poem->id == 1) continue;
-            $hash = Poem::contentHash($poem->poem);
+            $hash = Str::contentHash($poem->poem);
             $content = Content::create([
                 'entry_id' => $poem->id,
                 'type' => 0,
@@ -34,7 +35,7 @@ class DatabaseSeeder extends Seeder
         $contents = Content::all();
 
         foreach($contents as $p) {
-            $hash = Poem::contentFullHash($p->content);
+            $hash = Str::contentFullHash($p->content);
             $p->fullHash = $hash;
             $p->save();
         }

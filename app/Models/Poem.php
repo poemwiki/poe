@@ -149,20 +149,18 @@ class Poem extends Model implements Searchable {
 
         // TODO check if created same poem by hash
         self::creating(function ($model) {
-            $model->poem = self::trimTailSpaces($model->poem);
+            $model->poem = Str::trimTailSpaces($model->poem);
             $model->length = grapheme_strlen($model->poem);
         });
         self::created(function ($model) {
-            $hash = self::contentHash($model->poem);
-            $fullHash = self::contentFullHash($model->poem);
             $content = Content::create([
                 'entry_id' => $model->id,
                 'type' => 0,
                 'content' => $model->poem,
                 'hash_f' => '',             // parent pure content hash
-                'hash' => $hash,        // current pure content hash（用于去重）
+                'hash' => Str::contentHash($model->poem),        // current pure content hash（用于去重）
                 'full_hash_f' => '',        // parent version's full hash
-                'full_hash' => $fullHash    // current version's full hash（用于追踪版本变化）
+                'full_hash' => Str::contentFullHash($model->poem)    // current version's full hash（用于追踪版本变化）
             ]);
 
             $model->content_id = $content->id;
@@ -170,20 +168,20 @@ class Poem extends Model implements Searchable {
         });
 
         self::updating(function ($model) {
-            $model->poem = self::trimTailSpaces($model->poem);
+            $model->poem = Str::trimTailSpaces($model->poem);
             $model->length = grapheme_strlen($model->poem);
-            $fullHash = self::contentFullHash($model->poem);
-            $oldFullHash = $model->content->full_hash ?? self::contentFullHash($model->content->content);
+
+            $fullHash = Str::contentFullHash($model->poem);
+            $oldFullHash = $model->content->full_hash ?? Str::contentFullHash($model->content->content);
 
             if ($fullHash !== $oldFullHash) {
                 // update content when full hash changed
-                $hash = self::contentHash($model->poem);
                 $content = Content::create([
                     'entry_id' => $model->id,
                     'type' => 0,
                     'content' => $model->poem,
                     'hash_f' => $model->content->hash,
-                    'hash' => $hash,
+                    'hash' => Str::contentHash($model->poem),
                     'full_hash_f' => $oldFullHash,
                     'full_hash' => $fullHash
                 ]);
@@ -192,36 +190,6 @@ class Poem extends Model implements Searchable {
             }
         });
     }
-
-
-    public static function trimSpaces($str) {
-        return preg_replace('#^\s+|\s+$#u', '', $str);
-    }
-
-    public static function trimTailSpaces($str) {
-        return preg_replace('#\s+$#u', '', $str);
-    }
-
-    public static function noSpace($str) {
-        return preg_replace("#\s+#u", '', $str);
-    }
-
-    public static function noPunct($str) {
-        return preg_replace("#[[:punct:]]+#u", '', $str);
-    }
-
-    public static function pureStr($str) {
-        return self::noPunct(self::noSpace($str));
-    }
-
-    public static function contentHash($str) {
-        return hash('sha256', self::pureStr($str));
-    }
-
-    public static function contentFullHash($str) {
-        return hash('sha256', $str);
-    }
-
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo

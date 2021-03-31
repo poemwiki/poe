@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Str;
+use \Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 use Illuminate\Support\ServiceProvider;
 
@@ -58,6 +58,31 @@ class AppServiceProvider extends ServiceProvider {
         // CRC32的修正方法，修正php x86模式下出现的负值情况
         Stringable::macro('crc32', function () {
             return sprintf("%u", crc32($this->value));
+        });
+        Str::macro('crc32', function ($str) {
+            return sprintf("%u", crc32($str));
+        });
+
+        Str::macro('trimSpaces', function ($str) {
+            return preg_replace('#^\s+|\s+$#u', '', $str);
+        });
+        Str::macro('trimTailSpaces', function ($str) {
+            return preg_replace('#\s+$#u', '', $str);
+        });
+        Str::macro('noSpace', function ($str) {
+            return preg_replace("#\s+#u", '', $str);
+        });
+        Str::macro('noPunct', function ($str) {
+            return preg_replace("#[[:punct:]]+#u", '', $str);
+        });
+        Str::macro('pureStr', function ($str) {
+            return Str::noPunct(Str::noSpace($str));
+        });
+        Str::macro('contentHash', function ($str) {
+            return hash('sha256', Str::pureStr($str));
+        });
+        Str::macro('contentFullHash', function ($str) {
+            return hash('sha256', $str);
         });
     }
 }
