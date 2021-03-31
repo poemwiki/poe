@@ -159,9 +159,9 @@ class Poem extends Model implements Searchable {
                 'entry_id' => $model->id,
                 'type' => 0,
                 'content' => $model->poem,
-                'hash_f' => null,             // parent pure content hash
+                'hash_f' => '',             // parent pure content hash
                 'hash' => $hash,        // current pure content hash（用于去重）
-                'full_hash_f' => null,        // parent version's full hash
+                'full_hash_f' => '',        // parent version's full hash
                 'full_hash' => $fullHash    // current version's full hash（用于追踪版本变化）
             ]);
 
@@ -184,7 +184,7 @@ class Poem extends Model implements Searchable {
                     'content' => $model->poem,
                     'hash_f' => $model->content->hash,
                     'hash' => $hash,
-                    'full_hash_f' => $model->content->full_hash,
+                    'full_hash_f' => $oldFullHash,
                     'full_hash' => $fullHash
                 ]);
                 $model->content_id = $content->id;
