@@ -12,7 +12,7 @@ class UserAPIController extends Controller{
         $user = $request->user();
         if($request->nickName) {
 
-            $wechatApp = Factory\EasyWeChat\Factory::miniProgram([
+            $wechatApp = \EasyWeChat\Factory::miniProgram([
                 'app_id' => env('WECHAT_MINI_PROGRAM_APPID'),
                 'secret' => env('WECHAT_MINI_PROGRAM_SECRET'),
                 'response_type' => 'object',
