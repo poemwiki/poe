@@ -43,8 +43,8 @@ trait HasTranslations {
         if(empty($translations)) return '';
 
         $lastFallback = array_key_first($translations);
-        $zhFallback = ['zh', 'zh-cn', 'zh-hans', 'zh-Hans-CN', 'zh-hant', 'zh-hk', 'zh-tw', 'zh-yue', 'zh-sg', $lastFallback];
-        $zhTFallback = ['zh-hant', 'zh-hk', 'zh-tw', 'zh-yue', 'zh', 'zh-cn', 'zh-hans', 'zh-Hans-CN', 'zh-sg', $lastFallback];
+        $zhFallback = ['zh-hans', 'zh-cn', 'zh-Hans-CN', 'zh', 'zh-yue', 'zh-hant', 'zh-hk', 'zh-tw', 'zh-sg', $lastFallback];
+        $zhTFallback = ['zh-hant', 'zh-hk', 'zh-tw', 'zh', 'zh-cn', 'zh-hans', 'zh-yue', 'zh-Hans-CN', 'zh-sg', $lastFallback];
         if (in_array($lowerLocale, $zhFallback)){
             return $this->getFallbackTranslation($key, $zhFallback);
         }
