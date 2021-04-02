@@ -331,9 +331,9 @@ class Poem extends Model implements Searchable {
 
             // TODO: it's an ugly way to filter the redundant update log after create,
             // it should not be written to db at the poem creation
-            if ($oldVal && is_null($oldVal['poem'])
-                && is_null($oldVal['poet'])
-                && is_null($oldVal['title'])) {
+            if ($oldVal && array_key_exists('poem', $oldVal) && is_null($oldVal['poem'])
+                && array_key_exists('poet', $oldVal) && is_null($oldVal['poet'])
+                && array_key_exists('title', $oldVal) && is_null($oldVal['title'])) {
                 return false;
             }
 
