@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class LoginWeAppController extends Controller {
     //    use RedirectsUsers;
@@ -163,7 +164,7 @@ class LoginWeAppController extends Controller {
     public function getUserBindInfoByOpenID($openID, $bindRef = UserBind::BIND_REF['weapp'], $bindStatus=null) {
         try {
             $q = UserBind::where([
-                'open_id_crc32' => UserBind::crc32($openID),
+                'open_id_crc32' => Str::crc32($openID),
                 'open_id' => $openID,
                 'bind_ref' => $bindRef
             ]);
@@ -185,7 +186,7 @@ class LoginWeAppController extends Controller {
     public function getUserBindInfoByUnionID($unionID, $bindRef = UserBind::BIND_REF['weapp'], $bindStatus=null) {
         try {
             $q = UserBind::where([
-                'union_id_crc32' => UserBind::crc32($unionID),
+                'union_id_crc32' => Str::crc32($unionID),
                 'union_id' => $unionID,
                 'bind_ref' => $bindRef
             ]);

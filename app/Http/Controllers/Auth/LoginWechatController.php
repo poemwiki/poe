@@ -10,6 +10,7 @@ use App\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class LoginWechatController extends Controller {
     //    use RedirectsUsers;
@@ -80,7 +81,7 @@ class LoginWechatController extends Controller {
     public function getUserBindInfoByOpenID($openID, $bindRef = UserBind::BIND_REF['wechat']) {
         try {
             return UserBind::where([
-                'open_id_crc32' => UserBind::crc32($openID),
+                'open_id_crc32' => Str::crc32($openID),
                 'open_id' => $openID,
                 'bind_status' => 1,
                 'bind_ref' => $bindRef
@@ -94,7 +95,7 @@ class LoginWechatController extends Controller {
     public function getUserBindInfoByUnionID($unionID, $bindRef = UserBind::BIND_REF['wechat']) {
         try {
             return UserBind::where([
-                'union_id_crc32' => UserBind::crc32($unionID),
+                'union_id_crc32' => Str::crc32($unionID),
                 'union_id' => $unionID,
                 'bind_status' => 1,
                 'bind_ref' => $bindRef
