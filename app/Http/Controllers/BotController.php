@@ -255,7 +255,7 @@ SQL;
                     OR JSON_SEARCH(lower(poet_author.`name_lang`), 'all', :keyword6_$idx )
                 ) AND";
             }
-            $subSql = trim($subSql, 'AND') . ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR`need_confirm`<>1)';
+            $subSql = trim($subSql, 'AND') . ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR`need_confirm`<>1) AND p.`deleted_at` is NULL';
 
             $sql = <<<SQL
 SELECT  (IF(ISNULL(`wx`), 0, `wx`)+`base`) * IF(ISNULL(score), 1, 1+score/5) / (1+times) as `rank`, t.* FROM (
@@ -286,7 +286,7 @@ SQL;
                 OR `translator` like :keyword5
                 OR JSON_SEARCH(lower(poet_author.`name_lang`), \'all\', :keyword6)
             )';
-            $subSql .= ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1)';
+            $subSql .= ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1) AND p.`deleted_at` is NULL';
             $sql = <<<SQL
 SELECT  (IF(ISNULL(`wx`), 0, `wx`)+`base`) * IF(ISNULL(score), 1, 1+(score-3)/10) / (1+times) as `rank`, t.* FROM (
     $subSql
