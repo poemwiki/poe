@@ -127,21 +127,23 @@ class PoemRepository extends BaseRepository
 
     public function getPoemFromFakeId($fakeId, $select = null){
         $id = Poem::getIdFromFakeId($fakeId);
-        // return $this->newQuery()->with('wx', 'lang')->findOrFail($id);
+
         if($select)
             return $this->newQuery()->select($select)->findOrFail($id);
+
         return $this->newQuery()->findOrFail($id);
     }
 
     public function getByTagId($tagId, $orderBy) {
         // TODO Poem::where() tag_id=$tagId, with(['uploader', 'scores'])
-        return \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems()
-            ->orderByDesc($orderBy)->get()->map(function ($item, $index) use ($orderBy) {
+        $poems = \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems();
+
+        return $poems->orderByDesc($orderBy)->get()->map(function ($item, $index) use ($orderBy) {
+
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->uploader->name;
             $item['score_weight'] = ScoreRepository::calcWeight($item->id);
-            if($orderBy === 'score') $item['rank'] = $index + 1;
             return $item;
         });
     }
