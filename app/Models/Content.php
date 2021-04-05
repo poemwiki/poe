@@ -114,6 +114,15 @@ class Content extends Model
         'content' => 'required'
     ];
 
+
+    /**
+     * TODO this should be a morph relation
+     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     **/
+    public function poem() {
+        return $this->belongsTo(\App\Models\Poem::class, 'entry_id', 'id');
+    }
+
     public static function boot() {
         parent::boot();
 

@@ -3,11 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\Campaign;
+use App\Models\Content;
 use App\Models\Poem;
 use App\Models\Review;
 use App\Models\Score;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Class PoemRepository
@@ -200,6 +202,21 @@ class PoemRepository extends BaseRepository
             $item['score_weight'] = ScoreRepository::calcWeight($item->id);
             return $item;
         });
+    }
+
+
+    public static function isDuplicated(string $poem) {
+        // TODO poem soft deleted, but content not deleted???
+        $contentHash = Str::contentHash($poem);
+        $existed = Content::where([
+            'hash_crc32' => Str::crc32($contentHash),
+            'hash' => $contentHash
+        ])->whereHas('poem')->orderBy('created_at')->first();
+
+        if($existed) {
+            return Poem::find($existed->entry_id);
+        }
+        return false;
     }
 
 }

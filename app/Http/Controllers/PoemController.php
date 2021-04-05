@@ -14,6 +14,7 @@ use App\Models\Wikidata;
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
+use App\Rules\NoDuplicatedPoem;
 use Auth;
 use Brackets\AdminListing\Facades\AdminListing;
 use Carbon\Carbon;
@@ -228,6 +229,11 @@ class PoemController extends Controller
     public function update($fakeId, UpdatePoem $request) {
         // Sanitize input
         $sanitized = $request->getSanitized();
+        $id = intval(Poem::getIdFromFakeId($fakeId));
+        // manually validate if poem is duplicated
+        $request->validate([
+            'poem' => new NoDuplicatedPoem($id),
+        ]);
 
         // if wikidata_id valid and not null, create a author by wikidata_id
         if(is_numeric($sanitized['poet_wikidata_id']) && is_null($sanitized['poet_id'])) {
@@ -243,7 +249,6 @@ class PoemController extends Controller
         }
 
         // Update changed values Poem
-        $id = Poem::getIdFromFakeId($fakeId);
         $this->poemRepository->update($sanitized, $id);
 
         return $this->responseSuccess();

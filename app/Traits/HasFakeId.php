@@ -22,7 +22,7 @@ trait HasFakeId {
      * @param $fakeId
      * @return false|string The decrypted id of poem
      */
-    public static function getIdFromFakeId($fakeId) {
+    public static function getIdFromFakeId($fakeId) : string {
         $decoded = base64_decode($fakeId);
         if (!is_numeric($decoded)) {
             return false;

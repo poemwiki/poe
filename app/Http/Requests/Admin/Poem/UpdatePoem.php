@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin\Poem;
 
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
+use App\Rules\NoDuplicatedPoem;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;

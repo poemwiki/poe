@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin\Poem;
 
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
+use App\Rules\NoDuplicatedPoem;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -33,7 +34,7 @@ class StorePoem extends FormRequest {
             'poet_cn' => ['nullable', 'string'],
             'bedtime_post_id' => ['nullable', 'integer'],
             'bedtime_post_title' => ['nullable', 'string'],
-            'poem' => ['nullable', 'string'],
+            'poem' => ['nullable', 'string', new NoDuplicatedPoem],
             'length' => ['nullable', 'integer'],
             'translator' => ['nullable', 'string'],
             'from' => ['nullable', 'string'],

@@ -44,11 +44,29 @@ axios.create = function createPatchedAxios(conf) {
 const responseInterceptor = [
   res => res.data,
   error => {
+
+    if(error.response.status === 422) {
+      var text = [];
+      var data = error.response.data
+      Object.keys(error.response.data.errors).map(function (key) {
+        text.push(data.errors[key][0]);
+      });
+
+      Vue.notify({
+        type: 'error',
+        title: 'Error!',
+        text: text.join("<br/>")
+      });
+      console.error(error.response.data);
+      return;
+    }
+
     if(error.response.status !== 200) {
       Vue.notify({
         type: 'error',
         title: 'Error!',
-        text: error.response.statusText
+        text: error.response.statusText,
+        duration: 6000
       });
       console.error(error.response);
     }
