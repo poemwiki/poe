@@ -20,7 +20,7 @@ class TagAPIController extends Controller {
     }
 
     public function index(Request $request) {
-        $tags = $this->tagRepository->findByCategoryId(2);
+        $tags = $this->tagRepository->findByCategoryId($request->input('tag_id'));
 
         return $this->responseSuccess($tags->toArray());
     }
