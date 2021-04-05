@@ -76,6 +76,8 @@ class QueryController extends Controller {
         foreach ($poems as $p) {
             $shiftPoems->push($p->searchable);
         }
+
+        // TODO append translated poems
         $mergedPoems = $shiftPoems->unique('id');
 
         return view('query.search')->with([
