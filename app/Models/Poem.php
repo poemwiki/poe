@@ -149,7 +149,7 @@ class Poem extends Model implements Searchable {
 
         // TODO check if created same poem by hash
         self::creating(function ($model) {
-            $model->poem = Str::trimTailSpaces($model->poem);
+            $model->poem = Str::trimEmptyLines(Str::trimTailSpaces($model->poem));
             $model->length = grapheme_strlen($model->poem);
         });
         self::created(function ($model) {
@@ -168,7 +168,7 @@ class Poem extends Model implements Searchable {
         });
 
         self::updating(function ($model) {
-            $model->poem = Str::trimTailSpaces($model->poem);
+            $model->poem = Str::trimEmptyLines(Str::trimTailSpaces($model->poem));
             $model->length = grapheme_strlen($model->poem);
 
             $fullHash = Str::contentFullHash($model->poem);

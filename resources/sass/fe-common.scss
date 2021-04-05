@@ -5,6 +5,10 @@ ol{
   padding: 0;
 }
 
+pre {
+  margin-bottom: 0;
+}
+
 a {
   color: $blue;
   transition: background-color .4s ease,color .4s ease,border-radius .4s ease;

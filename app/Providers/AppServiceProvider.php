@@ -69,6 +69,9 @@ class AppServiceProvider extends ServiceProvider {
         Str::macro('trimTailSpaces', function ($str) {
             return preg_replace('#\s+$#u', '', $str);
         });
+        Str::macro('trimEmptyLines', function ($str) {
+            return preg_replace('#^\s*\n|\s*\n+$#u', '', $str);
+        });
         Str::macro('noSpace', function ($str) {
             return preg_replace("#\s+#u", '', $str);
         });

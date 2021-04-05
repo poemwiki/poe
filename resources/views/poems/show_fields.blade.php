@@ -64,12 +64,12 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                     <meta itemprops="url" content="https://poemwiki.org" />
                 </span>
 
-                @if($poem->preface)
-                    <pre class="preface font-hei" itemprop="preface">{{ $poem->preface }}</pre>
+                @if($poem->subtitle)
+                  <pre class="subtitle font-hei" itemprop="subtitle">{{ $poem->subtitle }}</pre>
                 @endif
 
-                @if($poem->subtitle)
-                    <pre class="subtitle font-hei" itemprop="subtitle">{{ $poem->subtitle }}</pre>
+                @if($poem->preface)
+                    <pre class="preface font-hei" itemprop="preface">{{ $poem->preface }}</pre>
                 @endif
 
                 <div class="poem-content {{$softWrap ? 'soft-wrap' : ''}} {{$graphemeLength >= config('app.length_too_long') ? 'text-justify' : ''}}"
@@ -79,9 +79,9 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                     <code class="poem-line no-height"><br></code>
                     @foreach(Str::of($poem->poem)->toLines() as $line)
                         @if(trim($line))
-                            <code class="poem-line font-hei">{{$line}}</code>
+                            <pre class="poem-line font-hei">{{$line}}</pre>
                         @else
-                            <code class="poem-line poem-line-empty"><br></code>
+                            <pre class="poem-line poem-line-empty"><br></pre>
                         @endif
                     @endforeach
                     <p class="poem-line no-height"><br></p>
