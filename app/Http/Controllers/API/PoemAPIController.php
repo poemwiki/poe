@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Livewire\Score;
 use App\Http\Requests\CreatePoemRequest;
-use App\Models\Campaign;
 use App\Models\Poem;
 use App\Models\Tag;
 use App\Repositories\PoemRepository;
@@ -32,11 +30,26 @@ class PoemAPIController extends Controller {
 
     public function index(Request $request) {
         // TODO pagination
-        // TODO order by
+        // TODO order by score updated before campaign end time
         $tagId = $request->input('tagId');
         $orderBy = $request->input('orderBy', 'created_at');
         if(is_numeric($tagId)) {
-            return $this->responseSuccess($this->poemRepository->getByTagId($tagId, $orderBy)->toArray());
+            $data = $this->poemRepository->getByTagId($tagId, $orderBy);
+            if($orderBy === 'score') {
+                $limit = Tag::find($tagId)->campaign->settings['rank_min_weight'] ?? 3;
+                $data = $data->filter(function ($value) use ($limit) {
+                    // 票数不足的不参与排名
+                    return $value['score_weight'] >= $limit;
+                })->sort(function ($a, $b) {
+                    $score = $b['score'] <=> $a['score'];
+                    return $score === 0 ? $b['score_weight'] <=> $a['score_weight'] : $score;
+                })->values()->map(function ($item, $index) use ($orderBy) {
+                    $item = $item->toArray();
+                    $item['rank'] = $index + 1;
+                    return $item;
+                });
+            }
+            return $this->responseSuccess($data);
         }
     }
 
@@ -62,6 +75,7 @@ class PoemAPIController extends Controller {
         $item = Poem::find($id);
         $res = $item->toArray();
         $res['poet_image'] = $item->uploader->avatarUrl;
+        $res['date_ago'] = \Illuminate\Support\Carbon::parse($res['created_at'])->diffForHumans(now());
         $res['score_weight'] = round(ScoreRepository::calcWeight($id));
         // dd(($res['score_weight']));
         $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item)->get()->map(function ($item) {
@@ -110,26 +124,27 @@ class PoemAPIController extends Controller {
     }
 
     public function share($poemId) {
-        // just for test
-        // if(config('app.env') == 'local' && !isset($_GET['force'])) {
-        //     return $this->responseSuccess(['url' => 'http://pwiki.lol/poem-card/1.png']);
-        // }
-
-        // TODO check if $poem->image exists, if not then generate image
         $poem = Poem::find($poemId);
 
         $postData = ['compositionId' => 'pure', 'poem' => $poem->poem, 'poet' => $poem->poetLabel, 'title' => $poem->title];
-        if(isset($_GET['force'])) {
+        $dir = storage_path('app/public/poem-card/' . $poem->id);
+        // TODO file name should be compositionId . hash(postData)
+        $storeDir = $dir .'/element-0.png';
+
+        if(isset($_GET['force']) or env('APP_ENV') === 'local') {
             $postData['force'] = 1;
+        } else if(file_exists($storeDir)) {
+            // TODO save route('poem-card', $poemId) to $poem->image if $storeDir exists,
+            // if not then generate the image before saving
+            return $this->responseSuccess(['url' => route('poem-card', $poemId)]);
         }
 
-        $img = file_get_contents_post("http://localhost:8888", $postData);
+        $img = file_get_contents_post(env('POE_RENDER_SERVER', 'http://47.105.165.228:8888'), $postData);
+        // TODO 绘制小程序码
 
-        $dir = storage_path('app/public/poem-card/' . $poem->id);
         if(!is_dir($dir)) {
             mkdir($dir);
         }
-        $storeDir = $dir .'/element-0.png';
         if(file_put_contents($storeDir, $img)) {
             return $this->responseSuccess(['url' => route('poem-card', $poemId)]);
         }
