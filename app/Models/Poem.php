@@ -326,7 +326,7 @@ class Poem extends Model implements Searchable {
     }
 
     public function getActivityLogsAttribute() {
-        return $this->activities()->orderBy('created_at', 'desc')->get()->map(function ($activity) {
+        return $this->activities()->orderBy('id', 'desc')->get()->map(function ($activity) {
             $oldVal = $activity->properties->get('old');
 
             // TODO: it's an ugly way to filter the redundant update log after create,

@@ -6,7 +6,7 @@
     PoemWiki
 @endsection
 @section('content')
-<h2>{{($poem->poet_cn ?? $poem->poet)}}  <a href="{{$poem->url}}">{{$poem->title}}</a> @lang('poem.edit history')</h2>
+<h2>{{($poem->poet_cn ?? $poem->poet)}}&nbsp;&nbsp;<a href="{{$poem->url}}">{{$poem->title}}</a>&nbsp;&nbsp;@lang('poem.edit history')</h2>
 <ol class="contribution collapsed">
     @foreach($poem->activityLogs as $key=>$log)
         <li @if($key!==0 && $key!==count($poem->activityLogs)-1)
@@ -16,9 +16,12 @@
                 $newVal = $log->properties->get('attributes');
                 $oldVal = $log->properties->get('old');
                 $props = array_keys($newVal ?? []);
-                //dd($logs);
+                //dd($log);
             @endphp
-            <span title="{{$log->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($log->created_at)->format('Y-m-d')}}</span> {{$log->causer_type === "App\User" ? \App\User::find($log->causer_id)->name : '系统'}} {{trans('poem.change type '.$log->description)}}
+            <span title="{{$log->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($log->created_at)->format('Y-m-d')}}</span>&nbsp;
+            <span>{{$log->causer_type === "App\User" ? \App\User::find($log->causer_id)->name : '系统'}}</span>&nbsp;
+            <span>{{trans('poem.change type '.$log->description)}}</span>
+
 
             @if($log->description === 'updated')
                 @foreach($props as $prop)
@@ -30,6 +33,8 @@
                         <span class="field">{{trans('admin.poem.columns.'.$prop)}}</span>
                     @elseif($prop === 'content_id')
 
+                    @elseif($prop === 'language_id')
+                        <span class="field">{{trans('admin.poem.columns.language_id')}}</span> [ <del>{{$oldVal[$prop] ? $languageList[$oldVal[$prop]]->name_lang : ''}}</del>&nbsp;->&nbsp;{{$newVal[$prop] ? $languageList[$newVal[$prop]]->name_lang : ''}} ]
                     @elseif($prop === 'original_id')
                         <span class="field">{{trans('poem.original poem')}}</span>
                     @else
@@ -42,7 +47,7 @@
         </li>
     @endforeach
 
-re    @if(count($poem->activityLogs)<1)
+    @if(count($poem->activityLogs)<1)
         <li title="{{$poem->created_at}}"><span class="field">@lang('poem.initial upload')</span> PoemWiki</li>
     @endif
 </ol>
