@@ -176,6 +176,21 @@ SQL;
             array_push($dataMsg, $this->_pad($line->pcount, 4) . ' ' . str_replace('[from-wechat]', '', $line->name));
         }
 
+
+        $resPrev = DB::select($sql, [
+            Poem::class,
+            User::class,
+            $startPreviousMonth->format('Y-m-d H:i:s'),
+            $endPreviousMonth->format('Y-m-d H:i:s')
+        ]);
+        // print_r($res);
+        // print_r( DB::getQueryLog());
+        array_push($dataMsg, "\n{$startPreviousMonth->month}月上传诗歌 Top 10");
+        array_push($dataMsg, "上传数量 用户名");
+        foreach ($resPrev as $line) {
+            array_push($dataMsg, $this->_pad($line->pcount, 4) . ' ' . str_replace('[from-wechat]', '', $line->name));
+        }
+
         $this->_log($poeDB, $chatroom, 'data', null);
 
         $msg = [
