@@ -34,11 +34,11 @@
                     @elseif($prop === 'content_id')
 
                     @elseif($prop === 'language_id')
-                        <span class="field">{{trans('admin.poem.columns.language_id')}}</span> [ <del>{{$oldVal[$prop] ? $languageList[$oldVal[$prop]]->name_lang : ''}}</del>&nbsp;->&nbsp;{{$newVal[$prop] ? $languageList[$newVal[$prop]]->name_lang : ''}} ]
+                        <span class="field">{{trans('admin.poem.columns.language_id')}}</span>&nbsp;[&nbsp;<del>{{$oldVal[$prop] ? $languageList[$oldVal[$prop]]->name_lang : ''}}</del>&nbsp;->&nbsp;{{$newVal[$prop] ? $languageList[$newVal[$prop]]->name_lang : ''}}&nbsp;]
                     @elseif($prop === 'original_id')
                         <span class="field">{{trans('poem.original poem')}}</span>
                     @else
-                        <span class="field">{{trans('admin.poem.columns.'.$prop)}}</span> [ <del>{{$oldVal[$prop]}}</del> -> {{$newVal[$prop]}} ]
+                        <span class="field">{{trans('admin.poem.columns.'.$prop)}}</span>&nbsp;[&nbsp;<del>{{$oldVal[$prop]}}</del>&nbsp;->&nbsp;{{$newVal[$prop]}}&nbsp;]
                     @endif
                 @endforeach
             @elseif($log->description === 'created')
@@ -55,6 +55,9 @@
 
 @push('styles')
   <style>
+    main {
+      padding: 1em;
+    }
     .field{
       display: inline-block;
       min-width: 6em;
