@@ -47,7 +47,7 @@
         </li>
     @endforeach
 
-    @if(count($poem->activityLogs)<1)
+    @if(count($poem->activityLogs)<1 or $poem->activityLogs->last()->description !== 'created')
         <li title="{{$poem->created_at}}"><span class="field">@lang('poem.initial upload')</span> PoemWiki</li>
     @endif
 </ol>
