@@ -26,7 +26,7 @@
                     </svg>
                 </div>
                 <div class="bars">
-                    @foreach([5,4,3,2,1] as $v)
+                    @foreach($descSortedScores as $v)
                         @if(isset($score['groupCount'][$v]))
                             <span class="bar bar-{{$v}}" title="{{$score['groupCount'][$v] / $score['count'] * 100}}%">
                             <span class="bar bar-percent"
@@ -58,7 +58,7 @@
                        @endif
                        aria-label="@choice('score.rating', 0)"/>
 
-                @foreach([1, 2, 3, 4, 5] as $v)
+                @foreach($sortedScores as $v)
                     <input type="radio" id="second-rate{{$v}}" name="rating" value="{{$v}}" @if($rating==$v)
                     checked aria-label="{{$v}} star"
                         @endif/>

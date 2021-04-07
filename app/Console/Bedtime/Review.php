@@ -109,7 +109,7 @@ blade,
             if (in_array($id, $exceptIds)) continue;
             if (!Poem::find($id)) continue;
 
-            $data = ['poem_id' => $id, 'user_id' => $userId, 'created_at' => now(), 'updated_at' => now(), 'score' => 5, 'weight' => 1.0];
+            $data = ['poem_id' => $id, 'user_id' => $userId, 'created_at' => now(), 'updated_at' => now(), 'score' => 10, 'weight' => 1.0];
             Score::updateOrInsert([
                 'poem_id' => $id,
                 'user_id' => $userId

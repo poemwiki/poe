@@ -28,7 +28,7 @@ class StoreScore extends FormRequest
     {
         return [
             'poem_id' => ['required', Rule::unique('score', 'poem_id'), 'string'],
-            'score' => ['required', Rule::in(Score::$RATING)],
+            'score' => ['required', Rule::in(Score::$SCORE)],
             'user_id' => ['required', Rule::unique('score', 'user_id'), 'string'],
             'weight' => ['required', 'numeric'],
 

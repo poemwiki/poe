@@ -2,8 +2,8 @@
 
 namespace App\Http\Livewire;
 
-use App\Http\Requests\Admin\Score\UpdateScore;
 use App\Models\Poem;
+use App\Models\Score as ScoreModel;
 use App\Repositories\ScoreRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -19,11 +19,16 @@ class Score extends Component {
     public $rating = null;
 
     protected $rules = [
-        'rating' => 'integer|min:1|max:5',
     ];
 
     public function __construct() {
         $this->scoreRepository = new ScoreRepository(app());
+        $allowedScores = collect(ScoreModel::$SCORE);
+        $this->sortedScores = $allowedScores->sort()->values()->all();
+        $this->descSortedScores = $allowedScores->sortDesc()->values()->all();
+        $this->rules = [
+            'rating' => Rule::in(ScoreModel::$SCORE)
+        ];
         parent::__construct();
     }
 
@@ -64,7 +69,9 @@ class Score extends Component {
 
     public function render() {
         return view('livewire.score', [
-            'score' => $this->poem->scoreArray
+            'score' => $this->poem->scoreArray,
+            'sortedScores' => $this->sortedScores,
+            'descSortedScores' => $this->descSortedScores
         ]);
     }
 }

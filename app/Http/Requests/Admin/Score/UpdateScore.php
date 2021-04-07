@@ -28,7 +28,7 @@ class UpdateScore extends FormRequest
     {
         return [
             'poem_id' => ['sometimes', Rule::unique('score', 'poem_id')->ignore($this->score->getKey(), $this->score->getKeyName()), 'string'],
-            'score' => ['sometimes', Rule::in(Score::$RATING)],
+            'score' => ['sometimes', Rule::in(Score::$SCORE)],
             'user_id' => ['sometimes', Rule::unique('score', 'user_id')->ignore($this->score->getKey(), $this->score->getKeyName()), 'string'],
             'weight' => ['sometimes', 'numeric'],
 
