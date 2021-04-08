@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateScoreRequest;
+use App\Models\Poem;
 use App\Models\Score;
 use App\Repositories\ScoreRepository;
 use Illuminate\Http\Request;
@@ -33,7 +34,7 @@ class ScoreAPIController extends Controller {
         );
 
         if($res) {
-            return $this->responseSuccess();
+            return $this->responseSuccess(ScoreRepository::calc($sanitized['poem_id']));
         }
         return $this->responseFail();
     }

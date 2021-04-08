@@ -16,9 +16,9 @@ class Score extends Model {
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
     protected static $ignoreChangedAttributes = ['created_at'];
-    public static $RATING = [1, 2, 3, 4, 5];
+    // public static $RATING = [1, 2, 3, 4, 5];
     public static $SCORE = [2, 4, 6, 8, 10];
-    public static $RATING_TO_SCORE = 2;
+    // public static $RATING_TO_SCORE = 2;
 
     protected $fillable = [
         'poem_id',

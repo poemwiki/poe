@@ -12,6 +12,7 @@ use App\Repositories\ScoreRepository;
 use EasyWeChat\Factory;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 /**
  * Class LanguageController
@@ -39,10 +40,10 @@ class PoemAPIController extends Controller {
                 $limit = Tag::find($tagId)->campaign->settings['rank_min_weight'] ?? 3;
                 $data = $data->filter(function ($value) use ($limit) {
                     // 票数不足的不参与排名
-                    return $value['score_weight'] >= $limit;
+                    return $value['score_count'] >= $limit;
                 })->sort(function ($a, $b) {
                     $score = $b['score'] <=> $a['score'];
-                    return $score === 0 ? $b['score_weight'] <=> $a['score_weight'] : $score;
+                    return $score === 0 ? $b['score_count'] <=> $a['score_count'] : $score;
                 })->values()->map(function ($item, $index) use ($orderBy) {
                     $item = $item->toArray();
                     $item['rank'] = $index + 1;
@@ -74,14 +75,18 @@ class PoemAPIController extends Controller {
         /** @var Poem $item */
         $item = Poem::find($id);
         $res = $item->toArray();
+
+        $res['poet'] = $item->poetLabel;
         $res['poet_image'] = $item->uploader->avatarUrl;
-        $res['date_ago'] = \Illuminate\Support\Carbon::parse($res['created_at'])->diffForHumans(now());
-        $res['score_weight'] = round(ScoreRepository::calcWeight($id));
-        // dd(($res['score_weight']));
+        $res['date_ago'] = Carbon::parse($res['created_at'])->diffForHumans(now());
+        // TODO save score_count to poem.score_count column
+        $res['score_count'] = ScoreRepository::calcCount($id);
+
         $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item)->get()->map(function ($item) {
-            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
+            $item['date_ago'] = Carbon::parse($item->created_at)->diffForHumans(now());
             return $item;
         });
+
         $res['related'] = $this->poemRepository->random(2)
             ->where('id', '<>', $id)
             ->whereHas('tags', function ($query) use ($item) {

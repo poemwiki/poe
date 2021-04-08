@@ -144,8 +144,8 @@ class PoemRepository extends BaseRepository
 
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
-            $item['poet'] = $item->uploader->name;
-            $item['score_weight'] = ScoreRepository::calcWeight($item->id);
+            $item['poet'] = $item->poetLabel;
+            $item['score_count'] = ScoreRepository::calcCount($item->id);
             return $item;
         });
     }
@@ -157,8 +157,8 @@ class PoemRepository extends BaseRepository
         ])->orderByDesc('created_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
-            $item['poet'] = $item->uploader->name;
-            $item['score_weight'] = ScoreRepository::calcWeight($item->id);
+            $item['poet'] = $item->poetLabel;
+            $item['score_count'] = ScoreRepository::calcCount($item->id);
             return $item;
         });
     }
@@ -198,8 +198,8 @@ class PoemRepository extends BaseRepository
         return $q->orderByDesc('created_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
-            $item['poet'] = $item->uploader->name;
-            $item['score_weight'] = ScoreRepository::calcWeight($item->id);
+            $item['poet'] = $item->poetLabel;
+            $item['score_count'] = ScoreRepository::calcCount($item->id);
             return $item;
         });
     }

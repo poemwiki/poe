@@ -145,4 +145,8 @@ class ScoreRepository extends BaseRepository {
         return Score::query()->select('weight')->where(['poem_id' => $poemId])->sum('weight');
     }
 
+    public static function calcCount($poemId) {
+        return Score::query()->where(['poem_id' => $poemId])->count('user_id');
+    }
+
 }
