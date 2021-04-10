@@ -119,6 +119,33 @@ class BotController extends Controller {
     private function _pad($str, $length=5) {
         return Str::padLeft($str, $length);
     }
+
+    /**
+     * @param Poem $poem
+     * @return mixed|string
+     */
+    public function getUrl(Poem $poem) {
+        if (!$poem->short_url) {
+            $longUrl = 'https://poemwiki.org/p/' . Poem::getFakeId($poem->id);
+            $url = short_url($longUrl, function ($link) use ($poem, $longUrl) {
+                Log::info('shorted url:' . $link);
+                if ($link === $longUrl) return;
+
+                $p = Poem::find($poem->id);
+                if (empty($p)) return;
+
+                $p->short_url = $link;
+                $p->save();
+            });
+            if ($url === $longUrl) {
+                $url = 'https://poemwiki.org/' . $poem->id;
+            }
+        } else {
+            $url = $poem->short_url;
+        }
+        return $url;
+    }
+
     private function _boldNum($str) {
         return str_replace([0,1,2,3,4,5,6,7,8,9], ['𝟎','𝟏','𝟐','𝟑','𝟒','𝟓','𝟔','𝟕','𝟖','𝟗'], $str);
     }
@@ -334,7 +361,7 @@ SQL;
 
             // TODO put this into blade
             if ($count == 0) {
-                $emoji = Arr::random(['😓', '😅', '😢', '😂', '😭呜呜 ', '', '🙁️', '😫', '😶', '😬', '😔', '😒', '😠', '😊', '😹','🙁','🙃','[裂开]','[苦涩]','[叹气]']);
+                $emoji = Arr::random(['😓', '😅', '😢', '😂', '😭呜呜 ', '', '🙁️', '😫', '😬', '😔', '😊', '😹','🙁','🙃','[裂开]','[苦涩]','[叹气]']);
                 $sorry = Arr::random(['Sorry', '对不起', '抱歉', '不好意思', '不好意思哈', 'Soooorry']);
                 $notFound = Arr::random(['没查到', '没搜着', '没找到', '没找着']);
                 $ne = Arr::random(['相关内容', '', '呢']);
@@ -373,11 +400,8 @@ SQL;
                 $content = preg_replace('@[\r\n]{3,}@', "\n\n", $post->poem);
 
 
-                if(isset($poetAuthor)) {
-                    $writer = '作者 / ' . $nation . $poetAuthor->name_lang;
-                } else {
-                    $writer = '作者 / ' . ($post->poet_cn ?? $post->poet);
-                }
+                $p = Poem::find($post->id);
+                $writer = '作者 / ' . $nation . $p->poetLabel;
 
 
                 // poem content
@@ -418,24 +442,7 @@ SQL;
                 }
 
                 // links & score
-                if(!$post->short_url) {
-                    $longUrl = 'https://poemwiki.org/p/'.Poem::getFakeId($post->id);
-                    $url = short_url($longUrl, function ($link) use ($post, $longUrl){
-                        Log::info('shorted url:' . $link);
-                        if($link === $longUrl) return;
-
-                        $p = Poem::find($post->id);
-                        if(empty($p)) return;
-
-                        $p->short_url = $link;
-                        $p->save();
-                    });
-                    if($url === $longUrl) {
-                        $url = 'https://poemwiki.org/'.$post->id;
-                    }
-                } else {
-                    $url = $post->short_url;
-                }
+                $url = $this->getUrl($p);
                 $wikiLink = "\n\n诗歌维基：$url";
 
                 $scoreRepo = new ScoreRepository(app());

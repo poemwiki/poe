@@ -80,7 +80,7 @@
                             return 'style="transition-delay:'.($i*20).'ms"';
                     })!!}
                   <span
-                    class="text-gray-400 float-right">{{$poem->poet_author ? $poem->poet_author->name_lang : $poem->poet}}</span></a>
+                    class="text-gray-400 float-right">{{$poem->poetLabel}}</span></a>
               </div>
             </li>
           @endforeach

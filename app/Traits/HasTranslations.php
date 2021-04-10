@@ -43,11 +43,13 @@ trait HasTranslations {
         if(empty($translations)) return '';
 
         $lastFallback = array_key_first($translations);
-        $zhFallback = ['zh-hans', 'zh-cn', 'zh-Hans-CN', 'zh', 'zh-yue', 'zh-hant', 'zh-hk', 'zh-tw', 'zh-sg', $lastFallback];
-        $zhTFallback = ['zh-hant', 'zh-hk', 'zh-tw', 'zh', 'zh-cn', 'zh-hans', 'zh-yue', 'zh-Hans-CN', 'zh-sg', $lastFallback];
+        $zhFallback = ['zh-hans', 'zh-cn', 'zh-Hans-CN', 'zh', 'zh-yue', 'zh-hant', 'zh-hk', 'zh-tw', 'zh-sg', 'wuu', 'yue', 'en', $lastFallback];
+        $zhTFallback = ['zh-hant', 'zh-hk', 'zh-tw', 'zh', 'zh-cn', 'zh-hans', 'zh-yue', 'zh-Hans-CN', 'zh-sg', 'wuu', 'yue', 'en', $lastFallback];
+        // TODO in_array($lowerLocale, $zhCNLocales)
         if (in_array($lowerLocale, $zhFallback)){
             return $this->getFallbackTranslation($key, $zhFallback);
         }
+        // TODO in_array($lowerLocale, $zhHantLocales)
         if (in_array($lowerLocale, $zhTFallback)){
             return $this->getFallbackTranslation($key, $zhTFallback);
         }
@@ -57,7 +59,7 @@ trait HasTranslations {
 
     function getFallbackTranslation(String $key, Array $fallbackArr): string {
         foreach ($fallbackArr as $locale) {
-            $translation = $this->getTranslation($key, $locale);
+            $translation = $this->getTranslation($key, $locale, false);
             if(!empty($translation)) {
                 return $translation;
             }
