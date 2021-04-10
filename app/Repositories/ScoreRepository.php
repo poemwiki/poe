@@ -145,8 +145,15 @@ class ScoreRepository extends BaseRepository {
         return Score::query()->select('weight')->where(['poem_id' => $poemId])->sum('weight');
     }
 
-    public static function calcCount($poemId) {
-        return Score::query()->where(['poem_id' => $poemId])->count('user_id');
+    public static function calcCount($poemId, $startTime = null, $endTime = null) {
+        $builder = Score::query()->where(['poem_id' => $poemId]);
+        if($startTime) {
+            $builder->where('updated_at', '>=', $startTime);
+        }
+        if($endTime) {
+            $builder->where('updated_at', '<=', $endTime);
+        }
+        return $builder->count('user_id');
     }
 
 }

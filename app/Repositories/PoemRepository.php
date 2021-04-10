@@ -136,16 +136,22 @@ class PoemRepository extends BaseRepository
         return $this->newQuery()->findOrFail($id);
     }
 
-    public function getByTagId($tagId, $orderBy) {
+    public function getByTagId($tagId, $orderBy, $startTime = null, $endTime = null) {
         // TODO Poem::where() tag_id=$tagId, with(['uploader', 'scores'])
         $poems = \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems();
+        if($startTime) {
+            $poems->where('poem.created_at', '>=', $startTime);
+        }
+        if($endTime) {
+            $poems->where('poem.created_at', '<=', $endTime);
+        }
 
-        return $poems->orderByDesc($orderBy)->get()->map(function ($item, $index) use ($orderBy) {
+        return $poems->orderByDesc($orderBy)->get()->map(function ($item, $index) use ($startTime, $endTime) {
 
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->poetLabel;
-            $item['score_count'] = ScoreRepository::calcCount($item->id);
+            $item['score_count'] = $endTime ? ScoreRepository::calcCount($item->id, $startTime, $endTime) : ScoreRepository::calcCount($item->id);
             return $item;
         });
     }

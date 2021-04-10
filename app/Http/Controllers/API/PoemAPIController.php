@@ -10,6 +10,7 @@ use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
 use EasyWeChat\Factory;
+use File;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -29,29 +30,82 @@ class PoemAPIController extends Controller {
         $this->reviewRepository = $reviewRepository;
     }
 
+    // TODO return poem.id only if client don't need
+    public function campaignIndex(Request $request) {
+        $tagId = $request->input('tagId');
+
+        if(!is_numeric($tagId)) {
+            return $this->responseFail();
+        }
+        $campaign = Tag::find($tagId)->campaign;
+
+        $dateInterval = Carbon::parse($campaign->end)->diff(now());
+        $campaignEnded = $dateInterval->invert === 0;
+
+        if(isset($campaign->settings['result'])) {
+            $byScoreData = $campaign->settings['result'];
+        } else {
+
+            // poem before endDate, scores before endDate
+            $byScore = $this->poemRepository->getByTagId($tagId, 'score', $campaign->start, $campaign->end);
+            $limit = $campaign->settings['rank_min_weight'] ?? 3;
+            $byScoreData = $byScore->filter(function ($value) use ($limit) {
+                // 票数不足的不参与排名
+                // dump($value['score_count']);
+                return $value['score_count'] >= $limit;
+            })->map(function (Poem $item) use ($campaign) {
+                $item['score'] = $item->getCampaignScore($campaign)['score'];
+                return $item;
+            })->sort(function ($a, $b) {
+                $score = $b['score'] <=> $a['score'];
+                return $score === 0 ? $b['score_count'] <=> $a['score_count'] : $score;
+            })->values()->map(function ($item, $index) {
+                $item = $item->toArray();
+                $item['rank'] = $index + 1;
+                return $item;
+            });
+
+            if($campaignEnded) {
+                $newSetting = $campaign->settings;
+                $newSetting['result'] = $byScoreData;
+                $campaign->settings = $newSetting;
+                $campaign->save();
+            }
+        }
+
+
+        $data = [
+            'byScore' => $byScoreData,
+            'byCreatedAt' => $this->poemRepository->getByTagId($tagId, 'created_at')
+        ];
+        return $this->responseSuccess($data);
+    }
+
     public function index(Request $request) {
         // TODO pagination
         // TODO order by score updated before campaign end time
         $tagId = $request->input('tagId');
         $orderBy = $request->input('orderBy', 'created_at');
-        if(is_numeric($tagId)) {
-            $data = $this->poemRepository->getByTagId($tagId, $orderBy);
-            if($orderBy === 'score') {
-                $limit = Tag::find($tagId)->campaign->settings['rank_min_weight'] ?? 3;
-                $data = $data->filter(function ($value) use ($limit) {
-                    // 票数不足的不参与排名
-                    return $value['score_count'] >= $limit;
-                })->sort(function ($a, $b) {
-                    $score = $b['score'] <=> $a['score'];
-                    return $score === 0 ? $b['score_count'] <=> $a['score_count'] : $score;
-                })->values()->map(function ($item, $index) use ($orderBy) {
-                    $item = $item->toArray();
-                    $item['rank'] = $index + 1;
-                    return $item;
-                });
-            }
-            return $this->responseSuccess($data);
+        if(!is_numeric($tagId)) {
+            return $this->responseFail();
         }
+
+        $data = $this->poemRepository->getByTagId($tagId, $orderBy);
+        if($orderBy === 'score') {
+            $limit = Tag::find($tagId)->campaign->settings['rank_min_weight'] ?? 3;
+            $data = $data->filter(function ($value) use ($limit) {
+                // 票数不足的不参与排名
+                return $value['score_count'] >= $limit;
+            })->sort(function ($a, $b) {
+                $score = $b['score'] <=> $a['score'];
+                return $score === 0 ? $b['score_count'] <=> $a['score_count'] : $score;
+            })->values()->map(function ($item, $index) {
+                $item = $item->toArray();
+                $item['rank'] = $index + 1;
+                return $item;
+            });
+        }
+        return $this->responseSuccess($data);
     }
 
     public function mine(Request $request) {
@@ -138,13 +192,13 @@ class PoemAPIController extends Controller {
 
         if(isset($_GET['force']) or env('APP_ENV') === 'local') {
             $postData['force'] = 1;
-        } else if(file_exists($storeDir)) {
+        } else if(file_exists($storeDir) && File::mimeType($storeDir) !== 'text/plain') {
             // TODO save route('poem-card', $poemId) to $poem->image if $storeDir exists,
             // if not then generate the image before saving
             return $this->responseSuccess(['url' => route('poem-card', $poemId)]);
         }
 
-        $img = file_get_contents_post(env('POE_RENDER_SERVER', 'http://47.105.165.228:8888'), $postData);
+        $img = file_get_contents_post(config('app.render_server'), $postData);
         // TODO 绘制小程序码
 
         if(!is_dir($dir)) {

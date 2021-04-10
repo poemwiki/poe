@@ -238,7 +238,9 @@ $config = [
     'length_too_long' => 80,
     'default_soft_wrap_length' => 20,
     'language_line_length_max' => [1 => 20, 2=>45, 7 => 20],
-    'campaign_caution' => "活动评分细则：\n1. 不允许恶意刷票行为\n2. 排行榜评分仅以活动期间评分计算。活动结束后仍可评分，但不影响已确认排行榜评分及排名。"
+    'campaign_caution' => "活动评分细则：\n1. 不允许恶意刷票行为\n2. 排行榜评分仅以活动期间评分计算。活动结束后仍可评分，但不影响已确认排行榜评分及排名。",
+
+    'render_server' => env('POE_RENDER_SERVER', 'http://47.105.165.228:8888'),
 
 ];
 

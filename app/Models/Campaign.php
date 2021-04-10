@@ -29,7 +29,8 @@ class Campaign extends Model {
         'created_at',
         'deleted_at',
         'updated_at',
-        'start'
+        'start',
+        'end'
 
     ];
     // these attributes are translatable
