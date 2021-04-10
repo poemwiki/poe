@@ -441,7 +441,7 @@ SQL;
                 $scoreRepo = new ScoreRepository(app());
                 $score = $scoreRepo->calcScoreByPoemId($post->id);
                 if ($score['score']) {
-                    $wikiScore = '评分：' . "${score['score']} " . str_repeat("🌟", floor($score['score']));
+                    $wikiScore = '评分：' . "${score['score']} " . str_repeat("🌟", round($score['score'] / 2));
                     array_push($parts, $wikiLink);
                     array_push($parts, $wikiScore);
                 } else {
