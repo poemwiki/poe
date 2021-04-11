@@ -10,10 +10,12 @@ use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
 use EasyWeChat\Factory;
+use Exception;
 use File;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class LanguageController
@@ -127,7 +129,7 @@ class PoemAPIController extends Controller {
 
     public function detail($id) {
         /** @var Poem $item */
-        $item = Poem::find($id);
+        $item = Poem::findOrFail($id);
         $res = $item->toArray();
 
         $res['poet'] = $item->poetLabel;
@@ -141,11 +143,15 @@ class PoemAPIController extends Controller {
             return $item;
         });
 
-        $res['related'] = $this->poemRepository->random(2)
-            ->where('id', '<>', $id)
-            ->whereHas('tags', function ($query) use ($item) {
+        $relatedQuery = $this->poemRepository->random(2)
+            ->where('id', '<>', $id);
+        if($item->tags) {
+            $relatedQuery->whereHas('tags', function ($query) use ($item) {
                 $query->where('tag_id', '=', $item->tags[0]->id);
-            })->get()->toArray();
+            });
+        }
+
+        $res['related'] = $relatedQuery->get()->toArray();
 
         return $this->responseSuccess($res);
     }
@@ -154,8 +160,8 @@ class PoemAPIController extends Controller {
         $sanitized = $request->getSanitized();
 
         $wechatApp = Factory::miniProgram([
-            'app_id' => env('WECHAT_MINI_PROGRAM_APPID'),
-            'secret' => env('WECHAT_MINI_PROGRAM_SECRET'),
+            'app_id' => config('wechat.mini_program.default.app_id'),
+            'secret' => config('wechat.mini_program.default.secret'),
             'response_type' => 'object',
         ]);
         $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['poem']);
@@ -182,32 +188,141 @@ class PoemAPIController extends Controller {
         return $this->responseSuccess();
     }
 
-    public function share($poemId) {
+
+    public function share(int $poemId) {
         $poem = Poem::find($poemId);
+        $force = isset($_GET['force']) || config('app.env') === 'local';
 
-        $postData = ['compositionId' => 'pure', 'poem' => $poem->poem, 'poet' => $poem->poetLabel, 'title' => $poem->title];
-        $dir = storage_path('app/public/poem-card/' . $poem->id);
-        // TODO file name should be compositionId . hash(postData)
-        $storeDir = $dir .'/element-0.png';
-
-        if(isset($_GET['force']) or env('APP_ENV') === 'local') {
-            $postData['force'] = 1;
-        } else if(file_exists($storeDir) && File::mimeType($storeDir) !== 'text/plain') {
-            // TODO save route('poem-card', $poemId) to $poem->image if $storeDir exists,
-            // if not then generate the image before saving
-            return $this->responseSuccess(['url' => route('poem-card', $poemId)]);
+        $compositionId = 'pure';
+        if(!$force && $poem->share_pics && isset($poem->share_pics[$compositionId])) {
+            if(file_exists($poem->share_pics[$compositionId])) {
+                return $this->responseSuccess(['url' => route('poem-card', [
+                    'id' => $poemId,
+                    'compositionId' => $compositionId
+                ])]);
+            }
         }
 
-        $img = file_get_contents_post(config('app.render_server'), $postData);
-        // TODO 绘制小程序码
+        $postData = ['compositionId' => $compositionId, 'poem' => $poem->poem, 'poet' => $poem->poetLabel, 'title' => $poem->title];
 
+        $dir = storage_path('app/public/poem-card/' . $poem->id);
         if(!is_dir($dir)) {
             mkdir($dir);
         }
-        if(file_put_contents($storeDir, $img)) {
-            return $this->responseSuccess(['url' => route('poem-card', $poemId)]);
+
+        // img file name will change if postData change
+        $hash = crc32(json_encode($postData));
+        $posterPath = "{$dir}/poster_{$compositionId}_{$hash}.png"; // posterImg = poemImg + appCodeImg
+        $poemImgFileName = "poem_{$compositionId}_{$hash}.png"; // main part of poster
+
+        $postData['force'] = $force;
+
+        try {
+            $poemImgPath = $this->fetchPoemImg($postData, $dir, $poemImgFileName, $force);
+            $appCodeImgPath = $this->fetchAppCodeImg($poemId, $dir, $force);
+
+            if(!$this->composite($poemImgPath, $appCodeImgPath, $posterPath)) {
+                return $this->responseFail();
+            }
+
+            $sharePics = $poem->share_pics ?? [];
+            $sharePics[$compositionId] = $posterPath;
+            $poem->share_pics = $sharePics;
+            $poem->save();
+            return $this->responseSuccess(['url' => route('poem-card', [
+                'id' => $poemId,
+                'compositionId' => $compositionId
+            ])]);
+
+        } catch (\Throwable $e) {
+            Log::error($e->getMessage());
+            return $this->responseFail();
+        }
+    }
+
+    /**
+     * @param $postData
+     * @param $dir
+     * @param $poemImgFileName
+     * @param bool $force
+     * @return string
+     * @throws Exception
+     */
+    private function fetchPoemImg($postData, string $dir, string $poemImgFileName, bool $force=false) {
+        $poemImgPath = $dir .'/'. $poemImgFileName;
+        if(!$force && file_exists($poemImgPath)) {
+            return $poemImgPath;
         }
 
-        return $this->responseFail();
+        $poemImg = file_get_contents_post(config('app.render_server'), $postData);
+        if(file_put_contents($poemImgPath, $poemImg)) {
+            if(File::mimeType($poemImgPath) == 'text/plain') {
+                unlink($poemImgPath);
+                throw new Exception('生成图片失败，请稍后再试。');
+            }
+
+            return $poemImgPath;
+        }
+        throw new Exception('图片写入失败，请稍后再试。');
+    }
+
+    /**
+     * @param int $poemId
+     * @param string $appCodeImgDir
+     * @param bool $force
+     * @param string $appCodeFileName
+     * @return string|false
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
+     * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
+     * @noinspection PhpFullyQualifiedNameUsageInspection
+     */
+    private function fetchAppCodeImg(int $poemId, string $appCodeImgDir, bool $force=false, string $appCodeFileName='app-code.jpg') {
+        $app = Factory::miniProgram([
+            'app_id' => config('wechat.mini_program.default.app_id'),
+            'secret' => config('wechat.mini_program.default.secret')
+        ]);
+        $response = $app->app_code->getUnlimit($poemId, [
+            'page' => 'pages/detail/detail',
+            'width' => 280,
+            // 'is_hyaline' => true
+        ]);
+        if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
+            $response->saveAs($appCodeImgDir, $appCodeFileName);
+            return $appCodeImgDir.'/'.$appCodeFileName;
+        }
+        return false;
+    }
+
+    /**
+     * composite poem image and appCode image
+     * @param string $poemImgPath
+     * @param string $appCodeImgPath
+     * @param string $posterPath
+     * @param int $quality
+     * @return bool
+     * @throws Exception
+     */
+    private function composite(string $poemImgPath, string $appCodeImgPath, string $posterPath, int $quality=100): bool {
+        // 绘制小程序码
+        // 覆盖海报右下角小程序码区域
+        $posterImg = img_overlay($poemImgPath, $appCodeImgPath, 0, 0, 120, 120);
+
+        $imgType = exif_imagetype($poemImgPath);
+        if ($imgType === IMAGETYPE_JPEG) {
+            $res = imagejpeg($posterImg, $posterPath, $quality);
+
+        } else if($imgType === IMAGETYPE_PNG){
+            //see: http://stackoverflow.com/a/7878801/1596547
+            $res = imagepng($posterImg, $posterPath, $quality*9/100);
+
+        } else if($imgType === IMAGETYPE_GIF){
+            $res = imagegif($posterImg, $posterPath);
+
+        } else {
+            throw new Exception('image type not supported');
+        }
+
+        imagedestroy($posterImg);
+        return $res;
     }
 }

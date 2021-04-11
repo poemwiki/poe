@@ -331,8 +331,15 @@ Route::get('/page/{page}', function ($page) {
     return abort(404);
 });
 
-Route::get('/poem-card/{id}', function ($id) {
-    $path = storage_path("app/public/poem-card/$id/element-0.png");
+Route::get('/poem-card/{id}/{compositionId?}', function ($id, $compositionId=null) {
+    $poem = Poem::find($id);
+    $pics = $poem->share_pics;
+    if($compositionId) {
+        $path = $pics[$compositionId];
+    } else {
+        abort(404);
+        return;
+    }
 
     if (!File::exists($path)) {
         abort(404);

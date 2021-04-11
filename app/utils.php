@@ -96,3 +96,50 @@ if (! function_exists('short_url')) {
         return $origin;
     }
 }
+
+if (! function_exists('create_image')) {
+
+    /**
+     * @param $imgPath
+     * @return false|resource
+     * @throws Exception
+     */
+    function create_image($imgPath) {
+        $type = \File::mimeType($imgPath);
+        switch ($type) {
+            case 'image/jpeg':
+                $image = imagecreatefromjpeg($imgPath);
+                break;
+            case 'image/png':
+                $image = imagecreatefrompng($imgPath);
+                break;
+            default:
+                throw new Exception('Image type not supported. front image: ' . $imgPath);
+        }
+        return $image;
+    }
+}
+
+if (! function_exists('img_overlay')) {
+    /**
+     * @param $bg
+     * @param $front
+     * @param $dist_x
+     * @param $dist_y
+     * @return false|resource
+     * @throws Exception
+     */
+    function img_overlay($bg, $front, $dist_x, $dist_y, $dist_w, $dist_h) {
+        // TODO use image type from getimagesize
+        $bgImg = create_image($bg);
+        $frontImg = create_image($front);
+
+        list($width, $height) = getimagesize($bg);
+        list($frontWidth, $frontHeight) = getimagesize($front);
+        $out = imagecreatetruecolor($width, $height);
+        imagecopyresampled($out, $bgImg, 0, 0, 0, 0, $width, $height, $width, $height);
+        imagecopyresampled($out, $frontImg, $width-220, $height-160, 0, 0, $dist_w, $dist_h, $frontWidth, $frontHeight);
+        return $out;
+    }
+
+}
