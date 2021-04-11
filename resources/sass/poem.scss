@@ -25,17 +25,20 @@ section.poem {
       margin-bottom: 1.6rem;
     }
 
-    .preface {
-      color: $gray;
-      text-indent: 2em;
-      font-size: $font-size-sm;
-    }
-
     .subtitle {
       font-size: 1.1em;
       font-weight: bolder;
+      white-space: pre-wrap;
+      display: block;
     }
 
+    .preface {
+      color: $gray;
+      padding-left: 2em;
+      font-size: $font-size-sm;
+      white-space: pre-wrap;
+      display: inline-block;
+    }
 
     .poem-content {
       margin-left: -.4em;
