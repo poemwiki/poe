@@ -146,8 +146,7 @@ class PoemRepository extends BaseRepository
             $poems->where('poem.created_at', '<=', $endTime);
         }
 
-        return $poems->orderByDesc($orderBy)->get()->map(function ($item, $index) use ($startTime, $endTime) {
-
+        return $poems->with('reviews')->orderByDesc($orderBy)->get()->map(function ($item) use ($startTime, $endTime) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->poetLabel;

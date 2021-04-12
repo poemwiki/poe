@@ -31,7 +31,7 @@ class Review extends Model {
         'deleted_at'
     ];
 
-    protected $appends = [];
+    protected $appends = ['uname'];
 
 
     // public static function boot() {

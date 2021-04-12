@@ -85,7 +85,6 @@ class PoemAPIController extends Controller {
 
     public function index(Request $request) {
         // TODO pagination
-        // TODO order by score updated before campaign end time
         $tagId = $request->input('tagId');
         $orderBy = $request->input('orderBy', 'created_at');
         if(!is_numeric($tagId)) {
@@ -133,7 +132,7 @@ class PoemAPIController extends Controller {
         $res = $item->toArray();
 
         $res['poet'] = $item->poetLabel;
-        $res['poet_image'] = $item->uploader->avatarUrl;
+        $res['poet_image'] = $item->uploader ? $item->uploader->avatarUrl : '';
         $res['date_ago'] = Carbon::parse($res['created_at'])->diffForHumans(now());
         // TODO save score_count to poem.score_count column
         $res['score_count'] = ScoreRepository::calcCount($id);
@@ -145,7 +144,7 @@ class PoemAPIController extends Controller {
 
         $relatedQuery = $this->poemRepository->random(2)
             ->where('id', '<>', $id);
-        if($item->tags) {
+        if($item->tags->count()) {
             $relatedQuery->whereHas('tags', function ($query) use ($item) {
                 $query->where('tag_id', '=', $item->tags[0]->id);
             });
@@ -189,6 +188,8 @@ class PoemAPIController extends Controller {
     }
 
 
+    // TODO poster image generation process should be a command, and invoke after poem created
+    // TODO regenerate poster when related poem fields updated
     public function share(int $poemId) {
         $poem = Poem::find($poemId);
         $force = isset($_GET['force']) || config('app.env') === 'local';
