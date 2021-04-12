@@ -47,7 +47,9 @@
     "spatie/laravel-searchable": "^1.7",
     "spatie/laravel-validation-rules": "^2.7",
     "lcobucci/jwt": "^3.4",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "ext-gd": "*",
+    "ext-exif": "*"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.7",
