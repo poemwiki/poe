@@ -300,7 +300,7 @@ SQL;
             $subSql = trim($subSql, 'AND') . ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR`need_confirm`<>1) AND p.`deleted_at` is NULL';
 
             $sql = <<<SQL
-SELECT  (IF(ISNULL(`wx`), 0, `wx`)+`base`) * IF(ISNULL(score), 1, 1+score/5) / (1+times) as `rank`, t.* FROM (
+SELECT (IF(ISNULL(`wx`), 0, `wx`)+`base`) * IF(ISNULL(score), 1, 1+(score-6)/20) / (1+times) as `rank`, t.* FROM (
     $subSql
 ) as t
 ORDER BY `rank` desc, t.times, t.length limit 0,2
@@ -330,7 +330,7 @@ SQL;
             )';
             $subSql .= ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1) AND p.`deleted_at` is NULL';
             $sql = <<<SQL
-SELECT  (IF(ISNULL(`wx`), 0, `wx`)+`base`) * IF(ISNULL(score), 1, 1+(score-3)/10) / (1+times) as `rank`, t.* FROM (
+SELECT (IF(ISNULL(`wx`), 0, `wx`)+`base`) * IF(ISNULL(score), 1, 1+(score-6)/20) / (1+times) as `rank`, t.* FROM (
     $subSql
 ) as t
 ORDER BY `rank` desc, t.times, t.length limit 0,2
@@ -452,7 +452,7 @@ SQL;
                     array_push($parts, $wikiLink);
                     array_push($parts, $wikiScore);
                 } else {
-                    $wikiScore = "点这里：$url 做第一个给这首诗打分的人";
+                    $wikiScore = "点这里：$url 消灭零评分";
                     array_push($parts, "\n\n$wikiScore");
                 }
 
