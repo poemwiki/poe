@@ -313,7 +313,7 @@ class Poem extends Model implements Searchable {
         } else if ($this->poetAuthor) {
             return $this->poetAuthor->name_lang;
         } else {
-            return ($this->poet === $this->poet_cn or is_null($this->poet_cn)) ? $this->poet : $this->poet_cn."（$this->poet）";
+            return ($this->poet === $this->poet_cn or is_null($this->poet_cn)) ? $this->poet : $this->poet_cn.'（'.$this->poet.'）';
         }
     }
 
