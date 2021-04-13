@@ -406,8 +406,8 @@ SQL;
 
                 // poem content
                 $parts = ['▍ ' . $post->title];
+                if($post->subtitle) array_push($parts, $post->subtitle);
                 if($post->preface) array_push($parts, '        '. $post->preface);
-                if($post->subtitle) array_push($parts, "\n    ".$post->subtitle);
                 array_push($parts, "\n".$content."\n");
 
 

@@ -76,7 +76,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                      itemprop="articleBody"
                      @if($poem->lang) lang="{{ $poem->lang->locale }}" @endif
                 >
-                    <code class="poem-line no-height"><br></code>
+                    <code class="poem-line @if($poem->subtitle) poem-line-empty @else no-height @endif"><br></code>
                     @foreach(Str::of($poem->poem)->toLines() as $line)
                         @if(trim($line))
                             <code class="poem-line font-hei">{{$line}}</code>
