@@ -152,6 +152,7 @@ class PoemAPIController extends Controller {
             ->map(function ($item) {
                 $item->makeHidden('user');
                 $item['date_ago'] = date_ago($item->created_at);
+                $item['content'] = str_replace('&nbsp;', ' ', strip_tags($item->content));
                 return $item;
             });
 
