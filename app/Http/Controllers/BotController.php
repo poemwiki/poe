@@ -134,6 +134,7 @@ class BotController extends Controller {
                 $p = Poem::find($poem->id);
                 if (empty($p)) return;
 
+                $p->timestamps = false;
                 $p->short_url = $link;
                 $p->save();
             });
