@@ -10,11 +10,14 @@ use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
+
 /**
  * Class Author
  * @property int $id
  * @property string $created_at
  * @property string $updated_at
+ * @property User user
+ * @property array|null picUrl
  * @package App
  */
 class Author extends Model implements Searchable {
