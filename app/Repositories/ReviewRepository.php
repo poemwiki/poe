@@ -57,7 +57,7 @@ class ReviewRepository extends BaseRepository {
         return $query->paginate($perPage, $columns);
     }
 
-    public function listByOriginalPoem(Poem $poem, $order = 'updated_at', $direction = 'desc', $columns = ['*']) {
+    public function listByOriginalPoem(Poem $poem, $order = 'review.created_at', $direction = 'desc', $columns = ['*']) {
         $poemIds = [$poem->id];
         if ($poem->original_id) {
             $poemIds[] = $poem->original_id;
@@ -67,7 +67,9 @@ class ReviewRepository extends BaseRepository {
         if ($poem->translatedPoems) {
             $poemIds = $poem->translatedPoems->pluck('id')->concat($poemIds)->all();
         }
-        $query = $this->allQuery()->whereIn('poem_id', $poemIds)->with(['user'])->orderBy($order, $direction);
+        $query = $this->allQuery()->whereIn('poem_id', $poemIds)
+            ->leftJoin('users', 'users.id', '=', 'review.user_id')
+            ->orderBy($order, $direction);
         return $query;
     }
 

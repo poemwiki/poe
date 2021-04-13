@@ -31,8 +31,8 @@
         @foreach($reviews as $review)
             <li class="">
                 <div class="review-h flex-center-vertically">
-                    <div><img class="avatar" src="{{$review->user->avatarUrl}}"></div>
-                    <div class="review-info"><b>{{$review->user->name}}</b><span class="review-time" title="{{$review->updated_at ?? $review->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($review->updated_at ?? $review->created_at)->diffForHumans(now())}}</span></div>
+                    <div><img class="avatar" src="{{$review->avatar}}"></div>
+                    <div class="review-info"><b>{{$review->name}}</b><span class="review-time" title="{{$review->updated_at ?? $review->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($review->updated_at ?? $review->created_at)->diffForHumans(now())}}</span></div>
                 </div>
 
                 @if(isset($userScore[$review->user_id]))

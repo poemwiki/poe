@@ -128,29 +128,55 @@ class PoemAPIController extends Controller {
 
     public function detail($id) {
         /** @var Poem $item */
-        $item = Poem::findOrFail($id);
+        $columns = [
+            'id', 'created_at', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
+            'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
+            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'];
+        $item = Poem::where('id', '=', $id)->get($columns)->first();
+        if(!$item) {
+            abort(404);
+            return $this->responseFail([], 'not found', -3);
+        }
         $res = $item->toArray();
 
         $res['poet'] = $item->poetLabel;
-        $res['poet_image'] = $item->uploader ? $item->uploader->avatarUrl : '';
-        $res['date_ago'] = Carbon::parse($res['created_at'])->diffForHumans(now());
+        $res['poet_avatar'] = $item->poetAvatar;
+        $res['date_ago'] = date_ago($item->created_at);
         // TODO save score_count to poem.score_count column
         $res['score_count'] = ScoreRepository::calcCount($id);
 
-        $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item)->get()->map(function ($item) {
-            $item['date_ago'] = Carbon::parse($item->created_at)->diffForHumans(now());
-            return $item;
-        });
+        unset($res['resource_url']);
+
+        $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item)
+            ->get(['review.content', 'review.created_at', 'review.user_id'])
+            ->map(function ($item) {
+                $item->makeHidden('user');
+                $item['date_ago'] = date_ago($item->created_at);
+                return $item;
+            });
 
         $relatedQuery = $this->poemRepository->random(2)
             ->where('id', '<>', $id);
-        if($item->tags->count()) {
+        if($item->tags->count() && config('app.env') === 'production') {
             $relatedQuery->whereHas('tags', function ($query) use ($item) {
                 $query->where('tag_id', '=', $item->tags[0]->id);
             });
         }
 
-        $res['related'] = $relatedQuery->get()->toArray();
+        $res['related'] = $relatedQuery->get(['id', 'poem', 'poet', 'poet_cn', 'poet_id', 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'])
+            ->map(function ($item) {
+                $arr = $item->toArray();
+                $arr['poet'] = $item->poetLabel;
+                // TODO how to remove it before map?
+                unset($arr['poet_author']);
+                unset($arr['fakeId']);
+                unset($arr['upload_user_id']);
+                unset($arr['translator_id']);
+                unset($arr['is_owner_uploaded']);
+                unset($arr['resource_url']);
+                return $arr;
+            })
+            ->toArray();
 
         return $this->responseSuccess($res);
     }
@@ -206,14 +232,16 @@ class PoemAPIController extends Controller {
 
         $postData = ['compositionId' => $compositionId, 'poem' => $poem->poem, 'poet' => $poem->poetLabel, 'title' => $poem->title];
 
-        $dir = storage_path('app/public/poem-card/' . $poem->id);
+        $relativeStoreDir = 'app/public/poem-card/' . $poem->id;
+        $dir = storage_path($relativeStoreDir);
         if(!is_dir($dir)) {
             mkdir($dir);
         }
 
         // img file name will change if postData change
         $hash = crc32(json_encode($postData));
-        $posterPath = "{$dir}/poster_{$compositionId}_{$hash}.png"; // posterImg = poemImg + appCodeImg
+        $posterStorePath = "{$relativeStoreDir}/poster_{$compositionId}_{$hash}.png";
+        $posterPath = storage_path($posterStorePath); // posterImg = poemImg + appCodeImg
         $poemImgFileName = "poem_{$compositionId}_{$hash}.png"; // main part of poster
 
         $postData['force'] = $force;
@@ -227,7 +255,7 @@ class PoemAPIController extends Controller {
             }
 
             $sharePics = $poem->share_pics ?? [];
-            $sharePics[$compositionId] = $posterPath;
+            $sharePics[$compositionId] = $posterStorePath;
             $poem->share_pics = $sharePics;
             $poem->save();
             return $this->responseSuccess(['url' => route('poem-card', [
@@ -282,10 +310,10 @@ class PoemAPIController extends Controller {
             'app_id' => config('wechat.mini_program.default.app_id'),
             'secret' => config('wechat.mini_program.default.secret')
         ]);
+        // 注意微信对此接口调用频率有限制
         $response = $app->app_code->getUnlimit($poemId, [
             'page' => 'pages/detail/detail',
             'width' => 280,
-            // 'is_hyaline' => true
         ]);
         if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
             $response->saveAs($appCodeImgDir, $appCodeFileName);

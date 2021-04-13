@@ -22,8 +22,8 @@ class LoginWeAppController extends Controller {
 
     public function __construct() {
         $this->weApp = \EasyWeChat\Factory::miniProgram([
-            'app_id' => env('WECHAT_MINI_PROGRAM_APPID'),
-            'secret' => env('WECHAT_MINI_PROGRAM_SECRET'),
+            'app_id' => config('wechat.mini_program.default.app_id'),
+            'secret' => config('wechat.mini_program.default.secret'),
 
             // 指定 API 调用返回结果的类型：array(default)/collection/object/raw/自定义类名
             'response_type' => 'array',]);
@@ -58,6 +58,7 @@ class LoginWeAppController extends Controller {
 
 
         // 找到 openid 对应的用户
+        // TODO 考虑同一unionid下不同openid的虚拟身份（欢乐马、神经蛙等）
         // TODO 考虑解绑情况
         $userBind = $this->getUserBindInfoByUnionID($data['unionid'], UserBind::BIND_REF['weapp'], 1);
         // 待解决的问题：微信服务端返回的 $data 中是否会包含 unionid？在何种情况下包含？

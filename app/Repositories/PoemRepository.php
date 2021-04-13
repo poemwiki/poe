@@ -89,12 +89,15 @@ class PoemRepository extends BaseRepository
     ORDER BY r1.id ASC
     LIMIT 1
      */
-    public static function random($num = 1) {
+    public static function random($num = 1, $with=[]) {
         // TODO 选取策略： 1. 优先选取 poem.bedtime_post_id 不为空的 poem
         // 2. 评分和评论数
         // 3. poem.length
         // 4. 最近未推送给当前用户的
-        return Poem::query()->with('wx', 'lang') // TODO 1. 如果显示声明原创的诗歌，是否需要跟普通诗歌区分开？ 2. 对声明原创的诗歌，gate 中定义只允许上传用户编辑
+        $builder = Poem::query();
+        if(!empty($with)) $builder->with($with);
+
+        return $builder // TODO 1. 如果显示声明原创的诗歌，是否需要跟普通诗歌区分开？ 2. 对声明原创的诗歌，gate 中定义只允许上传用户编辑
             ->inRandomOrder()
             ->take($num);
     }
@@ -159,7 +162,7 @@ class PoemRepository extends BaseRepository
         return self::newQuery()->where([
             ['is_owner_uploaded', '=', '1'],
             ['upload_user_id', '=', $userId],
-        ])->orderByDesc('created_at')->get()->map(function ($item) {
+        ])->with('reviews')->orderByDesc('created_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->poetLabel;
@@ -200,7 +203,7 @@ class PoemRepository extends BaseRepository
                 $q->where(['user_id' => $userId]);
             });
         });
-        return $q->orderByDesc('created_at')->get()->map(function ($item) {
+        return $q->with('reviews')->orderByDesc('created_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->poetLabel;

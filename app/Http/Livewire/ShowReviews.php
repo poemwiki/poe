@@ -87,7 +87,7 @@ class ShowReviews extends Component {
         $userIds = [];
         $poemIds = [];
         foreach ($reviews as $review) {
-            $userIds[] = $review->user->id;
+            $userIds[] = $review->user_id;
             $poemIds[] = $review->poem->id;
         }
 

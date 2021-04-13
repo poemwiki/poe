@@ -334,8 +334,8 @@ Route::get('/page/{page}', function ($page) {
 Route::get('/poem-card/{id}/{compositionId?}', function ($id, $compositionId=null) {
     $poem = Poem::find($id);
     $pics = $poem->share_pics;
-    if($compositionId) {
-        $path = $pics[$compositionId];
+    if($compositionId && isset($pics[$compositionId])) {
+        $path = storage_path($pics[$compositionId]);
     } else {
         abort(404);
         return;
@@ -355,8 +355,9 @@ Route::get('/poem-card/{id}/{compositionId?}', function ($id, $compositionId=nul
     return $response;
 })->name('poem-card');
 
+// TODO move it to PoemController
 Route::get('/{id}', function ($id) {
-    if($id <= 20000) {
+    if(is_numeric($id)) {
         // Bot return fakeId url, deprecate /{id} url
         return redirect(route('p/show', ['fakeId' => Poem::getFakeId($id)]));
     }
