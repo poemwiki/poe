@@ -16,10 +16,11 @@
                 $newVal = $log->properties->get('attributes');
                 $oldVal = $log->properties->get('old');
                 $props = array_keys($newVal ?? []);
+
                 //dd($log);
             @endphp
             <span title="{{$log->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($log->created_at)->format('Y-m-d')}}</span>&nbsp;
-            <span>{{$log->causer_type === "App\User" ? \App\User::find($log->causer_id)->name : '系统'}}</span>&nbsp;
+            <span>{{get_causer_name($log)}}</span>&nbsp;
             <span>{{trans('poem.change type '.$log->description)}}</span>
 
 

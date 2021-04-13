@@ -10,9 +10,14 @@ use Illuminate\Support\Facades\Redis;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Activitylog\ActivitylogServiceProvider;
 
+/**
+ * @property string|null avatar
+ * @property string avatarUrl
+ */
 class User extends Authenticatable implements MustVerifyEmail {
     use HasApiTokens, Notifiable;
 
+    static public $defaultAvatarUrl = 'images/avatar-default.png';
     /**
      * The attributes that are mass assignable.
      *
@@ -103,7 +108,7 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public static function isWeApp() {
         if (isset($_SERVER['HTTP_REFERER'])
-            && strpos($_SERVER['HTTP_REFERER'], env('WECHAT_MINI_PROGRAM_APPID')) !== false
+            && strpos($_SERVER['HTTP_REFERER'], config('wechat.mini_program.default.app_id')) !== false
         ){
             return true;
         }
@@ -143,8 +148,12 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $url;
     }
 
+    /**
+     * use avatarUrl in case users.avatar is null
+     * @return string
+     */
     public function getAvatarUrlAttribute() {
-        return $this->avatar ?? self::getGravatar($this->email);
+        return $this->avatar ?? asset(static::$defaultAvatarUrl);
     }
 
     public function getVerifiedAvatarHtml() {

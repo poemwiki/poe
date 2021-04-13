@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Content;
 use App\Repositories\ScoreRepository;
 use App\Traits\HasFakeId;
+use App\User;
 use Illuminate\Database\Eloquent\JsonEncodingException;
 use Illuminate\Support\Str;
 use Spatie\Searchable\Searchable;
@@ -18,6 +19,10 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property mixed original_id
  * @property mixed translatedPoems
  * @property mixed id
+ * @property string poetLabel
+ * @property integer is_owner_uploaded
+ * @property User uploader
+ * @property Author poetAuthor
  */
 class Poem extends Model implements Searchable {
     use SoftDeletes;
@@ -26,7 +31,7 @@ class Poem extends Model implements Searchable {
 
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
-    protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score' ];
+    protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url' ];
 
     protected $table = 'poem';
 
@@ -135,7 +140,7 @@ class Poem extends Model implements Searchable {
         //        'is_lock' => 'required'
     ];
 
-    protected $appends = ['resource_url', 'first_line'];
+    protected $appends = ['resource_url', 'fakeId'];
 
     /* ************************ ACCESSOR ************************* */
 
@@ -315,6 +320,31 @@ class Poem extends Model implements Searchable {
         } else {
             return ($this->poet === $this->poet_cn or is_null($this->poet_cn)) ? $this->poet : $this->poet_cn.'（'.$this->poet.'）';
         }
+    }
+
+    /**
+     * poetAvatar is an dynamic attribute of Poem, for these scene:
+     * 1. uploader->avatarUrl if is_owner_uploaded
+     * 2. poetAuthor->picUrl[0]  if the poet author has no related user
+     * 3. poetAuthor->user->avatarUrl
+     * @return string
+     */
+    public function getPoetAvatarAttribute() {
+        if ($this->is_owner_uploaded && $this->uploader) {
+            return $this->uploader->avatarUrl;
+        }
+
+        if ($this->poetAuthor) {
+            if($this->poetAuthor->user) {
+                return $this->poetAuthor->user->avatarUrl;
+            }
+
+            if($this->poetAuthor->picUrl) {
+                return $this->poetAuthor->picUrl[0];
+            }
+        }
+
+        return asset(\App\User::$defaultAvatarUrl);
     }
 
     /**

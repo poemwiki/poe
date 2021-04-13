@@ -162,10 +162,10 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                             $initialLog = $logs->last();
                         @endphp
                         <li title="{{$latestLog->created_at}}"><a
-                                href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update') {{$latestLog->causer_type === "App\User" ? \App\User::find($latestLog->causer_id)->name : 'PoemWiki'}}</a>
+                                href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update') {{get_causer_name($latestLog)}}</a>
                         </li>
                         <li title="{{$initialLog->created_at}}"><a
-                                href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') {{($initialLog->description === 'created') ? \App\User::find($initialLog->causer_id)->name : 'PoemWiki'}}</a>
+                                href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') {{get_causer_name($initialLog)}}</a>
                         </li>
                     @else
                         <li title="{{$poem->created_at}}"><a

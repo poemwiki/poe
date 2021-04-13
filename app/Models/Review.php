@@ -31,7 +31,7 @@ class Review extends Model {
         'deleted_at'
     ];
 
-    protected $appends = ['uname'];
+    protected $appends = ['name', 'avatar'];
 
 
     // public static function boot() {
@@ -51,8 +51,15 @@ class Review extends Model {
     /**
      * @return string
      */
-    public function getUnameAttribute() {
-       return $this->user->name;
+    public function getNameAttribute() {
+        return $this->user ? $this->user->name : '[已注销]';
+    }
+
+    /**
+     * @return string
+     */
+    public function getAvatarAttribute() {
+        return $this->user ? $this->user->avatarUrl : asset(\App\User::$defaultAvatarUrl);
     }
 
 

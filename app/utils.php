@@ -143,3 +143,18 @@ if (! function_exists('img_overlay')) {
     }
 
 }
+
+if (! function_exists('date_ago')) {
+    function date_ago($time) {
+        return \Illuminate\Support\Carbon::parse($time)->diffForHumans(now());
+    }
+}
+
+function get_causer_name($log) {
+    if ($log->causer_type === "App\User") {
+        $user=\App\User::find($log->causer_id);
+        return $user ? $user->name : "User[{$log->causer_id}]";
+    } else {
+        return 'PoemWiki';
+    }
+}
