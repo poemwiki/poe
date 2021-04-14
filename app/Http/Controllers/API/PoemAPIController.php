@@ -142,6 +142,8 @@ class PoemAPIController extends Controller {
         $res['poet'] = $item->poetLabel;
         $res['poet_avatar'] = $item->poetAvatar;
         $res['date_ago'] = date_ago($item->created_at);
+
+        $res['score'] = $item->totalScore;
         // TODO save score_count to poem.score_count column
         $res['score_count'] = ScoreRepository::calcCount($id);
 
