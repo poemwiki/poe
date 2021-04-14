@@ -111,9 +111,9 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                         class="poem-nation">{{$nation}}</span>@endif
                         <address itemprop="name" class="poem-writer">
                             @if($poem->poetAuthor)
-                                <a href="{{route('author/show',  ['fakeId' => $poem->poetAuthor->fakeId, 'from' => $poem->id])}}">{{$poem->poetAuthor->name_lang}}</a>
+                              <a href="{{route('author/show',  ['fakeId' => $poem->poetAuthor->fakeId, 'from' => $poem->id])}}" class="poemwiki-link">{{$poem->poetAuthor->name_lang}}</a>
                             @else
-                            <a href="{{route('search', $poetName)}}" class="search-link">{{$poetName}}</a>
+                              <a href="{{route('search', $poetName)}}" class="search-link">{{$poetName}}</a>
                             @endif
                         </address>
                     </dd><br>
@@ -122,7 +122,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                         <dt>@lang('admin.poem.columns.translator')</dt>
                         <dd itemprop="translator" class="poem-translator">
                         @if($poem->translatorAuthor)
-                            <a href="{{route('author/show', ['fakeId' => $poem->translatorAuthor->fakeId])}}">{{$poem->translatorAuthor->name_lang}}</a>
+                            <a href="{{route('author/show', ['fakeId' => $poem->translatorAuthor->fakeId])}}" class="poemwiki-link">{{$poem->translatorAuthor->name_lang}}</a>
                         @else
                             <a href="{{route('search', $poem->translator)}}" class="search-link">{{$poem->translator}}</a>
                         @endif

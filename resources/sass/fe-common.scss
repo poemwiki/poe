@@ -1,4 +1,5 @@
 @import 'menu';
+@import 'poemwiki.scss';
 
 ol{
   list-style-type: none;
@@ -236,3 +237,4 @@ nav.header-fixed {
   position: fixed;
   top: 6rem;
 }
+

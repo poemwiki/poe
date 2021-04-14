@@ -80,7 +80,7 @@
                             return 'style="transition-delay:'.($i*20).'ms"';
                     })!!}
                   <span
-                    class="text-gray-400 float-right">{{$poem->poetLabel}}</span></a>
+                    class="text-gray-400 float-right item-poem-author {{$poem->poetAuthor ? 'poemwiki-link' : ''}}">{{$poem->poetLabel}}</span></a>
               </div>
             </li>
           @endforeach

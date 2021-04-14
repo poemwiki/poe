@@ -68,6 +68,7 @@ article.poet{
   .first-line{
     padding-left: $font-size-larger-in-px;
     color: $gray;
+    position: relative;
   }
 }
 .search {
@@ -121,6 +122,17 @@ article.poet{
           width: 8rem;
           object-fit: cover;
           margin-right: 1rem;
+        }
+
+        .item-poem-author {
+          z-index: 1;
+          display: inline-block;
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          background: #fff;
+          padding: 0 .5em;
+          height: 1.2em;
         }
       }
       .item-author{
