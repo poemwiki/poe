@@ -50,7 +50,7 @@
            :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.preface') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
         <textarea type="text" v-model="form.preface"
-               v-validate="'max:64'"
+               v-validate="'max:300'"
                data-vv-as="{{ trans('admin.poem.columns.preface') }}"
                @input="validate($event)" class="form-control"
                :class="{'form-control-danger': errors.has('preface'), 'form-control-success': fields.preface && fields.preface.valid}"

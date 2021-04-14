@@ -48,7 +48,7 @@ class UpdatePoem extends FormRequest {
             'is_lock' => ['sometimes', 'boolean'],
             'content_id' => ['nullable', 'integer'],
             'original_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
-            'preface' => ['nullable', 'string', 'max:64'],
+            'preface' => ['nullable', 'string', 'max:300'],
             'subtitle' => ['nullable', 'string', 'max:32'],
             'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
             'poet_id' => ['nullable', Rule::in(array_merge(AuthorRepository::ids()->toArray(), ['new']))],
