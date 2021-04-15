@@ -46,6 +46,8 @@ section.poem {
       letter-spacing: 0.08em;
       line-height: 2;
       animation: fadein 2s ease-out;
+      white-space: pre-wrap;
+      word-break: normal;
       @include media-breakpoint-down(xs) {
         font-size: 3.8vw;
         white-space: nowrap;
