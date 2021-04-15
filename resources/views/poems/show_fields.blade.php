@@ -19,14 +19,15 @@ $graphemeLength = max(array_map(function($line) {
     return grapheme_strlen($line);
 }, explode("\n", $poem->poem)));
 
-$softWrap = true;
-$maxLengthConf = config('app.language_line_length_max');
-if ($poem->language_id && isset($maxLengthConf[$poem->language_id])) {
-    $maxLength = $maxLengthConf[$poem->language_id];
-} else {
-    $maxLength = config('app.default_soft_wrap_length');
-}
-$softWrap = $softWrap && ($graphemeLength >= $maxLength);
+// TODO 默认情况下不换行，且保留行首空格，$graphemeLength >= $maxLength 时启用soft-wrap
+$softWrap = false;
+// $maxLengthConf = config('app.language_line_length_max');
+// if ($poem->language_id && isset($maxLengthConf[$poem->language_id])) {
+//     $maxLength = $maxLengthConf[$poem->language_id];
+// } else {
+//     $maxLength = config('app.default_soft_wrap_length');
+// }
+// $softWrap = $softWrap && ($graphemeLength >= $maxLength);
 
 /** @var String $fakeId */
 $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' => $fakeId], false) : null;
