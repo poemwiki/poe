@@ -140,7 +140,7 @@ class Poem extends Model implements Searchable {
         //        'is_lock' => 'required'
     ];
 
-    protected $appends = ['resource_url', 'fakeId'];
+    protected $appends = ['resource_url'];
 
     /* ************************ ACCESSOR ************************* */
 
