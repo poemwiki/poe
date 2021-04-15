@@ -48,7 +48,7 @@ class CreateScoreRequest extends FormRequest {
 
         $isMaster = false;
         $tags = Poem::find($sanitized['poem_id'])->tags;
-        if($tags && $tags[0] && $tags[0]->campaign) {
+        if($tags->count() && $tags[0] && $tags[0]->campaign) {
             $campaign = $tags[0]->campaign;
             $isMaster = in_array($user->id, $campaign->settings['masters']);
         }
