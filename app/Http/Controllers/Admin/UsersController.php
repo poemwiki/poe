@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Listing;
 use App\Http\Requests\Admin\User\BulkDestroyUser;
 use App\Http\Requests\Admin\User\DestroyUser;
 use App\Http\Requests\Admin\User\IndexUser;
@@ -30,12 +31,12 @@ class UsersController extends Controller {
      */
     public function index(IndexUser $request) {
         // create and AdminListing instance for a specific model and
-        $data = AdminListing::create(User::class)->processRequestAndGet(
+        $data = Listing::create(User::class)->processRequestAndGet(
         // pass the request with params
             $request,
 
             // set columns to query
-            ['id', 'name', 'email', 'email_verified_at', 'is_admin', 'updated_at', 'is_v'],
+            ['id', 'name', 'email', 'email_verified_at', 'is_admin', 'updated_at', 'is_v', 'weight'],
 
             // set columns to searchIn
             ['email', 'id', 'name'],

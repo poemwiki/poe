@@ -24,7 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'invite_code', 'invited_by', 'avatar', 'is_v'
+        'name', 'email', 'password', 'invite_code', 'invited_by', 'avatar', 'is_v', 'weight'
     ];
 
     /**
@@ -44,7 +44,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     protected $casts = [
         'email_verified_at' => 'datetime',
         'invite_code' => 'string',
-        'last_online_at' => 'datetime'
+        'last_online_at' => 'datetime',
+        'weight' => 'float'
     ];
 
     protected $dates = [

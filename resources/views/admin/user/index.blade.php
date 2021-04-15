@@ -54,6 +54,7 @@
                                         <th is='sortable' :column="'email'">{{ trans('admin.user.columns.email') }}</th>
                                         <th is='sortable' :column="'is_admin'">{{ trans('admin.user.columns.is_admin') }}</th>
                                         <th is='sortable' :column="'is_v'">{{ trans('admin.user.columns.is_v') }}</th>
+                                        <th is='sortable' :column="'weight'">{{ trans('admin.user.columns.weight') }}</th>
                                         <th is='sortable' :column="'updated_at'">{{ trans('admin.user.columns.updated_at') }}</th>
 
                                         <th></th>
@@ -83,6 +84,7 @@
                                         <td>@{{ item.email }}</td>
                                         <td>@{{ item.is_admin }}</td>
                                         <td>@{{ item.is_v }}</td>
+                                        <td>@{{ item.weight }}</td>
                                         <td>@{{ item.updated_at | datetime}}</td>
 
                                         <td>

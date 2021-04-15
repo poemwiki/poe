@@ -35,6 +35,7 @@ class UpdateUser extends FormRequest
             'is_active' => ['sometimes', 'boolean'],
             'is_admin' => ['sometimes', 'boolean'],
             'is_v' => ['sometimes', 'boolean'],
+            'weight' => ['required', 'integer', 'max:100', 'min:1'],
             'name' => ['sometimes', 'string'],
             'password' => ['sometimes', 'confirmed', 'min:7', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9]).*$/', 'string'],
 

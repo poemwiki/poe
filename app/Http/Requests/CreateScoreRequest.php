@@ -54,7 +54,7 @@ class CreateScoreRequest extends FormRequest {
         }
 
         // TODO weight should from user.weight
-        $sanitized['weight'] = $isMaster ? 100 : 1;
+        $sanitized['weight'] = $isMaster ? max(100, $user->weight) : $user->weight;
 
         return $sanitized;
     }
