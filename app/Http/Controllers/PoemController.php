@@ -80,7 +80,7 @@ class PoemController extends Controller
 
         return view('poems.contribution')->with([
             'poem' => $poem,
-            'languageList' => LanguageRepository::allInUse(),
+            'languageList' => LanguageRepository::allInUse()->keyBy('id'),
             'randomPoemUrl' => '/'
         ]);
     }
