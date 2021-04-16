@@ -19,6 +19,8 @@ Route::middleware(['api'])->group(static function () {
     Route::prefix('v1')->name('api')->group(static function() {
         Route::prefix('campaign')->name('campaign/')->group(static function() {
             Route::get('/', '\App\Http\Controllers\API\CampaignAPIController@index')->name('index');
+            // TODO
+            // Route::get('/show', '\App\Http\Controllers\API\CampaignAPIController@show')->name('index');
         });
         Route::prefix('poem')->name('poem/')->group(static function() {
             Route::get('/', '\App\Http\Controllers\API\PoemAPIController@index')->name('index');

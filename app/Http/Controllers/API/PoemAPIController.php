@@ -131,7 +131,7 @@ class PoemAPIController extends Controller {
         $columns = [
             'id', 'created_at', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
             'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
-            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'];
+            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics'];
         $item = Poem::where('id', '=', $id)->get($columns)->first();
         if(!$item) {
             abort(404);
@@ -160,10 +160,19 @@ class PoemAPIController extends Controller {
 
         $relatedQuery = $this->poemRepository->random(2)
             ->where('id', '<>', $id);
-        if($item->tags->count() && config('app.env') === 'production') {
+        if($item->tags->count() /*&& config('app.env') === 'production'*/) {
+            $res['campaign_image'] = $item->tags[0]->campaign->image_url;
             $relatedQuery->whereHas('tags', function ($query) use ($item) {
                 $query->where('tag_id', '=', $item->tags[0]->id);
             });
+        }
+        if($item->share_pics && isset($item->share_pics['pure'])) {
+            if(File::exists(storage_path($item->share_pics['pure']))) {
+                $res['share_image'] = route('poem-card', [
+                    'id' => $item->id,
+                    'compositionId' => 'pure'
+                ]);
+            }
         }
 
         $res['related'] = $relatedQuery->get(['id', 'poem', 'poet', 'poet_cn', 'poet_id', 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'])
@@ -177,6 +186,7 @@ class PoemAPIController extends Controller {
                 unset($arr['translator_id']);
                 unset($arr['is_owner_uploaded']);
                 unset($arr['resource_url']);
+                unset($arr['share_pics']);
                 return $arr;
             })
             ->toArray();
@@ -216,21 +226,26 @@ class PoemAPIController extends Controller {
         return $this->responseSuccess();
     }
 
+    // TODO for mini program, generate and get poster image file should be in ONE request
+    public function poster(int $poemId, $force=null) {
+
+    }
 
     // TODO poster image generation process should be a command, and invoke after poem created
     // TODO regenerate poster when related poem fields updated
     public function share(int $poemId) {
         $poem = Poem::find($poemId);
-        $force = isset($_GET['force']) || config('app.env') === 'local';
+        $force = isset($_GET['force']);// || config('app.env') === 'local';
 
         $compositionId = 'pure';
-        if(!$force && $poem->share_pics && isset($poem->share_pics[$compositionId])) {
-            if(file_exists($poem->share_pics[$compositionId])) {
-                return $this->responseSuccess(['url' => route('poem-card', [
-                    'id' => $poemId,
-                    'compositionId' => $compositionId
-                ])]);
-            }
+        $posterUrl = route('poem-card', [
+            'id' => $poemId,
+            'compositionId' => $compositionId
+        ]);
+        if(!$force && $poem->share_pics && isset($poem->share_pics[$compositionId])
+            && file_exists(storage_path($poem->share_pics[$compositionId]))) {
+
+            return $this->responseSuccess(['url' => $posterUrl]);
         }
 
         $postData = ['compositionId' => $compositionId, 'poem' => $poem->poem, 'poet' => $poem->poetLabel, 'title' => $poem->title];
@@ -261,10 +276,7 @@ class PoemAPIController extends Controller {
             $sharePics[$compositionId] = $posterStorePath;
             $poem->share_pics = $sharePics;
             $poem->save();
-            return $this->responseSuccess(['url' => route('poem-card', [
-                'id' => $poemId,
-                'compositionId' => $compositionId
-            ])]);
+            return $this->responseSuccess(['url' => $posterUrl]);
 
         } catch (\Throwable $e) {
             Log::error($e->getMessage());

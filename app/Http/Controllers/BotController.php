@@ -28,7 +28,7 @@ class BotController extends Controller {
     private $poemRepository;
 
     protected $factor = [
-        'dushui' => 1.5,
+        'dushui' => 1.0,
         'ugc' => 1
     ];
 
