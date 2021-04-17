@@ -34,7 +34,8 @@ class AppServiceProvider extends ServiceProvider {
 
         Stringable::macro('firstLine', function ($lengthLimit = 20) {
             $arr = explode("\n", $this->value);
-            $firstLine = (new static($arr[0]))->replaceMatches('@[[:punct:]]+$@u', '');
+            $firstLine = (new static($arr[0]))->replaceMatches('@[[:punct:]]+$@u', '')
+                ->replaceMatches('@\s+@u', '');
             return $firstLine->length > $lengthLimit
                 ? new static($firstLine->split('@[,，.。:：;；]@u', 2)->first())
                 : $firstLine;
