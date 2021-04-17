@@ -165,9 +165,17 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                         <li title="{{$latestLog->created_at}}"><a
                                 href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update') {{get_causer_name($latestLog)}}</a>
                         </li>
-                        <li title="{{$initialLog->created_at}}"><a
-                                href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') {{get_causer_name($initialLog)}}</a>
-                        </li>
+
+                        @if($logs->count() == 1)
+                          <li title="{{$poem->created_at}}"><a
+                              href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload')
+                              PoemWiki</a>
+                          </li>
+                        @else
+                          <li title="{{$initialLog->created_at}}"><a
+                              href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') {{get_causer_name($initialLog)}}</a>
+                          </li>
+                        @endif
                     @else
                         <li title="{{$poem->created_at}}"><a
                                 href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload')

@@ -41,6 +41,7 @@ Vue.component('poem-form', {
         mode: 'text/plain',
         lineNumbers: true,
         line: true,
+        lineWrapping: true,
         // more CodeMirror options...
       }
     }

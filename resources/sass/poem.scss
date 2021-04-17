@@ -50,7 +50,7 @@ section.poem {
       word-break: normal;
       @include media-breakpoint-down(xs) {
         font-size: 3.8vw;
-        white-space: nowrap;
+        //white-space: nowrap;
         overflow: auto;
       }
       @media (max-width: 375px) {

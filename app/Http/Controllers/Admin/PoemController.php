@@ -9,7 +9,7 @@ use App\Http\Requests\Admin\Poem\IndexPoem;
 use App\Http\Requests\Admin\Poem\StorePoem;
 use App\Http\Requests\Admin\Poem\UpdatePoem;
 use App\Models\Poem;
-use Brackets\AdminListing\Facades\AdminListing;
+use App\Http\Listing;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -33,7 +33,7 @@ class PoemController extends Controller
     public function index(IndexPoem $request)
     {
         // create and AdminListing instance for a specific model and
-        $data = AdminListing::create(Poem::class)->processRequestAndGet(
+        $data = Listing::create(Poem::class)->processRequestAndGet(
             // pass the request with params
             $request,
 
