@@ -132,6 +132,7 @@ class PoemAPIController extends Controller {
             'id', 'created_at', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
             'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
             'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics'];
+        /** @var Poem $item */
         $item = Poem::where('id', '=', $id)->get($columns)->first();
         if(!$item) {
             abort(404);
@@ -160,11 +161,14 @@ class PoemAPIController extends Controller {
 
         $relatedQuery = $this->poemRepository->random(2)
             ->where('id', '<>', $id);
-        if($item->tags->count() /*&& config('app.env') === 'production'*/) {
-            $res['campaign_image'] = $item->tags[0]->campaign->image_url;
-            $relatedQuery->whereHas('tags', function ($query) use ($item) {
-                $query->where('tag_id', '=', $item->tags[0]->id);
-            });
+
+        $res['is_campaign'] = $item->is_campaign;
+        if($item->tags->count()) {
+            $res['tags'] = $item->tags->map->only(['id', 'name', 'category_id']);
+            if(config('app.env') !== 'local')
+                $relatedQuery->whereHas('tags', function ($query) use ($item) {
+                    $query->where('tag_id', '=', $item->tags[0]->id);
+                });
         }
         if($item->share_pics && isset($item->share_pics['pure'])) {
             if(File::exists(storage_path($item->share_pics['pure']))) {

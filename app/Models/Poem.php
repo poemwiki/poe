@@ -23,6 +23,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property integer is_owner_uploaded
  * @property User uploader
  * @property Author poetAuthor
+ * @property Illuminate\Support\Collection|Tag[] tags
  */
 class Poem extends Model implements Searchable {
     use SoftDeletes;
@@ -291,7 +292,16 @@ class Poem extends Model implements Searchable {
         return $this->belongsTo(\App\User::class, 'upload_user_id', 'id');
     }
 
+    // TODO public function getCampaginsAttribute() {}
 
+    public function getIsCampaignAttribute() {
+        if($this->tags->count()) {
+            return $this->tags->first(function ($tag) {
+                return $tag->campaign;
+            }) ? true : false;
+        }
+        return false;
+    }
 
     /**
      * @return string
