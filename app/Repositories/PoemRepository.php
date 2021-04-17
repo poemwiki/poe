@@ -150,7 +150,7 @@ class PoemRepository extends BaseRepository
         }
 
         return $poems->with('reviews')->orderByDesc($orderBy)->get()->map(function ($item) use ($startTime, $endTime) {
-            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
+            $item['date_ago'] = date_ago($item->created_at);
             $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->poetLabel;
             $item['score_count'] = $endTime ? ScoreRepository::calcCount($item->id, $startTime, $endTime) : ScoreRepository::calcCount($item->id);

@@ -46,6 +46,9 @@ class PoemAPIController extends Controller {
 
         if(isset($campaign->settings['result'])) {
             $byScoreData = $campaign->settings['result'];
+            foreach ($byScoreData as &$poem) {
+                $poem['date_ago'] = date_ago($poem['created_at']);
+            }
         } else {
 
             // poem before endDate, scores before endDate
