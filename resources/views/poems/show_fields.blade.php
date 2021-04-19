@@ -119,7 +119,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                         </address>
                     </dd><br>
 
-                    @if($poem->translator)
+                    @if($poem->translatorLabel)
                         <dt>@lang('admin.poem.columns.translator')</dt>
                         <dd itemprop="translator" class="poem-translator">
                         @if($poem->translatorAuthor)

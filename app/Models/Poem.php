@@ -323,12 +323,26 @@ class Poem extends Model implements Searchable {
      * @return string
      */
     public function getPoetLabelAttribute() {
+        // TODO if is_owner_uploaded==Poem::OWNER['poet'] && $this->uploader
         if ($this->is_owner_uploaded && $this->uploader) {
             return $this->uploader->name;
         } else if ($this->poetAuthor) {
             return $this->poetAuthor->name_lang;
         } else {
             return ($this->poet === $this->poet_cn or is_null($this->poet_cn)) ? $this->poet : $this->poet_cn.'（'.$this->poet.'）';
+        }
+    }
+
+    /**
+     * TODO enable set locales while getting traslator name
+     * @return string
+     */
+    public function getTranslatorLabelAttribute() {
+        // TODO if is_owner_uploaded==Poem::OWNER['translator'] && $this->uploader
+        if ($this->translatorAuthor) {
+            return $this->translatorAuthor->name_lang;
+        } else {
+            return $this->translator;
         }
     }
 
