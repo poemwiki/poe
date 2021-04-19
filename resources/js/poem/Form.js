@@ -99,15 +99,15 @@ Vue.component('poem-form', {
     },
 
     onSelectPoet: function(option) {
-      this.form.poet = option.label_en;
-      this.form.poet_cn = option.label_cn;
+      this.form.poet = option.label_en||option.label;
+      this.form.poet_cn = option.label_cn||option.label;
       if(this.isNew(this.form.poet_id)) {
         this.form.poet_wikidata_id = null;
       }
       console.log('selected poet', option, this.form.poet, this.form.poet_cn, this.form.poet_id);
     },
     onSelectTranslator: function(option) {
-      this.form.translator = option.label_en;
+      this.form.translator = option.label_en||option.label;
       if(this.isNew(this.form.translator_id)) {
         this.form.translator_wikidata_id = null;
       }
@@ -149,6 +149,10 @@ Vue.component('poem-form', {
     },
 
     searchAuthor: _.debounce((field, loading, search, vm) => {
+      if(!search) {
+        loading(false);
+        return
+      }
       console.log('searching');
       axios(
         `/q/author/${encodeURI(search)}/${vm.form[field]}`
@@ -165,6 +169,10 @@ Vue.component('poem-form', {
       });
     }, 450),
     searchTranslator: _.debounce((field, loading, search, vm) => {
+      if(!search) {
+        loading(false);
+        return
+      }
       axios(
         `/q/author/${encodeURI(search)}/${vm.form[field]}`
       ).then(res => {

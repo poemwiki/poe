@@ -53,9 +53,22 @@ class Score extends Component {
 
         $this->validateOnly('rating');
 
+        // TODO 同 API 路由下的打分逻辑应放在一处
+        $isMaster = false;
+        $user = Auth::user();
+        $tags = $this->poem->tags;
+        if($tags->count() && $tags[0] && $tags[0]->campaign) {
+            $campaign = $tags[0]->campaign;
+            $isMaster = in_array($user->id, $campaign->settings['masters']);
+        }
+        $weight = $user->weight;
         return  $this->scoreRepository->updateOrCreate(
-            ['poem_id' => $this->poem->id, 'user_id' => Auth::user()->id],
-            ['score' => $this->rating]);
+            ['poem_id' => $this->poem->id, 'user_id' => $user->id],
+            [
+                'score' => $this->rating,
+                'weight' => $isMaster ? max(100, $weight) : $weight
+            ]
+        );
     }
 
     public function remove() {
