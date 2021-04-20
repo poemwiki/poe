@@ -50,7 +50,7 @@ class Campaign extends Model {
      */
     protected $with = ['tag'];
 
-    protected $appends = ['tag_name', 'image_url', 'masters'];
+    protected $appends = ['tag_name', 'image_url', 'masters', 'share_image_url'];
 
     /* ************************ ACCESSOR ************************* */
 
@@ -60,9 +60,11 @@ class Campaign extends Model {
     public function getTagNameAttribute() {
         return $this->tag->name_lang;
     }
+
     public function getImageUrlAttribute() {
         return asset($this->image);
     }
+
     public function getMastersAttribute() {
         $masters = $this->settings['masters']; // master user ids
         if(!$masters) return null;
@@ -70,6 +72,10 @@ class Campaign extends Model {
         return array_map(function ($item) {
             return User::select(['id', 'avatar', 'name'])->find($item);
         }, $masters);
+    }
+
+    public function getShareImageUrlAttribute() {
+        return asset($this->settings['share_image_url'] ?? $this->image);
     }
 
     public function tag() {
