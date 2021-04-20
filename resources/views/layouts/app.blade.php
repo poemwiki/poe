@@ -1,24 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>{{config('app.name')}}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-@include('layouts.icon')
-@include('layouts.analyze')
+  <meta charset="utf-8">
+  <title>{{config('app.name')}}</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="applicable-device"content="pc,mobile">
+  @include('layouts.icon')
+  @include('layouts.analyze')
 
 
-    <!-- Scripts -->
-    <script src="{{ mix('/js/app.js') }}" defer></script>
+  <!-- Scripts -->
+  <script src="{{ mix('/js/app.js') }}" defer></script>
 
 
-    <!-- Styles -->
-    <link href="{{ mix('/css/app.css') }}" rel="stylesheet">
-    <?php
-    $user = Auth::user();
-    $inviteCode = $user->invite_code;
-    $userName = $user->name;
-    ?>
+  <!-- Styles -->
+  <link href="{{ mix('/css/app.css') }}" rel="stylesheet">
+  <?php
+  $user = Auth::user();
+  $inviteCode = $user->invite_code;
+  $userName = $user->name;
+  ?>
 </head>
 <body>
 <div id="app">
