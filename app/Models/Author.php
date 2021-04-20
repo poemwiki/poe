@@ -128,8 +128,17 @@ class Author extends Model implements Searchable {
     public function getUrlAttribute() {
         return route('author/show', ['fakeId' => $this->fakeId]);
     }
+
+    /**
+     * @return mixed|string
+     */
     public function getLabelAttribute() {
-        return $this->getTranslated('name_lang', 'en') . "（" . $this->getTranslated('name_lang', 'zh-CN') . "）";
+        $default = $this->getTranslated('name_lang', config('app.locale'));
+        $fallback = $this->getTranslated('name_lang', config('app.fallback_locale'));
+        if ($default !== $fallback) {
+           return  $default." ($fallback)";
+        }
+        return $default ?: $fallback;
     }
     public function getLabelEnAttribute() {
         return $this->getTranslated('name_lang', 'en');
