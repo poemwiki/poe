@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Nation;
 
+use App\Repositories\NationRepository;
 use Brackets\Translatable\TranslatableFormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -25,10 +26,10 @@ class UpdateNation extends TranslatableFormRequest
      */
     public function untranslatableRules(): array {
         return [
-            'f_id' => ['sometimes', 'string'],
+            'f_id' => ['sometimes', Rule::in(0, NationRepository::ids())],
             'name' => ['sometimes', Rule::unique('nation', 'name')->ignore($this->nation->getKey(), $this->nation->getKeyName()), 'string'],
-            'wikidata_id' => ['nullable', 'string'],
-            
+            'wikidata_id' => ['nullable', 'integer'],
+
 
         ];
     }
@@ -42,7 +43,7 @@ class UpdateNation extends TranslatableFormRequest
         return [
             'describe_lang' => ['nullable', 'string'],
             'name_lang' => ['sometimes', 'string'],
-            
+
         ];
     }
 

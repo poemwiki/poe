@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Nation;
 
+use App\Repositories\NationRepository;
 use Brackets\Translatable\TranslatableFormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -25,10 +26,10 @@ class StoreNation extends TranslatableFormRequest
      */
     public function untranslatableRules(): array {
         return [
-            'f_id' => ['required', 'string'],
+            'f_id' => ['required', Rule::in(0, NationRepository::ids())],
             'name' => ['required', Rule::unique('nation', 'name'), 'string'],
-            'wikidata_id' => ['nullable', 'string'],
-            
+            'wikidata_id' => ['nullable', 'integer'],
+
         ];
     }
 
@@ -41,7 +42,7 @@ class StoreNation extends TranslatableFormRequest
         return [
             'describe_lang' => ['nullable', 'string'],
             'name_lang' => ['required', 'string'],
-            
+
         ];
     }
 

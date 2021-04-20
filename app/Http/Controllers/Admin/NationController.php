@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Listing;
 use App\Http\Requests\Admin\Nation\BulkDestroyNation;
 use App\Http\Requests\Admin\Nation\DestroyNation;
 use App\Http\Requests\Admin\Nation\IndexNation;
@@ -33,15 +34,15 @@ class NationController extends Controller
     public function index(IndexNation $request)
     {
         // create and AdminListing instance for a specific model and
-        $data = AdminListing::create(Nation::class)->processRequestAndGet(
+        $data = Listing::create(Nation::class)->processRequestAndGet(
             // pass the request with params
             $request,
 
             // set columns to query
-            ['describe_lang', 'f_id', 'id', 'name', 'name_lang'],
+            ['describe_lang', 'f_id', 'id', 'name_lang'],
 
             // set columns to searchIn
-            ['describe_lang', 'id', 'name', 'name_lang', 'wikidata_id']
+            ['describe_lang', 'id', 'name_lang', 'wikidata_id']
         );
 
         if ($request->ajax()) {
