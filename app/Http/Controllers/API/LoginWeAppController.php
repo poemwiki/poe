@@ -76,6 +76,9 @@ class LoginWeAppController extends Controller {
             ];
             // 更新用户数据
             $userBind->update($attributes);
+            $user = $userBind->user;
+            $user->avatar = $avatar;
+            $user->save();
         } else {
             // 从未注册过的用户
             // 注册过网站，但还未用微信登录过，没有任何微信相关的 userBind
