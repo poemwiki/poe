@@ -180,7 +180,21 @@ class Poem extends Model implements Searchable {
             $model->length = grapheme_strlen($model->poem);
 
             $fullHash = Str::contentFullHash($model->poem);
-            $oldFullHash = $model->content->full_hash ?? Str::contentFullHash($model->content->content);
+            if(!$model->content) {
+                $oldPoem = Poem::find($model->id);
+                $oldFullHash = Str::contentFullHash($oldPoem->poem);
+                Content::create([
+                    'entry_id' => $oldPoem->id,
+                    'type' => 0,
+                    'content' => $oldPoem->poem,
+                    'hash_f' => '',             // parent pure content hash
+                    'hash' => Str::contentHash($oldPoem->poem),        // current pure content hash（用于去重）
+                    'full_hash_f' => '',        // parent version's full hash
+                    'full_hash' => $oldFullHash
+                ]);
+            }else {
+                $oldFullHash = $model->content->full_hash ?: Str::contentFullHash($model->content->content);
+            }
 
             if ($fullHash !== $oldFullHash) {
                 // update content when full hash changed
@@ -319,6 +333,16 @@ class Poem extends Model implements Searchable {
     }
 
     /**
+     * get score between campaign start and end time
+     * TODO update poem.score after each score updated/created
+     * @param Campaign $campaign
+     * @return array
+     */
+    public function getCampaignScore(Campaign $campaign) {
+        return ScoreRepository::calc($this->id, $campaign->start, $campaign->end);
+    }
+
+    /**
      * TODO enable set locales while getting poet name
      * @return string
      */
@@ -371,15 +395,6 @@ class Poem extends Model implements Searchable {
         return asset(\App\User::$defaultAvatarUrl);
     }
 
-    /**
-     * get score between campaign start and end time
-     * TODO update poem.score after each score updated/created
-     * @param Campaign $campaign
-     * @return array
-     */
-    public function getCampaignScore(Campaign $campaign) {
-        return ScoreRepository::calc($this->id, $campaign->start, $campaign->end);
-    }
 
     public function getActivityLogsAttribute() {
         return $this->activities()->orderBy('id', 'desc')->get()->map(function ($activity) {
