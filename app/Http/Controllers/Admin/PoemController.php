@@ -114,17 +114,18 @@ class PoemController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param Poem $poem
+     * @return \Illuminate\Contracts\Foundation\Application|RedirectResponse|Redirector
      * @throws AuthorizationException
-     * @return Factory|View
      */
     public function edit(Poem $poem)
     {
-        $this->authorize('admin.poem.edit', $poem);
-
-
-        return view('admin.poem.edit', [
-            'poem' => $poem,
-        ]);
+        return redirect(route('poems/edit', $poem->fakeId));
+        // $this->authorize('admin.poem.edit', $poem);
+        //
+        //
+        // return view('admin.poem.edit', [
+        //     'poem' => $poem,
+        // ]);
     }
 
     /**

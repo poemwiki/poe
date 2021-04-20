@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Listing;
 use App\Http\Requests\Admin\Genre\BulkDestroyGenre;
 use App\Http\Requests\Admin\Genre\DestroyGenre;
 use App\Http\Requests\Admin\Genre\IndexGenre;
 use App\Http\Requests\Admin\Genre\StoreGenre;
 use App\Http\Requests\Admin\Genre\UpdateGenre;
 use App\Models\Genre;
-use Brackets\AdminListing\Facades\AdminListing;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -33,7 +33,7 @@ class GenreController extends Controller
     public function index(IndexGenre $request)
     {
         // create and AdminListing instance for a specific model and
-        $data = AdminListing::create(Genre::class)->processRequestAndGet(
+        $data = Listing::create(Genre::class)->processRequestAndGet(
             // pass the request with params
             $request,
 

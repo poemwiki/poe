@@ -7,10 +7,9 @@ Vue.component('nation-form', {
             form: {
                 describe_lang:  this.getLocalizedFormDefaults() ,
                 f_id:  '' ,
-                name:  '' ,
                 name_lang:  this.getLocalizedFormDefaults() ,
                 wikidata_id:  '' ,
-                
+
             }
         }
     }
