@@ -44,8 +44,8 @@ class initialAuthor extends Command {
         // author only for who has related poem
 
 
-        $fromId = $this->argument('fromId') ?? 0;
-        $toId = $this->argument('toId') ?? 0;
+        $fromId = $this->argument('fromId') ?: 0;
+        $toId = $this->argument('toId') ?: 0;
 
         $force = $this->option('force');
         $poemId = $this->option('poem_id');

@@ -45,8 +45,8 @@ class Import extends Command {
     public function handle() {
         // YOU NEED TO execute php artisan wiki:import to import wikidata.org's poet data to wikidata table
 
-        $fromId = $this->argument('fromId') ?? 101247956;
-        $toId = $this->argument('toId') ?? 101247956;
+        $fromId = $this->argument('fromId') ?: 101247956;
+        $toId = $this->argument('toId') ?: 101247956;
 
         $wikidataId = $this->option('id');
         if (App::runningInConsole() && !$this->option('id')) {

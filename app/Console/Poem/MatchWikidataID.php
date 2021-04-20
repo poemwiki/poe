@@ -44,8 +44,8 @@ class MatchWikidataID extends Command {
      */
     public function handle() {
 
-        $fromId = $this->argument('fromId') ?? 0;
-        $toId = $this->argument('toId') ?? 9999999;
+        $fromId = $this->argument('fromId') ?: 0;
+        $toId = $this->argument('toId') ?: 9999999;
 
         $poemId = $this->option('id');
         if (App::runningInConsole() && !$this->option('id')) {

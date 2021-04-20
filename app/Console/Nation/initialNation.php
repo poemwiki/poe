@@ -40,12 +40,12 @@ class initialNation extends Command {
      */
     public function handle() {
 
-        $fromId = $this->argument('fromId') ?? 0;
+        $fromId = $this->argument('fromId') ?: 0;
 
         $force = $this->option('force');
         $authorId = $this->option('author_id');
         $skipImport = $this->option('skip-import');
-        $fromAuthorId = $this->argument('fromAuthorId') ?? 0;
+        $fromAuthorId = $this->argument('fromAuthorId') ?: 0;
         if (App::runningInConsole() && !$this->option('author_id')) {
             if ($this->choice('Do you wants specify author id?', ['yes', 'no'], 0) === 'yes') {
                 $authorId = $this->ask('Input author id: ');

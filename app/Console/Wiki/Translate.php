@@ -38,7 +38,7 @@ class Translate extends Command {
     public function handle() {
         // YOU NEED TO IMPORT wikidata_poet from JSON file FIRST, manually.
 
-        $fromId = $this->argument('fromId') ?? 87902;
+        $fromId = $this->argument('fromId') ?: 87902;
 
         $wikidataId = null;
         if (App::runningInConsole()) {

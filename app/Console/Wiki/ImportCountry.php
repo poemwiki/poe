@@ -47,7 +47,7 @@ class ImportCountry extends Command {
         // YOU NEED TO IMPORT wikidata_poet from JSON file
         // then run wiki:translate to initial wikidata
 
-        $fromId = $this->argument('fromId') ?? 0;
+        $fromId = $this->argument('fromId') ?: 0;
 
         $wikidataId = $this->option('id');
         if (App::runningInConsole() && !$this->option('id')) {

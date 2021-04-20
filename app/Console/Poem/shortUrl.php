@@ -38,8 +38,8 @@ class ShortUrl extends Command {
      * @return int
      */
     public function handle() {
-        $fromId = $this->argument('fromId') ?? 0;
-        $toId = $this->argument('toId') ?? 0;
+        $fromId = $this->argument('fromId') ?: 0;
+        $toId = $this->argument('toId') ?: 0;
 
         $force = $this->option('force');
         $poemId = $this->option('id');

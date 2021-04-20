@@ -56,8 +56,8 @@ class Review extends Command {
 
         // $this->addBedtimeScore(3054, 44);
         $this->addBedtimeReview(
-            $this->argument('fromTimestamp') ?? Date::createFromDate(2016, 4, 10, 'Asia/ShangHai')->getTimestamp(),
-            $this->argument('toTimestamp') ?? Date::createFromDate(2016, 4, 18, 'Asia/ShangHai')->getTimestamp()
+            $this->argument('fromTimestamp') ?: Date::createFromDate(2016, 4, 10, 'Asia/ShangHai')->getTimestamp(),
+            $this->argument('toTimestamp') ?: Date::createFromDate(2016, 4, 18, 'Asia/ShangHai')->getTimestamp()
         );
         return 0;
     }

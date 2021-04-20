@@ -44,8 +44,8 @@ class ImportFromAuthor extends Command {
      */
     public function handle() {
 
-        $fromId = $this->argument('fromId') ?? 101247956;
-        $toId = $this->argument('toId') ?? 101247956;
+        $fromId = $this->argument('fromId') ?: 101247956;
+        $toId = $this->argument('toId') ?: 101247956;
 
         $authorId = $this->option('id');
         if (App::runningInConsole() && !$this->option('id')) {
