@@ -46,7 +46,7 @@
                                         <th is='sortable' :column="'name'">{{ trans('admin.user.columns.name') }}</th>
                                         <th is='sortable' :column="'id'">{{ trans('id') }}</th>
                                         <th is='sortable' :column="'email'">{{ trans('admin.user.columns.email') }}</th>
-                                        <th :column="'bind_info'">{{ trans('admin.user.columns.bind_info') }}</th>
+                                        <th is='sortable' :column="'bind_names'">{{ trans('admin.user.columns.bind_info') }}</th>
                                         <th is='sortable' :column="'is_admin'">{{ trans('admin.user.columns.is_admin') }}</th>
                                         <th is='sortable' :column="'is_v'">{{ trans('admin.user.columns.is_v') }}</th>
                                         <th is='sortable' :column="'weight'">{{ trans('admin.user.columns.weight') }}</th>
