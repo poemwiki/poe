@@ -9,8 +9,10 @@ use App\Http\Requests\Admin\User\DestroyUser;
 use App\Http\Requests\Admin\User\IndexUser;
 use App\Http\Requests\Admin\User\StoreUser;
 use App\Http\Requests\Admin\User\UpdateUser;
+use App\Models\UserBind;
 use App\User;
 use Brackets\AdminListing\Facades\AdminListing;
+use Illuminate\Database\Eloquent\Builder;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Routing\ResponseFactory;
@@ -36,23 +38,44 @@ class UsersController extends Controller {
             $request,
 
             // set columns to query
-            ['id', 'name', 'email', 'email_verified_at', 'is_admin', 'updated_at', 'is_v', 'weight'],
+            [
+                // 'users.id', 'name', 'email', 'email_verified_at', 'is_admin', 'updated_at', 'is_v', 'weight',
+                // '`bind`.`id` as `bind_id`',
+                // 'bind.id as bind_id', 'bind.bind_status as bind_status', 'bind.bind_ref as bind_ref', 'bind.nickname as bind_name', 'bind.gender as bind_gender'
+            ],
 
             // set columns to searchIn
-            ['email', 'id', 'name'],
+            ['email', 'users.id', 'name', 'bind.nickname'],
 
-            function ($query) use ($request) {
+            function (Builder $query) use ($request) {
+                $query->select(DB::raw("GROUP_CONCAT(`bind`.`id`) as `bind_ids`, users.id, users.name, users.email, users.email_verified_at, users.is_admin, users.updated_at, is_v, weight"));
                 if (!$request->input('orderBy'))
-                    $query->orderBy('updated_at', 'desc');
+                    $query->orderBy('users.updated_at', 'desc');
+
+                $query->leftJoin('user_bind_info as bind', 'users.id', '=', 'bind.user_id')
+                    ->groupBy('users.id');
             }
         );
 
+        $binds = $data->reduce(function ($carry, $item) {
+            if(!$item['bind_ids']) return $carry;
+            return $item['bind_ids'] . ',' . $carry;
+        });
+        $bindIDs = explode(',', trim($binds, ','));
+        $userBinds = UserBind::findMany($bindIDs)->keyBy('id')
+            ->map->only(['id', 'bind_status', 'bind_ref', 'nickname', 'gender'])->toArray();
+
+        // TODO aggregate bind_ids for every user instead of showing multiple lines for each bind of user
+        // $users = collect([]);
+        foreach ($data as &$userWithBinds) {
+            $userWithBinds['binds'] = $userWithBinds['bind_ids']
+                ? collect(explode(',', $userWithBinds['bind_ids']))->map(function ($id) use($userBinds) {
+                    return $userBinds[$id];
+                })
+                : [];
+        };
+
         if ($request->ajax()) {
-            if ($request->has('bulk')) {
-                return [
-                    'bulkItems' => $data->pluck('id')
-                ];
-            }
             return ['data' => $data];
         }
 

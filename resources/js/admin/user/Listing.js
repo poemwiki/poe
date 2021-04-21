@@ -9,5 +9,11 @@ Vue.component('user-listing', {
         direction: 'desc'
       },
     }
+  },
+  methods: {
+    bindRefType: function(ref) {
+      const refs = {0: '微信', 1: '预留绑定类型1', 2: '微信小程序'}
+      return refs[ref] || '无绑定';
+    }
   }
 });

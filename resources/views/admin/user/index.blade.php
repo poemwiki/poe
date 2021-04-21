@@ -42,16 +42,11 @@
                             <table class="table table-hover table-listing">
                                 <thead>
                                     <tr>
-                                        <th class="bulk-checkbox">
-                                            <input class="form-check-input" id="enabled" type="checkbox" v-model="isClickedAll" v-validate="''" data-vv-name="enabled"  name="enabled_fake_element" @click="onBulkItemsClickedAllWithPagination()">
-                                            <label class="form-check-label" for="enabled">
-                                                #
-                                            </label>
-                                        </th>
 
                                         <th is='sortable' :column="'name'">{{ trans('admin.user.columns.name') }}</th>
                                         <th is='sortable' :column="'id'">{{ trans('id') }}</th>
                                         <th is='sortable' :column="'email'">{{ trans('admin.user.columns.email') }}</th>
+                                        <th :column="'bind_info'">{{ trans('admin.user.columns.bind_info') }}</th>
                                         <th is='sortable' :column="'is_admin'">{{ trans('admin.user.columns.is_admin') }}</th>
                                         <th is='sortable' :column="'is_v'">{{ trans('admin.user.columns.is_v') }}</th>
                                         <th is='sortable' :column="'weight'">{{ trans('admin.user.columns.weight') }}</th>
@@ -59,31 +54,19 @@
 
                                         <th></th>
                                     </tr>
-                                    <tr v-show="(clickedBulkItemsCount > 0) || isClickedAll">
-                                        <td class="bg-bulk-info d-table-cell text-center" colspan="12">
-                                            <span class="align-middle font-weight-light text-dark">{{ trans('brackets/admin-ui::admin.listing.selected_items') }} @{{ clickedBulkItemsCount }}.  <a href="#" class="text-primary" @click="onBulkItemsClickedAll('/admin/users')" v-if="(clickedBulkItemsCount < pagination.state.total)"> <i class="fa" :class="bulkCheckingAllLoader ? 'fa-spinner' : ''"></i> {{ trans('brackets/admin-ui::admin.listing.check_all_items') }} @{{ pagination.state.total }}</a> <span class="text-primary">|</span> <a
-                                                        href="#" class="text-primary" @click="onBulkItemsClickedAllUncheck()">{{ trans('brackets/admin-ui::admin.listing.uncheck_all_items') }}</a>  </span>
 
-                                            <span class="pull-right pr-2">
-                                                <button class="btn btn-sm btn-danger pr-3 pl-3" @click="bulkDelete('/admin/users/bulk-destroy')">{{ trans('brackets/admin-ui::admin.btn.delete') }}</button>
-                                            </span>
-
-                                        </td>
-                                    </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(item, index) in collection" :key="item.id" :class="bulkItems[item.id] ? 'bg-bulk' : ''">
-                                        <td class="bulk-checkbox">
-                                            <input class="form-check-input" :id="'enabled' + item.id" type="checkbox" v-model="bulkItems[item.id]" v-validate="''" :data-vv-name="'enabled' + item.id"  :name="'enabled' + item.id + '_fake_element'" @click="onBulkItemClicked(item.id)" :disabled="bulkCheckingAllLoader">
-                                            <label class="form-check-label" :for="'enabled' + item.id">
-                                            </label>
-                                        </td>
+                                    <tr v-for="(item, index) in collection" :key="item.id + '_' + item.bind_id" :class="bulkItems[item.id] ? 'bg-bulk' : ''">
 
                                         <td>@{{ item.name }}</td>
                                         <td>@{{ item.id }}</td>
                                         <td>@{{ item.email }}</td>
-                                        <td>@{{ item.is_admin }}</td>
-                                        <td>@{{ item.is_v }}</td>
+                                        <td><span v-for="(bind) in item.binds" :key="bind.id"
+                                          >[@{{ bind.bind_status ? '已绑定' : '已解绑' }}] [@{{ bindRefType(bind.bind_ref)  }}] @{{ bind.nickname }}
+                                          <br/></span></td>
+                                        <td>@{{ item.is_admin ? 'Yes' : 'No' }}</td>
+                                        <td>@{{ item.is_v ? 'Yes' : 'No' }}</td>
                                         <td>@{{ item.weight }}</td>
                                         <td>@{{ item.updated_at | datetime}}</td>
 
