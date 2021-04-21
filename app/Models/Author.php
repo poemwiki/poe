@@ -41,6 +41,7 @@ class Author extends Model implements Searchable {
         'wikipedia_url',
         'nation_id',
         'dynasty_id',
+        'upload_user_id'
     ];
 
 
@@ -69,6 +70,7 @@ class Author extends Model implements Searchable {
         'pic_url' => 'json',
         'nation_id' => 'integer',
         'dynasty_id' => 'integer',
+        'upload_user_id' => 'integer',
         // 'name_lang' => 'array',
         // 'describe_lang' => 'array'
     ];
@@ -83,6 +85,9 @@ class Author extends Model implements Searchable {
     }
     public function user() {
         return $this->hasOne(\App\User::class, 'id', 'user_id');
+    }
+    public function uploader() {
+        return $this->hasOne(\App\User::class, 'id', 'upload_user_id');
     }
     public function nation() {
         return $this->belongsTo(\App\Models\Nation::class, 'nation_id', 'id');

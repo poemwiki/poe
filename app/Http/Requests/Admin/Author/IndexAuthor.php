@@ -26,7 +26,7 @@ class IndexAuthor extends TranslatableFormRequest
     public function rules(): array
     {
         return [
-            'orderBy' => 'in:updated_at,describe_lange,id,name_lang,pic_url,user_id,wikipedia_url|nullable',
+            'orderBy' => 'in:updated_at,user_id,authorUser.name,uploader.name,describe_lange,id,name_lang,pic_url,wikipedia_url|nullable',
             'orderDirection' => 'in:asc,desc|nullable',
             'search' => 'string|nullable',
             'page' => 'integer|nullable',

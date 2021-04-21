@@ -38,16 +38,19 @@ class AuthorController extends Controller {
             $request,
 
             // set columns to query
-            ['id', 'name_lang', 'user_id', 'updated_at', 'users.name as user_name'],
+            ['id', 'name_lang', 'wikidata_id', 'user_id', 'updated_at', 'authorUser.name as user_name',
+                'upload_user_id', 'uploader.name as uploader_name'
+            ],
 
             // set columns to searchIn
-            ['name_lang', 'id'],
+            ['name_lang', 'id', 'users.name', 'uploader.name'],
 
             function ($query) use ($request) {
                 if(!$request->input('orderBy'))
                     $query->orderBy('updated_at', 'desc');
 
-                $query->leftJoin('users', 'author.user_id', '=', 'users.id');
+                $query->leftJoin('users as authorUser', 'author.user_id', '=', 'authorUser.id');
+                $query->leftJoin('users as uploader', 'author.upload_user_id', '=', 'uploader.id');
             },
 
             app()->getLocale()

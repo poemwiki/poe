@@ -26,7 +26,7 @@ class UpdateAuthor extends TranslatableFormRequest {
      */
     public function untranslatableRules(): array {
         return [
-            'pic_url' => ['nullable', 'string'],
+            // 'pic_url' => ['sometimes', 'string'],
             'user_id' => ['nullable', 'string'],
             'wikidata_id' => ['nullable', 'int'],
             'nation_id' => ['nullable', Rule::in(NationRepository::ids())],

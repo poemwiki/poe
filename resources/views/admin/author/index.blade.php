@@ -51,6 +51,8 @@
 
                                         <th is='sortable' :column="'id'">{{ trans('admin.author.columns.id') }}</th>
                                         <th is='sortable' :column="'name_lang'">{{ trans('admin.author.columns.name_lang') }}</th>
+                                        <th is='sortable' :column="'wikidata_id'">{{ trans('admin.author.columns.wikidata_id') }}</th>
+                                        <th is='sortable' :column="'uploader.name'">{{ trans('admin.author.columns.uploader.name') }}</th>
                                         <th is='sortable' :column="'user_id'">{{ trans('admin.author.columns.user_id') }}</th>
                                         <th :column="'user_name'">{{ trans('admin.author.columns.user_name') }}</th>
                                         <th is='sortable' :column="'updated_at'">{{ trans('updated_at') }}</th>
@@ -79,6 +81,8 @@
 
                                         <td>@{{ item.id }}</td>
                                         <td><a :href="item.url" target="_blank">@{{ item.name_lang }}</a></td>
+                                        <td><a :href="'https://www.wikidata.org/wiki/Q'+item.wikidata_id" target="_blank">@{{ item.wikidata_id }}</a></td>
+                                        <td>@{{ item.uploader_name }}</td>
                                         <td>@{{ item.user_id }}</td>
                                         <td>@{{ item.user_name }}</td>
                                         <td>@{{ item.updated_at | datetime}}</td>
@@ -88,7 +92,7 @@
                                                 <div class="col-auto">
                                                     <a class="btn btn-sm btn-spinner btn-info" :href="item.resource_url + '/verify'" title="@lang('admin.author.actions.verify')" role="button"><i class="fa fa-user">@lang('admin.author.actions.verify')</i></a>
                                                 </div>
-                                                <div class="col-auto hidden">
+                                                <div class="col-auto">
                                                     <a class="btn btn-sm btn-spinner btn-info" :href="item.resource_url + '/edit'" title="{{ trans('brackets/admin-ui::admin.btn.edit') }}" role="button"><i class="fa fa-edit"></i></a>
                                                 </div>
                                                 <form class="col hidden" @submit.prevent="deleteItem(item.resource_url)">
