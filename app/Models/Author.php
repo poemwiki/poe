@@ -30,6 +30,8 @@ class Author extends Model implements Searchable {
     protected static $logOnlyDirty = true;
     protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length'];
 
+    static public $defaultAvatarUrl = 'images/avatar-default.png';
+
     protected $table = 'author';
 
     protected $fillable = [
@@ -75,7 +77,7 @@ class Author extends Model implements Searchable {
         // 'describe_lang' => 'array'
     ];
 
-    protected $appends = ['resource_url', 'url', 'label', 'label_en', 'label_cn'];
+    protected $appends = ['resource_url', 'url', 'label', 'label_en', 'label_cn', 'avatar_url'];
 
     public function poems() {
         return $this->hasMany(\App\Models\Poem::class, 'poet_id', 'id');
@@ -109,6 +111,7 @@ class Author extends Model implements Searchable {
             Artisan::call('alias:importFromAuthor', ['--id' => $model->id]);
         });
         self::updated(function ($model) {
+            // TODO 如果前端可编辑多别名，此处应删除原有别名，或在controller删除前端选择的别名
             Artisan::call('alias:importFromAuthor', ['--id' => $model->id]);
         });
 
@@ -151,6 +154,19 @@ class Author extends Model implements Searchable {
     public function getLabelCNAttribute() {
         return $this->getTranslated('name_lang', 'zh-CN');
     }
+
+
+    private function isValidPicUrl($url) {
+        return !empty($url) && !str_ends_with($url, 'tif');
+    }
+    /**
+     * use avatarUrl in case users.avatar is null
+     * @return string
+     */
+    public function getAvatarUrlAttribute() {
+        return $this->isValidPicUrl($this->pic_url[0] ?? '') ? $this->pic_url[0] : asset(static::$defaultAvatarUrl);
+    }
+
 
     public static function searchPoems() {
 

@@ -25,10 +25,10 @@ class AuthorRepository extends BaseRepository {
     /**
      * @param string $name
      * @param array|null $authorId
-     * @param int $excludeAuthorId author_id that should be ignored
+     * @param int|null $excludeAuthorId author_id that should be ignored
      * @return Collection
      */
-    private static function _searchAlias(string $name, $authorIds=[], $excludeAuthorId): Collection {
+    private static function _searchAlias(string $name, $authorIds=[], $excludeAuthorId=null): Collection {
         $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
         $query = Alias::selectRaw('wikidata_id, min(wikidata_id) as id, min(name) as name, author_id')
             ->whereRaw("lower(`name`) LIKE $value");
@@ -46,10 +46,12 @@ class AuthorRepository extends BaseRepository {
             // 必须添加 or `author_id` is NULL 条件，否则查询不到 author_id 为 NULL 的数据。
         }
 
-        $res = $query->groupBy(['wikidata_id', 'author_id'])->orderBy('author_id', 'desc')->limit(self::SEARCH_LIMIT)->get()
-            ->map->only('QID', 'label_en', 'label_cn', 'label', 'url', 'author_id')->map(function ($item) {
+        $res = $query->groupBy(['wikidata_id', 'author_id'])->orderBy('author_id', 'desc')
+            ->limit(self::SEARCH_LIMIT)->get()
+            ->map->only(['QID', 'label_en', 'label_cn', 'label', 'url', 'author_id', 'wikidata_id'])->map(function ($item) {
                 $item['id'] = $item['author_id'] ?? $item['QID']; // don't replace this with select concat('Q', wikidata_id) as id, because it will be casted into integer
-                $item['source'] = $item['author_id'] ? '🔗 PoemWiki' : '🔗 Wikidata';
+                $item['source'] = $item['author_id'] ? 'PoemWiki' : 'Wikidata';
+                $item['avatar_url'] = $item['author_id'] ? Author::find($item['author_id'])->avatarUrl : Wikidata::find($item['wikidata_id'])->first_pic_url;
                 return $item;
             });
         return $res;
@@ -89,9 +91,10 @@ class AuthorRepository extends BaseRepository {
 
     public static function searchLabel($name, $authorId=null) {
         if(is_numeric($authorId)) {
-            $resById = Author::select(['id', 'name_lang'])->where('id', '=', $authorId)->get()
-                ->map->only('id', 'label_en', 'label_cn', 'label', 'url')->map(function ($item) {
-                    $item['source'] = '🔗 PoemWiki';
+            $resById = Author::select(['id', 'name_lang', 'pic_url'])->where('id', '=', $authorId)->get()
+                ->map->only(['id', 'label_en', 'label_cn', 'label', 'url', 'pic_url', 'avatarUrl'])->map(function ($item) {
+                    $item['source'] = 'PoemWiki';
+                    // dd($item);
                     return $item;
                 });
         }
@@ -138,7 +141,7 @@ class AuthorRepository extends BaseRepository {
                 $fileName = str_replace(' ', '_', $image->mainsnak->datavalue->value);
                 $ab = substr(md5($fileName), 0, 2);
                 $a = substr($ab, 0, 1);
-                $picUrl[] = Wikidata::PIC_URL_BASE . $a . '/' . $ab . '/' . $fileName;
+                $picUrl[] = Wikidata::$PIC_URL_BASE . $a . '/' . $ab . '/' . $fileName;
             }
         }
 

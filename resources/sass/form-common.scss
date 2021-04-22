@@ -43,8 +43,19 @@ input[type],select {
     overflow-x: hidden;
   }
 
+  .author-option {
+
+  }
   .author-option-source {
     padding: 0 4px;
+    line-height: 5em;
+    height: 5em;
+  }
+  .vs__dropdown-option{
+    position: relative;
+    line-height: 4em;
+    height: 4em;
+    padding-left: 4.2em;
   }
   .vs__dropdown-option--highlight {
     .poemwiki-link:before {
@@ -54,6 +65,16 @@ input[type],select {
       background-color: $vs-state-active-bg;
       color: $white;
     }
+  }
+
+  .author-option-avatar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4em;
+    height: 4em;
+    padding: 6px;
+    object-fit: cover;
   }
 }
 

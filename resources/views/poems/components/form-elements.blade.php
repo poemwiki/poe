@@ -99,7 +99,8 @@
                 source: '',
                 label_en: label,
                 label_cn: label,
-                url: ''
+                url: '',
+                avatar_url: '/images/avatar-default.png'
                })"
               :disabled="(form.translated_id || form.original_id) > 0"
               @option:selected="onSelectPoet"
@@ -117,7 +118,8 @@
       <template slot="option" slot-scope="option">
         <div :title="option.source ? '链接到作者页' : 'PoemWiki 暂无该作者，将链接到搜索页'" class="author-option">
           <span :class="option.source ? 'poemwiki-link' : ''">@{{ option.label }}</span>
-          <span :class="'author-option-source ' + option.source" class="absolute text-xs leading-loose right-0 bg-white inline-block text-right text-gray-400">@{{option.source}}</span>
+          <img class="author-option-avatar" :src="option.avatar_url" :alt="option.label">
+          <span :class="'author-option-source ' + option.source" class="absolute text-xs leading-loose right-0 bg-white inline-block text-right text-gray-400">@{{option.source || '暂无该作者'}}</span>
         </div>
       </template>
 
@@ -235,9 +237,19 @@
               data-vv-as="{{ trans('admin.poem.columns.translator_id') }}" data-vv-name="translator_id"
               name="translator_id_fake_element"
     >
+
       <template slot="option" slot-scope="option">
-        @{{ option.label }}
-        <span :class="'author-option ' + option.source" class="absolute right-3 inline-block text-right text-gray-400 w-28">@{{option.source}}</span>
+        <div :title="option.source ? '链接到作者页' : 'PoemWiki 暂无该作者，将链接到搜索页'" class="author-option">
+          <span :class="option.source ? 'poemwiki-link' : ''">@{{ option.label }}</span>
+          <img class="author-option-avatar" :src="option.avatar_url" :alt="option.label">
+          <span :class="'author-option-source ' + option.source" class="absolute text-xs leading-loose right-0 bg-white inline-block text-right text-gray-400">@{{option.source || '暂无该作者'}}</span>
+        </div>
+      </template>
+
+
+      <template slot="selected-option" slot-scope="option">
+        {{--    <a href="author/new or author page url" target="_blank"></a>--}}
+        <span :class="option.source ? 'poemwiki-link' : ''">@{{option.label}}</span>
       </template>
     </v-select>
 

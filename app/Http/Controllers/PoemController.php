@@ -212,9 +212,9 @@ class PoemController extends Controller
             'trans' => $this->trans(),
             'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::select('name_lang', 'id')->get(),
-            'defaultAuthors' => Author::select('name_lang', 'id')->whereIn('id', [$poem->poet_id, $poem->translator_id])
-                ->union(Author::select('name_lang', 'id')->limit(10))->get()->map(function ($item) {
-                    $item['source'] = '🔗 PoemWiki';
+            'defaultAuthors' => Author::select('name_lang', 'id', 'pic_url')->whereIn('id', [$poem->poet_id, $poem->translator_id])
+                ->union(Author::select('name_lang', 'id', 'pic_url')->limit(10))->get()->map(function ($item) {
+                    $item['source'] = 'PoemWiki';
                     return $item;
                 })->toArray(),
         ]);
