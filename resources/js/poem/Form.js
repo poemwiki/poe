@@ -224,7 +224,9 @@ Vue.component('poem-form', {
         label: this.form.poet,
         label_en: this.form.poet,
         label_cn: this.form.poet,
-        url: ''
+        url: '',
+        source: '',
+        avatar_url: '/images/avatar-default.png'
       }
     },
     newTranslator() {
@@ -233,7 +235,9 @@ Vue.component('poem-form', {
         label: this.form.translator,
         label_en: this.form.translator,
         label_cn: this.form.translator,
-        url: ''
+        url: '',
+        source: '',
+        avatar_url: '/images/avatar-default.png'
       }
     }
   },
