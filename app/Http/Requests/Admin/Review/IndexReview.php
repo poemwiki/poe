@@ -25,7 +25,7 @@ class IndexReview extends FormRequest
     public function rules(): array
     {
         return [
-            'orderBy' => 'in:content_id,id,like,poem_id,title,user_id|nullable',
+            'orderBy' => 'in:content_id,id,like,poem_id,title,user_id,updated_at|nullable',
             'orderDirection' => 'in:asc,desc|nullable',
             'search' => 'string|nullable',
             'page' => 'integer|nullable',
