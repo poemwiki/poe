@@ -50,6 +50,9 @@ class PoemController extends Controller
 
         );
 
+        foreach ($data as &$poem) {
+            $poem['url'] = $poem->url;
+        }
         if ($request->ajax()) {
             if ($request->has('bulk')) {
                 return [

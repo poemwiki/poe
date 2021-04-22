@@ -80,8 +80,8 @@
                                             </label>
                                         </td>
 
-                                    <td>@{{ item.id }}</td>
-                                        <td>@{{ item.title }}</td>
+                                        <td>@{{ item.id }}</td>
+                                        <td><a :href="item.url" target="_blank">@{{ item.title }}</a></td>
                                         <td>@{{ item.language_id }}</td>
                                         <td>@{{ item.is_original }}</td>
                                         <td>@{{ item.nation }}</td>
