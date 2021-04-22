@@ -17,6 +17,7 @@
                 $oldVal = $log->properties->get('old');
                 $props = array_keys($newVal ?? []);
 
+                //dd($poem->activityLogs);
                 //dd($log);
             @endphp
             <span title="{{$log->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($log->created_at)->format('Y-m-d')}}</span>&nbsp;
@@ -32,8 +33,22 @@
                     <br>
                     @if($prop === 'poem')
                         <span class="field">{{trans('admin.poem.columns.'.$prop)}}</span>
+                    @elseif($prop === 'poet_id')
+                        @php
+                          $oldAuthor = $oldVal[$prop] ? App\Models\Author::find($oldVal[$prop]) : null;
+                          $newAuthor = $newVal[$prop] ? App\Models\Author::find($newVal[$prop]) : null;
+                        @endphp
+                        <span class="field">{{trans('admin.poem.columns.poet_id')}}</span>&nbsp;[
+                        <del>@if($oldAuthor) <a href="{{$oldAuthor->url}}">{{$oldAuthor->label}}</a> @endif</del>&nbsp;->
+                          @if($newAuthor) <a href="{{$newAuthor->url}}">{{$newAuthor->label}}</a> @endif
+                        ]
                     @elseif($prop === 'content_id')
-
+                        @php
+                          // TODO Why poem.content_id not stored into log?
+                          //$oldContent = $oldVal[$prop] ? App\Models\Content::find($oldVal[$prop]) : null;
+                          //$newContent = $newVal[$prop] ? App\Models\Content::find($newVal[$prop]) : null;
+                        @endphp
+                        <span class="field">{{trans('admin.poem.columns.content_id')}}</span>&nbsp;[&nbsp;<del>{{$oldVal[$prop] ? $languageList[$oldVal[$prop]]->name_lang : ''}}</del>&nbsp;->&nbsp;{{$newVal[$prop] ? $languageList[$newVal[$prop]]->name_lang : ''}}&nbsp;]
                     @elseif($prop === 'language_id')
                         <span class="field">{{trans('admin.poem.columns.language_id')}}</span>&nbsp;[&nbsp;<del>{{$oldVal[$prop] ? $languageList[$oldVal[$prop]]->name_lang : ''}}</del>&nbsp;->&nbsp;{{$newVal[$prop] ? $languageList[$newVal[$prop]]->name_lang : ''}}&nbsp;]
                     @elseif($prop === 'original_id')
