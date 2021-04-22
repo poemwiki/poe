@@ -27,8 +27,8 @@ class UpdateDynasty extends TranslatableFormRequest
         return [
             'f_id' => ['sometimes', 'string'],
             'name' => ['sometimes', Rule::unique('dynasty', 'name')->ignore($this->dynasty->getKey(), $this->dynasty->getKeyName()), 'string'],
-            'wikidata_id' => ['nullable', 'string'],
-            
+            'wikidata_id' => ['nullable', 'integer'],
+
 
         ];
     }
@@ -42,7 +42,7 @@ class UpdateDynasty extends TranslatableFormRequest
         return [
             'describe_lang' => ['nullable', 'string'],
             'name_lang' => ['sometimes', 'string'],
-            
+
         ];
     }
 

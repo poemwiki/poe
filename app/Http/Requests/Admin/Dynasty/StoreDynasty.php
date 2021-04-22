@@ -27,8 +27,8 @@ class StoreDynasty extends TranslatableFormRequest
         return [
             'f_id' => ['required', 'string'],
             'name' => ['required', Rule::unique('dynasty', 'name'), 'string'],
-            'wikidata_id' => ['nullable', 'string'],
-            
+            'wikidata_id' => ['nullable', 'integer'],
+
         ];
     }
 
@@ -41,7 +41,7 @@ class StoreDynasty extends TranslatableFormRequest
         return [
             'describe_lang' => ['nullable', 'string'],
             'name_lang' => ['required', 'string'],
-            
+
         ];
     }
 

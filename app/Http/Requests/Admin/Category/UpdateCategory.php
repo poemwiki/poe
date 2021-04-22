@@ -26,8 +26,8 @@ class UpdateCategory extends TranslatableFormRequest
     public function untranslatableRules(): array {
         return [
             'name' => ['sometimes', Rule::unique('category', 'name')->ignore($this->category->getKey(), $this->category->getKeyName()), 'string'],
-            'wikidata_id' => ['nullable', 'string'],
-            
+            'wikidata_id' => ['nullable', 'integer'],
+
 
         ];
     }
@@ -41,7 +41,7 @@ class UpdateCategory extends TranslatableFormRequest
         return [
             'describe_lang' => ['nullable', 'string'],
             'name_lang' => ['sometimes', 'string'],
-            
+
         ];
     }
 

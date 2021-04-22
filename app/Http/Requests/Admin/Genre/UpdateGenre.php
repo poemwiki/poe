@@ -27,7 +27,7 @@ class UpdateGenre extends TranslatableFormRequest
         return [
             'f_id' => ['sometimes', 'integer'],
             'name' => ['sometimes', Rule::unique('genre', 'name')->ignore($this->genre->getKey(), $this->genre->getKeyName()), 'string'],
-            'wikidata_id' => ['nullable', 'string'],
+            'wikidata_id' => ['nullable', 'integer'],
 
 
         ];

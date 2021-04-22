@@ -43,7 +43,7 @@ class AuthorController extends Controller {
             ],
 
             // set columns to searchIn
-            ['name_lang', 'id', 'users.name', 'uploader.name'],
+            ['name_lang', 'id', 'authorUser.name', 'uploader.name'],
 
             function ($query) use ($request) {
                 if(!$request->input('orderBy'))

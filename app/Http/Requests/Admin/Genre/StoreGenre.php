@@ -27,7 +27,7 @@ class StoreGenre extends TranslatableFormRequest
         return [
             'f_id' => ['required', 'integer'],
             'name' => ['required', Rule::unique('genre', 'name'), 'string'],
-            'wikidata_id' => ['nullable', 'string'],
+            'wikidata_id' => ['nullable', 'integer'],
 
         ];
     }

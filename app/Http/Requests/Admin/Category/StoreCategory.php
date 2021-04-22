@@ -26,8 +26,8 @@ class StoreCategory extends TranslatableFormRequest
     public function untranslatableRules(): array {
         return [
             'name' => ['required', Rule::unique('category', 'name'), 'string'],
-            'wikidata_id' => ['nullable', 'string'],
-            
+            'wikidata_id' => ['nullable', 'integer'],
+
         ];
     }
 
@@ -40,7 +40,7 @@ class StoreCategory extends TranslatableFormRequest
         return [
             'describe_lang' => ['nullable', 'string'],
             'name_lang' => ['required', 'string'],
-            
+
         ];
     }
 

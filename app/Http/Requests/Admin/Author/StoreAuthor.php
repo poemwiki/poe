@@ -28,7 +28,7 @@ class StoreAuthor extends TranslatableFormRequest
         return [
             'pic_url' => ['nullable', 'string'],
             'user_id' => ['nullable', 'string'],
-            'wikidata_id' => ['nullable', 'string'],
+            'wikidata_id' => ['nullable', 'integer'],
             'wikidata_url' => ['nullable', 'string'],
 
         ];

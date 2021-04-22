@@ -27,7 +27,7 @@ class UpdateTag extends TranslatableFormRequest
         return [
             'category_id' => ['required', 'integer'],
             'name' => ['sometimes', Rule::unique('tag', 'name')->ignore($this->tag->getKey(), $this->tag->getKeyName()), 'string'],
-            'wikidata_id' => ['nullable', 'string'],
+            'wikidata_id' => ['nullable', 'integer'],
 
 
         ];

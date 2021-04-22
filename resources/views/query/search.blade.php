@@ -47,8 +47,8 @@
         <ol>
           @foreach($authors as $author)
             <li class="item item-author">
-              @if(isset($author->searchable->pic_url[0]))
-                <img class="item-pic item-left" src="{{$author->searchable->pic_url[0]}}">
+              @if(isset($author->searchable->avatar_url))
+                <img class="item-pic item-left" src="{{$author->searchable->avatar_url}}">
               @endif
               <div class="item-right title-list-item">
                 <a class="item-link title no-bg" href="{{ $author->url }}">{{ $author->title }}</a>
