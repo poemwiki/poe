@@ -117,7 +117,8 @@
     >
       <template slot="option" slot-scope="option">
         <div :title="option.source ? '链接到作者页' : 'PoemWiki 暂无该作者，将链接到搜索页'" class="author-option">
-          <span :class="option.source ? 'poemwiki-link' : ''">@{{ option.label }}</span>
+          <span class="author-option-label" :class="option.source ? 'poemwiki-link' : ''">@{{ option.label }}</span>
+          <span class="author-option-desc">@{{ option.desc }}</span>
           <img class="author-option-avatar" :src="option.avatar_url" :alt="option.label">
           <span :class="'author-option-source ' + option.source" class="absolute text-xs leading-loose right-0 bg-white inline-block text-right text-gray-400">@{{option.source || '暂无该作者'}}</span>
         </div>
@@ -222,7 +223,8 @@
                 id: 'new_' + label,
                 label_en: label,
                 label_cn: label,
-                url: ''
+                url: '',
+                avatar_url: '/images/avatar-default.png'
                })"
               @option:selected="onSelectTranslator"
               @search="onSearchTranslator"
@@ -240,7 +242,8 @@
 
       <template slot="option" slot-scope="option">
         <div :title="option.source ? '链接到作者页' : 'PoemWiki 暂无该作者，将链接到搜索页'" class="author-option">
-          <span :class="option.source ? 'poemwiki-link' : ''">@{{ option.label }}</span>
+          <span class="author-option-label" :class="option.source ? 'poemwiki-link' : ''">@{{ option.label }}</span>
+          <span class="author-option-desc">@{{ option.desc }}</span>
           <img class="author-option-avatar" :src="option.avatar_url" :alt="option.label">
           <span :class="'author-option-source ' + option.source" class="absolute text-xs leading-loose right-0 bg-white inline-block text-right text-gray-400">@{{option.source || '暂无该作者'}}</span>
         </div>

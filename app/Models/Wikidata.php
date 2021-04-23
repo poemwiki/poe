@@ -6,9 +6,15 @@ use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property mixed data
+ * @property mixed entity
+ */
 class Wikidata extends Model {
     use HasTranslations;
     use LogsActivity;
+
+    static public $defaultAvatarUrl = 'images/avatar-default.png';
 
     protected $table = 'wikidata';
     // '0':poet, '1':nation/region/country of citizenship,
@@ -38,9 +44,10 @@ class Wikidata extends Model {
         'zh' => ['zh', 'zh-cn', 'zh-hans', 'zh-Hans-CN', 'zh-hant', 'zh-hk', 'zh-tw', 'zh-yue', 'zh-sg'],
         'zh-CN' => ['zh-hant', 'zh-hk', 'zh-tw', 'zh-yue', 'zh', 'zh-cn', 'zh-hans', 'zh-Hans-CN', 'zh-sg']
     ];
-    const PIC_URL_BASE = 'https://upload.wikimedia.org/wikipedia/commons/';
+    public static $PIC_URL_BASE = 'https://upload.wikimedia.org/wikipedia/commons/';
 
     public $translatable = [
+        'description_lang'
     ];
 
     // TODO log activity for command execution
@@ -60,6 +67,13 @@ class Wikidata extends Model {
         'label_lang',
     ];
 
+    protected $casts = [
+        'id' => 'integer',
+    ];
+
+    public function getEntityAttribute() {
+        return json_decode($this->data);
+    }
     public function getClaim($prop) {
         return json_decode($this->data)->claims->$prop ?? null;
     }
@@ -69,14 +83,66 @@ class Wikidata extends Model {
     public function getAliases($locale) {
         return json_decode($this->data)->aliases->$locale->value ?? '';
     }
+    public function getDescriptionLangAttribute() {
+        $descriptionLang = [];
+        foreach ($this->entity->descriptions as $locale => $description) {
+            $descriptionLang[$locale] = $description->value;
+        }
+        return $descriptionLang;
+    }
+    // get description with fallback
+    public function getDescription($locale) {
+        // $descriptionLang = [];
+        // foreach ($this->entity->descriptions as $locale => $description) {
+        //     $descriptionLang[$locale] = $description->value;
+        // }
+        // return $descriptionLang;
+        return $this->fallback('description_lang', $locale);
+    }
     public function getSiteLink($locale) {
         $wikiname = $locale.'wiki';
         $title = json_decode($this->data)->sitelinks->$wikiname->title ?? '';
         if(!$title) return '';
         return 'https://'.$locale.'.wikipedia.org/wiki/' . str_replace(' ', '_', $title);
     }
+
     public function getUrlAttribute() {
         return $this->getSiteLink(app()->getLocale() === 'en' ? 'en' : 'zh');
+    }
+
+    public function getFirstPicUrlAttribute() {
+        $entity = json_decode($this->data);
+        if (isset($entity->claims->P18)) {
+            $P18 = $entity->claims->P18;
+            foreach ($P18 as $image) {
+                if (!isset($image->mainsnak->datavalue->value)) {
+                    continue;
+                }
+                $fileName = str_replace(' ', '_', $image->mainsnak->datavalue->value);
+                $ab = substr(md5($fileName), 0, 2);
+                $a = substr($ab, 0, 1);
+                return self::$PIC_URL_BASE . $a . '/' . $ab . '/' . $fileName;
+            }
+        }
+        return asset(static::$defaultAvatarUrl);
+    }
+
+    public function getPicUrls() {
+        $entity = json_decode($this->data);
+        $picUrl = [];
+        if (isset($entity->claims->P18)) {
+            $P18 = $entity->claims->P18;
+            foreach ($P18 as $image) {
+                if (!isset($image->mainsnak->datavalue->value)) {
+                    continue;
+                }
+                $fileName = str_replace(' ', '_', $image->mainsnak->datavalue->value);
+                $ab = substr(md5($fileName), 0, 2);
+                $a = substr($ab, 0, 1);
+                $picUrl[] = self::$PIC_URL_BASE . $a . '/' . $ab . '/' . $fileName;
+            }
+        }
+        return $picUrl;
     }
 
 }

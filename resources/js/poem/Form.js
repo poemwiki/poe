@@ -167,7 +167,7 @@ Vue.component('poem-form', {
         console.log('search result: ', res?.data?.length, _.map(vm.authorList, 'id'), _.map(vm.authorList, 'label'));
         loading(false);
       });
-    }, 450),
+    }, 500),
     searchTranslator: _.debounce((field, loading, search, vm) => {
       if(!search) {
         loading(false);

@@ -51,6 +51,25 @@ input[type],select {
     line-height: 5em;
     height: 5em;
   }
+  .author-option-label {
+    position: absolute;
+    display: block;
+    top: 6px;
+    left: 4.1em;
+    line-height: 1.2em;
+    &:before{
+      line-height: 1.0em;
+    }
+  }
+  .author-option-desc {
+    position: absolute;
+    display: block;
+    bottom: 6px;
+    left: 5.4em;
+    line-height: 1em;
+    font-size: 12px;
+    color: gray;
+  }
   .vs__dropdown-option{
     position: relative;
     line-height: 4em;
@@ -61,7 +80,8 @@ input[type],select {
     .poemwiki-link:before {
       background-color: transparent;
     }
-    .author-option-source {
+    .author-option-source,
+    .author-option-desc {
       background-color: $vs-state-active-bg;
       color: $white;
     }
@@ -75,6 +95,9 @@ input[type],select {
     height: 4em;
     padding: 6px;
     object-fit: cover;
+    color: $gray;
+    //font-size: 10px; //for alt text
+    //text-overflow: clip;
   }
 }
 
