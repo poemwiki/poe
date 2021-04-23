@@ -49,8 +49,10 @@ class CreateScoreRequest extends FormRequest {
         $isMaster = false;
         $tags = Poem::find($sanitized['poem_id'])->tags;
         if($tags->count() && $tags[0] && $tags[0]->campaign) {
+            /** @var \App\Models\Campaign $campaign */
             $campaign = $tags[0]->campaign;
-            $isMaster = in_array($user->id, $campaign->settings['masters']);
+            // TODO change masters data structure
+            $isMaster = $campaign->isMaster($user->id);
         }
 
         // TODO weight should from user.weight

@@ -58,8 +58,11 @@ class Score extends Component {
         $user = Auth::user();
         $tags = $this->poem->tags;
         if($tags->count() && $tags[0] && $tags[0]->campaign) {
+            /** @var \App\Models\Campaign $campaign */
             $campaign = $tags[0]->campaign;
-            $isMaster = in_array($user->id, $campaign->settings['masters']);
+            // TODO change masters data structure
+            // use $campaign->isMaster($user->id)
+            $isMaster = $campaign->isMaster($user->id);
         }
         $weight = $user->weight;
         return  $this->scoreRepository->updateOrCreate(
