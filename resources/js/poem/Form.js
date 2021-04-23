@@ -99,7 +99,7 @@ Vue.component('poem-form', {
     },
 
     onSelectPoet: function(option) {
-      this.form.poet = option.label_en||option.label;
+      this.form.poet = option.label;
       this.form.poet_cn = option.label_cn||option.label;
       if(this.isNew(this.form.poet_id)) {
         this.form.poet_wikidata_id = null;
@@ -107,7 +107,7 @@ Vue.component('poem-form', {
       console.log('selected poet', option, this.form.poet, this.form.poet_cn, this.form.poet_id);
     },
     onSelectTranslator: function(option) {
-      this.form.translator = option.label_en||option.label;
+      this.form.translator = option.label;
       if(this.isNew(this.form.translator_id)) {
         this.form.translator_wikidata_id = null;
       }
