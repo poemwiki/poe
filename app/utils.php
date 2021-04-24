@@ -158,3 +158,52 @@ function get_causer_name($log) {
         return 'PoemWiki';
     }
 }
+
+function fuckGWF(string $url, $userAgent = 'normal'): string {
+
+    $options = config('app.env') === 'production' ? [] : [
+        'http' => 'tcp://localhost:1087',
+        'https' => 'tcp://localhost:1087'
+    ];
+
+    $UAs = [
+        'normal' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4485.0 Safari/537.36',
+        'poemwiki' => 'PoemWiki-bot/0.1 (https://poemwiki.org; poemwiki@126.com) PHP/' . PHP_VERSION, // TODO adjust this; see https://w.wiki/CX6
+    ];
+
+    $response = Illuminate\Support\Facades\Http::withOptions($options)->withHeaders([
+        'Accept' => 'application/json',
+        'Content-Type' => 'application/json',
+        'User-Agent' => $UAs[$userAgent] ?? ''
+    ])->timeout(3)->retry(1, 2)->get($url);
+
+    if(!$response->successful()) {
+        return false;
+    }
+
+    $body = (string)$response->getBody();
+
+    if (!$body) return false;
+
+    return $body;
+}
+
+function get_wikipedia_summary(array $titleLocale) {
+    $title = $titleLocale['title'];
+    if(!$title) {
+        return '';
+    }
+
+    $endPoint = 'https://'.$titleLocale['locale'].'.wikipedia.org/api/rest_v1/page/summary/';
+    $url = $endPoint . urlencode(str_replace(' ', '_', $title));
+    // dd($url);
+    try {
+        $str = fuckGWF($url);
+    } catch (Exception $e) {
+        Log::warning('request fail. url:' . $url . '\nException:' . $e->getMessage());
+        return false;
+    }
+
+    if(!$str) return '';
+    return json_decode($str)->extract;
+}
