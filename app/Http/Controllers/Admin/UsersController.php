@@ -49,7 +49,7 @@ class UsersController extends Controller {
 
             function (Builder $query) use ($request) {
                 $query->select(DB::raw(
-                    "GROUP_CONCAT(`bind`.`id`) as `bind_ids`, GROUP_CONCAT(`bind`.`nickname`) as `bind_names`,
+                    "GROUP_CONCAT(`bind`.`id`) as `bind_ids`,
                     users.id, users.name, users.email, users.email_verified_at, users.is_admin, users.updated_at, is_v, weight"
                 ));
                 if (!$request->input('orderBy'))
@@ -66,7 +66,7 @@ class UsersController extends Controller {
         });
         $bindIDs = explode(',', trim($binds, ','));
         $userBinds = UserBind::findMany($bindIDs)->keyBy('id')
-            ->map->only(['id', 'bind_status', 'bind_ref', 'nickname', 'gender'])->toArray();
+            ->map->only(['id', 'bind_status', 'bind_ref', 'nickname', 'gender', 'avatar'])->toArray();
 
         // TODO aggregate bind_ids for every user instead of showing multiple lines for each bind of user
         // $users = collect([]);

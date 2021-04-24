@@ -63,7 +63,11 @@
                                         <td>@{{ item.id }}</td>
                                         <td>@{{ item.email }}</td>
                                         <td><span v-for="(bind) in item.binds" :key="bind.id"
-                                          >[@{{ bind.bind_status ? '已绑定' : '已解绑' }}] [@{{ bindRefType(bind.bind_ref)  }}] @{{ bind.nickname }}
+                                          >
+                                            [@{{ bind.bind_status ? '已绑定' : '已解绑' }}]
+                                            [@{{ bindRefType(bind.bind_ref)  }}]
+                                            <img :src="bind.avatar" alt="" style="width: 3em; height: 3em; border-radius: 4px; object-fit: cover" />
+                                            @{{ bind.nickname }}
                                           <br/></span></td>
                                         <td>@{{ item.is_admin ? 'Yes' : 'No' }}</td>
                                         <td>@{{ item.is_v ? 'Yes' : 'No' }}</td>
