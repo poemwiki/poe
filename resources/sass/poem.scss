@@ -143,6 +143,9 @@ section.poem {
           color: $white;
         }
       }
+      .poemwiki-link:before{
+        line-height: 2.4em;
+      }
     }
     dl.poem-ugc {
       margin: 0
