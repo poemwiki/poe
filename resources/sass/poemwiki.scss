@@ -6,3 +6,22 @@
   //line-height: 2.4em;
   background-color: #fff;
 }
+.wikidata-link, .wikipedia-link{
+  vertical-align: sub;
+  &:hover{
+    background-color: transparent;
+  }
+}
+.wikidata-link:before, .wikipedia-link:before {
+  content: '';
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background-size: 1em 1em;
+}
+.wikidata-link:before {
+  background-image: url("/images/wikidata-text.svg");
+}
+.wikipedia-link:before {
+  background-image: url("/images/wikipedia.svg");
+}
