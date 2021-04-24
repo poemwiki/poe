@@ -53,7 +53,7 @@ class AuthorRepository extends BaseRepository {
                 $item['id'] = $item['author_id'] ?? $item['QID']; // don't replace this with select concat('Q', wikidata_id) as id, because it will be casted into integer
                 $item['source'] = $item['author_id'] ? 'PoemWiki' : 'Wikidata';
                 $item['avatar_url'] = $item['author_id'] ? Author::find($item['author_id'])->avatarUrl : Wikidata::find($item['wikidata_id'])->first_pic_url;
-                $item['desc'] = $item['author_id'] ? Author::find($item['author_id'])->describe_lang : Wikidata::find(str_replace('Q', '', $item['QID']))->getDescription(strtolower(config('app.locale')));
+                $item['desc'] = $item['author_id'] ? Author::find($item['author_id'])->describe_lang : Wikidata::find(str_replace('Q', '', $item['QID']))->getDescription(config('app.locale'));
                 return $item;
             });
         return $res;

@@ -81,6 +81,8 @@ $config = [
     */
 
     'locale' => 'zh-CN',
+    // TODO set locale-wikipedia properly depend on request
+    'locale-wikipedia' => 'zh',
 
     /*
     |--------------------------------------------------------------------------

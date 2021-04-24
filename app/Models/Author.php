@@ -18,6 +18,7 @@ use Spatie\Searchable\SearchResult;
  * @property string $updated_at
  * @property User user
  * @property array|null picUrl
+ * @property Wikidata wikiData
  * @package App
  */
 class Author extends Model implements Searchable {
@@ -43,7 +44,8 @@ class Author extends Model implements Searchable {
         'wikipedia_url',
         'nation_id',
         'dynasty_id',
-        'upload_user_id'
+        'upload_user_id',
+        'wiki_desc_lang'
     ];
 
 
@@ -57,6 +59,7 @@ class Author extends Model implements Searchable {
     public $translatable = [
         'describe_lang',
         'name_lang',
+        'wiki_desc_lang'
     ];
 
 
@@ -143,7 +146,7 @@ class Author extends Model implements Searchable {
     public function getLabelAttribute() {
         $default = $this->getTranslated('name_lang', config('app.locale'));
         $fallback = $this->getTranslated('name_lang', config('app.fallback_locale'));
-        if ($default !== $fallback) {
+        if ($default !== $fallback && $fallback) {
            return  $default." ($fallback)";
         }
         return $default ?: $fallback;
@@ -153,6 +156,13 @@ class Author extends Model implements Searchable {
     }
     public function getLabelCNAttribute() {
         return $this->getTranslated('name_lang', 'zh-CN');
+    }
+
+    // get all alias without repeated values
+    public function getAliasArrAttribute() {
+        $all = Alias::select(['name', 'locale'])->where(['author_id', '=', $this->id])->get()
+            ->unique();
+        dd($all);
     }
 
 
@@ -165,6 +175,19 @@ class Author extends Model implements Searchable {
      */
     public function getAvatarUrlAttribute() {
         return $this->isValidPicUrl($this->pic_url[0] ?? '') ? $this->pic_url[0] : asset(static::$defaultAvatarUrl);
+    }
+
+    public function fetchWikiDesc($force = false) {
+        if(!$this->wiki_desc_lang) {
+            $titleLocale = $this->wikiData->getSiteTitle(config('app.locale-wikipedia'));
+            $summary = get_wikipedia_summary($titleLocale);
+
+            if($summary) {
+                $this->setTranslation('wiki_desc_lang', $titleLocale['locale'], $summary);
+                $this->save();
+            }
+        }
+        return $this->wiki_desc_lang;
     }
 
 

@@ -15,6 +15,7 @@ class Wikidata extends Model {
     use LogsActivity;
 
     static public $defaultAvatarUrl = 'images/avatar-default.png';
+    static public $endpoint = 'https://wikidata.org';
 
     protected $table = 'wikidata';
     // '0':poet, '1':nation/region/country of citizenship,
@@ -99,15 +100,45 @@ class Wikidata extends Model {
         // return $descriptionLang;
         return $this->fallback('description_lang', $locale);
     }
-    public function getSiteLink($locale) {
-        $wikiname = $locale.'wiki';
-        $title = json_decode($this->data)->sitelinks->$wikiname->title ?? '';
-        if(!$title) return '';
-        return 'https://'.$locale.'.wikipedia.org/wiki/' . str_replace(' ', '_', $title);
+
+    public function getSiteTitle(string $locale = '', array $fallback = ['en', 'zh', 'ja', 'fr', 'de', 'es', 'pt', 'pl']) {
+        $siteLinks = json_decode($this->data)->sitelinks;
+
+        array_unshift($fallback, $locale);
+        foreach ($fallback as $lang) {
+            $wikiname = $lang.'wiki';
+            // dd(isset($siteLinks->$wikiname), array_keys((array)$siteLinks), $siteLinks->$wikiname);
+
+            $title = $siteLinks->$wikiname->title ?? '';
+            if(!$title) continue;
+            return ['title' => $title, 'locale' => $lang];
+        }
+
+        $siteNames = collect(array_keys((array)$siteLinks))->filter(function($name){
+            return str_ends_with($name, 'wiki');
+        });
+        if(count($siteNames)) {
+            $first = $siteNames[0];
+            $title = $siteLinks->$first->title ?? '';
+            if($title)
+                return ['title' => $title, 'locale' => $lang];
+        }
+
+        return null;
+    }
+
+    public function getSiteLink(string $locale, $fallback = ['en', 'zh', 'ja', 'fr', 'de', 'es', 'pt', 'pl']) {
+        $title = $this->getSiteTitle($locale, $fallback);
+        if(!$title) return null;
+
+        return 'https://'.$title['locale'].'.wikipedia.org/wiki/' . str_replace(' ', '_', $title['title']);
     }
 
     public function getUrlAttribute() {
-        return $this->getSiteLink(app()->getLocale() === 'en' ? 'en' : 'zh');
+        return $this->getSiteLink(config('app.locale-wikipedia'));
+    }
+    public function getWikidataUrlAttribute() {
+        return static::$endpoint.'/wiki/Q'.$this->id;
     }
 
     public function getFirstPicUrlAttribute() {
