@@ -247,7 +247,7 @@ SQL;
         $dataMode = in_array($msg, ['数据', 'data']);
         $keyword = $this->getKeywords($msg);
 
-        if (empty($keyword) && !$dataMode && !$topMode) {
+        if ((empty($keyword) or grapheme_strlen($msg) > 20) && !$dataMode && !$topMode) {
             return Response::json([
                 'code' => -2,
                 'poem' => '抱歉，没有匹配到关键词。',
