@@ -20,7 +20,11 @@ class CampaignAPIController extends Controller {
     }
 
     public function index(Request $request) {
-        $campaigns = $this->campaignRepository->allInUse();
+        $campaigns = $this->campaignRepository->allInUse()->map(function ($campaign) {
+            $ret = $campaign->toArray();
+            $ret['settings'] = collect($campaign->settings)->except(['result']);
+            return $ret;
+        });
 
         return $this->responseSuccess($campaigns->toArray());
     }
