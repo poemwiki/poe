@@ -1,4 +1,4 @@
-@extends('brackets/admin-ui::admin.layout.default')
+@extends('admin.layout.default')
 
 @section('title', trans('admin.admin-user.actions.edit', ['name' => $adminUser->email]))
 
@@ -13,7 +13,7 @@
                 :data="{{ $adminUser->toJson() }}"
                 :activation="!!'{{ $activation }}'"
                 inline-template>
-            
+
                 <form class="form-horizontal form-edit" method="post" @submit.prevent="onSubmit" :action="action">
 
                     <div class="card-header">

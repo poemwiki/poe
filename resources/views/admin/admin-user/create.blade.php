@@ -1,4 +1,4 @@
-@extends('brackets/admin-ui::admin.layout.default')
+@extends('admin.layout.default')
 
 @section('title', trans('admin.admin-user.actions.create'))
 
@@ -11,7 +11,7 @@
             <admin-user-form
                 :action="'{{ url('admin/admin-users') }}'"
                 :activation="!!'{{ $activation }}'"
-                
+
                 inline-template>
 
                 <form class="form-horizontal form-create" method="post" @submit.prevent="onSubmit" :action="action">

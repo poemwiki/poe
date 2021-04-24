@@ -1,4 +1,4 @@
-@extends('brackets/admin-ui::admin.layout.default')
+@extends('admin.layout.default')
 
 @section('title', trans('admin.admin-user.actions.index'))
 
@@ -50,7 +50,7 @@
                                     <th is='sortable' :column="'id'">{{ trans('admin.admin-user.columns.id') }}</th>
                                     <th is='sortable' :column="'language'">{{ trans('admin.admin-user.columns.language') }}</th>
                                     <th is='sortable' :column="'last_name'">{{ trans('admin.admin-user.columns.last_name') }}</th>
-                                    
+
                                     <th></th>
                                 </tr>
                             </thead>
@@ -73,7 +73,7 @@
                                     <td >@{{ item.id }}</td>
                                     <td >@{{ item.language }}</td>
                                     <td >@{{ item.last_name }}</td>
-                                    
+
                                     <td>
                                         <div class="row no-gutters">
                                             @can('admin.admin-user.impersonal-login')

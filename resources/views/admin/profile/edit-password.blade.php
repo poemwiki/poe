@@ -1,4 +1,4 @@
-@extends('brackets/admin-ui::admin.layout.default')
+@extends('admin.layout.default')
 
 @section('title', trans('admin.admin-user.actions.edit_password'))
 
@@ -35,8 +35,8 @@
                                 <div v-if="errors.has('password_confirmation')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('password_confirmation') }}</div>
                             </div>
                         </div>
-                        
-                        
+
+
                     </div>
 
                     <div class="card-footer">

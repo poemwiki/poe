@@ -1,4 +1,4 @@
-@extends('brackets/admin-ui::admin.layout.default')
+@extends('admin.layout.default')
 
 @section('title', trans('admin.admin-user.actions.edit_profile'))
 
@@ -11,7 +11,7 @@
             <profile-edit-profile-form
                 :action="'{{ url('admin/profile') }}'"
                 :data="{{ $adminUser->toJson() }}"
-                
+
                 inline-template>
 
                 <form class="form-horizontal form-edit" method="post" @submit.prevent="onSubmit" :action="action">
@@ -39,7 +39,7 @@
                                         <div v-if="errors.has('email')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('email') }}</div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="form-group row align-items-center" :class="{'has-danger': errors.has('first_name'), 'has-success': fields.first_name && fields.first_name.valid }">
                                     <label for="first_name" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-3'">{{ trans('admin.admin-user.columns.first_name') }}</label>
                                     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-7'">
@@ -47,7 +47,7 @@
                                         <div v-if="errors.has('first_name')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('first_name') }}</div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="form-group row align-items-center" :class="{'has-danger': errors.has('language'), 'has-success': fields.language && fields.language.valid }">
                                     <label for="language" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-3'">{{ trans('admin.admin-user.columns.language') }}</label>
                                     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-7'">
@@ -55,7 +55,7 @@
                                         <div v-if="errors.has('language')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('language') }}</div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="form-group row align-items-center" :class="{'has-danger': errors.has('last_name'), 'has-success': fields.last_name && fields.last_name.valid }">
                                     <label for="last_name" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-3'">{{ trans('admin.admin-user.columns.last_name') }}</label>
                                     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-7'">
@@ -63,8 +63,8 @@
                                         <div v-if="errors.has('last_name')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('last_name') }}</div>
                                     </div>
                                 </div>
-                                
-                                
+
+
                             </div>
                         </div>
 
