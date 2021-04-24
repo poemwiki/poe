@@ -329,7 +329,7 @@ Route::get('/page/{page}', function ($page) {
     if(view()->exists($view))
         return view($view);
     return abort(404);
-});
+})->name('page');
 
 Route::get('/poem-card/{id}/{compositionId?}', function ($id, $compositionId=null) {
     $poem = Poem::find($id);
