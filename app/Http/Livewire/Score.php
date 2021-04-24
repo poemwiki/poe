@@ -60,8 +60,6 @@ class Score extends Component {
         if($tags->count() && $tags[0] && $tags[0]->campaign) {
             /** @var \App\Models\Campaign $campaign */
             $campaign = $tags[0]->campaign;
-            // TODO change masters data structure
-            // use $campaign->isMaster($user->id)
             $isMaster = $campaign->isMaster($user->id);
         }
         $weight = $user->weight;

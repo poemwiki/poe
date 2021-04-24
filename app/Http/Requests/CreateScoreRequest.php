@@ -51,7 +51,6 @@ class CreateScoreRequest extends FormRequest {
         if($tags->count() && $tags[0] && $tags[0]->campaign) {
             /** @var \App\Models\Campaign $campaign */
             $campaign = $tags[0]->campaign;
-            // TODO change masters data structure
             $isMaster = $campaign->isMaster($user->id);
         }
 
