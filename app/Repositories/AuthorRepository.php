@@ -7,6 +7,7 @@ use App\Models\Author;
 use App\Models\Wikidata;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -123,9 +124,10 @@ class AuthorRepository extends BaseRepository {
     /**
      * TODO this process should be a command
      * @param Wikidata $wiki
+     * @param int|null $user_id
      * @return Author
      */
-    public function importFromWikidata(Wikidata $wiki) {
+    public function importFromWikidata(Wikidata $wiki, int $userID=null) {
         $entity = json_decode($wiki->data);
 
         $authorNameLang = [];
@@ -158,8 +160,9 @@ class AuthorRepository extends BaseRepository {
             'wikidata_id' => $wiki->id,
             'wikipedia_url' => json_encode($entity->sitelinks),
             'describe_lang' => $descriptionLang,    // Don't json_encode translatable attributes
-            "created_at" => now(),
-            "updated_at" => now(),
+            'upload_user_id' => $userID,
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
         return $this->updateOrCreate(['wikidata_id' => $wiki->id], $insert);
     }
@@ -174,7 +177,7 @@ class AuthorRepository extends BaseRepository {
 
         if (!$authorExisted) {
             $wiki = Wikidata::find($wikidata_id);
-            $authorExisted = $this->importFromWikidata($wiki);
+            $authorExisted = $this->importFromWikidata($wiki, Auth::user()->id);
             // Does this necessary?
             // 以下一步对于在前端查询前已导入过 wikidata label&alias 的 author 来说是不必要的，
             // 为适应未来在前端直接从 wikidata 接口查询未知 author 的数据，有 $poet_wikidata_id
