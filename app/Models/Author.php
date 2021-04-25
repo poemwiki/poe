@@ -186,6 +186,9 @@ class Author extends Model implements Searchable {
     public function fetchWikiDesc($force = false) {
         if(!$this->wiki_desc_lang) {
             $titleLocale = $this->wikiData->getSiteTitle(config('app.locale-wikipedia'));
+            if(empty($titleLocale)) {
+                return '';
+            }
             $summary = get_wikipedia_summary($titleLocale);
 
             if($summary) {
