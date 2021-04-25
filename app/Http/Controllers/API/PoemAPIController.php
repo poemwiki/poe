@@ -39,7 +39,19 @@ class PoemAPIController extends Controller {
         if(!is_numeric($tagId)) {
             return $this->responseFail();
         }
+
+        $columns = [
+            'id', 'created_at', 'date_ago', 'title', 'subtitle', 'preface', 'location',
+            'poem', 'poet', 'poet_cn', 'poet_id', 'poet_image', 'score', 'score_count',
+            // 'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'language_id',
+            // 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics', 'bedtime_post_id'
+        ];
+
         $campaign = Tag::find($tagId)->campaign;
+        if(!$campaign) {
+            // campaign deleted
+            return $this->responseSuccess([]);
+        }
 
         $dateInterval = Carbon::parse($campaign->end)->diff(now());
         $campaignEnded = $dateInterval->invert === 0;
@@ -50,26 +62,33 @@ class PoemAPIController extends Controller {
                 $poem['date_ago'] = date_ago($poem['created_at']);
             }
         } else {
-
             // poem before endDate, scores before endDate
             $byScore = $this->poemRepository->getByTagId($tagId, 'score', $campaign->start, $campaign->end);
             $limit = $campaign->settings['rank_min_weight'] ?? 3;
             $byScoreData = $byScore->filter(function ($value) use ($limit) {
                 // 票数不足的不参与排名
                 // dump($value['score_count']);
+                // TODO should use $item->getCampaignScore returned score_count
                 return $value['score_count'] >= $limit;
             })->map(function (Poem $item) use ($campaign) {
-                $item['score'] = $item->getCampaignScore($campaign)['score'];
+                $score = $item->getCampaignScore($campaign);
+                $item['score'] = $score['score'];
+                $item['score_weight'] = $score['weight'];
                 return $item;
             })->sort(function ($a, $b) {
-                $score = $b['score'] <=> $a['score'];
-                return $score === 0 ? $b['score_count'] <=> $a['score_count'] : $score;
-            })->values()->map(function ($item, $index) {
-                $item = $item->toArray();
+                $scoreOrder = $b['score'] <=> $a['score'];
+                $countOrder = $b['score_count'] <=> $a['score_count'];
+                return $scoreOrder === 0
+                    ? ($countOrder === 0 ? $b['score_weight'] <=> $a['score_weight'] : $countOrder)
+                    : $scoreOrder;
+            })->map->only($columns)->values()->map(function ($item, $index) {
+                // $item = $item->toArray();
                 $item['rank'] = $index + 1;
                 return $item;
             });
 
+            // TODO this should be done in a command when campaign ends
+            // and in case of command failed to execute, do it again here at controller
             if($campaignEnded) {
                 $newSetting = $campaign->settings;
                 $newSetting['result'] = $byScoreData;
@@ -82,6 +101,7 @@ class PoemAPIController extends Controller {
         $data = [
             'byScore' => $byScoreData,
             'byCreatedAt' => $this->poemRepository->getByTagId($tagId, 'created_at')
+                ->map->only($columns)
         ];
         return $this->responseSuccess($data);
     }
@@ -110,6 +130,94 @@ class PoemAPIController extends Controller {
             });
         }
         return $this->responseSuccess($data);
+    }
+
+
+
+    public function random($num = 5) {
+        $num = min(5, $num);
+
+        /** @var Poem $item */
+        $columns = [
+            'id', 'created_at', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
+            'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
+            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics'];
+        /** @var Poem $item */
+        $poems = PoemRepository::random($num)->get($columns);
+        if(!$poems) {
+            abort(404);
+            return $this->responseFail([], 'not found', -3);
+        }
+
+
+        $res = $poems->map(function ($poem) {
+            $poem->poet = $poem->poetLabel;
+            $poem['score'] = $poem->totalScore;
+            $poem['score_count'] = ScoreRepository::calcCount($poem->id);
+            return $poem;
+        });
+
+
+        return $this->responseSuccess($res);
+
+        $res = $poem->toArray();
+
+        $res['poet'] = $item->poetLabel;
+        $res['poet_avatar'] = $item->poetAvatar;
+        $res['date_ago'] = date_ago($item->created_at);
+
+        $res['score'] = $item->totalScore;
+        // TODO save score_count to poem.score_count column
+        $res['score_count'] = ScoreRepository::calcCount($id);
+
+        unset($res['resource_url']);
+
+        $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item)
+            ->get(['review.content', 'review.created_at', 'review.user_id'])
+            ->map(function ($item) {
+                $item->makeHidden('user');
+                $item['date_ago'] = date_ago($item->created_at);
+                $item['content'] = str_replace('&nbsp;', ' ', strip_tags($item->content));
+                return $item;
+            });
+
+        $relatedQuery = $this->poemRepository->random(2)
+            ->where('id', '<>', $id);
+
+        $res['is_campaign'] = $item->is_campaign;
+        if($item->tags->count()) {
+            $res['tags'] = $item->tags->map->only(['id', 'name', 'category_id']);
+            if(config('app.env') !== 'local')
+                $relatedQuery->whereHas('tags', function ($query) use ($item) {
+                    $query->where('tag_id', '=', $item->tags[0]->id);
+                });
+        }
+        if($item->share_pics && isset($item->share_pics['pure'])) {
+            if(File::exists(storage_path($item->share_pics['pure']))) {
+                $res['share_image'] = route('poem-card', [
+                    'id' => $item->id,
+                    'compositionId' => 'pure'
+                ]);
+            }
+        }
+
+        $res['related'] = $relatedQuery->get(['id', 'poem', 'poet', 'poet_cn', 'poet_id', 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'])
+            ->map(function ($item) {
+                $arr = $item->toArray();
+                $arr['poet'] = $item->poetLabel;
+                // TODO how to remove it before map?
+                unset($arr['poet_author']);
+                unset($arr['fakeId']);
+                unset($arr['upload_user_id']);
+                unset($arr['translator_id']);
+                unset($arr['is_owner_uploaded']);
+                unset($arr['resource_url']);
+                unset($arr['share_pics']);
+                return $arr;
+            })
+            ->toArray();
+
+        return $this->responseSuccess($res);
     }
 
     public function mine(Request $request) {
@@ -249,13 +357,16 @@ class PoemAPIController extends Controller {
             'id' => $poemId,
             'compositionId' => $compositionId
         ]);
+
+        $postData = ['compositionId' => $compositionId, 'poem' => $poem->poem, 'poet' => $poem->poetLabel, 'title' => $poem->title];
+        $hash = crc32(json_encode($postData));
         if(!$force && $poem->share_pics && isset($poem->share_pics[$compositionId])
             && file_exists(storage_path($poem->share_pics[$compositionId]))) {
+            // TODO if posterUrl not contain $hash, remove old poem and poster file and generate new
 
             return $this->responseSuccess(['url' => $posterUrl]);
         }
 
-        $postData = ['compositionId' => $compositionId, 'poem' => $poem->poem, 'poet' => $poem->poetLabel, 'title' => $poem->title];
 
         $relativeStoreDir = 'app/public/poem-card/' . $poem->id;
         $dir = storage_path($relativeStoreDir);
@@ -264,7 +375,6 @@ class PoemAPIController extends Controller {
         }
 
         // img file name will change if postData change
-        $hash = crc32(json_encode($postData));
         $posterStorePath = "{$relativeStoreDir}/poster_{$compositionId}_{$hash}.png";
         $posterPath = storage_path($posterStorePath); // posterImg = poemImg + appCodeImg
         $poemImgFileName = "poem_{$compositionId}_{$hash}.png"; // main part of poster
