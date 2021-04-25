@@ -120,7 +120,7 @@
           <span class="author-option-label" :class="option.source ? 'poemwiki-link' : ''">@{{ option.label }}</span>
           <span class="author-option-desc">@{{ option.desc }}</span>
           <img class="author-option-avatar" :src="option.avatar_url" :alt="option.label">
-          <span :class="'author-option-source ' + option.source" class="absolute text-xs leading-loose right-0 bg-white inline-block text-right text-gray-400">@{{option.source || '暂无该作者'}}</span>
+          <span :class="'author-option-source ' + option.source" class="absolute text-xs leading-loose right-0 bg-white inline-block text-right text-gray-400">@{{option.source || '仅录入名字，暂不关联作者'}}</span>
         </div>
       </template>
 
@@ -245,7 +245,7 @@
           <span class="author-option-label" :class="option.source ? 'poemwiki-link' : ''">@{{ option.label }}</span>
           <span class="author-option-desc">@{{ option.desc }}</span>
           <img class="author-option-avatar" :src="option.avatar_url" :alt="option.label">
-          <span :class="'author-option-source ' + option.source" class="absolute text-xs leading-loose right-0 bg-white inline-block text-right text-gray-400">@{{option.source || '暂无该作者'}}</span>
+          <span :class="'author-option-source ' + option.source" class="absolute text-xs leading-loose right-0 bg-white inline-block text-right text-gray-400">@{{option.source || '仅录入名字，暂不关联作者'}}</span>
         </div>
       </template>
 

@@ -167,11 +167,11 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
 
                       @if($log->description === 'updated')
                         <li title="{{$log->created_at}}"><a
-                            href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update') {{get_causer_name($log)}}</a></li>
+                            href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update'){{get_causer_name($log)}}</a></li>
 
                       @elseif($log->description === 'created')
                         <li title="{{$log->created_at}}"><a
-                            href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial version') {{get_causer_name($log)}}</a></li>
+                            href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload'){{get_causer_name($log)}}</a></li>
                       @endif
 
                     @endif
@@ -181,7 +181,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                   <!-- for poems imported from bedtimepoem, they have no "created" log -->
                   @if(count($poem->activityLogs)<1 or $poem->activityLogs->last()->description !== 'created')
                     <li title="{{$poem->created_at}}"><a
-                          href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') PoemWiki</a></li>
+                          href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload')PoemWiki</a></li>
                   @endif
 
                 </ol>
