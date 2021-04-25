@@ -9,6 +9,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 /**
  * @property mixed data
  * @property mixed entity
+ * @property string wiki_desc_lang wikipedia summary
  */
 class Wikidata extends Model {
     use HasTranslations;
@@ -91,13 +92,9 @@ class Wikidata extends Model {
         }
         return $descriptionLang;
     }
-    // get description with fallback
+
+    // get wikidata description with fallback
     public function getDescription($locale) {
-        // $descriptionLang = [];
-        // foreach ($this->entity->descriptions as $locale => $description) {
-        //     $descriptionLang[$locale] = $description->value;
-        // }
-        // return $descriptionLang;
         return $this->fallback('description_lang', $locale);
     }
 
