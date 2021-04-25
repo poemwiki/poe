@@ -82,11 +82,15 @@ class AppServiceProvider extends ServiceProvider {
         Str::macro('pureStr', function ($str) {
             return Str::noPunct(Str::noSpace($str));
         });
+
+        // TODO 考虑大小写，简繁体
         Str::macro('contentHash', function ($str) {
             return hash('sha256', Str::pureStr($str));
         });
         Str::macro('contentFullHash', function ($str) {
             return hash('sha256', $str);
         });
+
+        // TODO Str::macro('simHash')
     }
 }
