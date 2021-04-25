@@ -192,6 +192,10 @@ class Author extends Model implements Searchable {
                 // To avoid unnecessary alias:importFromAuthor command execute
                 Author::withoutEvents(function () use ($titleLocale, $summary) {
                     $this->setTranslation('wiki_desc_lang', $titleLocale['locale'], $summary);
+                    // save summary to description_lang and don't show wiki_desc_lang?
+                    // if($this->description_lang === $this->wikiData->getDescription(config('app.locale'))) {
+                    //
+                    // }
                     $this->save();
                 });
             }

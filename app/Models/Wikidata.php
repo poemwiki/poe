@@ -94,7 +94,7 @@ class Wikidata extends Model {
     }
 
     // get wikidata description with fallback
-    public function getDescription($locale) {
+    public function getDescription(string $locale) {
         return $this->fallback('description_lang', $locale);
     }
 

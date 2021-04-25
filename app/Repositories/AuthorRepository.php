@@ -6,6 +6,7 @@ use App\Models\Alias;
 use App\Models\Author;
 use App\Models\Wikidata;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -120,6 +121,7 @@ class AuthorRepository extends BaseRepository {
 
 
     /**
+     * TODO this process should be a command
      * @param Wikidata $wiki
      * @return Author
      */
@@ -159,8 +161,27 @@ class AuthorRepository extends BaseRepository {
             "created_at" => now(),
             "updated_at" => now(),
         ];
-        $author = $this->updateOrCreate(['wikidata_id' => $wiki->id], $insert);
+        return $this->updateOrCreate(['wikidata_id' => $wiki->id], $insert);
+    }
 
-        return $author;
+
+    /**
+     * Get a existed Author by wikidata_id
+     * @param $wikidata_id
+     */
+    public function getExistedAuthor($wikidata_id) : Author {
+        $authorExisted = Author::where('wikidata_id', '=', $wikidata_id)->first();
+
+        if (!$authorExisted) {
+            $wiki = Wikidata::find($wikidata_id);
+            $authorExisted = $this->importFromWikidata($wiki);
+            // Does this necessary?
+            // 以下一步对于在前端查询前已导入过 wikidata label&alias 的 author 来说是不必要的，
+            // 为适应未来在前端直接从 wikidata 接口查询未知 author 的数据，有 $poet_wikidata_id
+            // 而暂未导入 wikidata label&alias 至 Alias 表的情况，保留以下导入过程
+            $authorExisted->fetchWikiDesc();
+            Artisan::call('alias:import', ['--id' => $wikidata_id]);
+        }
+        return $authorExisted;
     }
 }

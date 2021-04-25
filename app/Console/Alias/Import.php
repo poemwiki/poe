@@ -26,7 +26,7 @@ class Import extends Command {
      *
      * @var string
      */
-    protected $description = "Import alias from wikidata.data.'\$->labels'";
+    protected $description = "Import alias from wikidata.data.'\$->labels' and aliases";
 
     /**
      * Create a new command instance.

@@ -239,13 +239,13 @@ class PoemController extends Controller
 
         // if wikidata_id valid and not null, create a author by wikidata_id
         if(is_numeric($sanitized['poet_wikidata_id']) && is_null($sanitized['poet_id'])) {
-            $poetAuthor = $this->getExistedAuthor($sanitized['poet_wikidata_id']);
+            $poetAuthor = $this->authorRepository->getExistedAuthor($sanitized['poet_wikidata_id']);
             $sanitized['poet_id'] = $poetAuthor->id;
             $sanitized['poet'] = $poetAuthor->label;
             $sanitized['poet_cn'] = $poetAuthor->labelCN;
         }
         if(is_numeric($sanitized['translator_wikidata_id']) && is_null($sanitized['translator_id'])) {
-            $translatorAuthor = $this->getExistedAuthor($sanitized['translator_wikidata_id']);
+            $translatorAuthor = $this->authorRepository->getExistedAuthor($sanitized['translator_wikidata_id']);
             $sanitized['translator_id'] = $translatorAuthor->id;
             $sanitized['translator'] = $translatorAuthor->labelCN;
         }
@@ -256,19 +256,5 @@ class PoemController extends Controller
         return $this->responseSuccess();
     }
 
-    /**
-     * TODO move it to AuthorRepositoy
-     * @param $poet_wikidata_id
-     */
-    private function getExistedAuthor($poet_wikidata_id) : Author {
-        $authorExisted = Author::where('wikidata_id', '=', $poet_wikidata_id)->first();
-
-        if (!$authorExisted) {
-            $wiki = Wikidata::find($poet_wikidata_id);
-            $authorExisted = $this->authorRepository->importFromWikidata($wiki);
-            Artisan::call('alias:import', ['--id' => $poet_wikidata_id]);
-        }
-        return $authorExisted;
-    }
 
 }
