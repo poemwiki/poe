@@ -7,7 +7,12 @@
   background-color: #fff;
 }
 .wikidata-link, .wikipedia-link{
-  vertical-align: sub;
+  vertical-align: text-bottom;
+  line-height: 1em;
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  padding: 0;
   &:hover{
     background-color: transparent;
   }
@@ -17,10 +22,12 @@
   display: inline-block;
   width: 1em;
   height: 1em;
-  background-size: 1em 1em;
+  background-size: 1em auto;
+  background-repeat: no-repeat;
+  background-position-y: center;
 }
 .wikidata-link:before {
-  background-image: url("/images/wikidata-text.svg");
+  background-image: url("/images/wikidata.svg");
 }
 .wikipedia-link:before {
   background-image: url("/images/wikipedia.svg");

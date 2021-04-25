@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasTranslations;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
@@ -114,6 +115,7 @@ class Author extends Model implements Searchable {
             Artisan::call('alias:importFromAuthor', ['--id' => $model->id]);
         });
         self::updated(function ($model) {
+            // TODO only do importFromAuthor if name_lang changed
             // TODO 如果前端可编辑多别名，此处应删除原有别名，或在controller删除前端选择的别名
             Artisan::call('alias:importFromAuthor', ['--id' => $model->id]);
         });
@@ -160,9 +162,13 @@ class Author extends Model implements Searchable {
 
     // get all alias without repeated values
     public function getAliasArrAttribute() {
-        $all = Alias::select(['name', 'locale'])->where(['author_id', '=', $this->id])->get()
+        $all = Alias::select(['name', 'locale'])->where('author_id', '=', $this->id)
+            ->get()->pluck(['name'])->map(function ($name) {
+                return Str::noPunct($name);
+            })
             ->unique();
-        dd($all);
+
+        return $all;
     }
 
 
@@ -183,8 +189,11 @@ class Author extends Model implements Searchable {
             $summary = get_wikipedia_summary($titleLocale);
 
             if($summary) {
-                $this->setTranslation('wiki_desc_lang', $titleLocale['locale'], $summary);
-                $this->save();
+                // To avoid unnecessary alias:importFromAuthor command execute
+                Author::withoutEvents(function () use ($titleLocale, $summary) {
+                    $this->setTranslation('wiki_desc_lang', $titleLocale['locale'], $summary);
+                    $this->save();
+                });
             }
         }
         return $this->wiki_desc_lang;

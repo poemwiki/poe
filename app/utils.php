@@ -207,3 +207,10 @@ function get_wikipedia_summary(array $titleLocale) {
     if(!$str) return '';
     return json_decode($str)->extract;
 }
+
+function t2s($str) {
+    $od = opencc_open("t2s.json");
+    $content = opencc_convert($str, $od);
+    opencc_close($od);
+    return $content;
+}

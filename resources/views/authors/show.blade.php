@@ -1,20 +1,21 @@
 @extends('layouts.fe')
 
-@section('title'){{$author->name_lang}}@endsection
-@section('author')
-    PoemWiki
-@endsection
+@section('title', !empty($author->alias_arr) ? $author->alias_arr->join(', ') : '')
+
+@section('author', 'PoemWiki')
+
+@php
+$aliasMaxLength = 4;
+@endphp
 
 @section('content')
     <article class="poet">
       <h1>{{$author->label}}
         @if($author->wikidata_id)
-          <a class="wikidata-link" href="{{$author->wikiData->wikidata_url}}" target="_blank"></a>&nbsp;
-          @if($author->wikiData->url)
-            <a class="wikipedia-link" href="{{$author->wikiData->url}}" target="_blank"></a>
-          @endif
+          <a class="wikidata-link" href="{{$author->wikiData->wikidata_url}}" target="_blank"></a>
         @endif
       </h1>
+      @if(config('app.env') === 'local') {{$author->id}} @endif
       <a class="edit btn"
          href="{{ Auth::check() ? route('author/edit', $author->fakeId) : route('login', ['ref' => route('author/edit', $author->fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
 
@@ -33,20 +34,64 @@
         @endif
       </div>
 
+
+      {{--      alias--}}
+
+      @if(!empty($author->alias_arr) && count($author->alias_arr) > 1)
+        <div class="poet-brief poet-alias-wrapper">
+          <span class="poet-label">@lang('admin.author.columns.alias_arr')：</span>
+          <p class="poet-alias">
+            @foreach($author->alias_arr as $key=>$alias)
+              <a class="poet-alias-item" href="{{route('search', $alias)}}">{{$alias}}</a>
+            @endforeach
+          </p>
+        </div>
+      @endif
+
+{{--      @if(!empty($author->alias_arr) && count($author->alias_arr) > 1)--}}
+{{--        @if(count($author->alias_arr) > $aliasMaxLength)--}}
+{{--          <span class="poet-label">@lang('admin.author.columns.alias_arr')：</span>--}}
+{{--          @foreach($author->alias_arr as $key=>$alias)--}}
+{{--            @break($key >= $aliasMaxLength)--}}
+{{--            <a class="poet-alias" href="{{route('search', $alias)}}">{{$alias}}</a>--}}
+{{--          @endforeach--}}
+{{--          <details>--}}
+{{--            <summary></summary>--}}
+{{--            @foreach($author->alias_arr as $key=>$alias)--}}
+{{--              @continue($key < $aliasMaxLength)--}}
+{{--              <a class="poet-alias" href="{{route('search', $alias)}}">{{$alias}}</a>--}}
+{{--            @endforeach--}}
+{{--          </details>--}}
+{{--        @else--}}
+
+{{--          <p class="poet-brief">--}}
+{{--            <span class="poet-label">@lang('admin.author.columns.alias_arr')：</span>--}}
+{{--            @foreach($author->alias_arr as $alias)--}}
+{{--              <a class="poet-alias" href="{{route('search', $alias)}}">{{$alias}}</a>--}}
+{{--            @endforeach--}}
+{{--          </p>--}}
+{{--        @endif--}}
+{{--      @endif--}}
+
       @if($author->nation)
-      <p class="poet-brief">@lang('admin.author.columns.nation_id')：{{$author->nation->name_lang}}</p>
+        <p class="poet-brief"><span class="poet-label">@lang('admin.author.columns.nation_id')：</span>{{$author->nation->name_lang}}</p>
       @endif
 
       @if($author->dynasty)
-        <p class="poet-brief">@lang('admin.author.columns.dynasty_id')：{{$author->dynasty->name_lang}}</p>
+        <p class="poet-brief"><span class="poet-label">@lang('admin.author.columns.dynasty_id')：</span>{{$author->dynasty->name_lang}}</p>
       @endif
 
 {{--  short description  @if($author->wikiData) <p class="poet-brief poet-brief-wikdiata">@lang('wiki.data.desc')：{{$author->wikiData->getDescription(config('app.locale'))}}</p> @endif--}}
-      <p class="poet-brief" style="white-space: pre-line;">@lang('Introduction')：{{$author->describe_lang}}</p>
-        @if($author->wikiData) <p class="poet-brief poet-brief-wikdiata">@lang('wiki.pedia.summary')：{{
-              $author->wiki_desc_lang ?: $author->fetchWikiDesc()
-              }}</p>
-        @endif
+      @if($author->wikiData)
+        <p class="poet-brief poet-brief-wikdiata"><span class="poet-label">@lang('wiki.pedia.summary')：</span>{{
+              t2s($author->wiki_desc_lang ?: $author->fetchWikiDesc())
+              }}
+          @if($author->wikiData->url)
+            <a class="wikipedia-link" href="{{$author->wikiData->url}}" target="_blank"></a>
+          @endif
+        </p>
+      @endif
+      <p class="poet-brief" style="white-space: pre-line;"><span class="poet-label">@lang('Introduction')：</span>{{$author->describe_lang}}</p>
 
         @if($poemsAsPoet->isNotEmpty())
         <h2>
