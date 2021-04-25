@@ -98,7 +98,10 @@ class Campaign extends Model {
 
         $users = [];
         foreach ($masters as $index => $masterID) {
-            $user = User::select(['id', 'avatar', 'name'])->find($masterID)->toArray();
+            $user = User::select(['id', 'avatar', 'name'])->find($masterID);
+            if(!$user) continue;
+
+            $user = $user->toArray();
             // 同时存在 masters和 masterInfos 的情况下，优先使用 masterInfos 内的 name 和 avatar
             if($masterInfos && ($info = $masterInfos[$index])) {
                 $user['name'] = $info['name'];
