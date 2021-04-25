@@ -42,7 +42,7 @@ class PoemAPIController extends Controller {
 
         $columns = [
             'id', 'created_at', 'date_ago', 'title', 'subtitle', 'preface', 'location',
-            'poem', 'poet', 'poet_cn', 'poet_id', 'poet_image', 'score', 'score_count',
+            'poem', 'poet', 'poet_cn', 'poet_id', 'poet_image', 'score', 'score_count', 'score_weight', 'rank'
             // 'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'language_id',
             // 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics', 'bedtime_post_id'
         ];
@@ -58,9 +58,16 @@ class PoemAPIController extends Controller {
 
         if(isset($campaign->settings['result'])) {
             $byScoreData = $campaign->settings['result'];
-            foreach ($byScoreData as &$poem) {
+            foreach ($byScoreData as $key=>&$poem) {
                 $poem['date_ago'] = date_ago($poem['created_at']);
+                // TODO unset this lower than 7 limit if list performance allowed
+                if($poem['score'] <= 7) {
+                    unset($byScoreData[$key]);
+                    continue;
+                }
+                $poem = collect($poem)->only($columns);
             }
+
         } else {
             // poem before endDate, scores before endDate
             $byScore = $this->poemRepository->getByTagId($tagId, 'score', $campaign->start, $campaign->end);
