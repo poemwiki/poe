@@ -89,8 +89,11 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                 </div>
             </div>
 
+
             <section class="poem-meta">
                 <dl class="poem-info">
+                    @if(config('app.env') === 'local') {{$poem->id}} @endif
+
                     @if($poem->year or $poem->month)
                         @if($poem->year && $poem->month && $poem->date)
                             <dd itemprop="dateCreated" class="poem-time">{{$poem->year}}.{{$poem->month}}.{{$poem->date}}</dd>
@@ -155,34 +158,32 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                 @endguest
 
                 <ol class="contribution">
-                    @if(count($logs) >= 1)
-                        @php
-                            //dd($logs);
-                            /** @var \App\Models\ActivityLog[] $logs */
-                            $latestLog = $logs->first();
-                            /** @var \App\Models\ActivityLog $initialLog */
-                            $initialLog = $logs->last();
-                        @endphp
-                        <li title="{{$latestLog->created_at}}"><a
-                                href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update') {{get_causer_name($latestLog)}}</a>
-                        </li>
+                  @foreach($poem->activityLogs as $key=>$log)
+                    @php
+                      $maxKey = $poem->activityLogs->keys()->max();
+                    @endphp
 
-                        @if($logs->count() <= 1 or $initialLog->description!=='created')
-                          <li title="{{$poem->created_at}}"><a
-                              href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload')
-                              PoemWiki</a>
-                          </li>
-                        @else
-                          <li title="{{$initialLog->created_at}}"><a
-                              href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') {{get_causer_name($initialLog)}}</a>
-                          </li>
-                        @endif
-                    @else
-                        <li title="{{$poem->created_at}}"><a
-                                href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload')
-                                PoemWiki</a>
-                        </li>
+                    @if($key===0 or $key===$maxKey)
+
+                      @if($log->description === 'updated')
+                        <li title="{{$log->created_at}}"><a
+                            href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update') {{get_causer_name($log)}}</a></li>
+
+                      @elseif($log->description === 'created')
+                        <li title="{{$log->created_at}}"><a
+                            href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial version') {{get_causer_name($log)}}</a></li>
+                      @endif
+
                     @endif
+
+                  @endforeach
+
+                  <!-- for poems imported from bedtimepoem, they have no "created" log -->
+                  @if(count($poem->activityLogs)<1 or $poem->activityLogs->last()->description !== 'created')
+                    <li title="{{$poem->created_at}}"><a
+                          href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload') PoemWiki</a></li>
+                  @endif
+
                 </ol>
                 <a class="btn create"
                    href="{{ Auth::check() ? route('poems/create') : route('login', ['ref' => route('poems/create')]) }}">@lang('poem.add poem')</a>

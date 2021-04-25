@@ -32,7 +32,7 @@ class Poem extends Model implements Searchable {
 
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
-    protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url' ];
+    protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id' ];
 
     protected $table = 'poem';
 
@@ -183,7 +183,7 @@ class Poem extends Model implements Searchable {
             if(!$model->content) {
                 $oldPoem = Poem::find($model->id);
                 $oldFullHash = Str::contentFullHash($oldPoem->poem);
-                Content::create([
+                $oldContent = Content::create([
                     'entry_id' => $oldPoem->id,
                     'type' => 0,
                     'content' => $oldPoem->poem,
@@ -192,6 +192,9 @@ class Poem extends Model implements Searchable {
                     'full_hash_f' => '',        // parent version's full hash
                     'full_hash' => $oldFullHash
                 ]);
+                // does this trigger a infinite recursion?
+                // $oldPoem->content_id = $oldContent->id;
+                // $oldPoem->save();
             }else {
                 $oldFullHash = $model->content->full_hash ?: Str::contentFullHash($model->content->content);
             }
@@ -207,6 +210,7 @@ class Poem extends Model implements Searchable {
                     'full_hash_f' => $oldFullHash,
                     'full_hash' => $fullHash
                 ]);
+                // TODO WHY content_id modification not loged in activityLog?
                 $model->content_id = $content->id;
                 $model->need_confirm = 0;
             }
@@ -397,6 +401,7 @@ class Poem extends Model implements Searchable {
 
 
     public function getActivityLogsAttribute() {
+        // it's right to order by id desc instead of by created_at!
         return $this->activities()->orderBy('id', 'desc')->get()->map(function ($activity) {
             $oldVal = $activity->properties->get('old');
 
@@ -420,9 +425,9 @@ class Poem extends Model implements Searchable {
             }
 
             return $activity;
-        })->reject(function ($val) {
-            return $val === false;
-        });
+        })->filter(function ($val) {
+            return $val !== false;
+        })->values(); // values() makes result keys a continuously increased integer sequence
     }
 
     /**
