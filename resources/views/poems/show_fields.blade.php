@@ -158,14 +158,15 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                 @endguest
 
                 <ol class="contribution">
+                  @php
+                    $maxKey = $poem->activityLogs->keys()->max();
+                    $showFakeInitLog = (count($poem->activityLogs)<1) || ($poem->activityLogs->last()->description !== 'created');
+                  @endphp
                   @foreach($poem->activityLogs as $key=>$log)
-                    @php
-                      $maxKey = $poem->activityLogs->keys()->max();
-                    @endphp
 
                     @if($key===0 or $key===$maxKey)
 
-                      @if($log->description === 'updated')
+                      @if($log->description === 'updated' && $key===0)
                         <li title="{{$log->created_at}}"><a
                             href="{{route('poems/contribution', $fakeId)}}">@lang('poem.latest update'){{get_causer_name($log)}}</a></li>
 
@@ -179,7 +180,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                   @endforeach
 
                   <!-- for poems imported from bedtimepoem, they have no "created" log -->
-                  @if(count($poem->activityLogs)<1 or $poem->activityLogs->last()->description !== 'created')
+                  @if($showFakeInitLog)
                     <li title="{{$poem->created_at}}"><a
                           href="{{route('poems/contribution', $fakeId)}}">@lang('poem.initial upload')PoemWiki</a></li>
                   @endif
