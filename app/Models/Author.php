@@ -164,7 +164,7 @@ class Author extends Model implements Searchable {
     public function getAliasArrAttribute() {
         $all = Alias::select(['name', 'locale'])->where('author_id', '=', $this->id)
             ->get()->pluck(['name'])->map(function ($name) {
-                return Str::noPunct($name);
+                return Str::trimSpaces($name);
             })
             ->unique();
 
