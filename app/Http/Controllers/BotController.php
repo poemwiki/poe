@@ -104,10 +104,10 @@ class BotController extends Controller {
     private function _log($poeDB, $chatroom, $subject_type, $subject_id) {
         $stmt = $poeDB->prepare('INSERT INTO `bot_reply_log` SET `created_at`=:created_at,
                 `subject_id`=:subject_id, `subject_type`=:subject_type, `chatroom_id`=:chatroom_id');
-        $stmt->bindValue(':subject_id', null);
+        $stmt->bindValue(':subject_id', $subject_id);
         $stmt->bindValue(':chatroom_id', $chatroom);
         $stmt->bindValue(':created_at', now());
-        $stmt->bindValue(':subject_type', 'data');
+        $stmt->bindValue(':subject_type', $subject_type);
         $stmt->execute();
 
         if($stmt->errorCode() !== '00000') {
@@ -219,7 +219,7 @@ SQL;
             array_push($dataMsg, $this->_pad($line->pcount, 4) . ' ' . str_replace('[from-wechat]', '', $line->name));
         }
 
-        $this->_log($poeDB, $chatroom, 'data', null);
+        $this->_log($poeDB, $chatroom, 'top', null);
 
         $msg = [
             'code' => 0,
