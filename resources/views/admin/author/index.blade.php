@@ -56,6 +56,7 @@
                                         <th is='sortable' :column="'user_id'">{{ trans('admin.author.columns.user_id') }}</th>
                                         <th :column="'user_name'">{{ trans('admin.author.columns.user_name') }}</th>
                                         <th is='sortable' :column="'updated_at'">{{ trans('updated_at') }}</th>
+                                        <th is='sortable' :column="'created_at'">{{ trans('created_at') }}</th>
 
                                         <th></th>
                                     </tr>
@@ -86,6 +87,7 @@
                                         <td>@{{ item.user_id }}</td>
                                         <td>@{{ item.user_name }}</td>
                                         <td>@{{ item.updated_at | datetime}}</td>
+                                        <td>@{{ item.created_at | date}}</td>
 
                                         <td>
                                             <div class="row no-gutters">

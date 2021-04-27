@@ -85,7 +85,7 @@
                                         <td><a :href="'/' + item.poem_id" target="_blank">@{{ item.poem_title }}</a></td>
 {{--                                        <td>@{{ item.title }}</td>--}}
                                         <td>@{{ item.user_name }}</td>
-                                        <td>@{{ item.updated_at }}</td>
+                                        <td>@{{ item.updated_at | datetime }}</td>
 
                                         <td>
                                             <div class="row no-gutters">

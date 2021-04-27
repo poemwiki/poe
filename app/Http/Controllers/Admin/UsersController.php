@@ -50,7 +50,7 @@ class UsersController extends Controller {
             function (Builder $query) use ($request) {
                 $query->select(DB::raw(
                     "GROUP_CONCAT(`bind`.`id`) as `bind_ids`,
-                    users.id, users.name, users.email, users.email_verified_at, users.is_admin, users.updated_at, is_v, weight"
+                    users.id, users.name, users.email, users.email_verified_at, users.is_admin, users.updated_at, users.created_at, is_v, weight"
                 ));
                 if (!$request->input('orderBy'))
                     $query->orderBy('users.updated_at', 'desc');

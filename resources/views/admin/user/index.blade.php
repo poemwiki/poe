@@ -50,7 +50,8 @@
                                         <th is='sortable' :column="'is_admin'">{{ trans('admin.user.columns.is_admin') }}</th>
                                         <th is='sortable' :column="'is_v'">{{ trans('admin.user.columns.is_v') }}</th>
                                         <th is='sortable' :column="'weight'">{{ trans('admin.user.columns.weight') }}</th>
-                                        <th is='sortable' :column="'updated_at'">{{ trans('admin.user.columns.updated_at') }}</th>
+                                        <th is='sortable' :column="'updated_at'">{{ trans('updated_at') }}</th>
+                                        <th is='sortable' :column="'created_at'">{{ trans('created_at') }}</th>
 
                                         <th></th>
                                     </tr>
@@ -73,6 +74,7 @@
                                         <td>@{{ item.is_v ? 'Yes' : 'No' }}</td>
                                         <td>@{{ item.weight }}</td>
                                         <td>@{{ item.updated_at | datetime}}</td>
+                                        <td>@{{ item.created_at | datetime}}</td>
 
                                         <td>
                                             <div class="row no-gutters">
