@@ -23,8 +23,12 @@
             <div class="form-group row align-items-center" :class="{'has-danger': errors.has('describe_lang_{{ $locale }}'), 'has-success': fields['describe_lang_{{ $locale }}'] && fields['describe_lang_{{ $locale }}'].valid }">
                 <label for="describe_lang_{{ $locale }}" class="col-md-2 col-form-label text-md-right">{{ trans('admin.author.columns.describe_lang') }}</label>
                 <div class="col-md-9" :class="{'col-xl-8': !isFormLocalized }">
-                    <input type="text" v-model="form.describe_lang['{{ $locale }}']" v-validate="''" @input="validate($event)" class="form-control" :class="{'form-control-danger': errors.has('describe_lang_{{ $locale }}'), 'form-control-success': fields['describe_lang_{{ $locale }}'] && fields['describe_lang_{{ $locale }}'].valid }" id="describe_lang_{{ $locale }}" name="describe_lang_{{ $locale }}" placeholder="{{ trans('admin.author.columns.describe_lang') }}">
-                    <div v-if="errors.has('describe_lang_{{ $locale }}')" class="form-control-feedback form-text" v-cloak>{{'{{'}} errors.first('describe_lang_{{ $locale }}') }}</div>
+
+
+                  <textarea class="form-control" :class="{'form-control-danger': errors.has('describe_lang_{{ $locale }}'), 'form-control-success': fields['describe_lang_{{ $locale }}'] && fields['describe_lang_{{ $locale }}'].valid }"
+                            v-model="form.describe_lang['{{ $locale }}']" v-validate="''" @input="validate($event)" id="describe_lang_['{{ $locale }}']" name="describe_lang_['{{ $locale }}']"></textarea>
+
+                  <div v-if="errors.has('describe_lang_{{ $locale }}')" class="form-control-feedback form-text" v-cloak>{{'{{'}} errors.first('describe_lang_{{ $locale }}') }}</div>
                 </div>
             </div>
         </div>
@@ -51,7 +55,9 @@
     <label for="wikidata_id" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.author.columns.wikidata_id') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
         <div>
-            <textarea class="form-control" v-model="form.wikidata_id" v-validate="''" id="wikidata_id" name="wikidata_id"></textarea>
+            <input class="form-control" type="number" step="1"
+               :class="{'form-control-danger': errors.has('wikidata_id'), 'form-control-success': fields['wikidata_id'] && fields['wikidata_id'].valid }"
+               v-model="form.wikidata_id" v-validate="'integer'" @input="validate($event)" id="wikidata_id" name="wikidata_id" />
         </div>
         <div v-if="errors.has('wikidata_id')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('wikidata_id') }}</div>
     </div>

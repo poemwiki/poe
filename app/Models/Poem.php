@@ -352,10 +352,11 @@ class Poem extends Model implements Searchable {
      */
     public function getPoetLabelAttribute() {
         // TODO if is_owner_uploaded==Poem::OWNER['poet'] && $this->uploader
+        // TODO use poetAuthor->label if poem.poet and poem.poet_cn is used for SEO
         if ($this->is_owner_uploaded && $this->uploader) {
             return $this->uploader->name;
         } else if ($this->poetAuthor) {
-            return $this->poetAuthor->name_lang;
+            return $this->poetAuthor->label;
         } else {
             return ($this->poet === $this->poet_cn or is_null($this->poet_cn)) ? $this->poet : $this->poet_cn.'（'.$this->poet.'）';
         }
@@ -368,7 +369,7 @@ class Poem extends Model implements Searchable {
     public function getTranslatorLabelAttribute() {
         // TODO if is_owner_uploaded==Poem::OWNER['translator'] && $this->uploader
         if ($this->translatorAuthor) {
-            return $this->translatorAuthor->name_lang;
+            return $this->translatorAuthor->label;
         } else {
             return $this->translator;
         }

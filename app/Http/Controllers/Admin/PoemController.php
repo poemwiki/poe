@@ -38,20 +38,37 @@ class PoemController extends Controller
             $request,
 
             // set columns to query
-            ['id', 'title', 'updated_at', 'language_id', 'is_original', 'poet', 'poet_cn', 'bedtime_post_id', 'bedtime_post_title', 'length', 'translator', 'from', 'year', 'month', 'date', 'location', 'dynasty', 'nation', 'need_confirm', 'is_lock', 'content_id'],
+            ['id', 'title', 'updated_at', 'created_at', 'is_original', 'length',
+                'poet', 'poet_cn', 'poet_id', 'poetAuthor.name_lang',
+                'translator', 'translator_id', 'translatorAuthor.name_lang', 'from', 'language_id', 'language.name_lang',
+                'is_owner_uploaded', 'upload_user_id', 'uploader.name as uploader_name', 'need_confirm', 'is_lock', 'content_id'],
 
             // set columns to searchIn
-            ['id', 'title', 'poet', 'poet_cn', 'bedtime_post_title', 'poem', 'translator', 'from', 'year', 'month', 'date', 'dynasty', 'nation'],
+            ['id', 'title', 'poet', 'poet_cn', 'poetAuthor.name_lang', 'translatorAuthor.name_lang', 'bedtime_post_title', 'poem', 'uploader.name', 'translator', 'from'],
 
             function ($query) use ($request) {
                 if(!$request->input('orderBy'))
                     $query->orderBy('updated_at', 'desc');
+
+                $query->leftJoin('users as uploader', 'uploader.id', '=', 'poem.upload_user_id');
+                $query->leftJoin('author as poetAuthor', 'poetAuthor.id', '=', 'poem.poet_id');
+                $query->leftJoin('author as translatorAuthor', 'translatorAuthor.id', '=', 'poem.translator_id');
+                $query->leftJoin('language', 'language.id', '=', 'poem.language_id');
             }
 
         );
 
         foreach ($data as &$poem) {
             $poem['url'] = $poem->url;
+            $poem['language_name'] = $poem->lang ? $poem->lang->label : '';
+            $poem['poet_label'] = $poem->poetLabel;
+            if($poem->poetAuthor) {
+                $poem['poet_url'] = $poem->poetAuthor->url;
+            }
+            $poem['translator_label'] = $poem->translatorLabel;
+            if($poem->translatorAuthor) {
+                $poem['translator_url'] = $poem->translatorAuthor->url;
+            }
         }
         if ($request->ajax()) {
             if ($request->has('bulk')) {
@@ -166,6 +183,10 @@ class PoemController extends Controller
      */
     public function destroy(DestroyPoem $request, Poem $poem)
     {
+        if($poem->translatedPoems->count()) {
+            $ids = $poem->translatedPoems->pluck('id')->toArray();
+            return response(['message' => '删除失败，请先删除本诗关联的译作(ID:'.join(', ', $ids).')'], 405);
+        }
         $poem->delete();
 
         if ($request->ajax()) {

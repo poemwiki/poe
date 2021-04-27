@@ -60,7 +60,9 @@
     <label for="wikidata_id" class="col-form-label text-md-right" :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.category.columns.wikidata_id') }}</label>
     <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
         <div>
-            <textarea class="form-control" v-model="form.wikidata_id" v-validate="''" id="wikidata_id" name="wikidata_id"></textarea>
+          <input class="form-control" type="number" step="1"
+                 :class="{'form-control-danger': errors.has('wikidata_id'), 'form-control-success': fields['wikidata_id'] && fields['wikidata_id'].valid }"
+                 v-model="form.wikidata_id" v-validate="'integer'" @input="validate($event)" id="wikidata_id" name="wikidata_id" />
         </div>
         <div v-if="errors.has('wikidata_id')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('wikidata_id') }}</div>
     </div>

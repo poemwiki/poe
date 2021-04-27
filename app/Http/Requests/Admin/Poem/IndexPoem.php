@@ -23,7 +23,7 @@ class IndexPoem extends FormRequest
      */
     public function rules(): array {
         return [
-            'orderBy' => 'in:updated_at,title,id,language_id,nation,is_original,nation_id,poet, poet_cn,translator,poet_id, translator_id|nullable',
+            'orderBy' => 'in:updated_at,created_at,uploader.name,title,id,language_id,nation,is_original,nation_id,poet, poet_cn,translator,poet_id, translator_id|nullable',
             'orderDirection' => 'in:desc,asc|nullable',
             'search' => 'string|nullable',
             'page' => 'integer|nullable',

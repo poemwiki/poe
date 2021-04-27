@@ -43,7 +43,7 @@ class AuthorController extends Controller {
             ],
 
             // set columns to searchIn
-            ['name_lang', 'id', 'authorUser.name', 'uploader.name'],
+            ['name_lang', 'id', 'authorUser.name', 'wikidata_id', 'user_id', 'uploader.name'],
 
             function ($query) use ($request) {
                 if(!$request->input('orderBy'))
@@ -178,6 +178,17 @@ class AuthorController extends Controller {
      * @throws Exception
      */
     public function destroy(DestroyAuthor $request, Author $author) {
+        if($author->poems->count() || $author->translatedPoems->count()) {
+            $ids = [];
+            foreach ($author->poems as $p) {
+                $ids[] = $p->id;
+            }
+            foreach ($author->translatedPoems as $p) {
+                $ids[] = $p->id;
+            }
+            return response(['message' => '删除失败，请先删除本作者关联的作品(ID:'.join(', ', $ids).')'], 405);
+        }
+
         $author->delete();
 
         if ($request->ajax()) {
