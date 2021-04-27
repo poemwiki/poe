@@ -60,6 +60,9 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
         <article>
             <div class="poem-main">
                 <h1 class="title title-bar font-hei" itemprop="headline" id="title">{{ $poem->title }}</h1>
+
+                @if(config('app.env') === 'local') <h5>{{$poem->id}}</h5> @endif
+
                 <span itemprops="provider" itemscope itemtype="https://schema.org/Organization" class="hidden">
                     <span itemprops="name">PoemWiki</span>
                     <meta itemprops="url" content="https://poemwiki.org" />
@@ -92,7 +95,6 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
 
             <section class="poem-meta">
                 <dl class="poem-info">
-                    @if(config('app.env') === 'local') {{$poem->id}} @endif
 
                     @if($poem->year or $poem->month)
                         @if($poem->year && $poem->month && $poem->date)
