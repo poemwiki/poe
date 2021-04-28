@@ -1,4 +1,8 @@
-@extends('layouts.fe')
+<?php
+use Jfcherng\Diff\Differ;
+use Jfcherng\Diff\DiffHelper;
+use Jfcherng\Diff\Factory\RendererFactory;
+?>@extends('layouts.fe')
 
 
 @section('title'){{$poem->title}}@endsection
@@ -6,66 +10,100 @@
     PoemWiki
 @endsection
 @section('content')
-<h2>{{($poem->poet_cn ?? $poem->poet)}}&nbsp;&nbsp;<a href="{{$poem->url}}">{{$poem->title}}</a>&nbsp;&nbsp;@lang('poem.edit history')</h2>
-<ol class="contribution collapsed">
+<h2>{{($poem->poetLabel)}}&nbsp;&nbsp;<a href="{{$poem->url}}">{{$poem->title}}</a>&nbsp;&nbsp;@lang('poem.edit history')</h2>
+<ol class="contribution">
+
     @foreach($poem->activityLogs as $key=>$log)
-        <li @if($key!==0 && $key!==count($poem->activityLogs)-1)
-            class="log-middle"
-            @endif>
-            @php
-                $newVal = $log->properties->get('attributes');
-                $oldVal = $log->properties->get('old');
-                $props = array_keys($newVal ?? []);
+    <li class="log-group {{($key!==0 && $key!==count($poem->activityLogs)-1) ? 'log-middle' : ''}}">
+        @php
+            $newVal = $log->properties->get('attributes');
+            $oldVal = $log->properties->get('old');
+            $props = array_keys($newVal ?? []);
 
-                //dd($poem->activityLogs);
-                //dd($log);
-            @endphp
-            <span title="{{$log->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($log->created_at)->format('Y-m-d')}}</span>&nbsp;
-            <span>{{get_causer_name($log)}}</span>&nbsp;
-            <span>{{trans('poem.change type '.$log->description)}}</span>
+            //dd($poem->activityLogs);
+            //dd($log);
+        @endphp
+        <span title="{{$log->created_at}} UTC">{{date_ago($log->created_at)}}</span>&nbsp;&nbsp;&nbsp;
+        <b>{{get_causer_name($log)}}</b>&nbsp;&nbsp;
+        <span>{{trans('poem.change type '.$log->description)}}</span>
 
 
-            @if($log->description === 'updated')
-                @foreach($props as $prop)
-                    @if($prop === 'content_id' or $prop === 'need_confirm')
-                        @continue
-                    @endif
-                    <br>
-                    @if($prop === 'poem')
-                        <span class="field">{{trans('admin.poem.columns.'.$prop)}}</span>
-                    @elseif($prop === 'poet_id')
-                        @php
-                          $oldAuthor = $oldVal[$prop] ? App\Models\Author::find($oldVal[$prop]) : null;
-                          $newAuthor = $newVal[$prop] ? App\Models\Author::find($newVal[$prop]) : null;
-                        @endphp
-                        <span class="field">{{trans('admin.poem.columns.poet_id')}}</span>&nbsp;[
-                        <del>@if($oldAuthor) <a href="{{$oldAuthor->url}}">{{$oldAuthor->label}}</a> @endif</del>&nbsp;->
-                          @if($newAuthor) <a href="{{$newAuthor->url}}">{{$newAuthor->label}}</a> @endif
-                        ]
-                    @elseif($prop === 'content_id')
-                        @php
-                          // TODO Why poem.content_id not stored into log?
-                          //$oldContent = $oldVal[$prop] ? App\Models\Content::find($oldVal[$prop]) : null;
-                          //$newContent = $newVal[$prop] ? App\Models\Content::find($newVal[$prop]) : null;
-                        @endphp
-                        <span class="field">{{trans('admin.poem.columns.content_id')}}</span>&nbsp;[&nbsp;<del>{{$oldVal[$prop] ? $languageList[$oldVal[$prop]]->name_lang : ''}}</del>&nbsp;->&nbsp;{{$newVal[$prop] ? $languageList[$newVal[$prop]]->name_lang : ''}}&nbsp;]
-                    @elseif($prop === 'language_id')
-                        <span class="field">{{trans('admin.poem.columns.language_id')}}</span>&nbsp;[&nbsp;<del>{{$oldVal[$prop] ? $languageList[$oldVal[$prop]]->name_lang : ''}}</del>&nbsp;->&nbsp;{{$newVal[$prop] ? $languageList[$newVal[$prop]]->name_lang : ''}}&nbsp;]
-                    @elseif($prop === 'original_id')
-                        <span class="field">{{trans('poem.original poem')}}</span>
-                    @else
-                        <span class="field">{{trans('admin.poem.columns.'.$prop)}}</span>&nbsp;[&nbsp;<del>{{$oldVal[$prop]}}</del>&nbsp;->&nbsp;{{$newVal[$prop]}}&nbsp;]
-                    @endif
-                @endforeach
-            @elseif($log->description === 'created')
-                @lang('poem.initial version')
-            @endif
-        </li>
+        @if($log->description === 'updated')
+            @foreach($props as $prop)
+                @if(in_array($prop, \App\Models\Poem::$ignoreChangedAttributes))
+                    @continue
+                @endif
+                @php
+                    $old = $oldVal[$prop] ?? '';
+                    $new = $newVal[$prop] ?? '';
+                @endphp
+
+            <div class="log">
+                @if($prop === 'poem')
+                    <span class="field">{{trans('admin.poem.columns.'.$prop)}}</span>
+                  @php
+                      $differOptions = [
+                          // show how many neighbor lines
+                          // Differ::CONTEXT_ALL can be used to show the whole file
+                          'context' => 1,
+                          // ignore case difference
+                          'ignoreCase' => false,
+                          // ignore whitespace difference
+                          'ignoreWhitespace' => false,
+                      ];
+                      $rendererOptions = [
+                          'detailLevel' => 'line',
+                          'language' => 'chs',
+                      ];
+
+                      $differ = new Differ(explode("\n", $old), explode("\n", $new), $differOptions);
+                      $renderer = RendererFactory::make('SideBySide', $rendererOptions); // or your own renderer object
+                      $result = $renderer->render($differ);
+
+                      echo $result;
+                  @endphp
+                @elseif($prop === 'poet_id')
+                    @php
+                      $oldAuthor = $old ? App\Models\Author::find($old) : null;
+                      $newAuthor = $new ? App\Models\Author::find($new) : null;
+                    @endphp
+                    <span class="field">{{trans('admin.poem.columns.poet_id')}}</span>&nbsp;[&nbsp;
+                    <del>@if($oldAuthor) <a href="{{$oldAuthor->url}}">{{$oldAuthor->label}}</a> @endif</del>&nbsp;⟹&nbsp;
+                      @if($newAuthor) <a href="{{$newAuthor->url}}">{{$newAuthor->label}}</a> @endif
+                    &nbsp;]
+                @elseif($prop === 'content_id')
+                    @php
+                      // TODO Why poem.content_id not stored into log?
+                      $oldContent = $old ? App\Models\Content::find($old) : null;
+                      $newContent = $new ? App\Models\Content::find($new) : null;
+                      // <span class="field">{{trans('admin.poem.columns.content_id')}}</span>&nbsp;[&nbsp;<del>{{$oldContent ? $oldContent->content : ''}}</del>&nbsp;⟹&nbsp;{{$newContent ? $newContent->content : ''}}&nbsp;]
+                    @endphp
+                    <span class="field">{{trans('admin.poem.columns.content_id')}}</span>&nbsp;[&nbsp;<del>{{$old}}</del>&nbsp;⟹&nbsp;{{$new}}&nbsp;]
+                @elseif($prop === 'language_id')
+                  <span class="field">{{trans('admin.poem.columns.language_id')}}</span>&nbsp;[&nbsp;<del>{{$old ? $languageList[$old]->name_lang : ''}}</del>&nbsp;⟹&nbsp;{{$new ? $languageList[$new]->name_lang : ''}}&nbsp;]
+                @elseif($prop === 'genre_id')
+                  <span class="field">{{trans('admin.poem.columns.genre_id')}}</span>&nbsp;[&nbsp;<del>{{$old ? $genreList[$old]->name_lang : ''}}</del>&nbsp;⟹&nbsp;{{$new ? $genreList[$new]->name_lang : ''}}&nbsp;]
+                @elseif($prop === 'original_id')
+                    <span class="field">{{trans('poem.original poem')}}</span>
+                @else
+                    <span class="field">{{trans('admin.poem.columns.'.$prop)}}</span>&nbsp;[&nbsp;<del>{{$old}}</del>&nbsp;⟹&nbsp;{{$new}}&nbsp;]
+                @endif
+            </div>
+            @endforeach
+        @elseif($log->description === 'created')
+            @lang('poem.initial version')
+        @endif
+    </li>
+
     @endforeach
 
     <!-- for poems imported from bedtimepoem, they have no "created" log -->
     @if(count($poem->activityLogs)<1 or $poem->activityLogs->last()->description !== 'created')
-        <li title="{{$poem->created_at}}"><span class="field">@lang('poem.initial upload')</span> PoemWiki</li>
+        <li title="{{$poem->created_at}}" class="log-group">
+          <span title="{{$poem->created_at}} UTC">{{date_ago('2020-07-21')}}</span>&nbsp;&nbsp;&nbsp;
+          <b>PoemWiki</b>&nbsp;&nbsp;
+          <span>{{trans('poem.change type created')}}</span>@lang('poem.initial version')
+        </li>
     @endif
 </ol>
 @endsection
@@ -78,6 +116,42 @@
     .field{
       display: inline-block;
       min-width: 6em;
+      color: #9d9d9d;
     }
+
+    .log-group{
+      padding: 1em 0;
+      line-height: 2em;
+    }
+    .log-group+.log-group{
+      border-top: 1px solid #eee;
+    }
+
+    .diff{
+      margin: -.5em 0 1em;
+    }
+    .diff th{
+      font-weight: normal;
+      font-size: 14px;
+      color: #9d9d9d;
+    }
+    .change .old, .chang .new {
+      vertical-align: baseline;
+    }
+    .change .n-new, .change .n-old{
+      font: 14px/1.8 "Courier New", Courier, monospace;
+      color: #9d9d9d;
+      display: inline-block;
+      margin-right: .5em;
+    }
+    .log del {
+      background-color: lightpink;
+      text-decoration: none;
+    }
+    .change .new>ins {
+      background-color: rgb(190, 230, 190);
+      text-decoration: none;
+    }
+
   </style>
 @endpush

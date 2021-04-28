@@ -41,4 +41,8 @@ class GenreRepository extends BaseRepository {
     public static function model() {
         return Genre::class;
     }
+
+    public static function allInUse() {
+        return static::model()::select('name_lang', 'id')->whereNull('deleted_at')->orderBy('id', 'desc')->get();
+    }
 }

@@ -12,6 +12,7 @@ use App\Models\Genre;
 use App\Models\Poem;
 use App\Models\Wikidata;
 use App\Repositories\AuthorRepository;
+use App\Repositories\GenreRepository;
 use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use App\Rules\NoDuplicatedPoem;
@@ -81,6 +82,7 @@ class PoemController extends Controller
         return view('poems.contribution')->with([
             'poem' => $poem,
             'languageList' => LanguageRepository::allInUse()->keyBy('id'),
+            'genreList' => GenreRepository::allInUse()->keyBy('id'),
             'randomPoemUrl' => '/'
         ]);
     }

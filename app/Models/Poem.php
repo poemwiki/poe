@@ -32,7 +32,7 @@ class Poem extends Model implements Searchable {
 
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
-    protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id' ];
+    public static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id' ];
 
     protected $table = 'poem';
 
