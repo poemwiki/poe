@@ -295,7 +295,9 @@ SQL;
                     `poem` like :keyword1_$idx OR `title` like :keyword2_$idx
                     OR `poet` like :keyword3_$idx OR `poet_cn` like :keyword4_$idx
                     OR `translator` like :keyword5_$idx
-                    OR JSON_SEARCH(lower(poet_author.`name_lang`), 'all', :keyword6_$idx )
+                    OR JSON_SEARCH(lower(poet_author.`name_lang`), 'all', :keyword6_$idx)
+                    OR `subtitle` like :keyword7_$idx
+                    OR `preface` like :keyword8_$idx
                 ) AND";
             }
             $subSql = trim($subSql, 'AND') . ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR`need_confirm`<>1) AND p.`deleted_at` is NULL';
@@ -318,6 +320,8 @@ SQL;
                 $q->bindValue(":keyword4_$idx", "%$word%", PDO::PARAM_STR);
                 $q->bindValue(":keyword5_$idx", "%$word%", PDO::PARAM_STR);
                 $q->bindValue(":keyword6_$idx", "%$word%", PDO::PARAM_STR);
+                $q->bindValue(":keyword7_$idx", "%$word%", PDO::PARAM_STR);
+                $q->bindValue(":keyword8_$idx", "%$word%", PDO::PARAM_STR);
             }
 
         } else {
@@ -328,6 +332,8 @@ SQL;
                 OR `poet` like :keyword3 OR `poet_cn` like :keyword4
                 OR `translator` like :keyword5
                 OR JSON_SEARCH(lower(poet_author.`name_lang`), \'all\', :keyword6)
+                OR `subtitle` like :keyword7
+                OR `preface` like :keyword8
             )';
             $subSql .= ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1) AND p.`deleted_at` is NULL';
             $sql = <<<SQL
@@ -345,6 +351,8 @@ SQL;
             $q->bindValue(':keyword4', $word, PDO::PARAM_STR);
             $q->bindValue(':keyword5', $word, PDO::PARAM_STR);
             $q->bindValue(":keyword6", $word, PDO::PARAM_STR);
+            $q->bindValue(":keyword7", $word, PDO::PARAM_STR);
+            $q->bindValue(":keyword8", $word, PDO::PARAM_STR);
         }
 
         $q->bindValue(':chatroomId', $chatroom, PDO::PARAM_STR);
