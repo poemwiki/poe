@@ -243,7 +243,7 @@ SQL;
         $maxLength = $request->input('maxLength', 800);
         $msg = $request->input('keyword', '云朵');
 
-        $topMode = preg_match("@top($|\s)@i", $msg);
+        $topMode = preg_match("@^top($|\s)@i", $msg);
         $dataMode = in_array($msg, ['数据', 'data']);
         $keyword = $this->getKeywords($msg);
 
