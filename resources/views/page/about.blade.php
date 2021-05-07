@@ -25,7 +25,8 @@
       text-align: justify;
       line-height: 2em;
     }
-    main {
+    main p {
+      width: 100%;
     }
     main .qr{
       display: block;

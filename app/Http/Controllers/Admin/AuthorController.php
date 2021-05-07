@@ -38,7 +38,7 @@ class AuthorController extends Controller {
             $request,
 
             // set columns to query
-            ['id', 'name_lang', 'wikidata_id', 'user_id', 'updated_at', 'authorUser.name as user_name',
+            ['id', 'name_lang', 'wikidata_id', 'user_id', 'updated_at', 'created_at', 'authorUser.name as user_name',
                 'upload_user_id', 'uploader.name as uploader_name'
             ],
 
