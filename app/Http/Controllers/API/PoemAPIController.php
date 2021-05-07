@@ -41,8 +41,10 @@ class PoemAPIController extends Controller {
         }
 
         $columns = [
-            'id', 'created_at', 'date_ago', 'title', 'subtitle', 'preface', 'location',
-            'poem', 'poet', 'poet_cn', 'poet_id', 'poet_image', 'score', 'score_count', 'score_weight', 'rank'
+            'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
+            'poem', 'poet', 'poet_id', 'poet_avatar', 'poet_image', //'poet_cn',
+            'score', 'score_count', 'score_weight', 'rank',
+            'reviews', 'reviews_count'
             // 'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'language_id',
             // 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics', 'bedtime_post_id'
         ];
@@ -107,12 +109,14 @@ class PoemAPIController extends Controller {
 
         $data = [
             'byScore' => $byScoreData,
-            'byCreatedAt' => $this->poemRepository->getByTagId($tagId, 'created_at')
+            // TODO if weapp use virtual list, remove splice
+            'byCreatedAt' => $this->poemRepository->getByTagId($tagId, 'created_at')->splice(0,150)
                 ->map->only($columns)
         ];
         return $this->responseSuccess($data);
     }
 
+    // TODO this is a deprecated method
     public function index(Request $request) {
         // TODO pagination
         $tagId = $request->input('tagId');
@@ -139,90 +143,45 @@ class PoemAPIController extends Controller {
         return $this->responseSuccess($data);
     }
 
-
-
-    public function random($num = 5) {
+    public function random($num = 5, $id = null) {
         $num = min(5, $num);
 
-        /** @var Poem $item */
         $columns = [
             'id', 'created_at', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
             'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
-            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics'];
-        /** @var Poem $item */
-        $poems = PoemRepository::random($num)->get($columns);
-        if(!$poems) {
-            abort(404);
-            return $this->responseFail([], 'not found', -3);
-        }
+            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded',
+            'reviews', 'reviews_count', 'date_ago', 'poet_avatar',
+            'score', 'score_count', 'score_weight'
+        ];
+        $reviewColumn = [
+            'avatar', 'content', 'created_at', 'id', 'user_id', 'name', 'poem_id'//, 'title'
+        ];
 
+        $poems = $this->poemRepository->suggest($num, ['reviews'])->get();
 
-        $res = $poems->map(function ($poem) {
-            $poem->poet = $poem->poetLabel;
-            $poem['score'] = $poem->totalScore;
-            $poem['score_count'] = ScoreRepository::calcCount($poem->id);
-            return $poem;
-        });
-
-
-        return $this->responseSuccess($res);
-
-        $res = $poem->toArray();
-
-        $res['poet'] = $item->poetLabel;
-        $res['poet_avatar'] = $item->poetAvatar;
-        $res['date_ago'] = date_ago($item->created_at);
-
-        $res['score'] = $item->totalScore;
-        // TODO save score_count to poem.score_count column
-        $res['score_count'] = ScoreRepository::calcCount($id);
-
-        unset($res['resource_url']);
-
-        $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item)
-            ->get(['review.content', 'review.created_at', 'review.user_id'])
-            ->map(function ($item) {
-                $item->makeHidden('user');
-                $item['date_ago'] = date_ago($item->created_at);
-                $item['content'] = str_replace('&nbsp;', ' ', strip_tags($item->content));
-                return $item;
-            });
-
-        $relatedQuery = $this->poemRepository->random(2)
-            ->where('id', '<>', $id);
-
-        $res['is_campaign'] = $item->is_campaign;
-        if($item->tags->count()) {
-            $res['tags'] = $item->tags->map->only(['id', 'name', 'category_id']);
-            if(config('app.env') !== 'local')
-                $relatedQuery->whereHas('tags', function ($query) use ($item) {
-                    $query->where('tag_id', '=', $item->tags[0]->id);
-                });
-        }
-        if($item->share_pics && isset($item->share_pics['pure'])) {
-            if(File::exists(storage_path($item->share_pics['pure']))) {
-                $res['share_image'] = route('poem-card', [
-                    'id' => $item->id,
-                    'compositionId' => 'pure'
-                ]);
+        if($id) {
+            $poemById = $this->poemRepository->findMany([$id]);
+            if($poemById) {
+                $poems = $poemById->concat($poems);//;
             }
         }
 
-        $res['related'] = $relatedQuery->get(['id', 'poem', 'poet', 'poet_cn', 'poet_id', 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'])
-            ->map(function ($item) {
-                $arr = $item->toArray();
-                $arr['poet'] = $item->poetLabel;
-                // TODO how to remove it before map?
-                unset($arr['poet_author']);
-                unset($arr['fakeId']);
-                unset($arr['upload_user_id']);
-                unset($arr['translator_id']);
-                unset($arr['is_owner_uploaded']);
-                unset($arr['resource_url']);
-                unset($arr['share_pics']);
-                return $arr;
-            })
-            ->toArray();
+        $res = [];
+        foreach($poems as $poem) {
+            $item = $poem->only($columns);
+
+            $score = $poem->scoreArray;
+            $item['score'] = $score['score'];
+            $item['score_count'] = $score['count'];
+            $item['date_ago'] = date_ago($poem->created_at);
+            $item['poet'] = $poem->poetLabel;
+            $item['reviews_count'] = $poem->reviews->count();
+            $item['reviews'] = $poem->reviews->take(1)->map(function ($review) use ($reviewColumn) {
+                $review->content = $review->pureContent;
+                return $review->makeHidden('user')->only($reviewColumn);
+            });
+            $res[] = $item;
+        };
 
         return $this->responseSuccess($res);
     }
@@ -245,35 +204,34 @@ class PoemAPIController extends Controller {
     }
 
     public function detail($id) {
-        /** @var Poem $item */
         $columns = [
-            'id', 'created_at', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
+            'id', 'created_at', 'title', 'subtitle', 'preface', 'poem',
+            'poet', 'poet_cn', 'poet_id', 'poet_avatar', 'poet_image', // TODO remove poet_image after weapp upgrade
             'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
-            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics'];
+            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics'
+        ];
         /** @var Poem $item */
-        $item = Poem::where('id', '=', $id)->get($columns)->first();
+        $item = Poem::where('id', '=', $id)->first();
         if(!$item) {
             abort(404);
             return $this->responseFail([], 'not found', -3);
         }
-        $res = $item->toArray();
+        $res = $item->only($columns);
 
         $res['poet'] = $item->poetLabel;
-        $res['poet_avatar'] = $item->poetAvatar;
+        $res['poet_image'] = $item->poetAvatar; // TODO remove it after weapp upgrade
         $res['date_ago'] = date_ago($item->created_at);
 
         $res['score'] = $item->totalScore;
         // TODO save score_count to poem.score_count column
         $res['score_count'] = ScoreRepository::calcCount($id);
 
-        unset($res['resource_url']);
-
         $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item)
             ->get(['review.content', 'review.created_at', 'review.user_id'])
             ->map(function ($item) {
                 $item->makeHidden('user');
                 $item['date_ago'] = date_ago($item->created_at);
-                $item['content'] = str_replace('&nbsp;', ' ', strip_tags($item->content));
+                $item['content'] = $item->pureContent;
                 return $item;
             });
 
@@ -297,18 +255,12 @@ class PoemAPIController extends Controller {
             }
         }
 
-        $res['related'] = $relatedQuery->get(['id', 'poem', 'poet', 'poet_cn', 'poet_id', 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'])
+        $res['related'] = $relatedQuery->get([
+            'id', 'poem', 'poet', 'poet_cn', 'poet_id', 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'
+        ])
             ->map(function ($item) {
                 $arr = $item->toArray();
                 $arr['poet'] = $item->poetLabel;
-                // TODO how to remove it before map?
-                unset($arr['poet_author']);
-                unset($arr['fakeId']);
-                unset($arr['upload_user_id']);
-                unset($arr['translator_id']);
-                unset($arr['is_owner_uploaded']);
-                unset($arr['resource_url']);
-                unset($arr['share_pics']);
                 return $arr;
             })
             ->toArray();
