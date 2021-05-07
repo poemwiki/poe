@@ -229,6 +229,7 @@ class PoemRepository extends BaseRepository
 
     public static function isDuplicated(string $poem) {
         // TODO poem soft deleted, but content not deleted???
+        // TODO use simhash
         $contentHash = Str::contentHash($poem);
         $existed = Content::where([
             'hash_crc32' => Str::crc32($contentHash),
