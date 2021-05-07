@@ -77,6 +77,10 @@ class Review extends Model {
         return $this->belongsTo(\App\User::class, 'user_id', 'id');
     }
 
+    public function getPureContentAttribute() {
+        return str_replace('&nbsp;', ' ', strip_tags($this->content));
+    }
+
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasOne

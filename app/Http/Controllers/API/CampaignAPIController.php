@@ -23,10 +23,12 @@ class CampaignAPIController extends Controller {
         $campaigns = $this->campaignRepository->allInUse()->map(function ($campaign) {
             $ret = $campaign->toArray();
             $ret['settings'] = collect($campaign->settings)->except(['result']);
+            $ret['poem_count'] = $campaign->poem_count;
+            $ret['user_count'] = $campaign->user_count;
             return $ret;
         });
 
-        return $this->responseSuccess($campaigns->toArray());
+        return $this->responseSuccess($campaigns);
     }
 
     public function show($id) {

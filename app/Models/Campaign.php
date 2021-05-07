@@ -117,6 +117,34 @@ class Campaign extends Model {
         return asset($this->settings['share_image_url'] ?? $this->image);
     }
 
+    public function getPoemCountAttribute() {
+        return Taggable::where([
+            ['tag_id', '=', $this->tag->id],
+            ['taggable_type', '=', Poem::class]
+        ])->distinct()->count('taggable_id');
+    }
+
+    public function getUploadUserCountAttribute() {
+        $poems = Tag::where('id', '=', $this->tag->id)->first()->poems();
+        return $poems->where('is_owner_uploaded', '=', '1')->distinct('upload_user_id')->count('upload_user_id');
+    }
+
+    public function getUserCountAttribute() {
+        $poemIds = Poem::select('id')->whereHas('tags', function($q) {
+            $q->where('tag.id', '=', $this->tag->id);
+        })->pluck('id');
+        // scorer
+        $scorer = Score::select(['user_id'])->whereIn('poem_id', $poemIds)->pluck('user_id');
+
+        // reviewer
+        $reviewer = Review::select(['user_id'])->whereIn('poem_id', $poemIds)->pluck('user_id');
+
+        // poem uploader
+        $uploader = Poem::select(['upload_user_id'])->whereIn('id', $poemIds)->pluck('upload_user_id');
+
+        return $scorer->concat($reviewer)->concat($uploader)->unique()->count();
+    }
+
     public function tag() {
         return $this->belongsTo(\App\Models\Tag::class, 'tag_id', 'id');
     }

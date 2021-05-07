@@ -32,7 +32,11 @@ class Score extends Model {
         'created_at',
         'deleted_at',
         'updated_at',
+    ];
 
+    protected $casts = [
+        'poem_id' => 'integer',
+        'user_id' => 'integer'
     ];
 
     protected $appends = [];
