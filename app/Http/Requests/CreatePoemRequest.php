@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
+use App\Rules\NoDuplicatedPoem;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Poem;
 use Illuminate\Support\Facades\Auth;
@@ -26,16 +27,16 @@ class CreatePoemRequest extends FormRequest {
      *
      * @return array
      */
-    public function rules() {
+    public function rules(): array {
         return [
             'title' => ['required', 'string'],
-            'language_id' => ['nullable', Rule::in(LanguageRepository::ids())],
+            'language_id' => Rule::in(LanguageRepository::ids()),
             'is_original' => ['nullable', 'boolean'],
             'poet' => ['nullable', 'string'],
             'poet_cn' => ['nullable', 'string'],
             'bedtime_post_id' => ['nullable', 'integer'],
             'bedtime_post_title' => ['nullable', 'string'],
-            'poem' => ['nullable', 'string'],
+            'poem' => ['nullable', 'string', new NoDuplicatedPoem],
             'length' => ['nullable', 'integer'],
             'translator' => ['nullable', 'string'],
             'from' => ['nullable', 'string'],
@@ -50,7 +51,7 @@ class CreatePoemRequest extends FormRequest {
             'content_id' => ['nullable', 'integer'],
             'original_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
             'translated_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'], // TODO use fake ID here
-            'preface' => ['nullable', 'string', 'max:64'],
+            'preface' => ['nullable', 'string', 'max:300'],
             'subtitle' => ['nullable', 'string', 'max:32'],
             'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
             'poet_id' => ['nullable', Rule::in(array_merge(AuthorRepository::ids()->toArray(), ['new']))],

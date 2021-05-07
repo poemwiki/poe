@@ -23,7 +23,7 @@ class NoDuplicatedPoem implements Rule {
      *
      * @param string $attribute
      * @param mixed $value
-     * @return bool
+     * @return bool false if failed(has duplicated poem content)
      */
     public function passes($attribute, $value) {
         $this->dupPoem = PoemRepository::isDuplicated($value);
