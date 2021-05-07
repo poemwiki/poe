@@ -76,7 +76,7 @@ class PoemRepository extends BaseRepository
 
     /**
      * @param int $num
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Builder
      * @TODO optimize sql by :
      * SELECT r1.id
     FROM poem AS r1
@@ -90,15 +90,24 @@ class PoemRepository extends BaseRepository
     LIMIT 1
      */
     public static function random($num = 1, $with=[]) {
+        $builder = Poem::query();
+        if(!empty($with)) $builder->with($with);
+
+        return $builder
+            ->inRandomOrder()
+            ->take($num);
+    }
+
+    public function suggest($num = 1, $with=[]) {
         // TODO 选取策略： 1. 优先选取 poem.bedtime_post_id 不为空的 poem
         // 2. 评分和评论数
         // 3. poem.length
         // 4. 最近未推送给当前用户的
-        $builder = Poem::query();
+        $builder = Poem::query()->where('language_id', '=', '1');
         if(!empty($with)) $builder->with($with);
 
         return $builder // TODO 1. 如果显示声明原创的诗歌，是否需要跟普通诗歌区分开？ 2. 对声明原创的诗歌，gate 中定义只允许上传用户编辑
-            ->inRandomOrder()
+        ->inRandomOrder()
             ->take($num);
     }
 
@@ -149,10 +158,15 @@ class PoemRepository extends BaseRepository
             $poems->where('poem.created_at', '<=', $endTime);
         }
 
-        return $poems->with('reviews')->orderByDesc($orderBy)->get()->map(function ($item) use ($startTime, $endTime) {
+        return $poems->with('reviews')->orderByDesc($orderBy)->get()->map(function (Poem $item) use ($startTime, $endTime) {
             $item['date_ago'] = date_ago($item->created_at);
-            $item['poet_image'] = $item->uploader->avatarUrl;
+            $item['poet_image'] = $item->uploader ? $item->uploader->avatarUrl : asset(\App\User::$defaultAvatarUrl);
             $item['poet'] = $item->poetLabel;
+            if(!(config('app.env') === 'production')) {
+                $item['poet'] = $item['poet'] . '-' .$item->id;
+            }
+            $item['reviews_count'] = $item->reviews->count();
+            $item['reviews'] = $item->reviews->take(2)->map->only(['id', 'avatar', 'content', 'created_at', 'name', 'user_id']);
             $item['score_count'] = $endTime ? ScoreRepository::calcCount($item->id, $startTime, $endTime) : ScoreRepository::calcCount($item->id);
             return $item;
         });
