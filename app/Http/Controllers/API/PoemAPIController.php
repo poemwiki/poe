@@ -72,7 +72,12 @@ class PoemAPIController extends Controller {
 
         } else {
             // poem before endDate, scores before endDate
-            $byScore = $this->poemRepository->getByTagId($tagId, 'score', $campaign->start, $campaign->end);
+            if($campaign->id >= 6 || (!(config('app.env') === 'production'))) {
+                $byScore = $this->poemRepository->getTopByTagId($tagId, $campaign->start, $campaign->end);
+            } else {
+                $byScore = $this->poemRepository->getByTagId($tagId, 'score', $campaign->start, $campaign->end);
+            }
+
             $limit = $campaign->settings['rank_min_weight'] ?? 3;
             $byScoreData = $byScore->filter(function ($value) use ($limit) {
                 // 票数不足的不参与排名

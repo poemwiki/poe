@@ -172,6 +172,48 @@ class PoemRepository extends BaseRepository
         });
     }
 
+    /**
+     * 选取认证用户评分过的诗歌
+     * @param $tagId
+     * @param null $startTime
+     * @param null $endTime
+     * @param int $scoreMin
+     * @return mixed
+     */
+    public function getTopByTagId($tagId, $startTime = null, $endTime = null, $scoreMin = 6) {
+        $poemIds = Poem::select('id')->whereHas('tags', function($q) use ($tagId) {
+            $q->where('tag.id', '=', $tagId);
+        })->pluck('id');
+
+        $poemIdsScoredByV = Score::select(['user_id', 'poem_id'])
+            ->whereIn('poem_id', $poemIds)
+            ->whereHas('user', function ($q) {
+                $q->where('is_v', '=', 1);
+            })
+            ->pluck('poem_id');
+
+        $poems = Poem::whereIn('id', $poemIdsScoredByV)->where('score', '>', $scoreMin);
+        if($startTime) {
+            $poems->where('poem.created_at', '>=', $startTime);
+        }
+        if($endTime) {
+            $poems->where('poem.created_at', '<=', $endTime);
+        }
+
+        return $poems->with('reviews')->orderByDesc('score')->get()->map(function (Poem $item) use ($startTime, $endTime) {
+            $item['date_ago'] = date_ago($item->created_at);
+            $item['poet_image'] = $item->uploader ? $item->uploader->avatarUrl : asset(\App\User::$defaultAvatarUrl);
+            $item['poet'] = $item->poetLabel;
+            if(!(config('app.env') === 'production')) {
+                $item['poet'] = $item['poet'] . '-' .$item->id;
+            }
+            $item['reviews_count'] = $item->reviews->count();
+            $item['reviews'] = $item->reviews->take(2)->map->only(['id', 'avatar', 'content', 'created_at', 'name', 'user_id']);
+            $item['score_count'] = $endTime ? ScoreRepository::calcCount($item->id, $startTime, $endTime) : ScoreRepository::calcCount($item->id);
+            return $item;
+        });
+    }
+
     public function getByOwner($userId) {
         return self::newQuery()->where([
             ['is_owner_uploaded', '=', '1'],

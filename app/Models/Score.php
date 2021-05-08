@@ -91,6 +91,12 @@ class Score extends Model {
     public function poem() {
         return $this->belongsTo(\App\Models\Poem::class, 'poem_id', 'id');
     }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     **/
+    public function user() {
+        return $this->belongsTo(\App\User::class, 'user_id', 'id');
+    }
 
 
     /**
