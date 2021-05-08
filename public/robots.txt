@@ -1,2 +1,8 @@
+User-agent: Baiduspider
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
 User-agent: *
-Disallow:
+Disallow: /
