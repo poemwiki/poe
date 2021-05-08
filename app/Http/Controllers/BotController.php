@@ -410,7 +410,7 @@ SQL;
 
 
                 $p = Poem::find($post->id);
-                $writer = '作者 / ' . $nation . $p->poetLabel;
+                $writer = '作者 / ' . $nation . $p->poetLabelCn;
 
 
                 // poem content
