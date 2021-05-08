@@ -90,8 +90,8 @@ class Campaign extends Model {
             return array_map(function ($item) {
                 // 优先使用 masterInfos 内的 name 和 avatar
                 $ret = $item;
-                $ret['avatar'] = $item['avatar'] ? asset($item['avatar'])
-                    : ($item['id'] ? User::find($item['id'])->avatarUrl : asset(User::$defaultAvatarUrl));
+                $ret['avatar'] = isset($item['avatar']) ? asset($item['avatar'])
+                    : ((isset($item['id']) && User::find($item['id'])) ? User::find($item['id'])->avatarUrl : asset(User::$defaultAvatarUrl));
                 return $ret;
             }, $masterInfos);
         }
