@@ -322,7 +322,7 @@ class PoemAPIController extends Controller {
             'compositionId' => $compositionId
         ]);
 
-        $postData = ['compositionId' => $compositionId, 'poem' => $poem->poem, 'poet' => $poem->poetLabel, 'title' => $poem->title];
+        $postData = ['compositionId' => $compositionId, 'id' => $poem->id, 'poem' => $poem->poem, 'poet' => $poem->poetLabel, 'title' => $poem->title];
         $hash = crc32(json_encode($postData));
         if(!$force && $poem->share_pics && isset($poem->share_pics[$compositionId])
             && file_exists(storage_path($poem->share_pics[$compositionId]))) {
@@ -379,7 +379,7 @@ class PoemAPIController extends Controller {
             return $poemImgPath;
         }
 
-        $poemImg = file_get_contents_post(config('app.render_server'), $postData);
+        $poemImg = file_get_contents_post(config('app.render_server'), $postData, 'application/x-www-form-urlencoded', 30);
         if(file_put_contents($poemImgPath, $poemImg)) {
             if(File::mimeType($poemImgPath) == 'text/plain') {
                 unlink($poemImgPath);
