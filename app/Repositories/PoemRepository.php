@@ -173,7 +173,7 @@ class PoemRepository extends BaseRepository
     }
 
     /**
-     * 选取认证用户评分过的诗歌
+     * 选取最赞列表的诗歌
      * @param $tagId
      * @param null $startTime
      * @param null $endTime
@@ -187,9 +187,9 @@ class PoemRepository extends BaseRepository
 
         $poemIdsScoredByV = Score::select(['user_id', 'poem_id'])
             ->whereIn('poem_id', $poemIds)
-            ->whereHas('user', function ($q) {
-                $q->where('is_v', '=', 1);
-            })
+            // ->whereHas('user', function ($q) {
+            //     $q->where('is_v', '=', 1);
+            // })
             ->pluck('poem_id');
 
         $poems = Poem::whereIn('id', $poemIdsScoredByV)->where('score', '>', $scoreMin);

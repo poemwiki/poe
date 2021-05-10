@@ -149,7 +149,7 @@ class PoemAPIController extends Controller {
     }
 
     public function random($num = 5, $id = null) {
-        $num = min(5, $num);
+        $num = min(10, $num);
 
         $columns = [
             'id', 'created_at', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',

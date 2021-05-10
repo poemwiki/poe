@@ -351,6 +351,11 @@ class Poem extends Model implements Searchable {
      * @return string
      */
     public function getPoetLabelAttribute() {
+        // TODO 考虑认领诗歌的情况。如果一首诗歌被用户成功认领，那么upload_user_id将不代表作者
+        // 此时需要用 is_owner_uploaded==Poem::OWNER['author'] 来标志作者上传
+        // is_owner_uploaded==Poem::OWNER['none'] 标志默认状态，无人认领，未标注原创
+        // is_owner_uploaded==Poem::OWNER['poet'] 标注原创，作者用户上传，此时以upload_user_id将不代表作者
+        // is_owner_uploaded==Poem::OWNER['author'] 标志原创且已被作者认领，upload_user_id不代表作者，只代表上传人，此时应以poetAuthor为作者
         // TODO if is_owner_uploaded==Poem::OWNER['poet'] && $this->uploader
         // TODO use poetAuthor->label if poem.poet and poem.poet_cn is used for SEO
         if ($this->is_owner_uploaded && $this->uploader) {
@@ -359,6 +364,18 @@ class Poem extends Model implements Searchable {
             return $this->poetAuthor->label;
         } else {
             return ($this->poet === $this->poet_cn or is_null($this->poet_cn)) ? $this->poet : $this->poet_cn.'（'.$this->poet.'）';
+        }
+    }
+
+    public function getPoetLabelCnAttribute() {
+        // TODO if is_owner_uploaded==Poem::OWNER['poet'] && $this->uploader
+        // TODO use poetAuthor->label_cn if poem.poet and poem.poet_cn is used for SEO
+        if ($this->is_owner_uploaded && $this->uploader) {
+            return $this->uploader->name;
+        } else if ($this->poetAuthor) {
+            return $this->poetAuthor->label_cn;
+        } else {
+            return is_null($this->poet_cn) ? $this->poet : $this->poet_cn;
         }
     }
 
