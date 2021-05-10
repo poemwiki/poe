@@ -34,7 +34,10 @@ $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' 
 
 $firstLine = Str::of($poem->poem)->firstLine();
 $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.org/icon/apple-touch-icon.png'
+// TODO @section('keywords', !empty($poem->keywrods) ? $poem->keywrods->join(', ') : '')
 ?>
+
+@section('canonical')<link rel="canonical" href="{{$poem->url}}" />@endsection
 @section('title'){{$poem->title}}@endsection
 @section('author'){{$poem->poet.($poem->poet ? ',' : '').$poem->poet_cn}}@endsection
 @section('meta-og')

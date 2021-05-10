@@ -11,9 +11,10 @@
     <meta name="author" content="PoemWiki,@yield('author')">
     <meta name="description" content="PoemWiki">
 
-    <meta name="keyword" content="@yield('title'),@yield('author'),@yield('title') 评论,@yield('title') 诗评,@yield('title') review,poemwiki,poem,poetry,poet,诗,诗歌,诗人,诗评,poem review">
+    <meta name="keyword" content="@yield('keywords'),@yield('title'),@yield('author'),@yield('title') 评论,@yield('title') 诗评,@yield('title') review,poemwiki,poem,poetry,poet,诗,诗歌,诗人,诗评,poem review">
     <meta name="description" content="@yield('author') @yield('title') 诗歌全文,@yield('author') @yield('title') 评论、评分">
 
+    @yield('canonical')
     @include('layouts.icon')
 
     @yield('meta-og')

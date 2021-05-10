@@ -1,9 +1,12 @@
 @extends('layouts.fe')
 
-@section('title', !empty($author->alias_arr) ? $author->alias_arr->join(', ') : '')
+@section('title', $author->label)
+
+@section('keywords', !empty($author->alias_arr) ? $author->alias_arr->join(', ') : '')
 
 @section('author', 'PoemWiki')
 
+@section('canonical')<link rel="canonical" href="{{$author->url}}" />@endsection
 @php
 $aliasMaxLength = 4;
 @endphp
