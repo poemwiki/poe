@@ -162,7 +162,14 @@ class PoemAPIController extends Controller {
             'avatar', 'content', 'created_at', 'id', 'user_id', 'name', 'poem_id'//, 'title'
         ];
 
-        $poems = $this->poemRepository->suggest($num, ['reviews'])->get();
+        $poems = $this->poemRepository->suggest($num, ['reviews'])
+            ->whereNull('campaign_id')
+            ->where('score', '>=', 7)
+            ->get();
+        $noScorePoems = $this->poemRepository->suggest(1, ['reviews'])
+            ->whereNull('score')
+            ->get();
+        $poems = $poems->concat($noScorePoems);
 
         if($id) {
             $poemById = $this->poemRepository->findMany([$id]);
@@ -213,7 +220,8 @@ class PoemAPIController extends Controller {
             'id', 'created_at', 'title', 'subtitle', 'preface', 'poem',
             'poet', 'poet_cn', 'poet_id', 'poet_avatar', 'poet_image', // TODO remove poet_image after weapp upgrade
             'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
-            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics'
+            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics',
+            'campaign_id'
         ];
         /** @var Poem $item */
         $item = Poem::where('id', '=', $id)->first();
@@ -240,16 +248,21 @@ class PoemAPIController extends Controller {
                 return $item;
             });
 
-        $relatedQuery = $this->poemRepository->random(2)
+        $relatedQuery = $this->poemRepository->suggest(2)
             ->where('id', '<>', $id);
 
         $res['is_campaign'] = $item->is_campaign;
         if($item->tags->count()) {
             $res['tags'] = $item->tags->map->only(['id', 'name', 'category_id']);
-            if(config('app.env') !== 'local')
+
+            if($item->is_campaign) {
                 $relatedQuery->whereHas('tags', function ($query) use ($item) {
+                    // TODO use campaign tag here
                     $query->where('tag_id', '=', $item->tags[0]->id);
                 });
+            } else {
+                $relatedQuery->where('score', '>=', 7);
+            }
         }
         if($item->share_pics && isset($item->share_pics['pure'])) {
             if(File::exists(storage_path($item->share_pics['pure']))) {
@@ -347,7 +360,10 @@ class PoemAPIController extends Controller {
 
         try {
             $poemImgPath = $this->fetchPoemImg($postData, $dir, $poemImgFileName, $force);
-            $appCodeImgPath = $this->fetchAppCodeImg($poemId, $dir, $force);
+
+            $scene = $poem->is_campaign ? ($poem->campaign_id . '-' . $poem->id) : $poem->id;
+            $page = $poem->is_campaign ? 'pages/campaign/campaign' : 'pages/poems/index';
+            $appCodeImgPath = $this->fetchAppCodeImg($scene, $dir, $page, $force);
 
             if(!$this->composite($poemImgPath, $appCodeImgPath, $posterPath)) {
                 return $this->responseFail();
@@ -392,7 +408,8 @@ class PoemAPIController extends Controller {
     }
 
     /**
-     * @param int $poemId
+     * @param string $scene
+     * @param string $page
      * @param string $appCodeImgDir
      * @param bool $force
      * @param string $appCodeFileName
@@ -401,14 +418,14 @@ class PoemAPIController extends Controller {
      * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
      * @noinspection PhpFullyQualifiedNameUsageInspection
      */
-    private function fetchAppCodeImg(int $poemId, string $appCodeImgDir, bool $force=false, string $appCodeFileName='app-code.jpg') {
+    private function fetchAppCodeImg(string $scene, string $appCodeImgDir, string $page = 'pages/detail/detail', bool $force=false, string $appCodeFileName='app-code.jpg') {
         $app = Factory::miniProgram([
             'app_id' => config('wechat.mini_program.default.app_id'),
             'secret' => config('wechat.mini_program.default.secret')
         ]);
         // 注意微信对此接口调用频率有限制
-        $response = $app->app_code->getUnlimit($poemId, [
-            'page' => 'pages/detail/detail',
+        $response = $app->app_code->getUnlimit($scene, [
+            'page' => $page,
             'width' => 280,
         ]);
         if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
