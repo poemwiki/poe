@@ -156,7 +156,7 @@ class Author extends Model implements Searchable {
     public function getLabelEnAttribute() {
         return $this->getTranslated('name_lang', 'en');
     }
-    public function getLabelCNAttribute() {
+    public function getLabelCnAttribute() {
         return $this->getTranslated('name_lang', 'zh-CN');
     }
 

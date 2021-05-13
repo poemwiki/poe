@@ -156,7 +156,7 @@ class PoemController extends Controller
             $poetAuthor = $this->authorRepository->getExistedAuthor($sanitized['poet_wikidata_id']);
             $sanitized['poet_id'] = $poetAuthor->id;
             $sanitized['poet'] = $poetAuthor->label;
-            $sanitized['poet_cn'] = $poetAuthor->labelCN;
+            $sanitized['poet_cn'] = $poetAuthor->label_cn;
         }
         if(is_numeric($sanitized['translator_wikidata_id']) && is_null($sanitized['translator_id'])) {
             $translatorAuthor = $this->authorRepository->getExistedAuthor($sanitized['translator_wikidata_id']);
@@ -244,12 +244,12 @@ class PoemController extends Controller
             $poetAuthor = $this->authorRepository->getExistedAuthor($sanitized['poet_wikidata_id']);
             $sanitized['poet_id'] = $poetAuthor->id;
             $sanitized['poet'] = $poetAuthor->label;
-            $sanitized['poet_cn'] = $poetAuthor->labelCN;
+            $sanitized['poet_cn'] = $poetAuthor->label_cn;
         }
         if(is_numeric($sanitized['translator_wikidata_id']) && is_null($sanitized['translator_id'])) {
             $translatorAuthor = $this->authorRepository->getExistedAuthor($sanitized['translator_wikidata_id']);
             $sanitized['translator_id'] = $translatorAuthor->id;
-            $sanitized['translator'] = $translatorAuthor->labelCN;
+            $sanitized['translator'] = $translatorAuthor->label_cn;
         }
 
         // Update changed values Poem
