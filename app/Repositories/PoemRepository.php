@@ -261,7 +261,7 @@ class PoemRepository extends BaseRepository
         });
         return $q->with('reviews')->orderByDesc('created_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
-            $item['poet_image'] = $item->uploader->avatarUrl;
+            $item['poet_image'] = $item->poet_avatar;
             $item['poet'] = $item->poetLabel;
             $item['score_count'] = ScoreRepository::calcCount($item->id);
             return $item;
