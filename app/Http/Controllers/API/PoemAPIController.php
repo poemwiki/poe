@@ -88,6 +88,10 @@ class PoemAPIController extends Controller {
                 $score = $item->getCampaignScore($campaign);
                 $item['score'] = $score['score'];
                 $item['score_weight'] = $score['weight'];
+                $item['reviews'] = $item['reviews']->map(function ($review) {
+                    $review['content'] = $review['pure_content'];
+                    return $review;
+                });
                 return $item;
             })->sort(function ($a, $b) {
                 $scoreOrder = $b['score'] <=> $a['score'];
@@ -186,7 +190,7 @@ class PoemAPIController extends Controller {
             $item['score'] = $score['score'];
             $item['score_count'] = $score['count'];
             $item['date_ago'] = date_ago($poem->created_at);
-            $item['poet'] = $poem->poetLabel;
+            $item['poet'] = $poem->poet_label;
             $item['reviews_count'] = $poem->reviews->count();
             $item['reviews'] = $poem->reviews->take(1)->map(function ($review) use ($reviewColumn) {
                 $review->content = $review->pureContent;
@@ -218,7 +222,7 @@ class PoemAPIController extends Controller {
     public function detail($id) {
         $columns = [
             'id', 'created_at', 'title', 'subtitle', 'preface', 'poem',
-            'poet', 'poet_cn', 'poet_id', 'poet_avatar', 'poet_image', // TODO remove poet_image after weapp upgrade
+            'poet', 'poet_cn', 'poet_id', 'poet_avatar',
             'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
             'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics',
             'campaign_id'
@@ -231,8 +235,7 @@ class PoemAPIController extends Controller {
         }
         $res = $item->only($columns);
 
-        $res['poet'] = $item->poetLabel;
-        $res['poet_image'] = $item->poetAvatar; // TODO remove it after weapp upgrade
+        $res['poet'] = $item->poet_label;
         $res['date_ago'] = date_ago($item->created_at);
 
         $res['score'] = $item->totalScore;
@@ -278,7 +281,7 @@ class PoemAPIController extends Controller {
         ])
             ->map(function ($item) {
                 $arr = $item->toArray();
-                $arr['poet'] = $item->poetLabel;
+                $arr['poet'] = $item->poet_label;
                 return $arr;
             })
             ->toArray();

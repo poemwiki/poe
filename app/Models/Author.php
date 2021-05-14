@@ -148,9 +148,6 @@ class Author extends Model implements Searchable {
     public function getLabelAttribute() {
         $default = $this->getTranslated('name_lang', config('app.locale'));
         $fallback = $this->getTranslated('name_lang', config('app.fallback_locale'));
-        if ($default !== $fallback && $fallback) {
-           return  $default." ($fallback)";
-        }
         return $default ?: $fallback;
     }
     public function getLabelEnAttribute() {

@@ -208,7 +208,7 @@ class PoemRepository extends BaseRepository
                 $item['poet'] = $item['poet'] . '-' .$item->id;
             }
             $item['reviews_count'] = $item->reviews->count();
-            $item['reviews'] = $item->reviews->take(2)->map->only(['id', 'avatar', 'content', 'created_at', 'name', 'user_id']);
+            $item['reviews'] = $item->reviews->take(2)->map->only(['id', 'avatar', 'content', 'pure_content', 'created_at', 'name', 'user_id']);
             $item['score_count'] = $endTime ? ScoreRepository::calcCount($item->id, $startTime, $endTime) : ScoreRepository::calcCount($item->id);
             return $item;
         });
@@ -262,7 +262,7 @@ class PoemRepository extends BaseRepository
         return $q->with('reviews')->orderByDesc('created_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet_image'] = $item->poet_avatar;
-            $item['poet'] = $item->poetLabel;
+            $item['poet'] = $item->poet_label;
             $item['score_count'] = ScoreRepository::calcCount($item->id);
             return $item;
         });
