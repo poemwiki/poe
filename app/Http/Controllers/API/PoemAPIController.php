@@ -300,7 +300,13 @@ class PoemAPIController extends Controller {
         }
 
         $poem = Poem::create($sanitized);
-        $poem->tags()->save(Tag::find($sanitized['tag_id']));
+        $tag = Tag::find($sanitized['tag_id']);
+        $poem->tags()->save($tag);
+
+        if($tag->is_campaign) {
+            $poem->campaign_id = $tag->campaign->id;
+            $poem->save();
+        }
 
         return $this->responseSuccess();
     }

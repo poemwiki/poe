@@ -10,6 +10,10 @@ class Category extends Model {
     use SoftDeletes;
     use HasTranslations;
 
+    static $CATEGORY_ID = [
+        'campaign' => 2
+    ];
+
     protected $table = 'category';
 
     protected $fillable = [

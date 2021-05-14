@@ -77,7 +77,8 @@ class Poem extends Model implements Searchable {
         'translator_id',
         'upload_user_id',
         'is_owner_uploaded',
-        'share_pics'
+        'share_pics',
+        'campaign_id'
     ];
 
     /**
@@ -118,7 +119,8 @@ class Poem extends Model implements Searchable {
         'upload_user_id' => 'integer',
         'score' => 'float',
         'is_owner_uploaded' => 'integer',
-        'share_pics' => 'json'
+        'share_pics' => 'json',
+        'campaign_id' => 'integer',
     ];
 
 

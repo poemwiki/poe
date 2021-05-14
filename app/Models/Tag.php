@@ -48,11 +48,16 @@ class Tag extends Model {
         return url('/admin/tags/' . $this->getKey());
     }
 
+    public function getIsCampaignAttribute() {
+        return $this->category_id === Category::$CATEGORY_ID['campaign'];
+    }
+
     // tag poem M:M
     public function poems() {
         return $this->morphedByMany(\App\Models\Poem::class, 'taggable', 'taggable');
     }
 
+    // TODO if category_id is not 2, this should return null
     public function campaign() {
         return $this->hasOne(\App\Models\Campaign::class, 'tag_id', 'id');
     }
