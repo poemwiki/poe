@@ -18,7 +18,7 @@ use Spatie\Searchable\SearchResult;
  * @property string $created_at
  * @property string $updated_at
  * @property User user
- * @property array|null picUrl
+ * @property array|null pic_url
  * @property Wikidata wikiData
  * @package App
  */
@@ -170,10 +170,11 @@ class Author extends Model implements Searchable {
 
 
     private function isValidPicUrl($url) {
-        return !empty($url) && !str_ends_with($url, 'tif');
+        return !empty($url) && !str_ends_with($url, 'tif') && !str_starts_with($url, 'https://upload.wikimedia.org');
     }
     /**
      * use avatarUrl in case users.avatar is null
+     * TODO check if valid for each pic_url
      * @return string
      */
     public function getAvatarUrlAttribute() {
