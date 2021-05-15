@@ -29,4 +29,13 @@ User-agent: YandexMobileBot
 Allow: /
 
 User-agent: *
+Disallow: /login
+
+User-agent: *
+Disallow: /new
+
+User-agent: *
+Disallow: /poems/create
+
+User-agent: *
 Disallow: /
