@@ -26,7 +26,7 @@
           <div class="card-header">
             <i class="fa fa-pencil"></i> {{ trans('admin.poem.actions.edit', ['name' => $poem->title]) }}
 
-            &nbsp;&nbsp;{{$poem->poetAuthor ? $poem->poetAuthor->label : $poem->poet_cn ?? $poem->poet ?? ''}} 《<a target="_blank" href="{{$poem->url}}">{{ $poem->title }}</a>》
+            &nbsp;&nbsp;{{$poem->poetAuthor ? $poem->poetAuthor->label : $poem->poet_cn ?? $poem->poet ?? ''}} <a target="_blank" href="{{$poem->url}}">{{ $poem->title }}</a>
           </div>
 
           <div class="card-body">
