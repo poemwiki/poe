@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Author;
 use App\Models\Nation;
 use App\Models\Poem;
+use App\Query\AuthorSearchAspect;
 use App\Repositories\AuthorRepository;
 use App\Repositories\NationRepository;
 use App\Repositories\PoemRepository;
@@ -40,46 +41,51 @@ class QueryController extends Controller {
     public function search($keyword){
         if($keyword === '' || is_null($keyword)) return view('query.search');
 
-        $keyword = Str::of($keyword)
+        $keyword4Query = Str::of($keyword)
             // ->replace('·', ' ')
             // ->replaceMatches('@[[:punct:]]+@u', ' ')
+            ->replaceMatches('@[a-zA-Z]\s@u', ' ')
             ->replaceMatches('@\s+@u', ' ')
             ->trim();//->lower();
         // dd($keyword);
 
         // DB::enableQueryLog();
         $searchResults = (new Search())
-            ->registerModel(Author::class, function(ModelSearchAspect $modelSearchAspect) {
-                return $modelSearchAspect
-                    ->addSearchableAttribute('name_lang')
-                    // ->has('poems')
-                    ->with('poems')
-                    // ->with('translatedPoems')
-                ;
+            ->registerAspect(AuthorSearchAspect::class) // TODO AuthorSearchAspect()->limit(5)
+            ->registerModel(Poem::class, function(ModelSearchAspect $modelSearchAspect) {
+                $modelSearchAspect
+                    ->addSearchableAttribute('title') // return results for partial matches
+                    ->addSearchableAttribute('poem')
+                    ->addSearchableAttribute('poet')
+                    ->addSearchableAttribute('poet_cn')
+                    ->addSearchableAttribute('translator')
+                    ->with('poetAuthor');
+                    // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
             })
-            ->registerModel(Poem::class, 'title', 'poem', 'poet', 'poet_cn', 'translator')//, 'poet')
-            ->search($keyword);
+            // ->registerModel(Poem::class, 'title', 'poem', 'poet', 'poet_cn', 'translator')//, 'poet')
+            ->search($keyword4Query);
 
         // dd(DB::getQueryLog());
         $results = $searchResults->groupByType();
-        $authors = $results->get('author') ?: [];
+        $authors = $results->get('authors') ?: [];
         $poems = $results->get('poem') ?: [];
 
         $shiftPoems = collect();
+
+        foreach ($poems as $p) {
+            $shiftPoems->push($p->searchable);
+        }
+
         foreach ($authors as $author) {
             foreach($author->searchable->poems as $poem) {
                 $shiftPoems->push($poem);
             }
         }
 
-        // TODO shiftPoems may contain some of $poems
-        foreach ($poems as $p) {
-            $shiftPoems->push($p->searchable);
-        }
-
         // TODO append translated poems
         $mergedPoems = $shiftPoems->unique('id');
 
+        // dd($mergedPoems);
         return view('query.search')->with([
             'authors' => $authors,
             'poems' => $mergedPoems,

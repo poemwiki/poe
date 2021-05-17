@@ -214,3 +214,10 @@ function t2s($str) {
     opencc_close($od);
     return $content;
 }
+
+function getWikimediaPath($url) {
+    return preg_replace('#https?://upload.wikimedia.org#', '', $url);
+}
+function isWikimediaUrl($url) {
+    return str_starts_with($url, 'https://upload.wikimedia.org') or str_starts_with($url, 'http://upload.wikimedia.org');
+}

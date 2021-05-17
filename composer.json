@@ -77,7 +77,8 @@
     },
     "classmap": [
       "database/seeds",
-      "database/factories"
+      "database/factories",
+      "app/Query"
     ],
     "files": [
       "app/utils.php"
