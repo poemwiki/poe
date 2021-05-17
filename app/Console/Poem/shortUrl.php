@@ -7,7 +7,7 @@ use App\Models\Poem;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
 
-class ShortUrl extends Command {
+class shortUrl extends Command {
     /**
      * The name and signature of the console command.
      *
