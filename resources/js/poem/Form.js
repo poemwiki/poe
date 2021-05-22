@@ -5,6 +5,9 @@ import vSelect from 'vue-select';
 vSelect.props.reduce.default = function (option) {
   return option.id;
 };
+vSelect.props.filterBy.default = function(option, label, search) {
+  return true;//(label || '').toLowerCase().indexOf(search.toLowerCase()) > -1
+}
 
 // import base style
 import 'codemirror/lib/codemirror.css'
@@ -44,8 +47,8 @@ Vue.component('poem-form', {
         translator_wikidata_id: null,
       },
 
-      authorList: this.defaultAuthors,
-      translatorList: _.clone(this.defaultAuthors),
+      authorList: [],//this.defaultAuthors,
+      translatorList: [],//_.clone(this.defaultAuthors),
       cmOptions: {
         tabSize: 2,
         mode: 'text/plain',
@@ -160,9 +163,12 @@ Vue.component('poem-form', {
         if(res?.data?.length) {
           vm.authorList = res.data;
           if(vm.isNew(vm.form.poet_id)) {
+            console.log('push to authorList', vm.newAuthor);
             vm.authorList.push(vm.newAuthor);
           }
+          console.log('reset authorList', vm.authorList);
         }
+        console.log('result', res?.data?.length);
 
         console.log('search result: ', res?.data?.length, _.map(vm.authorList, 'id'), _.map(vm.authorList, 'label'));
         loading(false);
