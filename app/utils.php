@@ -162,8 +162,7 @@ function get_causer_name($log) {
 function fuckGWF(string $url, $userAgent = 'normal'): string {
 
     $options = config('app.env') === 'production' ? [] : [
-        'http' => 'tcp://localhost:1087',
-        'https' => 'tcp://localhost:1087'
+        'proxy' => 'http://localhost:1087',
     ];
 
     $UAs = [
@@ -208,16 +207,50 @@ function get_wikipedia_summary(array $titleLocale) {
     return json_decode($str)->extract;
 }
 
+function get_wikimedia_pic_info(array $titleLocale) {
+    $title = $titleLocale['title'];
+    if(!$title) {
+        return '';
+    }
+
+    // https://en.wikipedia.org/w/api.php?format=json&prop=imageinfo&iiprop=extmetadata&titles=File:Marcel_Proust_1895.jpg
+    // https://en.wikipedia.org/w/api.php?format=json&prop=imageinfo&iiprop=extmetadata&titles=File:Marcel_Proust_1895.jpg
+    // https://en.wikipedia.org/w/api.php?action=query&format=json&prop=imageinfo&titles=File%3AMarcel%20Proust%201895.jpg&iiprop=extmetadata
+    $endPoint = 'https://'.($titleLocale['locale'] ?? 'en').'.wikipedia.org/w/api.php?action=query&format=json&prop=imageinfo&iiprop=extmetadata&titles=';
+    $url = $endPoint .urlencode('File:'.$title);
+
+    try {
+        $str = fuckGWF($url);
+    } catch (Exception $e) {
+        Log::warning('request fail. url:' . $url . '\nException:' . $e->getMessage());
+        return false;
+    }
+
+    if(!$str) return '';
+    return json_decode($str);
+}
+
 function t2s($str) {
     $od = opencc_open("t2s.json");
     $content = opencc_convert($str, $od);
     opencc_close($od);
     return $content;
 }
-
+function isValidPicUrl($url) {
+    return !empty($url) && !str_ends_with($url, 'tif');
+}
 function getWikimediaPath($url) {
     return preg_replace('#https?://upload.wikimedia.org#', '', $url);
 }
 function isWikimediaUrl($url) {
     return str_starts_with($url, 'https://upload.wikimedia.org') or str_starts_with($url, 'http://upload.wikimedia.org');
+}
+
+function responseFile($path) {
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+    return $response;
 }

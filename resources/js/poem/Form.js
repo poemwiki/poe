@@ -163,12 +163,9 @@ Vue.component('poem-form', {
         if(res?.data?.length) {
           vm.authorList = res.data;
           if(vm.isNew(vm.form.poet_id)) {
-            console.log('push to authorList', vm.newAuthor);
             vm.authorList.push(vm.newAuthor);
           }
-          console.log('reset authorList', vm.authorList);
         }
-        console.log('result', res?.data?.length);
 
         console.log('search result: ', res?.data?.length, _.map(vm.authorList, 'id'), _.map(vm.authorList, 'label'));
         loading(false);
