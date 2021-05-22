@@ -537,12 +537,12 @@ SQL;
         $str = trim(preg_replace('@[[:punct:]\n\r～｜　\s]+@u', ' ', $str));
         $keyword = '';
         $matches = [];
-        preg_match('@^(搜索??|search)(一下|一搜|一首|一个)??\s*?(?<keyword>.*)(的?((古|现代)?诗歌?|词))?$@Uu', $str, $matches);
+        preg_match('@^(搜索??|search)(一下|一首)??\s*?(?<keyword>.*)(的?((古|现代)?诗歌?|词))?$@Uu', $str, $matches);
         if (isset($matches['keyword'])) {
             $keyword = trim($matches['keyword']);
         } else {
             $matches = [];
-            preg_match('@^(有没有??|告诉我|帮我找|我想要|(给我来|给我|来)|搜索?)(一首|(一|那|哪)?个|一下)??((和|跟|带|包?含)有??)??\s*?(?<keyword>.*)((有关|相关)?的?((十四行|十六行|古|现代)?诗歌?|词))$@Uu', $str, $matches);
+            preg_match('@^(有没有??|告诉我|帮我找|我想要|(给我来|给我|来)|搜索?)(一首|一下)??((和|跟|带|包?含)有??)??\s*?(?<keyword>.*)((有关|相关)?的?((十四行|十六行|古|现代)?诗歌?|词))$@Uu', $str, $matches);
             $keyword = isset($matches['keyword']) ? trim($matches['keyword']) : '';
         }
 
