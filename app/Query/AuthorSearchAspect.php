@@ -29,7 +29,7 @@ class AuthorSearchAspect extends SearchAspect {
 
     public function getResults(string $term): Collection {
 
-        return Author::whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name_lang, '$.*'))) LIKE \"%$term%\"")->get();
+        return Author::whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name_lang, '$.*'))) LIKE \"%$term%\" ")->limit(10)->get();
 
     }
 }

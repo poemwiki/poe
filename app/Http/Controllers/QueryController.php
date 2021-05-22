@@ -44,10 +44,17 @@ class QueryController extends Controller {
         $keyword4Query = Str::of($keyword)
             // ->replace('·', ' ')
             // ->replaceMatches('@[[:punct:]]+@u', ' ')
-            ->replaceMatches('@[a-zA-Z]\s@u', ' ')
+            ->replaceMatches('@\b[a-zA-Z]{1,2}\b@u', ' ')
             ->replaceMatches('@\s+@u', ' ')
             ->trim();//->lower();
-        // dd($keyword);
+        // dd($keyword4Query);
+        if($keyword4Query->length < 1) {
+            return view('query.search')->with([
+                'authors' => [],
+                'poems' => [],
+                'keyword' => $keyword
+            ]);
+        }
 
         // DB::enableQueryLog();
         $searchResults = (new Search())
@@ -59,7 +66,7 @@ class QueryController extends Controller {
                     ->addSearchableAttribute('poet')
                     ->addSearchableAttribute('poet_cn')
                     ->addSearchableAttribute('translator')
-                    ->with('poetAuthor');
+                    ->with('poetAuthor')->limit(100);
                     // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
             })
             // ->registerModel(Poem::class, 'title', 'poem', 'poet', 'poet_cn', 'translator')//, 'poet')
@@ -76,7 +83,8 @@ class QueryController extends Controller {
             $shiftPoems->push($p->searchable);
         }
 
-        foreach ($authors as $author) {
+        foreach ($authors as $key => $author) {
+            if($key >= 5) break;
             foreach($author->searchable->poems as $poem) {
                 $shiftPoems->push($poem);
             }
