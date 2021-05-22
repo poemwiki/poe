@@ -107,7 +107,7 @@ class PoemRepository extends BaseRepository
         if(!empty($with)) $builder->with($with);
 
         return $builder // TODO 1. 如果显示声明原创的诗歌，是否需要跟普通诗歌区分开？ 2. 对声明原创的诗歌，gate 中定义只允许上传用户编辑
-        ->inRandomOrder()
+        ->inRandomOrder(rand(0, 1000000))
             ->take($num);
     }
 
@@ -272,6 +272,9 @@ class PoemRepository extends BaseRepository
     public static function isDuplicated(string $poem) {
         // TODO poem soft deleted, but content not deleted???
         // TODO use simhash
+        if(mb_strlen($poem) <= 10) {
+            return false;
+        }
         $contentHash = Str::contentHash($poem);
         $existed = Content::where([
             'hash_crc32' => Str::crc32($contentHash),
