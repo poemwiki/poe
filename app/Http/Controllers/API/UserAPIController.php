@@ -19,7 +19,7 @@ class UserAPIController extends Controller{
             ]);
             $result = $wechatApp->content_security->checkText($request->nickName);
             if($result->errcode) {
-                return $this->responseFail([], '请检查是否含有敏感词', -2);
+                return $this->responseFail([], '请检查是否含有敏感词', Controller::$CODE['content_security_failed']);
             }
 
             $user->name = $request->nickName;

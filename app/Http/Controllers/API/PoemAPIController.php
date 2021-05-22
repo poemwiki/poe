@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CreatePoemRequest;
+use App\Http\Requests\API\StoreOwnerUploaderPoem;
 use App\Models\Poem;
 use App\Models\Tag;
 use App\Repositories\PoemRepository;
@@ -166,11 +166,13 @@ class PoemAPIController extends Controller {
             'avatar', 'content', 'created_at', 'id', 'user_id', 'name', 'poem_id'//, 'title'
         ];
 
-        $poems = $this->poemRepository->suggest($num, ['reviews'])
+        $noScoreNum = 2;
+        $poems = $this->poemRepository->suggest($num - $noScoreNum, ['reviews'])
             ->whereNull('campaign_id')
             ->where('score', '>=', 7)
             ->get();
-        $noScorePoems = $this->poemRepository->suggest(1, ['reviews'])
+        $noScorePoems = $this->poemRepository->suggest($noScoreNum, ['reviews'])
+            ->whereNull('campaign_id')
             ->whereNull('score')
             ->get();
         $poems = $poems->concat($noScorePoems);
@@ -231,12 +233,17 @@ class PoemAPIController extends Controller {
         $item = Poem::where('id', '=', $id)->first();
         if(!$item) {
             abort(404);
-            return $this->responseFail([], 'not found', -3);
+            return $this->responseFail([], 'not found', Controller::$CODE['no_entry']);
         }
         $res = $item->only($columns);
 
         $res['poet'] = $item->poet_label;
         $res['date_ago'] = date_ago($item->created_at);
+        // $res['sell'] = [
+        //     'picUrl' => asset('images/campaign/6/sell.jpg'),
+        //     'appId' => '',
+        //     'path' => ''
+        // ];
 
         $res['score'] = $item->totalScore;
         // TODO save score_count to poem.score_count column
@@ -289,7 +296,7 @@ class PoemAPIController extends Controller {
         return $this->responseSuccess($res);
     }
 
-    public function store(CreatePoemRequest $request) {
+    public function store(StoreOwnerUploaderPoem $request) {
         $sanitized = $request->getSanitized();
 
         $wechatApp = Factory::miniProgram([
@@ -299,17 +306,19 @@ class PoemAPIController extends Controller {
         ]);
         $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['poem']);
         if($result->errcode) {
-            return $this->responseFail([], '请检查是否含有敏感词', -2);
+            return $this->responseFail([], '请检查是否含有敏感词', Controller::$CODE['content_security_failed']);
         }
 
         $poem = Poem::create($sanitized);
         $tag = Tag::find($sanitized['tag_id']);
-        $poem->tags()->save($tag);
-
-        if($tag->is_campaign) {
-            $poem->campaign_id = $tag->campaign->id;
-            $poem->save();
+        if($tag) {
+            $poem->tags()->save($tag);
+            if($tag->is_campaign) {
+                $poem->campaign_id = $tag->campaign->id;
+                $poem->save();
+            }
         }
+
 
         return $this->responseSuccess();
     }
