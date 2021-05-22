@@ -29,7 +29,7 @@
 
 
     @if(isset($authors) && isset($poems))
-    <p class="search-count">@lang('search.count', ['count' => count($authors) + $poems->count()])</p>
+    <p class="search-count">@lang('search.count', ['count' => count($authors) + count($poems)])</p>
     @endif
 
 
@@ -63,7 +63,7 @@
       </div>
     @endif
 
-    @if(isset($poems) && $poems->count())
+    @if(isset($poems) && count($poems))
       <div class="search-group">
         <h2>@lang('search.result-poem')</h2>
 

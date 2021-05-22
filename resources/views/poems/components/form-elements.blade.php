@@ -93,7 +93,9 @@
 
     <input type="hidden" name="poet" v-model="form.poet">
     <v-select :options="authorList" label="label" :reduce="label => label.id"
-              taggable :create-option="label => ({
+              taggable
+              :filterable="false"
+              :create-option="label => ({
                 label: label,
                 id: 'new_' + label,
                 source: '',
