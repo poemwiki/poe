@@ -11,10 +11,12 @@ class NoDuplicatedPoem implements Rule {
     /**
      * Create a new rule instance.
      *
-     * @return void
+     * @param int|null $poem_id
+     * @param string $transKey
      */
-    public function __construct(int $poem_id = null) {
+    public function __construct(int $poem_id = null, string $transKey = 'poem.duplicated poem') {
         $this->poem_id = $poem_id;
+        $this->transKey = $transKey;
         $this->dupPoem = null;
     }
 
@@ -40,9 +42,13 @@ class NoDuplicatedPoem implements Rule {
      * @return string
      */
     public function message() {
-        return trans('poem.duplicated poem', [
+        if($this->transKey === 'id') {
+            return $this->dupPoem->id;
+        }
+        return trans($this->transKey, [
             'url' => route('p/show', Poem::getFakeId($this->dupPoem->id)),
             'title' => $this->dupPoem->title,
+            'id' => $this->dupPoem->id,
             'poet' => $this->dupPoem->poetLabel
         ]);
     }

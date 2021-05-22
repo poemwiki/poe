@@ -36,7 +36,7 @@ class CreatePoemRequest extends FormRequest {
             'poet_cn' => ['nullable', 'string'],
             'bedtime_post_id' => ['nullable', 'integer'],
             'bedtime_post_title' => ['nullable', 'string'],
-            'poem' => ['nullable', 'string', new NoDuplicatedPoem],
+            'poem' => [new NoDuplicatedPoem(null), 'required', 'string'],
             'length' => ['nullable', 'integer'],
             'translator' => ['nullable', 'string'],
             'from' => ['nullable', 'string'],
