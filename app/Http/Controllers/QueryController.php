@@ -46,7 +46,7 @@ class QueryController extends Controller {
             // ->replaceMatches('@[[:punct:]]+@u', ' ')
             ->replaceMatches('@\b[a-zA-Z]{1,2}\b@u', ' ')
             ->replaceMatches('@\s+@u', ' ')
-            ->trim();//->lower();
+            ->trim();
         // dd($keyword4Query);
         if($keyword4Query->length < 1) {
             return view('query.search')->with([

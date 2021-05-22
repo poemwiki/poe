@@ -33,7 +33,7 @@ class AuthorRepository extends BaseRepository {
     private static function _searchAlias(string $name, $authorIds=[], $excludeAuthorId=null): Collection {
         $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
         $query = Alias::selectRaw('wikidata_id, min(wikidata_id) as id, min(name) as name, author_id')
-            ->whereRaw("lower(`name`) LIKE $value");
+            ->whereRaw("`name` LIKE $value");
 
         if (is_array($authorIds) && !empty($authorIds))
             $query->whereIn('author_id', $authorIds);
