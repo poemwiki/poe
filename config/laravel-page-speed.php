@@ -28,6 +28,7 @@ return [
         '*.jpeg',
         'admin*',
         'poem-card*',
+        'author-avatar*',
         'captcha*',
         '*.xml',
         '*.less',
