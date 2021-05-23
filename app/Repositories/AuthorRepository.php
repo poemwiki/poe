@@ -93,7 +93,7 @@ class AuthorRepository extends BaseRepository {
         return $res->toArray();
     }
 
-    public static function searchLabel($name, $authorId=null) {
+    public static function searchLabel($name, $authorId=null): Collection {
         if(is_numeric($authorId)) {
             $resById = Author::select(['id', 'name_lang', 'pic_url', 'describe_lang'])->where('id', '=', $authorId)->get()
                 ->map->only(['id', 'label_en', 'label_cn', 'label', 'url', 'pic_url', 'describe_lang', 'avatar_url'])->map(function ($item) {
@@ -110,7 +110,7 @@ class AuthorRepository extends BaseRepository {
         if(isset($resById))
             $aliasRes = $resById->concat($aliasRes);
 
-        return $aliasRes->toArray();
+        return $aliasRes;
     }
 
     /**
@@ -125,7 +125,7 @@ class AuthorRepository extends BaseRepository {
      * TODO this process should be a command
      * @param Wikidata $wiki
      * @param int|null $user_id
-     * @return Author
+     * @return AuthorRepository|\Illuminate\Database\Eloquent\Model
      */
     public function importFromWikidata(Wikidata $wiki, int $userID=null) {
         $entity = json_decode($wiki->data);
@@ -170,6 +170,7 @@ class AuthorRepository extends BaseRepository {
 
     /**
      * Get a existed Author by wikidata_id
+     * if not existed, create one from wikidata
      * @param $wikidata_id
      */
     public function getExistedAuthor($wikidata_id) : Author {

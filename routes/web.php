@@ -281,6 +281,7 @@ Route::prefix('p')->name('p/')->group(static function() {
 
 Route::prefix('author')->name('author/')->group(static function() {
     Route::get('/create',    'AuthorController@create')->name('create');
+    Route::get('/create-from-wikidata/{wikidata_id}',    'AuthorController@createFromWikidata')->name('create-from-wikidata');
     Route::get('/edit/{fakeId}',    'AuthorController@edit')->name('edit');
     Route::post('/update/{fakeId}',    'AuthorController@update')->name('update');
     Route::post('/store',    'AuthorController@store')->name('store');

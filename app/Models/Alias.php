@@ -5,8 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasTranslations;
+use Spatie\Searchable\Searchable;
+use Spatie\Searchable\SearchResult;
 
-class Alias extends Model {
+/**
+ * @property Wikidata wikidata
+ */
+class Alias extends Model implements Searchable {
     protected $table = 'alias';
 
     protected $fillable = [
@@ -66,4 +71,24 @@ class Alias extends Model {
     }
 
 
+    public function getSearchResult(): SearchResult {
+        $author = $this->author;
+        if($author) {
+            $url = route('author/show', ['fakeId' => $author->fakeId]);
+
+            return new SearchResult(
+                $author,
+                $this->name,
+                $url
+            );
+        }
+
+        $wikiData = $this->wikidata;
+        $url = route('author/create-from-wikidata', ['wikidata_id' => $wikiData->id]);
+        return new SearchResult(
+            $wikiData,
+            $this->name,
+            $url
+        );
+    }
 }

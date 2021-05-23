@@ -6,10 +6,12 @@ use App\Http\Requests\Admin\Author\UpdateAuthor;
 use App\Models\Author;
 use App\Models\Nation;
 use App\Models\Poem;
+use App\Models\Wikidata;
 use App\Repositories\AuthorRepository;
 use App\Repositories\DynastyRepository;
 use App\Repositories\LanguageRepository;
 use App\Repositories\NationRepository;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Routing\Redirector;
 
 
@@ -118,6 +120,22 @@ class AuthorController extends Controller {
             'dynastyList' => DynastyRepository::allInUse(),
             'defaultNation' => Nation::limit(10)->get()->toArray(),
         ]);
+    }
+
+    /**
+     * Store a newly created author in storage.
+     * @param int $wikidata_id
+     * @return array
+     */
+    public function createFromWikidata(int $wikidata_id) {
+        $wikidata = Wikidata::find($wikidata_id);
+        if(!$wikidata) {
+            throw new ModelNotFoundException('no such wikidata entry');
+        }
+
+        $author = $this->authorRepository->getExistedAuthor($wikidata_id);
+
+        return $this->responseSuccess(route('author/show', $author->fakeId));
     }
 
     /**

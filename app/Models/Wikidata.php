@@ -5,13 +5,15 @@ namespace App\Models;
 use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Searchable\Searchable;
+use Spatie\Searchable\SearchResult;
 
 /**
  * @property mixed data
  * @property mixed entity
  * @property string wiki_desc_lang wikipedia summary
  */
-class Wikidata extends Model {
+class Wikidata extends Model implements Searchable {
     use HasTranslations;
     use LogsActivity;
 
@@ -173,4 +175,13 @@ class Wikidata extends Model {
         return $picUrl;
     }
 
+
+    public function getSearchResult(): SearchResult {
+        $url = '';// TODO wikidata url here
+        return new SearchResult(
+            $this,
+            $this->getSiteTitle('zh')['title'],
+            $url
+        );
+    }
 }

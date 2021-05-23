@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Author;
 use App\Models\Nation;
 use App\Models\Poem;
-use App\Query\AuthorSearchAspect;
+use App\Query\AuthorAliasSearchAspect;
 use App\Repositories\AuthorRepository;
 use App\Repositories\NationRepository;
 use App\Repositories\PoemRepository;
@@ -58,7 +58,7 @@ class QueryController extends Controller {
 
         // DB::enableQueryLog();
         $searchResults = (new Search())
-            ->registerAspect(AuthorSearchAspect::class) // TODO AuthorSearchAspect()->limit(5)
+            ->registerAspect(AuthorAliasSearchAspect::class)
             ->registerModel(Poem::class, function(ModelSearchAspect $modelSearchAspect) {
                 $modelSearchAspect
                     ->addSearchableAttribute('title') // return results for partial matches
@@ -74,7 +74,7 @@ class QueryController extends Controller {
 
         // dd(DB::getQueryLog());
         $results = $searchResults->groupByType();
-        $authors = $results->get('authors') ?: [];
+        $authors = $results->get('authorAlias') ?: [];
         $poems = $results->get('poem') ?: [];
 
         $shiftPoems = collect();
@@ -85,6 +85,11 @@ class QueryController extends Controller {
 
         foreach ($authors as $key => $author) {
             if($key >= 5) break;
+            if($author->searchable instanceof \App\Models\Wikidata) {
+                // TODO comment unset to show wikidata poet on search result page
+                unset($authors[$key]);
+                continue;
+            }
             foreach($author->searchable->poems as $poem) {
                 $shiftPoems->push($poem);
             }
