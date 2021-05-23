@@ -57,6 +57,7 @@
 
                   <th is='sortable' :column="'id'">{{ trans('admin.poem.columns.id') }}</th>
                   <th is='sortable' :column="'title'">{{ trans('admin.poem.columns.title') }}</th>
+                  <th is='sortable' :column="'campaign.id'">{{ trans('admin.poem.columns.campaign_id') }}</th>
                   <th is='sortable' :column="'language_id'">{{ trans('admin.poem.columns.language_id') }}</th>
                   <th is='sortable' :column="'is_original'">{{ trans('admin.poem.columns.is_original') }}</th>
                   <th is='sortable' :column="'is_owner_uploaded'">{{ trans('admin.poem.columns.is_owner_uploaded') }}</th>
@@ -99,6 +100,7 @@
 
                   <td>@{{ item.id }}</td>
                   <td><a :href="item.url" target="_blank">@{{ item.title }}</a></td>
+                  <td>@{{ item.campaign_name }}</td>
                   <td>@{{ item.language_name }}</td>
                   <td>@{{ item.is_original ? '原作' : '译作' }}</td>
                   <td>@{{ item.is_owner_uploaded ? 'Yes' : 'No' }}</td>

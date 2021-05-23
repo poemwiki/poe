@@ -39,7 +39,7 @@ class PoemController extends Controller
 
             // set columns to query
             ['id', 'title', 'updated_at', 'created_at', 'is_original', 'length',
-                'poet', 'poet_cn', 'poet_id', 'poetAuthor.name_lang',
+                'poet', 'poet_cn', 'poet_id', 'poetAuthor.name_lang', 'campaign_id',
                 'translator', 'translator_id', 'translatorAuthor.name_lang', 'from', 'language_id', 'language.name_lang',
                 'is_owner_uploaded', 'upload_user_id', 'uploader.name as uploader_name', 'need_confirm', 'is_lock', 'content_id'],
 
@@ -54,6 +54,7 @@ class PoemController extends Controller
                 $query->leftJoin('author as poetAuthor', 'poetAuthor.id', '=', 'poem.poet_id');
                 $query->leftJoin('author as translatorAuthor', 'translatorAuthor.id', '=', 'poem.translator_id');
                 $query->leftJoin('language', 'language.id', '=', 'poem.language_id');
+                $query->leftJoin('campaign', 'campaign.id', '=', 'poem.campaign_id');
             }
 
         );
@@ -61,6 +62,7 @@ class PoemController extends Controller
         foreach ($data as &$poem) {
             $poem['url'] = $poem->url;
             $poem['language_name'] = $poem->lang ? $poem->lang->label : '';
+            $poem['campaign_name'] = $poem->campaign_id ? \App\Models\Campaign::find($poem->campaign_id)->name_lang : '';
             $poem['poet_label'] = $poem->poetLabel;
             if($poem->poetAuthor) {
                 $poem['poet_url'] = $poem->poetAuthor->url;
