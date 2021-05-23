@@ -167,18 +167,18 @@ class Author extends Model implements Searchable {
 
         return $all;
     }
-
-
-    private function isValidPicUrl($url) {
-        return !empty($url) && !str_ends_with($url, 'tif') && !str_starts_with($url, 'https://upload.wikimedia.org');
-    }
     /**
      * use avatarUrl in case users.avatar is null
      * TODO check if valid for each pic_url
      * @return string
      */
     public function getAvatarUrlAttribute() {
-        return $this->isValidPicUrl($this->pic_url[0] ?? '') ? $this->pic_url[0] : asset(static::$defaultAvatarUrl);
+        $url = isValidPicUrl($this->pic_url[0] ?? '') ? $this->pic_url[0] : asset(static::$defaultAvatarUrl);
+        if (isWikimediaUrl($url)) {
+            // $url = route('author-avatar', ['fakeId' => $this->fake_id]);
+            $url = asset(static::$defaultAvatarUrl);
+        }
+        return $url;
     }
 
     public function fetchWikiDesc($force = false) {
