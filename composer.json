@@ -37,6 +37,7 @@
     "fukuball/jieba-php": "^0.33.0",
     "guzzlehttp/guzzle": "^6.3",
     "itsgoingd/clockwork": "^4.1",
+    "jaeger/querylist": "^4.2",
     "jfcherng/php-diff": "^6.10",
     "laravel/framework": "^7.0",
     "laravel/passport": "^8.2",
