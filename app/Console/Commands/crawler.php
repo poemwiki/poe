@@ -58,16 +58,21 @@ class crawler extends Command {
         parent::__construct();
     }
 
-    public function fetch($url, $model, $fetchFunction, $cb) {
+    public function fetch($url, $model, $fetchFunction, $cb, $sleep=null) {
         $crawl = Crawl::where([
             'model' => $model,
             'url' => $url,
         ])->first();
+
         if ($crawl) {
+            logger()->info('use previous result:' . $crawl->result);
             $result = json_decode($crawl->result, true);
-            $result['html'] = $crawl->html;
+            $result['html'] = isset($result['html']) ? $result['html'] : $crawl->html;
         } else {
             $result = $this->$fetchFunction($url);
+            if($sleep) {
+                sleep($sleep + random_int(0, 5));
+            }
         }
         return $cb($result);
     }
@@ -139,8 +144,9 @@ class crawler extends Command {
         }
 
 
-        foreach ($poemList as &$item) {
+        foreach ($poemList as $key => &$item) {
             logger()->info('crawling item page: ' . $item['poemUrl']);
+            $sleep = $key <= count($poemList) - 1 ? 10 : 0;
             $poem = $this->fetch($item['poemUrl'], \App\Models\Poem::class, 'fetchPoem', function($poem) use ($poetCrawl, $item) {
                 logger()->info('crawled item: ', $poem);
                 Crawl::updateOrCreate([
@@ -149,12 +155,11 @@ class crawler extends Command {
                 ], [
                     'name' => $item['title'],
                     'export_setting' => json_encode($this->poemExportSetting),
-                    'result' => json_encode($poem['content']),
+                    'result' => json_encode(collect($poem)->except('html')),
                     'html' => $poem['html'],
                     'f_crawl_id' => $poetCrawl->id
                 ]);
-            });
-            sleep(1);
+            }, $sleep);
         }
 
         return 0;
@@ -165,6 +170,9 @@ class crawler extends Command {
             'html' => [
                 '#content',
                 'html', '-.signatureDiv -[id^=audio]',],
+            'title' => [
+                '.container h3',
+                'text'],
             'content' => [
                 '#content',
                 'html', '-.signatureDiv -[id^=audio]',
