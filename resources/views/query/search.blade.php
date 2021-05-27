@@ -40,7 +40,7 @@
       </aside>
     @endif
 
-    @if(isset($authors) && $authors)
+    @if(isset($authors) && $authors && count($authors))
       <div class="search-group">
         <h2>@lang('search.result-author')</h2>
 
