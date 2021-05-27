@@ -21,13 +21,14 @@ class QueryController extends Controller {
 
     // public function __construct() {
     // }
-    public function index(){
+    public function index() {
         return view('query.search');
     }
 
     public function nation($keyword, $id) {
         return $this->response(NationRepository::searchByName($keyword, $id));
     }
+
     public function author($keyword, $id) {
         return $this->response(AuthorRepository::searchLabel($keyword, $id));
     }
@@ -38,8 +39,8 @@ class QueryController extends Controller {
     }
 
     // TODO support multiple word search like bot search, order by relative
-    public function search($keyword){
-        if($keyword === '' || is_null($keyword)) return view('query.search');
+    public function search($keyword) {
+        if ($keyword === '' || is_null($keyword)) return view('query.search');
 
         $keyword4Query = Str::of($keyword)
             // ->replace('·', ' ')
@@ -48,7 +49,7 @@ class QueryController extends Controller {
             ->replaceMatches('@\s+@u', ' ')
             ->trim();
         // dd($keyword4Query);
-        if($keyword4Query->length < 1) {
+        if ($keyword4Query->length < 1) {
             return view('query.search')->with([
                 'authors' => [],
                 'poems' => [],
@@ -59,7 +60,7 @@ class QueryController extends Controller {
         // DB::enableQueryLog();
         $searchResults = (new Search())
             ->registerAspect(AuthorAliasSearchAspect::class)
-            ->registerModel(Poem::class, function(ModelSearchAspect $modelSearchAspect) {
+            ->registerModel(Poem::class, function (ModelSearchAspect $modelSearchAspect) {
                 $modelSearchAspect
                     ->addSearchableAttribute('title') // return results for partial matches
                     ->addSearchableAttribute('poem')
@@ -67,14 +68,19 @@ class QueryController extends Controller {
                     ->addSearchableAttribute('poet_cn')
                     ->addSearchableAttribute('translator')
                     ->with('poetAuthor')->limit(100);
-                    // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
+                // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
             })
             // ->registerModel(Poem::class, 'title', 'poem', 'poet', 'poet_cn', 'translator')//, 'poet')
             ->search($keyword4Query);
 
         // dd(DB::getQueryLog());
         $results = $searchResults->groupByType();
-        $authors = $results->get('authorAlias') ?: [];
+        $authors = $results->get('authorAlias') ?: collect([]);
+        $authors = $authors->filter(function($author) {
+            // TODO show wikidata poet on search result page: $author->searchable instanceof \App\Models\Wikidata
+            return $author->searchable instanceof \App\Models\Author;
+        });
+
         $poems = $results->get('poem') ?: [];
 
         $shiftPoems = collect();
@@ -84,14 +90,14 @@ class QueryController extends Controller {
         }
 
         foreach ($authors as $key => $author) {
-            if($key >= 5) break;
-            if($author->searchable instanceof \App\Models\Wikidata) {
-                // TODO comment unset to show wikidata poet on search result page
-                unset($authors[$key]);
-                continue;
-            }
-            foreach($author->searchable->poems as $poem) {
-                $shiftPoems->push($poem);
+            if ($key >= 5) break;
+
+            // in case of $author->searchable instanceof \App\Models\Wikidata
+            // after show wikidata poet on search result page
+            if ($author->searchable instanceof \App\Models\Author) {
+                foreach ($author->searchable->poems as $poem) {
+                    $shiftPoems->push($poem);
+                }
             }
         }
 

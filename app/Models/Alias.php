@@ -83,6 +83,12 @@ class Alias extends Model implements Searchable {
             );
         }
 
+        if(!$this->wikidata) {
+            // 由于删除author时，会删除相关alias，所以$this->author和$this->wikidata必有一个不为空
+            // 此处返回 SearchResult 仅从逻辑完备考虑，正常情况下不会执行
+            return new SearchResult($this, $this->name, '');
+        }
+
         $wikiData = $this->wikidata;
         $url = route('author/create-from-wikidata', ['wikidata_id' => $wikiData->id]);
         return new SearchResult(

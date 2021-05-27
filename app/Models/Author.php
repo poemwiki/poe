@@ -119,6 +119,9 @@ class Author extends Model implements Searchable {
             // TODO 如果前端可编辑多别名，此处应删除原有别名，或在controller删除前端选择的别名
             Artisan::call('alias:importFromAuthor', ['--id' => $model->id]);
         });
+        self::deleting(function ($model) {
+            $model->alias()->delete();
+        });
 
     }
 
