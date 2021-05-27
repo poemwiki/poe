@@ -121,13 +121,16 @@ class AuthorController extends Controller {
      * @throws AuthorizationException
      */
     public function edit(Author $author) {
-        $this->authorize('admin.author.edit', $author);
 
-        return view('admin.author.edit', [
-            'author' => $author,
-            'nationList' => Nation::select('name_lang', 'id')->get(),
-            'dynastyList' => Dynasty::select('name_lang', 'id')->get(),
-        ]);
+        return redirect(route('author/edit', $author->fakeId));
+
+        // $this->authorize('admin.author.edit', $author);
+        //
+        // return view('admin.author.edit', [
+        //     'author' => $author,
+        //     'nationList' => Nation::select('name_lang', 'id')->get(),
+        //     'dynastyList' => Dynasty::select('name_lang', 'id')->get(),
+        // ]);
     }
 
     /**
