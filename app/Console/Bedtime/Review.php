@@ -77,12 +77,15 @@ class Review extends Command {
                 ->replace('#wechat_redirect', '')
                 ->replace('http://', 'https://');
 
-            $link = short_url($origin, function ($short) use ($origin, $post) {
-                if($short !== $origin) {
-                    $post->short_url = $short;
-                    $post->save();
-                }
-            });
+            $link = $origin;
+            // 小程序中不支持打开第三方短链接
+            // todo 获取 https://mp.weixin.qq.com/s/iluK_83NX7xgx2WOPc6i_A 这样的链接
+            // $link = mp_short_url($origin, function ($short) use ($origin, $post) {
+            //     if($short !== $origin) {
+            //         $post->short_url = $short;
+            //         $post->save();
+            //     }
+            // });
 
             // $link = short_url(str_replace('http://', 'https://', $link));
             Log::info('Add bedtimepoem review link: ' . $link);
