@@ -75,7 +75,7 @@ class QueryController extends Controller {
 
         // dd(DB::getQueryLog());
         $results = $searchResults->groupByType();
-        $authors = $results->get('authorAlias') ?: collect([]);
+        $authors = $results->get('authorAlias') ?: collect();
         $authors = $authors->filter(function($author) {
             // TODO show wikidata poet on search result page: $author->searchable instanceof \App\Models\Wikidata
             return $author->searchable instanceof \App\Models\Author;
