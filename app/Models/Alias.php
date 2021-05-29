@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasTranslations;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 
 /**
  * @property Wikidata wikidata
+ * @property Author|null author
+ * @property string name
+ * @property integer id
  */
 class Alias extends Model implements Searchable {
     protected $table = 'alias';
@@ -34,7 +35,7 @@ class Alias extends Model implements Searchable {
 
 
     public function author() {
-        return $this->belongsTo(\App\Models\Author::class, 'author_id', 'id');
+        return $this->belongsTo(Author::class, 'author_id', 'id');
     }
 
     /* ************************ ACCESSOR ************************* */
@@ -67,7 +68,7 @@ class Alias extends Model implements Searchable {
     }
 
     public function wikidata() {
-        return $this->hasOne(\App\Models\Wikidata::class, 'id', 'wikidata_id');
+        return $this->hasOne(Wikidata::class, 'id', 'wikidata_id');
     }
 
 

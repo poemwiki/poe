@@ -20,6 +20,7 @@ use Spatie\Searchable\SearchResult;
  * @property User user
  * @property array|null pic_url
  * @property Wikidata wikiData
+ * @property mixed fakeId
  * @package App
  */
 class Author extends Model implements Searchable {

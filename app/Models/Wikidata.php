@@ -12,6 +12,7 @@ use Spatie\Searchable\SearchResult;
  * @property mixed data
  * @property mixed entity
  * @property string wiki_desc_lang wikipedia summary
+ * @property integer id
  */
 class Wikidata extends Model implements Searchable {
     use HasTranslations;
