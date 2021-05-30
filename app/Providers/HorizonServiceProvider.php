@@ -34,10 +34,22 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
     protected function gate()
     {
         Gate::define('viewHorizon', function ($user) {
-            dd($user);
             return in_array($user->id, [
                 1
             ]);
+        });
+    }
+
+    /**
+     * Overload authorization method from \Laravel\Horizon\HorizonApplicationServiceProvider
+     * to allow access to Horizon without having a logged in user.
+     *
+     * @return void
+     */
+    protected function authorization()
+    {
+        Horizon::auth(function ($request) {
+            return true;
         });
     }
 }

@@ -76,5 +76,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'isInvited' => \App\Http\Middleware\CheckInviteCode::class,
         'wechat.oauth' => \Overtrue\LaravelWeChat\Middleware\OAuthAuthenticate::class,
+        'horizonBasicAuth' => \App\Http\Middleware\HorizonBasicAuth::class,
     ];
 }
