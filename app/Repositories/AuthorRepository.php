@@ -26,7 +26,7 @@ class AuthorRepository extends BaseRepository {
 
     /**
      * @param string $name
-     * @param array|null $authorId
+     * @param array $authorIds
      * @param int|null $excludeAuthorId author_id that should be ignored
      * @return Collection
      */
@@ -93,9 +93,21 @@ class AuthorRepository extends BaseRepository {
         return $res->toArray();
     }
 
-    public static function searchLabel($name, $authorId=null): Collection {
+    /**
+     * @param string $name
+     * @param integer|integer[]|null $authorId
+     * @return Collection
+     */
+    public static function searchLabel(string $name, $authorId=null): Collection {
         if(is_numeric($authorId)) {
-            $resById = Author::select(['id', 'name_lang', 'pic_url', 'describe_lang'])->where('id', '=', $authorId)->get()
+            $authorId = [$authorId];
+        }
+        $authorId = collect($authorId)->filter(function ($id) {
+            return is_integer($id);
+        })->toArray();
+        // dd($authorId);
+        if(is_array($authorId)) {
+            $resById = Author::select(['id', 'name_lang', 'pic_url', 'describe_lang'])->whereIn('id', $authorId)->get()
                 ->map->only(['id', 'label_en', 'label_cn', 'label', 'url', 'pic_url', 'describe_lang', 'avatar_url'])->map(function ($item) {
                     $item['source'] = 'PoemWiki';
                     $item['desc'] = $item['describe_lang'];
