@@ -10,6 +10,16 @@ class CreateCrawlTable extends Migration {
      * @return void
      */
     public function up() {
+        // Schema::create('crawl_job', function (Blueprint $table) {
+        //     $table->bigIncrements('id')->unsigned();
+        //     // Artisan::call('alias:import', ['--id' => $wikidata_id]);
+        //     $table->string('command')->nullable(false);
+        //     $table->json('parameters')->nullable(true);
+        //
+        // });
+        // Schema::create('import_job', function (Blueprint $table) {
+        //     $table->bigIncrements('id')->unsigned();
+        // });
         Schema::create('crawl', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned();
             $table->unsignedBigInteger('f_crawl_id')->default(0);
@@ -33,5 +43,7 @@ class CreateCrawlTable extends Migration {
      */
     public function down() {
         Schema::dropIfExists('crawl');
+        Schema::dropIfExists('crawl_job');
+        Schema::dropIfExists('import_job');
     }
 }

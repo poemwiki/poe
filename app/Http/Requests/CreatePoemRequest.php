@@ -52,7 +52,7 @@ class CreatePoemRequest extends FormRequest {
             'original_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
             'translated_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'], // TODO use fake ID here
             'preface' => ['nullable', 'string', 'max:300'],
-            'subtitle' => ['nullable', 'string', 'max:32'],
+            'subtitle' => ['nullable', 'string', 'max:128'],
             'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
             'poet_id' => ['nullable', Rule::in(array_merge(AuthorRepository::ids()->toArray(), ['new']))],
             'poet_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
