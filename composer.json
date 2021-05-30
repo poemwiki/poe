@@ -40,6 +40,7 @@
     "jaeger/querylist": "^4.2",
     "jfcherng/php-diff": "^6.10",
     "laravel/framework": "^7.0",
+    "laravel/horizon": "^4.0.0",
     "laravel/passport": "^8.2",
     "laravel/tinker": "^2.0",
     "laravel/ui": "^2.1",
