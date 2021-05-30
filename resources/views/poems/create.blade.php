@@ -14,7 +14,7 @@
       <poem-form
         id="poem-form"
         :action="'{{ url('poems/store') }}'"
-        @if($poem->scenario) :data="{{ $poem->toJson() /*TODO pass fillable attributes only*/}}" @endif
+        @if($poem->scenario) :data="{{ $poem->toFillableJson() }}" @endif
         :trans="{{json_encode($trans)}}"
         :locales="{{ json_encode($locales) }}"
         :default-authors="{{ json_encode($defaultAuthors) }}"
