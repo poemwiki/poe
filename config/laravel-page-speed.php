@@ -29,6 +29,7 @@ return [
         'admin*',
         'poem-card*',
         'author-avatar*',
+        // '*contribution*',
         'captcha*',
         '*.xml',
         '*.less',

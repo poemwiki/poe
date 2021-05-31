@@ -52,12 +52,15 @@ use Jfcherng\Diff\Factory\RendererFactory;
                           'ignoreWhitespace' => false,
                       ];
                       $rendererOptions = [
-                          'detailLevel' => 'line',
+                          'detailLevel' => 'char', // (none, line, word, char)
                           'language' => 'chs',
+                          'separateBlock' => true, // show a separator between different diff hunks in HTML renderers
+                          'spacesToNbsp' => true
                       ];
 
                       $differ = new Differ(explode("\n", $old), explode("\n", $new), $differOptions);
                       $renderer = RendererFactory::make('SideBySide', $rendererOptions); // or your own renderer object
+                      //dd($renderer, $old, $new);
                       $result = $renderer->render($differ);
 
                       echo $result;
