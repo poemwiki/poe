@@ -34,7 +34,7 @@
          :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.subtitle') }}</label>
   <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">
     <input type="text" v-model="form.subtitle"
-           v-validate="'max:32'"
+           v-validate="'max:128'"
            data-vv-as="{{ trans('admin.poem.columns.subtitle') }}"
            @input="validate($event)" class="form-control"
            :class="{'form-control-danger': errors.has('subtitle'), 'form-control-success': fields.subtitle && fields.subtitle.valid}"
