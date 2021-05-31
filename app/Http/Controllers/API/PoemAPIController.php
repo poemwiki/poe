@@ -42,7 +42,7 @@ class PoemAPIController extends Controller {
 
         $columns = [
             'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
-            'poem', 'poet', 'poet_id', 'poet_avatar', 'poet_image', //'poet_cn',
+            'poem', 'poet', 'poet_id', 'poet_avatar', //'poet_cn',
             'score', 'score_count', 'score_weight', 'rank',
             'reviews', 'reviews_count'
             // 'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'language_id',
@@ -193,6 +193,7 @@ class PoemAPIController extends Controller {
             $item['score_count'] = $score['count'];
             $item['date_ago'] = date_ago($poem->created_at);
             $item['poet'] = $poem->poet_label;
+            $item['poet_cn'] = $poem->poet_label_cn;
             $item['reviews_count'] = $poem->reviews->count();
             $item['reviews'] = $poem->reviews->take(1)->map(function ($review) use ($reviewColumn) {
                 $review->content = $review->pureContent;
@@ -238,6 +239,7 @@ class PoemAPIController extends Controller {
         $res = $item->only($columns);
 
         $res['poet'] = $item->poet_label;
+        $res['poet_cn'] = $item->poet_label_cn;
         $res['date_ago'] = date_ago($item->created_at);
         // $res['sell'] = [
         //     'picUrl' => asset('images/campaign/6/sell.jpg'),
@@ -250,7 +252,7 @@ class PoemAPIController extends Controller {
         $res['score_count'] = ScoreRepository::calcCount($id);
 
         $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item)
-            ->get(['review.content', 'review.created_at', 'review.user_id'])
+            ->get(['review.id', 'review.content', 'review.created_at', 'review.user_id', 'review.like', 'review.reply_id'])
             ->map(function ($item) {
                 $item->makeHidden('user');
                 $item['date_ago'] = date_ago($item->created_at);
