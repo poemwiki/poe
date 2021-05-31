@@ -19,9 +19,9 @@ class RemoveSpace extends PageSpeed{
             // remove  spaces around block elements tag
             "@\s*(</?(head|meta|title|link|address|article|h1|h2|h3|h4|h5|h6|aside|blockquote|details|dialog|dd|div|dl|dt|fieldset|figcaption|figure|footer|form|h1|header|hgroup|hr|li|main|nav|ol|p|section|table|ul)(\s+[^>]+)*>)\s*@" => '$1',
             // remove spaces around inline elements tag
-            "@\s*(</?(a|abbr|acronym|audio|b|bdi|bdo|big|br|button|canvas|cite|data|datalist|del|dfn|em|embed|i|iframe|img|input|ins|kbd|label|map|mark|meter|noscript|object|output|picture|progress|q|ruby|s|samp|script|select|slot|small|span|strong|sub|sup|svg|template|textarea|time|u|tt|var|video|wbr)(\s+[^>]+)*>)\s*@" => '$1',
-            // remove spaces around pre/code tag
-            "@\s*(<(pre|code)(\s+[^>]+)*>)@" => '$1',
+            "@\s*(</?(a|abbr|acronym|audio|b|bdi|bdo|big|br|button|canvas|cite|data|datalist|dfn|em|embed|i|iframe|img|input|kbd|label|map|mark|meter|noscript|object|output|picture|progress|q|ruby|s|samp|script|select|slot|small|span|strong|sub|sup|svg|template|textarea|time|u|tt|var|video|wbr)(\s+[^>]+)*>)\s*@" => '$1',
+            // remove spaces before pre/code tag
+            "@\s*(<(pre|code|del|ins)(\s+[^>]+)*>)@" => '$1',
         ];
 
         $str = $this->replace($replace, $buffer);
