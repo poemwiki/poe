@@ -31,6 +31,7 @@ class CreateReviewRequest extends FormRequest {
             'title' => ['nullable', 'string', 'max:64'],
             'content' => ['required', 'string', 'max:1000'],
             'poem_id' => ['required', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
+            'reply_id' => ['nullable', 'integer', 'exists:' . \App\Models\Review::class . ',id'],
         ];
     }
 

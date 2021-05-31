@@ -21,6 +21,17 @@ class ReviewAPIController extends Controller {
         $this->repository = $itemRepository;
     }
 
+    public function like($action, $id) {
+        $review = Review::find($id);
+        if($action === 'like') {
+            $review->like = $review->like+1;
+        } else if($action === 'unlike') {
+            $review->like = $review->like-1;
+        }
+        $review->save();
+        return $this->responseSuccess(['like' => $review->like]);
+    }
+
     public function store(CreateReviewRequest $request) {
         $sanitized = $request->getSanitized();
 
