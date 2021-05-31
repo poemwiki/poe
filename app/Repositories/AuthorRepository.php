@@ -30,7 +30,7 @@ class AuthorRepository extends BaseRepository {
      * @param int|null $excludeAuthorId author_id that should be ignored
      * @return Collection
      */
-    private static function _searchAlias(string $name, $authorIds=[], $excludeAuthorId=null): Collection {
+    private static function _searchAlias(string $name, $authorIds=[], array $excludeAuthorId=null): Collection {
         $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
         $query = Alias::selectRaw('wikidata_id, min(wikidata_id) as id, min(name) as name, author_id')
             ->whereRaw("`name` LIKE $value");
@@ -41,8 +41,8 @@ class AuthorRepository extends BaseRepository {
         if (is_null($authorIds))
             $query->whereNull('author_id');
 
-        if (is_numeric($excludeAuthorId)) {
-            $query->whereRaw("NOT(`author_id` <=> $excludeAuthorId)");
+        if (is_array($excludeAuthorId)) {
+            $query->whereNotIn('author_id', $excludeAuthorId);
             // NOT(nullable fields <=> sth) 等价于以下条件：
             // $query->whereRaw("(`author_id` <> $excludeAuthorId or `author_id` is NULL)");
             // 必须添加 or `author_id` is NULL 条件，否则查询不到 author_id 为 NULL 的数据。
@@ -95,19 +95,16 @@ class AuthorRepository extends BaseRepository {
 
     /**
      * @param string $name
-     * @param integer|integer[]|null $authorId
+     * @param integer[]|null $authorId
      * @return Collection
      */
-    public static function searchLabel(string $name, $authorId=null): Collection {
-        if(is_numeric($authorId)) {
-            $authorId = [$authorId];
-        }
-        $authorId = collect($authorId)->filter(function ($id) {
+    public static function searchLabel(string $name, array $authorId=null): Collection {
+        $authorIds = collect($authorId)->filter(function ($id) {
             return is_integer($id);
         })->toArray();
         // dd($authorId);
-        if(is_array($authorId)) {
-            $resById = Author::select(['id', 'name_lang', 'pic_url', 'describe_lang'])->whereIn('id', $authorId)->get()
+        if(is_array($authorIds)) {
+            $resById = Author::select(['id', 'name_lang', 'pic_url', 'describe_lang'])->whereIn('id', $authorIds)->get()
                 ->map->only(['id', 'label_en', 'label_cn', 'label', 'url', 'pic_url', 'describe_lang', 'avatar_url'])->map(function ($item) {
                     $item['source'] = 'PoemWiki';
                     $item['desc'] = $item['describe_lang'];

@@ -137,7 +137,7 @@ class PoemController extends Controller
             'genreList' => Genre::select('name_lang', 'id')->get(),
             'translatedPoem' => $translatedPoem ?? null, // TODO don't pass translatedPoem
             'originalPoem' => $originalPoem ?? null, // TODO don't pass originalPoem
-            'defaultAuthors' => Author::select('name_lang', 'id')->limit(10)->get()->toArray(),
+            'defaultAuthors' => []//Author::select('name_lang', 'id')->limit(10)->get()->toArray(),
         ]);
     }
 
@@ -209,17 +209,13 @@ class PoemController extends Controller
             'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id'
         ]);
 
+        $authorIds = array_unique([$poem->poet_id, $poem->translator_id]);
         return view('poems.edit', [
             'poem' => $poem,
             'trans' => $this->trans(),
             'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::select('name_lang', 'id')->get(),
-            'defaultAuthors' => Author::select('name_lang', 'id', 'pic_url', 'describe_lang')->whereIn('id', [$poem->poet_id, $poem->translator_id])
-                ->union(Author::select('name_lang', 'id', 'pic_url', 'describe_lang')->limit(10))->get()->map(function ($item) {
-                    $item['source'] = 'PoemWiki';
-                    $item['desc'] = $item->describe_lang;
-                    return $item;
-                })->toArray(),
+            'defaultAuthors' => AuthorRepository::searchLabel($poem->poetLabel, $authorIds),
         ]);
     }
 

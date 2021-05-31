@@ -30,7 +30,7 @@ class QueryController extends Controller {
     }
 
     public function author($keyword, $id) {
-        return $this->response(AuthorRepository::searchLabel($keyword, $id));
+        return $this->response(AuthorRepository::searchLabel($keyword, [$id]));
     }
 
     // TODO support multiple word search like bot search, order by relative
