@@ -160,7 +160,6 @@ class PoemRepository extends BaseRepository
 
         return $poems->with('reviews')->orderByDesc($orderBy)->get()->map(function (Poem $item) use ($startTime, $endTime) {
             $item['date_ago'] = date_ago($item->created_at);
-            $item['poet_image'] = $item->uploader ? $item->uploader->avatarUrl : asset(\App\User::$defaultAvatarUrl);
             $item['poet'] = $item->poetLabel;
             if(!(config('app.env') === 'production')) {
                 $item['poet'] = $item['poet'] . '-' .$item->id;
@@ -202,7 +201,6 @@ class PoemRepository extends BaseRepository
 
         return $poems->with('reviews')->orderByDesc('score')->get()->map(function (Poem $item) use ($startTime, $endTime) {
             $item['date_ago'] = date_ago($item->created_at);
-            $item['poet_image'] = $item->uploader ? $item->uploader->avatarUrl : asset(\App\User::$defaultAvatarUrl);
             $item['poet'] = $item->poetLabel;
             if(!(config('app.env') === 'production')) {
                 $item['poet'] = $item['poet'] . '-' .$item->id;
@@ -220,7 +218,6 @@ class PoemRepository extends BaseRepository
             ['upload_user_id', '=', $userId],
         ])->with('reviews')->orderByDesc('created_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
-            $item['poet_image'] = $item->uploader->avatarUrl;
             $item['poet'] = $item->poetLabel;
             $item['score_count'] = ScoreRepository::calcCount($item->id);
             return $item;
@@ -261,7 +258,6 @@ class PoemRepository extends BaseRepository
         });
         return $q->with('reviews')->orderByDesc('created_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
-            $item['poet_image'] = $item->poet_avatar;
             $item['poet'] = $item->poet_label;
             $item['score_count'] = ScoreRepository::calcCount($item->id);
             return $item;
