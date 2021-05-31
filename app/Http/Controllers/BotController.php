@@ -9,6 +9,8 @@ use App\Repositories\PoemRepository;
 use App\Repositories\ScoreRepository;
 use App\User;
 use EasyWeChat\Factory;
+use EasyWeChat\Kernel\Exceptions\InvalidConfigException;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Http\Request;
@@ -127,24 +129,43 @@ class BotController extends Controller {
     public function getUrl(Poem $poem) {
         if (!$poem->short_url) {
             $longUrl = 'https://poemwiki.org/p/' . Poem::getFakeId($poem->id);
-            $url = short_url($longUrl, function ($link) use ($poem, $longUrl) {
-                Log::info('shorted url:' . $link);
-                if ($link === $longUrl) return;
-
-                $p = Poem::find($poem->id);
-                if (empty($p)) return;
-
-                $p->timestamps = false;
-                $p->short_url = $link;
-                $p->save();
-            });
+            $url = short_url($longUrl);
             if ($url === $longUrl) {
+                return 'https://poemwiki.org/' . $poem->id;
+            } else {
+                Poem::withoutEvents(function () use ($poem, $url) {
+                    $poem->timestamps = false;
+                    $poem->short_url = $url;
+                    $poem->save();
+                });
+            }
+        }
+        return $poem->short_url;
+    }
+
+    /**
+     * @param Poem $poem
+     * @return mixed|string
+     */
+    public function getWeappUrl(Poem $poem) {
+        if (!$poem->weapp_url) {
+            try {
+                $res = getPermanentWxUrlLink($poem->id);
+                if($res->errcode) {
+                    throw new \Exception('get permanent wxUrlLink error' . $res->errmsg);
+                }
+                $url = $res->url_link;
+            } catch (Exception $e) {
                 $url = 'https://poemwiki.org/' . $poem->id;
             }
-        } else {
-            $url = $poem->short_url;
+
+            Poem::withoutEvents(function () use ($poem, $url) {
+                $poem->timestamps = false;
+                $poem->weapp_url = $url;
+                $poem->save();
+            });
         }
-        return $url;
+        return $poem->weapp_url;
     }
 
     private function _boldNum($str) {
@@ -451,7 +472,7 @@ SQL;
                 }
 
                 // links & score
-                $url = $this->getUrl($p);
+                $url = $this->getWeappUrl($p);
                 $wikiLink = "\n\n诗歌维基：$url";
 
                 $scoreRepo = new ScoreRepository(app());
