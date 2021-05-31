@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\HasCompositeKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -22,7 +21,8 @@ class Review extends Model {
         'poem_id',
         'user_id',
         'content',
-        'title'
+        'title',
+        'reply_id'
     ];
 
     protected $dates = [
@@ -31,7 +31,7 @@ class Review extends Model {
         'deleted_at'
     ];
 
-    protected $appends = ['name', 'avatar'];
+    protected $appends = ['name', 'avatar', 'reply_to_user'];
 
 
     // public static function boot() {
@@ -54,12 +54,22 @@ class Review extends Model {
     public function getNameAttribute() {
         return $this->user ? $this->user->name : '[已注销]';
     }
+    /**
+     * @return string
+     */
+    public function getReplyToUserAttribute() {
+        return $this->replyOfReview ? $this->replyOfReview->user->name : '[已注销]';
+    }
 
     /**
      * @return string
      */
     public function getAvatarAttribute() {
         return $this->user ? $this->user->avatarUrl : asset(\App\User::$defaultAvatarUrl);
+    }
+
+    public function getPureContentAttribute() {
+        return str_replace('&nbsp;', ' ', strip_tags($this->content));
     }
 
 
@@ -73,12 +83,15 @@ class Review extends Model {
     /**
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo
      **/
-    public function user() {
-        return $this->belongsTo(\App\User::class, 'user_id', 'id');
+    public function replyOfReview() {
+        return $this->belongsTo(self::class, 'reply_id', 'id');
     }
 
-    public function getPureContentAttribute() {
-        return str_replace('&nbsp;', ' ', strip_tags($this->content));
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     **/
+    public function user() {
+        return $this->belongsTo(\App\User::class, 'user_id', 'id');
     }
 
 
