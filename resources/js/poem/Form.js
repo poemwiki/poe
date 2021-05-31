@@ -47,8 +47,8 @@ Vue.component('poem-form', {
         translator_wikidata_id: null,
       },
 
-      authorList: [],//this.defaultAuthors,
-      translatorList: [],//_.clone(this.defaultAuthors),
+      authorList: this.defaultAuthors,
+      translatorList: _.clone(this.defaultAuthors),
       cmOptions: {
         tabSize: 2,
         mode: 'text/plain',
