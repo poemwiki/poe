@@ -254,3 +254,42 @@ function responseFile($path) {
     $response->header("Content-Type", $type);
     return $response;
 }
+
+/**
+ * 获取小程序scheme码
+ *
+ * @param  array  $param
+ * @return array|Illuminate\Support\Collection|object|Psr\Http\Message\ResponseInterface|string
+ *
+ * @throws GuzzleHttp\Exception\GuzzleException
+ * @throws EasyWeChat\Kernel\Exceptions\InvalidConfigException
+ */
+function getWxUrlLink(array $param = []) {
+    $wechatApp = EasyWeChat\Factory::miniProgram([
+        'app_id' => config('wechat.mini_program.default.app_id'),
+        'secret' => config('wechat.mini_program.default.secret'),
+        'response_type' => 'object',
+    ]);
+    $client = new EasyWeChat\Kernel\BaseClient($wechatApp);
+    return $client->httpPostJson('wxa/generate_urllink', $param);
+}
+
+/**
+ * 获取小程序scheme码
+ *
+ * @param string|int $scene
+ * @param string $path
+ * @return array|Illuminate\Support\Collection|object|Psr\Http\Message\ResponseInterface|string
+ *
+ * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+ * @throws \GuzzleHttp\Exception\GuzzleException
+ */
+function getPermanentWxUrlLink($scene, $path = 'pages/poems/index') {
+    return getWxUrlLink([
+        'path' => $path,
+        "query" =>  "?scene=" . $scene,
+        "is_expire" => false,
+        // "expire_type" => 1,
+        // "expire_interval" => 365,
+    ]);
+}
