@@ -20,6 +20,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property mixed translatedPoems
  * @property mixed id
  * @property string poetLabel
+ * @property string poet_label
+ * @property string poet_label_cn
  * @property integer is_owner_uploaded
  * @property User uploader
  * @property Author poetAuthor
@@ -377,7 +379,7 @@ class Poem extends Model implements Searchable {
         } else if ($this->poetAuthor) {
             return $this->poetAuthor->label_cn;
         } else {
-            return is_null($this->poet_cn) ? $this->poet : $this->poet_cn;
+            return (is_null($this->poet_cn) or $this->poet_cn==='') ? $this->poet : $this->poet_cn;
         }
     }
 
