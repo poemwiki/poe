@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Likeable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -10,6 +11,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Review extends Model {
     use SoftDeletes;
     use LogsActivity;
+    use Likeable;
 
     protected $table = 'review';
 

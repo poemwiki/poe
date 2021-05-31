@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Traits\Liker;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -16,6 +17,7 @@ use Spatie\Activitylog\ActivitylogServiceProvider;
  */
 class User extends Authenticatable implements MustVerifyEmail {
     use HasApiTokens, Notifiable;
+    use Liker;
 
     static public $defaultAvatarUrl = 'images/avatar-default.png';
     /**

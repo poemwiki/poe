@@ -23,12 +23,19 @@ class ReviewAPIController extends Controller {
 
     public function like($action, $id) {
         $review = Review::find($id);
-        if($action === 'like') {
-            $review->like = $review->like+1;
-        } else if($action === 'unlike') {
-            $review->like = $review->like-1;
+        $user = request()->user();
+        $hasLiked = $user->hasLiked($review);
+
+        if($action === 'like' && !$hasLiked) {
+            $user->like($review);
+            $review->like = $review->likers()->count();
+            $review->save();
+        } else if($action === 'unlike' && $hasLiked) {
+            $user->unlike($review);
+            $review->like = $review->likers()->count();
+            $review->save();
         }
-        $review->save();
+
         return $this->responseSuccess(['like' => $review->like]);
     }
 

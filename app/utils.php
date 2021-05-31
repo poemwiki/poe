@@ -285,10 +285,11 @@ function getWxUrlLink(array $param = []) {
  * @throws \GuzzleHttp\Exception\GuzzleException
  */
 function getPermanentWxUrlLink($scene, $path = 'pages/poems/index') {
+    logger()->info('getting permanent wx urlLink:' . $path . $scene);
     return getWxUrlLink([
         'path' => $path,
-        "query" =>  "?scene=" . $scene,
-        "is_expire" => false,
+        'query' =>  'id=' . $scene,
+        'is_expire' => false,
         // "expire_type" => 1,
         // "expire_interval" => 365,
     ]);
