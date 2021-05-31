@@ -13,8 +13,8 @@ class UserAPIController extends Controller{
         if($request->nickName) {
 
             $wechatApp = \EasyWeChat\Factory::miniProgram([
-                'app_id' => env('WECHAT_MINI_PROGRAM_APPID'),
-                'secret' => env('WECHAT_MINI_PROGRAM_SECRET'),
+                'app_id' => config('wechat.mini_program.default.app_id'),
+                'secret' => config('wechat.mini_program.default.secret'),
                 'response_type' => 'object',
             ]);
             $result = $wechatApp->content_security->checkText($request->nickName);
