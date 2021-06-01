@@ -21,7 +21,7 @@ class AddReplyToReview extends Migration
             $table->string('weapp_url')->nullable(true);
         });
         Schema::table('campaign', function (Blueprint $table) {
-            $table->string('weapp_url')->nullable(true);
+            $table->json('weapp_url')->nullable(true);
         });
         Schema::create('likes', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned();

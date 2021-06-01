@@ -148,24 +148,34 @@ class BotController extends Controller {
      * @return mixed|string
      */
     public function getWeappUrl(Poem $poem) {
-        if (!$poem->weapp_url) {
+        $shouldRenew = $poem->weapp_url && isset($poem->weapp_url['expire']) && $poem->weapp_url['expire'] < now()->timestamp;
+        if (!$poem->weapp_url or $shouldRenew) {
             try {
-                $res = getPermanentWxUrlLink($poem->id);
+                $permanent = $poem->id <= 4000;
+                $expireIntervalDays = 365;
+                $res = $permanent ? getPermanentWxUrlLink('id=' . $poem->id)
+                    : getTmpWxUrlLink($expireIntervalDays, 'id=' . $poem->id);
                 if($res->errcode) {
                     throw new \Exception('get permanent wxUrlLink error' . $res->errmsg);
                 }
                 $url = $res->url_link;
+
+                Poem::withoutEvents(function () use ($expireIntervalDays, $permanent, $poem, $url) {
+                    $poem->timestamps = false;
+                    if($permanent) {
+                        $poem->weapp_url = ['url' => $url];
+                    } else {
+                        $poem->weapp_url = ['url' => $url, 'expire' => now()->addDays($expireIntervalDays - 1)->timestamp];
+                    }
+                    $poem->save();
+                });
             } catch (Exception $e) {
-                $url = 'https://poemwiki.org/' . $poem->id;
+                return $poem->url;
             }
 
-            Poem::withoutEvents(function () use ($poem, $url) {
-                $poem->timestamps = false;
-                $poem->weapp_url = $url;
-                $poem->save();
-            });
         }
-        return $poem->weapp_url;
+
+        return $poem->weapp_url['url'];
     }
 
     private function _boldNum($str) {

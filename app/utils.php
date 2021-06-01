@@ -277,20 +277,30 @@ function getWxUrlLink(array $param = []) {
 /**
  * 获取小程序scheme码
  *
- * @param string|int $scene
+ * @param string $query
  * @param string $path
  * @return array|Illuminate\Support\Collection|object|Psr\Http\Message\ResponseInterface|string
  *
  * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
  * @throws \GuzzleHttp\Exception\GuzzleException
  */
-function getPermanentWxUrlLink($scene, $path = 'pages/poems/index') {
-    logger()->info('getting permanent wx urlLink:' . $path . $scene);
+function getPermanentWxUrlLink($query, $path = 'pages/poems/index') {
+    logger()->info('getting permanent wx urlLink:' . $path . $query);
     return getWxUrlLink([
         'path' => $path,
-        'query' =>  'id=' . $scene,
+        'query' =>  $query,
         'is_expire' => false,
         // "expire_type" => 1,
         // "expire_interval" => 365,
+    ]);
+}
+
+function getTmpWxUrlLink($expireIntervalDays, $query, $path = 'pages/poems/index') {
+    return getWxUrlLink([
+        'path' => $path,
+        'query' =>  $query,
+        'is_expire' => true,
+        "expire_type" => 1,
+        "expire_interval" => $expireIntervalDays,
     ]);
 }
