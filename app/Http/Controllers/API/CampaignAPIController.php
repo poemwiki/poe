@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
 use App\Repositories\CampaignRepository;
+use App\Repositories\PoemRepository;
 use Illuminate\Http\Request;
 
 /**
@@ -14,9 +15,12 @@ use Illuminate\Http\Request;
 class CampaignAPIController extends Controller {
     /** @var  CampaignRepository */
     private $campaignRepository;
+    /** @var  PoemRepository */
+    private $poemRepository;
 
-    public function __construct(CampaignRepository $campaignRepository) {
+    public function __construct(CampaignRepository $campaignRepository, PoemRepository $poemRepository) {
         $this->campaignRepository = $campaignRepository;
+        $this->poemRepository = $poemRepository;
     }
 
     public function index(Request $request) {
@@ -36,9 +40,15 @@ class CampaignAPIController extends Controller {
         $campaign = $this->campaignRepository->find($id);
 
         if (empty($campaign)) {
-            return $this->sendError('Language not found');
+            return $this->responseFail([], '没有找到这个活动。', self::$CODE['no_entry']);
         }
+        $ret = $campaign->toArray();
+        $ret['settings'] = collect($campaign->settings)->except(['result']);
+        $ret['poem_count'] = $campaign->poem_count;
+        $ret['user_count'] = $campaign->user_count;
 
-        return $this->responseSuccess($campaign->toArray());
+        $ret['poemData'] = $this->poemRepository->getCampaignPoemsByTagId($campaign->tag_id);
+
+        return $this->responseSuccess($ret);
     }
 }

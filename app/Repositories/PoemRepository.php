@@ -7,7 +7,9 @@ use App\Models\Content;
 use App\Models\Poem;
 use App\Models\Review;
 use App\Models\Score;
+use App\Models\Tag;
 use App\Repositories\BaseRepository;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -165,7 +167,7 @@ class PoemRepository extends BaseRepository
                 $item['poet'] = $item['poet'] . '-' .$item->id;
             }
             $item['reviews_count'] = $item->reviews->count();
-            $item['reviews'] = $item->reviews->take(2)->map->only(['id', 'avatar', 'content', 'created_at', 'name', 'user_id']);
+            $item['reviews'] = $item->reviews->take(2)->map->only(['id', 'avatar', 'content', 'pure_content', 'created_at', 'name', 'user_id']);
             $item['score_count'] = $endTime ? ScoreRepository::calcCount($item->id, $startTime, $endTime) : ScoreRepository::calcCount($item->id);
             return $item;
         });
@@ -281,6 +283,98 @@ class PoemRepository extends BaseRepository
             return Poem::find($existed->entry_id);
         }
         return false;
+    }
+
+    public function getCampaignPoemsByTagId($tagId) {
+
+        if(!is_numeric($tagId)) {
+            return $this->responseFail();
+        }
+
+        $columns = [
+            'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
+            'poem', 'poet', 'poet_id', 'poet_avatar', //'poet_cn',
+            'score', 'score_count', 'score_weight', 'rank',
+            'reviews', 'reviews_count'
+            // 'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'language_id',
+            // 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics', 'bedtime_post_id'
+        ];
+
+        $campaign = Tag::find($tagId)->campaign;
+        if(!$campaign) {
+            // campaign deleted
+            return [];
+        }
+
+        $dateInterval = Carbon::parse($campaign->end)->diff(now());
+        $campaignEnded = $dateInterval->invert === 0;
+
+        if(isset($campaign->settings['result'])) {
+
+            $byScoreData = $campaign->settings['result'];
+            foreach ($byScoreData as $key=>&$poem) {
+                $poem['date_ago'] = date_ago($poem['created_at']);
+                // TODO unset this lower than 7 limit if list performance allowed
+                if($poem['score'] <= 7) {
+                    unset($byScoreData[$key]);
+                    continue;
+                }
+                $poem = collect($poem)->only($columns);
+            }
+
+        } else {
+
+            // poem before endDate, scores before endDate
+            if($campaign->id >= 6 || (!(config('app.env') === 'production'))) {
+                $byScore = $this->getTopByTagId($tagId, $campaign->start, $campaign->end);
+            } else {
+                $byScore = $this->getByTagId($tagId, 'score', $campaign->start, $campaign->end);
+            }
+
+            $limit = $campaign->settings['rank_min_weight'] ?? 3;
+            $byScoreData = $byScore->filter(function ($value) use ($limit) {
+                // 票数不足的不参与排名
+                // dump($value['score_count']);
+                // TODO should use $item->getCampaignScore returned score_count
+                return $value['score_count'] >= $limit;
+            })->map(function (Poem $item) use ($campaign) {
+                $score = $item->getCampaignScore($campaign);
+                $item['score'] = $score['score'];
+                $item['score_weight'] = $score['weight'];
+                $item['reviews'] = $item['reviews']->map(function ($review) {
+                    $review['content'] = $review['pure_content'];
+                    return $review;
+                });
+                return $item;
+            })->sort(function ($a, $b) {
+                $scoreOrder = $b['score'] <=> $a['score'];
+                $countOrder = $b['score_count'] <=> $a['score_count'];
+                return $scoreOrder === 0
+                    ? ($countOrder === 0 ? $b['score_weight'] <=> $a['score_weight'] : $countOrder)
+                    : $scoreOrder;
+            })->map->only($columns)->values()->map(function ($item, $index) {
+                // $item = $item->toArray();
+                $item['rank'] = $index + 1;
+                return $item;
+            });
+
+            // TODO this should be done in a command when campaign ends
+            // and in case of command failed to execute, do it again here at controller
+            if($campaignEnded) {
+                $newSetting = $campaign->settings;
+                $newSetting['result'] = $byScoreData;
+                $campaign->settings = $newSetting;
+                $campaign->save();
+            }
+        }
+
+
+        return [
+            'byScore' => $byScoreData,
+            // TODO if weapp use virtual list, remove splice
+            'byCreatedAt' => $this->getByTagId($tagId, 'created_at')->splice(0,150)
+                ->map->only($columns)
+        ];
     }
 
 }
