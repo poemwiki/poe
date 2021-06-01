@@ -68,7 +68,7 @@ class ScoreRepository extends BaseRepository {
         return $query;
     }
 
-    public function listByUser($userId, $columns = ['poem_id', 'score']) {
+    public function listByUserId($userId, $columns = ['poem_id', 'score']) {
         $query = $this->allQuery()->select($columns)
             ->where('user_id', '=', $userId);
         return $query;

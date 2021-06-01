@@ -15,6 +15,7 @@ use File;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -26,10 +27,13 @@ class PoemAPIController extends Controller {
     private $poemRepository;
     /** @var  ReviewRepository */
     private $reviewRepository;
+    /** @var  ScoreRepository */
+    private $scoreRepository;
 
-    public function __construct(PoemRepository $poemRepository, ReviewRepository $reviewRepository) {
+    public function __construct(PoemRepository $poemRepository, ReviewRepository $reviewRepository, ScoreRepository $scoreRepository) {
         $this->poemRepository = $poemRepository;
         $this->reviewRepository = $reviewRepository;
+        $this->scoreRepository = $scoreRepository;
     }
 
     // TODO return poem.id only if client don't need
@@ -230,56 +234,84 @@ class PoemAPIController extends Controller {
             'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics',
             'campaign_id'
         ];
-        /** @var Poem $item */
-        $item = Poem::where('id', '=', $id)->first();
-        if(!$item) {
+        /** @var Poem $poem */
+        $poem = Poem::where('id', '=', $id)->first();
+        if(!$poem) {
             abort(404);
             return $this->responseFail([], 'not found', Controller::$CODE['no_entry']);
         }
-        $res = $item->only($columns);
+        $res = $poem->only($columns);
 
-        $res['poet'] = $item->poet_label;
-        $res['poet_cn'] = $item->poet_label_cn;
-        $res['date_ago'] = date_ago($item->created_at);
+        $user = request()->user();
+
+        if($user) {
+            $myScore = $this->scoreRepository->listByUserId($user->id)
+                ->where('poem_id', '=', $poem->id)
+                ->first();
+            $res['my_score'] = $myScore ? $myScore->score : null;
+        }
+
+        $res['poet'] = $poem->poet_label;
+        $res['poet_cn'] = $poem->poet_label_cn;
+        $res['date_ago'] = date_ago($poem->created_at);
         // $res['sell'] = [
         //     'picUrl' => asset('images/campaign/6/sell.jpg'),
         //     'appId' => '',
         //     'path' => ''
         // ];
 
-        $res['score'] = $item->totalScore;
+        $liked_review_ids = [];
+
+        $res['score'] = $poem->totalScore;
         // TODO save score_count to poem.score_count column
         $res['score_count'] = ScoreRepository::calcCount($id);
 
-        $res['reviews'] = $this->reviewRepository->listByOriginalPoem($item)
-            ->get(['review.id', 'review.content', 'review.created_at', 'review.user_id', 'review.like', 'review.reply_id'])
-            ->map(function ($item) {
-                $item->makeHidden('user');
-                $item['date_ago'] = date_ago($item->created_at);
-                $item['content'] = $item->pureContent;
-                return $item;
+        DB::enableQueryLog();
+        $q = $this->reviewRepository->listByOriginalPoem($poem);
+
+        $reviewColumns = ['review.id', 'review.content', 'review.created_at', 'review.user_id', 'review.like', 'review.reply_id'];
+        if($user) {
+            $q->leftJoin('likes', function($join) use ($user) {
+                $join->on('review.id', '=', 'likes.likeable_id')
+                    ->where('likes.user_id', '=', $user->id)
+                    ->where('likes.likeable_type', '=', \App\Models\Review::class);
             });
+            $reviewColumns[] = 'likes.likeable_id';
+        }
+
+        $res['reviews'] = $q->get($reviewColumns)
+            ->map(function ($review) use ($user, &$liked_review_ids) {
+
+            $review->makeHidden('user');
+
+            if($review->likeable_id) array_push($liked_review_ids, $review->likeable_id);
+
+            $review['date_ago'] = date_ago($review->created_at);
+            $review['content'] = $review->pureContent;
+            return $review->only(['id', 'content', 'created_at', 'user_id', 'like', 'reply_id', 'name', 'avatar', 'reply_to_user', 'date_ago']);
+        });
+        $res['liked_review_ids'] = $liked_review_ids;
 
         $relatedQuery = $this->poemRepository->suggest(2)
             ->where('id', '<>', $id);
 
-        $res['is_campaign'] = $item->is_campaign;
-        if($item->tags->count()) {
-            $res['tags'] = $item->tags->map->only(['id', 'name', 'category_id']);
+        $res['is_campaign'] = $poem->is_campaign;
+        if($poem->tags->count()) {
+            $res['tags'] = $poem->tags->map->only(['id', 'name', 'category_id']);
 
-            if($item->is_campaign) {
-                $relatedQuery->whereHas('tags', function ($query) use ($item) {
+            if($poem->is_campaign) {
+                $relatedQuery->whereHas('tags', function ($query) use ($poem) {
                     // TODO use campaign tag here
-                    $query->where('tag_id', '=', $item->tags[0]->id);
+                    $query->where('tag_id', '=', $poem->tags[0]->id);
                 });
             } else {
                 $relatedQuery->where('score', '>=', 7);
             }
         }
-        if($item->share_pics && isset($item->share_pics['pure'])) {
-            if(File::exists(storage_path($item->share_pics['pure']))) {
+        if($poem->share_pics && isset($poem->share_pics['pure'])) {
+            if(File::exists(storage_path($poem->share_pics['pure']))) {
                 $res['share_image'] = route('poem-card', [
-                    'id' => $item->id,
+                    'id' => $poem->id,
                     'compositionId' => 'pure'
                 ]);
             }

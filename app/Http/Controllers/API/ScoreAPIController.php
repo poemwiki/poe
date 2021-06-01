@@ -40,7 +40,7 @@ class ScoreAPIController extends Controller {
     }
 
     public function mine() {
-        $scores = $this->repository->listByUser(Auth::user()->id)->get()
+        $scores = $this->repository->listByUserId(Auth::user()->id)->get()
             ->keyBy('poem_id')->map(function ($item) {
                 return $item['score'];
             });
