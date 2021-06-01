@@ -20,7 +20,7 @@ Route::middleware(['api'])->group(static function () {
         Route::prefix('campaign')->name('campaign/')->group(static function() {
             Route::get('/', '\App\Http\Controllers\API\CampaignAPIController@index')->name('index');
             // TODO
-            // Route::get('/show', '\App\Http\Controllers\API\CampaignAPIController@show')->name('index');
+            Route::get('/show/{id}', '\App\Http\Controllers\API\CampaignAPIController@show')->name('index');
         });
         Route::prefix('poem')->name('poem/')->group(static function() {
             Route::get('/', '\App\Http\Controllers\API\PoemAPIController@index')->name('index');
@@ -44,6 +44,7 @@ Route::middleware(['auth:api', 'api'])->group(static function () {
             Route::post('/decrypt', [\App\Http\Controllers\API\LoginWeAppController::class, 'decrypt'])->name('weapp-decrypt');
         });
         Route::prefix('poem')->name('poem/')->group(static function() {
+            Route::post('/detail/{id}', '\App\Http\Controllers\API\PoemAPIController@detail')->name('detail');
             Route::post('/store', [\App\Http\Controllers\API\PoemAPIController::class, 'store'])->name('store');
             Route::get('/mine', [\App\Http\Controllers\API\PoemAPIController::class, 'mine'])->name('mine');
             Route::get('/delete/{poemId}', [\App\Http\Controllers\API\PoemAPIController::class, 'delete'])->name('delete');
