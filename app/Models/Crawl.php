@@ -4,6 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class Crawl
+ * @property result string
+ * @package App\Models
+ */
 class Crawl extends Model {
     protected $table = 'crawl';
 

@@ -14,7 +14,7 @@ class crawler extends Command {
      * eg url: http://www.zgshige.com/c/2019-08-21/950036.shtml
      * @var string
      */
-    protected $signature = 'crawler:import {url}';
+    protected $signature = 'crawler:start {url}';
 
     /**
      * The console command description.
@@ -85,6 +85,7 @@ class crawler extends Command {
         $url = $this->argument('url') ?? 'http://www.zgshige.com/c/2019-08-21/950036.shtml';
 
 
+        // TODO get crawl data from --id, invoke fetch function depend on crawl.model
         // dd($this->fetchPoem('http://www.zgshige.com/c/2016-03-04/950042.shtml'));
 
         $poetCrawl = $this->fetch($url, \App\Models\Author::class, 'fetchPoetInfo', function($result) use($url) {
