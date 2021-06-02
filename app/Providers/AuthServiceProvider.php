@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Poem;
 use App\User;
+use Illuminate\Auth\Access\Response;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -50,10 +51,11 @@ class AuthServiceProvider extends ServiceProvider
             return isset($user->id);
         });
 
-        Gate::define('web.poem.change', function (User $user) {
-            // TODO only allow poem.poetAuthor.user to change his own poem
-            // if($poem->user_id) {return $poem->user_id === $user->id}
-            // TODO 如果声明原创，则只有作者账号或管理员可更改
+        Gate::define('web.poem.change', function (User $user, Poem $poem) {
+            // 如果是用户上传的原创作品，则只有作者账号可更改
+            if ($poem->is_owner_uploaded===Poem::$OWNER['uploader']) {
+                return $user->id === $poem->uploader->id ? Response::allow() : Response::deny('Not Allowed');
+            }
             return isset($user->id);
         });
         Gate::define('web.author.change', function (User $user) {

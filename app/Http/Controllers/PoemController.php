@@ -203,6 +203,8 @@ class PoemController extends Controller
      * @return Factory|View
      */
     public function edit($fakeId) {
+        $poem = Poem::find(Poem::getIdFromFakeId($fakeId));
+        $this->authorizeForUser(Auth::user(), 'web.poem.change', [$poem]);
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId, [
             'id', 'title', 'language_id', 'is_original', 'original_id', 'poet', 'poet_cn', 'bedtime_post_id', 'bedtime_post_title',
             'poem', 'translator', 'from', 'year', 'month', 'date', 'dynasty', 'nation', 'preface', 'subtitle', 'genre_id',
@@ -227,9 +229,9 @@ class PoemController extends Controller
      * @return array
      */
     public function update($fakeId, UpdatePoem $request) {
+        $id = intval(Poem::getIdFromFakeId($fakeId));
         // Sanitize input
         $sanitized = $request->getSanitized();
-        $id = intval(Poem::getIdFromFakeId($fakeId));
         // manually validate if poem is duplicated
         $request->validate([
             'poem' => new NoDuplicatedPoem($id),

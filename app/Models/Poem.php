@@ -26,6 +26,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property User uploader
  * @property Author poetAuthor
  * @property Illuminate\Support\Collection|Tag[] tags
+ * @property User owner
  */
 class Poem extends Model implements Searchable {
     use SoftDeletes;
@@ -35,6 +36,11 @@ class Poem extends Model implements Searchable {
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
     public static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id' ];
+    public static $OWNER = [
+        'none' => 0,
+        'uploader' => 1,
+        'author' => 2
+    ];
 
     protected $table = 'poem';
 
@@ -353,6 +359,26 @@ class Poem extends Model implements Searchable {
     }
 
     /**
+     * 是否为用户的原创作品
+     */
+    public function getIsOwnedAttribute() {
+        return $this->is_owner_uploaded!==0;
+    }
+
+    /**
+     * 获取原创作者
+     */
+    public function getOwnerAttribute() {
+        if ($this->poetAuthor && $this->poetAuthor->user) {
+            return $this->poetAuthor->user;
+        } else if ($this->is_owner_uploaded===static::$OWNER['uploader'] && $this->uploader) {
+            return $this->uploader;
+        }
+
+        return null;
+    }
+
+    /**
      * TODO enable set locales while getting poet name
      * @return string
      */
@@ -360,11 +386,11 @@ class Poem extends Model implements Searchable {
         // TODO 考虑认领诗歌的情况。如果一首诗歌被用户成功认领，那么upload_user_id将不代表作者
         // 此时需要用 is_owner_uploaded==Poem::OWNER['author'] 来标志作者上传
         // is_owner_uploaded==Poem::OWNER['none'] 标志默认状态，无人认领，未标注原创
-        // is_owner_uploaded==Poem::OWNER['poet'] 标注原创，作者用户上传，此时以upload_user_id将不代表作者
+        // is_owner_uploaded==Poem::OWNER['uploader'] 标注原创，作者用户上传，此时以upload_user_id将不代表作者
         // is_owner_uploaded==Poem::OWNER['author'] 标志原创且已被作者认领，upload_user_id不代表作者，只代表上传人，此时应以poetAuthor为作者
         // TODO if is_owner_uploaded==Poem::OWNER['poet'] && $this->uploader
         // TODO use poetAuthor->label if poem.poet and poem.poet_cn is used for SEO
-        if ($this->is_owner_uploaded && $this->uploader) {
+        if ($this->is_owner_uploaded===static::$OWNER['uploader'] && $this->uploader) {
             return $this->uploader->name;
         } else if ($this->poetAuthor) {
             return $this->poetAuthor->label;
