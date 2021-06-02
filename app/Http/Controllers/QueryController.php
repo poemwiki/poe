@@ -26,20 +26,21 @@ class QueryController extends Controller {
     }
 
     public function nation($keyword, $id) {
-        return $this->response(NationRepository::searchByName($keyword, $id));
+        return $this->response(NationRepository::searchByName(Str::trimSpaces($keyword), $id));
     }
 
     public function author($keyword, $id) {
-        return $this->response(AuthorRepository::searchLabel($keyword, [$id]));
+        return $this->response(AuthorRepository::searchLabel(Str::trimSpaces($keyword), [$id]));
     }
 
     // TODO support multiple word search like bot search, order by relative
     public function poem($keyword) {
-        return $this->response(PoemRepository::searchByName($keyword));
+        return $this->response(PoemRepository::searchByName(Str::trimSpaces($keyword)));
     }
 
     // TODO support multiple word search like bot search, order by relative
     public function search($keyword) {
+        $keyword = Str::trimSpaces($keyword);
         if ($keyword === '' || is_null($keyword)) return view('query.search');
 
         $keyword4Query = Str::of($keyword)
