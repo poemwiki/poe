@@ -42,7 +42,9 @@ class AuthorRepository extends BaseRepository {
             $query->whereNull('author_id');
 
         if (is_array($excludeAuthorId)) {
-            $query->whereNotIn('author_id', $excludeAuthorId);
+            $query->where(function ($q) use ($excludeAuthorId) {
+                $q->whereNotIn('author_id', $excludeAuthorId)->orWhereNull('author_id');
+            });
             // NOT(nullable fields <=> sth) 等价于以下条件：
             // $query->whereRaw("(`author_id` <> $excludeAuthorId or `author_id` is NULL)");
             // 必须添加 or `author_id` is NULL 条件，否则查询不到 author_id 为 NULL 的数据。
@@ -99,10 +101,7 @@ class AuthorRepository extends BaseRepository {
      * @return Collection
      */
     public static function searchLabel(string $name, array $authorId=null): Collection {
-        $authorIds = collect($authorId)->filter(function ($id) {
-            return is_integer($id);
-        })->toArray();
-        // dd($authorId);
+        $authorIds = collect($authorId)->toArray();
         if(is_array($authorIds)) {
             $resById = Author::select(['id', 'name_lang', 'pic_url', 'describe_lang'])->whereIn('id', $authorIds)->get()
                 ->map->only(['id', 'label_en', 'label_cn', 'label', 'url', 'pic_url', 'describe_lang', 'avatar_url'])->map(function ($item) {
