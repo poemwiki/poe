@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Poem;
 
+use App\Models\Poem;
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use App\Rules\NoDuplicatedPoem;
@@ -17,7 +18,8 @@ class UpdatePoem extends FormRequest {
      * @return bool
      */
     public function authorize(): bool {
-        return Gate::allows('admin.poem.edit', $this->poem) || Gate::allows('web.poem.change', Auth::user());
+        $poem = Poem::find(Poem::getIdFromFakeId($this->route('fakeId')));
+        return Gate::allows('admin.poem.edit') || Gate::allows('web.poem.change', $poem);
     }
 
     /**

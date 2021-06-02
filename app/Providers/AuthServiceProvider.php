@@ -33,13 +33,16 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('api.poem.create', function (User $user) {
             return isset($user->id);
         });
-        Gate::define('api.poem.update', function (User $user) {
-            // TODO 如果声明原创，则只有作者账号或管理员可更改
+        Gate::define('api.poem.update', function (User $user, Poem $poem) {
+            // 如果是用户上传的原创作品，只有作者账号可更改
+            if ($poem->is_owner_uploaded===Poem::$OWNER['uploader']) {
+                return $user->id === $poem->uploader->id ? Response::allow() : Response::deny('Not Allowed');
+            }
             return isset($user->id);
         });
         Gate::define('api.poem.delete', function (User $user, Poem $poem) {
-            // 如果声明原创，则只有作者账号或管理员可更改
-            if ($poem->is_owner_uploaded) {
+            // 如果是用户上传的原创作品，只有作者账号或管理员可删除
+            if ($poem->is_owner_uploaded===Poem::$OWNER['uploader']) {
                 return $user->id === $poem->upload_user_id or $user->is_admin;
             }
             return $user->is_admin;
@@ -52,7 +55,7 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('web.poem.change', function (User $user, Poem $poem) {
-            // 如果是用户上传的原创作品，则只有作者账号可更改
+            // 如果是用户上传的原创作品，只有作者账号可更改
             if ($poem->is_owner_uploaded===Poem::$OWNER['uploader']) {
                 return $user->id === $poem->uploader->id ? Response::allow() : Response::deny('Not Allowed');
             }
