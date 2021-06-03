@@ -214,6 +214,11 @@ class PoemRepository extends BaseRepository
         });
     }
 
+    // TODO withReview in one method
+    private function _withReviews($q) {
+
+    }
+
     public function getByOwner($userId) {
         return self::newQuery()->where([
             ['is_owner_uploaded', '=', '1'],
@@ -222,10 +227,16 @@ class PoemRepository extends BaseRepository
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet'] = $item->poetLabel;
             $item['score_count'] = ScoreRepository::calcCount($item->id);
-            return $item;
+            return $item->only(self::$listColumns);
         });
     }
 
+    public static $listColumns = [
+        'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
+        'poem', 'poet', 'poet_id', 'poet_avatar', 'poet_cn',
+        'score', 'score_count', 'score_weight', 'rank',
+        'reviews', 'reviews_count'
+    ];
     /**
      * @param $userId
      * @param bool $isCampaignPoem
@@ -250,7 +261,6 @@ class PoemRepository extends BaseRepository
             }
         }
 
-
         $q->where(function ($q) use ($userId) {
             $q->whereHas('reviews', function($q) use ($userId) {
                 $q->where(['user_id' => $userId]);
@@ -258,11 +268,12 @@ class PoemRepository extends BaseRepository
                 $q->where(['user_id' => $userId]);
             });
         });
+
         return $q->with('reviews')->orderByDesc('created_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet'] = $item->poet_label;
             $item['score_count'] = ScoreRepository::calcCount($item->id);
-            return $item;
+            return $item->only(self::$listColumns);
         });
     }
 
@@ -291,15 +302,6 @@ class PoemRepository extends BaseRepository
             return $this->responseFail();
         }
 
-        $columns = [
-            'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
-            'poem', 'poet', 'poet_id', 'poet_avatar', //'poet_cn',
-            'score', 'score_count', 'score_weight', 'rank',
-            'reviews', 'reviews_count'
-            // 'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'language_id',
-            // 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics', 'bedtime_post_id'
-        ];
-
         $campaign = Tag::find($tagId)->campaign;
         if(!$campaign) {
             // campaign deleted
@@ -319,7 +321,7 @@ class PoemRepository extends BaseRepository
                     unset($byScoreData[$key]);
                     continue;
                 }
-                $poem = collect($poem)->only($columns);
+                $poem = collect($poem)->only(self::$listColumns);
             }
 
         } else {
