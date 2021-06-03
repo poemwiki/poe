@@ -59,7 +59,7 @@ class CreatePoemRequest extends FormRequest {
             'translator_id' => ['nullable', Rule::in(array_merge(AuthorRepository::ids()->toArray(), ['new']))],
             'translator_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
             'upload_user_id' => ['nullable', 'exists:' . \App\User::class . ',id'],
-            'is_owner_uploaded' => ['nullable', Rule::in([0, 1])],
+            'is_owner_uploaded' => ['required', Rule::in([Poem::$OWNER['none'], Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])],
             'tag_id' => ['nullable', 'exists:' . \App\Models\Tag::class . ',id'],
         ];
     }
@@ -85,7 +85,21 @@ class CreatePoemRequest extends FormRequest {
             $sanitized['translator_wikidata_id'] = null;
         }
 
-        $sanitized['upload_user_id'] = Auth::user()->id;
+        $user = Auth::user();
+        // 原创作品不允许更改作者，只允许选择关联作者或只填入名字
+        // TODO 诗歌编辑页，原创作品模式下只允许选择当前用户关联的作者作为poet_id
+        // if($sanitized['is_poet_uploaded']) {
+        //     $sanitized['poet_id'] = null;
+        //     $sanitized['poet_wikidata_id'] = null;
+        // }
+        // // 原创译作不允许更改译者，只允许选择关联译者或只填入名字
+        // // TODO 诗歌编辑页，原创译作模式下只允许选择当前用户关联的作者作为translator_id
+        // if($sanitized['is_translator_uploaded']) {
+        //     $sanitized['translator_id'] = null;
+        //     $sanitized['translator_wikidata_id'] = null;
+        // }
+
+        $sanitized['upload_user_id'] = $user->id;
 
         return $sanitized;
     }

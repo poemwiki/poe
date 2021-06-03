@@ -13,7 +13,8 @@ class StorePoem extends CreatePoemRequest {
      * @return bool
      */
     public function authorize(): bool {
-        return Gate::allows('admin.poem.create');
+        // return true;
+        return Gate::allows('web.poem.create', Auth::user());
     }
 
     /**

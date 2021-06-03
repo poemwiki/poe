@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Poem;
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use App\Rules\NoDuplicatedPoem;
@@ -11,13 +12,15 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class UpdatePoemRequest extends FormRequest {
+    private $_poemToChange;
     /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
      */
     public function authorize(): bool {
-        return Gate::allows('admin.poem.edit', $this->poem) || Gate::allows('web.poem.change', Auth::user());
+        $this->_poemToChange = Poem::find(Poem::getIdFromFakeId($this->route('fakeId')));
+        return Gate::allows('admin.poem.edit') || Gate::allows('web.poem.change', $this->_poemToChange);
     }
 
     /**
@@ -50,7 +53,7 @@ class UpdatePoemRequest extends FormRequest {
             'original_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
 
             'preface' => ['nullable', 'string', 'max:300'],
-            'subtitle' => ['nullable', 'string', 'max:32'],
+            'subtitle' => ['nullable', 'string', 'max:128'],
             'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
             'poet_id' => ['nullable', Rule::in(array_merge(AuthorRepository::ids()->toArray(), ['new']))],
             'poet_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
@@ -78,6 +81,17 @@ class UpdatePoemRequest extends FormRequest {
         if (isset($sanitized['translator_id']) && $sanitized['translator_id'] === 'new') {
             $sanitized['translator_id'] = null;
             $sanitized['translator_wikidata_id'] = null;
+        }
+
+        // 原创作品不允许更改作者
+        if(in_array($this->_poemToChange->is_owner_uploaded, [Poem::$OWNER['uploader'], Poem::$OWNER['poetAuthor']])) {
+            $sanitized['poet_id'] = $this->_poemToChange->poet_id;
+            $sanitized['poet_wikidata_id'] = $this->_poemToChange->poet_wikidata_id;
+        }
+        // 原创译作不允许更改译者
+        if(in_array($this->_poemToChange->is_owner_uploaded, [Poem::$OWNER['translatorUploader'], Poem::$OWNER['translatorAuthor']])) {
+            $sanitized['translator_id'] = $this->_poemToChange->translator_id;
+            $sanitized['translator_wikidata_id'] = $this->_poemToChange->translator_wikidata_id;
         }
 
         //Add your code for manipulation with request data here

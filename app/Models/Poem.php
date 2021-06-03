@@ -39,7 +39,9 @@ class Poem extends Model implements Searchable {
     public static $OWNER = [
         'none' => 0,
         'uploader' => 1,
-        'author' => 2
+        'translatorUploader' => 2,
+        'poetAuthor' => 3,
+        'translatorAuthor' => 4
     ];
 
     protected $table = 'poem';
@@ -362,7 +364,7 @@ class Poem extends Model implements Searchable {
      * 是否为用户的原创作品
      */
     public function getIsOwnedAttribute() {
-        return $this->is_owner_uploaded!==0;
+        return $this->is_owner_uploaded!==static::$OWNER['none'];
     }
 
     /**
@@ -385,9 +387,11 @@ class Poem extends Model implements Searchable {
     public function getPoetLabelAttribute() {
         // TODO 考虑认领诗歌的情况。如果一首诗歌被用户成功认领，那么upload_user_id将不代表作者
         // 此时需要用 is_owner_uploaded==Poem::OWNER['author'] 来标志作者上传
-        // is_owner_uploaded==Poem::OWNER['none'] 标志默认状态，无人认领，未标注原创
-        // is_owner_uploaded==Poem::OWNER['uploader'] 标注原创，作者用户上传，此时以upload_user_id将不代表作者
-        // is_owner_uploaded==Poem::OWNER['author'] 标志原创且已被作者认领，upload_user_id不代表作者，只代表上传人，此时应以poetAuthor为作者
+        // is_owner_uploaded==Poem::$OWNER['none'] 标志默认状态，无人认领，未标注原创
+        // is_owner_uploaded==Poem::$OWNER['uploader'] 标注原创，作者用户上传，此时以upload_user_id将不代表作者
+        // is_owner_uploaded==Poem::$OWNER['translatorUploader'] 标注为原创译作，译者用户上传，此时upload_user_id将代表译者
+        // is_owner_uploaded==Poem::$OWNER['poetAuthor'] 标注原创且已被作者认领，upload_user_id不代表作者，只代表上传人，此时应以poetAuthor为作者
+        // is_owner_uploaded==Poem::$OWNER['translatorAuthor'] 标注为原创译作且已被译者认领，upload_user_id不代表作者，只代表上传人，此时应以translatorAuthor为作者
         // TODO if is_owner_uploaded==Poem::OWNER['poet'] && $this->uploader
         // TODO use poetAuthor->label if poem.poet and poem.poet_cn is used for SEO
         if ($this->is_owner_uploaded===static::$OWNER['uploader'] && $this->uploader) {
