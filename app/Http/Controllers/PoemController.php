@@ -115,7 +115,7 @@ class PoemController extends Controller
         }
 
         if($preset) {
-            $poem->scenario = 'preset';
+            $poem->_scenario = 'preset';
             $poem->poet_id = $preset->poet_id;
             $poem->poet_wikidata_id = $preset->poet_wikidata_id;
             $poem->poet = $preset->poet;
@@ -207,8 +207,8 @@ class PoemController extends Controller
         $this->authorizeForUser(Auth::user(), 'web.poem.change', [$poem]);
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId, [
             'id', 'title', 'language_id', 'is_original', 'original_id', 'poet', 'poet_cn', 'bedtime_post_id', 'bedtime_post_title',
-            'poem', 'translator', 'from', 'year', 'month', 'date', 'dynasty', 'nation', 'preface', 'subtitle', 'genre_id',
-            'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id'
+            'poem', 'translator', 'from', 'year', 'month', 'date', 'preface', 'subtitle', 'genre_id',
+            'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded'
         ]);
 
         $authorIds = array_unique([$poem->poet_id, $poem->translator_id]);
@@ -217,7 +217,7 @@ class PoemController extends Controller
             'trans' => $this->trans(),
             'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::select('name_lang', 'id')->get(),
-            'defaultAuthors' => AuthorRepository::searchLabel($poem->poetLabel, $authorIds),
+            'defaultAuthors' => $poem->poetLabel ? AuthorRepository::searchLabel($poem->poetLabel, $authorIds) : [],
         ]);
     }
 
