@@ -130,6 +130,7 @@ class PoemController extends Controller
             $poem->translator_wikidata_id = null;
         }
 
+        $deftaultAuthors = ($preset && $preset->poetLabel) ? AuthorRepository::searchLabel($preset->poetLabel, [$preset->poet_id]) : [];
         return view('poems.create', [
             'poem' => $poem,
             'trans' => $this->trans(),
@@ -137,7 +138,7 @@ class PoemController extends Controller
             'genreList' => Genre::select('name_lang', 'id')->get(),
             'translatedPoem' => $translatedPoem ?? null, // TODO don't pass translatedPoem
             'originalPoem' => $originalPoem ?? null, // TODO don't pass originalPoem
-            'defaultAuthors' => []//Author::select('name_lang', 'id')->limit(10)->get()->toArray(),
+            'defaultAuthors' => $deftaultAuthors//Author::select('name_lang', 'id')->limit(10)->get()->toArray(),
         ]);
     }
 
