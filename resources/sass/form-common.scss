@@ -29,8 +29,24 @@ input[type],select {
   input[type=text],select {
     @apply mt-0 block w-full px-0.5 border-0 border-b border-gray-200 focus:ring-0 focus:border-black text-base placeholder-gray-300;
   }
+  input[type=radio]{
+    width: .8em;
+    height: .8em;
+    vertical-align: middle;
+    line-height: 2.4em;
+    margin-right: .3em;
+  }
   textarea{
     @apply mt-0 block w-full px-0.5 border border-b border-gray-200 rounded-md focus:ring-0 focus:border-black text-base placeholder-gray-300;
+  }
+  .radio_group {
+    @apply mt-0 block w-full px-0.5 py-2 rounded-md focus:ring-0 text-base;
+    legend {
+      @apply mt-4 block w-full text-base font-bold px-0.5;
+    }
+    label {
+      font-weight: normal;
+    }
   }
 
   .form-control-feedback {

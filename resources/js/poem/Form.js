@@ -45,6 +45,7 @@ Vue.component('poem-form', {
         translator_id: null,
         poet_wikidata_id: null,
         translator_wikidata_id: null,
+        is_owner_uploaded: 0
       },
 
       authorList: this.defaultAuthors,
@@ -61,6 +62,29 @@ Vue.component('poem-form', {
   },
 
   watch: {
+    'form.is_owner_uploaded': function(newVal, oldVal) {
+      if(newVal === 1) {
+        this.form.is_original = 1;
+      } else if(newVal === 2) {
+        this.form.is_original = 0;
+      }
+
+    },
+
+    'form.poet_id': function (newVal) {
+      if(newVal === null) {
+        this.form.poet = '';
+        this.form.poet_cn = '';
+        console.log('clear poet');
+      }
+    },
+
+    'form.translator_id': function (newVal) {
+      if(newVal === null) {
+        this.form.translator = '';
+        console.log('clear translator');
+      }
+    }
   },
 
   mounted: function() {
@@ -97,6 +121,12 @@ Vue.component('poem-form', {
       if(this.isNew(data.translator_id)) {
         data.translator_id = 'new';
         data.translator_wikidata_id = null;
+      }
+      if(data.is_original === 1) {
+        console.log('clear translator info on submit');
+        data.translator_id = null;
+        data.translator_wikidata_id = null;
+        data.translator = null;
       }
       return data;
     },
