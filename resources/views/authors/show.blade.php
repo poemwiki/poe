@@ -104,9 +104,7 @@ $aliasMaxLength = 4;
         <ul>
         @foreach($poemsAsPoet as $poem)
             <li class="title-list-item">
-                <a class="title title-bar font-song no-bg" href="{{$poem->url}}">{!!
-                    Str::of(trim($poem->title) ? trim($poem->title) : '无题')
-                        ->surround('span')!!}</a>
+                <a class="title title-bar font-song no-bg" href="{{$poem->url}}">{{trim($poem->title) ? trim($poem->title) : '无题'}}</a>
                 <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->poem)->firstLine()->surround('span', function ($i) {
                             return 'style="transition-delay:'.($i*20).'ms"';
                     })!!}</a>
