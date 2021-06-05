@@ -11,6 +11,7 @@
 
     <input type="hidden" name="translated_id" v-model="form.translated_id">
 
+@if($mode==='create')
 <div>
   <fieldset class="radio_group">
 
@@ -33,6 +34,7 @@
     <input type="hidden" name="is_owner_uploaded" :value="form.is_owner_uploaded">
   </fieldset>
 </div>
+@endif
 
 <div :class="{'has-danger': errors.has('title'), 'has-success': fields.title && fields.title.valid }">
 <label for="title" class="col-form-label text-md-right required"

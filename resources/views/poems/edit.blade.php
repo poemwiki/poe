@@ -28,7 +28,7 @@
           </div>
 
           <div class="card-body">
-            @include('poems.components.form-elements')
+            @include('poems.components.form-elements', ['mode' => 'edit'])
           </div>
 
 
