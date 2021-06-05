@@ -29,7 +29,7 @@
 
     <ol class="review-list">
         @foreach($reviews as $review)
-            <li class="">
+            <li class="review-card">
                 <div class="review-h flex-center-vertically">
                     <div><img class="avatar" src="{{$review->avatar}}"></div>
                     <div class="review-info"><b>{{$review->name}}</b><span class="review-time" title="{{$review->updated_at ?? $review->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($review->updated_at ?? $review->created_at)->diffForHumans(now())}}</span></div>
@@ -65,21 +65,29 @@
         @endif
     </ol>
 
-    <section id="review-modal" @if(!$isEditing) class="hidden" @endif>
+    <section id="review-modal" @if(!$showModal) class="hidden" @endif>
         <div class="overlay close-review"></div>
 
         <form wire:submit.prevent="" wire:ignore>
             <div class="review-form-header flex-center-vertically">
                 <p class="review-form-h">@lang('Write Review')</p>
-                <div class="review-form-btn"><a href="#" class="btn close-review">@lang('Close')</a><button class="btn btn-wire" type="submit" wire:click="submit()">@lang('Submit')</button></div>
+                <div class="review-form-btn"><a href="#" class="btn close-review">@lang('Close')</a><button class="btn btn-wire" type="submit"
+                    wire:loading.attr="disabled"
+                    wire:click="submit()">@lang('Submit')</button>
+                </div>
             </div>
 {{--   see:  https://laracasts.com/discuss/channels/laravel/how-to-bind-ckeditor-value-to-laravel-livewire-component?page=1#reply=607889       --}}
-            <input name="title" type="text" class="review-title" placeholder="@lang('Title')" wire:model.debounce.999999ms="title"
+            <input name="title" type="text" class="review-title" placeholder="@lang('Title')"
+                   wire:model.debounce.999999ms="title"
                    wire:key="review-title">
 
-            <div id="content-warpper">
-                <textarea id="review-content" name="content" cols="30" rows="10" class="review-content medium-editor-textarea"
-                          placeholder="@lang('Content')"></textarea>
+            <div id="content-warpper" wire:ignore>
+
+                <textarea id="review-content" cols="30" rows="10" class="review-content medium-editor-textarea"
+                    wire:model.defer="content" placeholder="@lang('Review')">
+                    {!! $content !!}
+                </textarea>
+
             </div>
             <span class="error">@error('title') {{ $message }} @enderror @error('content') {{ $message }} @enderror</span>
 
@@ -90,7 +98,7 @@
 </section>
 
 @push('scripts')
-<script src="/js/lib/zepto.min.js"></script>
+{{--<script src="/js/lib/zepto.min.js"></script>--}}
 <script src="/js/review.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -120,7 +128,7 @@
             placeholder: {
                 /* This example includes the default options for placeholder,
                    if nothing is passed this is what it used */
-                text: $('#review-content').attr('placeholder'),
+                text: '@lang('Review')',//$('#review-content').attr('placeholder'),
                 hideOnClick: true
             },
             // static: true,

@@ -20,7 +20,7 @@ class ShowReviews extends Component {
     public $poem;
     public $title;
     public $content;
-    public $isEditing = false;
+    public $showModal = false;
 
     //    protected $listeners = ['new-review' => '$refresh'];
     protected $listeners = ['contentUpdated'];
@@ -28,7 +28,7 @@ class ShowReviews extends Component {
     public function contentUpdated($string) {
         $this->content = $string;
         // dd($this->content);
-        $this->isEditing = true;
+        $this->showModal = true;
     }
 
 
@@ -44,13 +44,13 @@ class ShowReviews extends Component {
     }
 
     public function updated($propName) {
-        $this->isEditing = true;
+        $this->showModal = true;
         $this->validateOnly($propName);
         // $this->dispatchBrowserEvent('review-updated');
     }
 
     public function submit() {
-        $this->isEditing = true;
+        $this->showModal = true;
         $this->validate();
         // $this->dispatchBrowserEvent('review-updated');
         // Execution doesn't reach here if validation fails.
@@ -60,12 +60,14 @@ class ShowReviews extends Component {
             'poem_id' => $this->poem->id,
             'user_id' => Auth::user()->id
         ]);
-        $this->isEditing = false;
+        $this->showModal = false;
+        $this->content = '';
+        $this->title = '';
     }
 
     public function delete($review_id) {
-        // TODO fix this: review-modal will be open after delete if not setting isEditing=false
-        $this->isEditing = false;
+        // TODO fix this: review-modal will be open after delete if not setting showModal=false
+        $this->showModal = false;
         $review = Review::findOrFail($review_id);
         if ($review->user_id !== Auth::user()->id) {
             return;
