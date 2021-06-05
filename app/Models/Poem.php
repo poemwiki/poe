@@ -490,10 +490,10 @@ class Poem extends Model implements Searchable {
      *
      * @throws \Illuminate\Database\Eloquent\JsonEncodingException
      */
-    public function toFillableJson($options = 0) {
+    public function toFillableJson($options = 0, $extraList = []) {
         $allowedFields = $this->fillable;
-        $fillable = array_filter($this->jsonSerialize(), function ($item, $key) use ($allowedFields)  {
-            return in_array($key, $allowedFields);
+        $fillable = array_filter($this->jsonSerialize(), function ($item, $key) use ($extraList, $allowedFields)  {
+            return in_array($key, $allowedFields) or in_array($key, $extraList);
         }, ARRAY_FILTER_USE_BOTH);
         $json = json_encode($fillable, $options);
 
