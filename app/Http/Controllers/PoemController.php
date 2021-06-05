@@ -129,6 +129,7 @@ class PoemController extends Controller
             $poem->translator_id = null;
             $poem->translator_wikidata_id = null;
         }
+        $poem['_user_name'] = Auth::user()->name;
 
         $deftaultAuthors = ($preset && $preset->poetLabel) ? AuthorRepository::searchLabel($preset->poetLabel, [$preset->poet_id]) : [];
         return view('poems.create', [
@@ -138,7 +139,7 @@ class PoemController extends Controller
             'genreList' => Genre::select('name_lang', 'id')->get(),
             'translatedPoem' => $translatedPoem ?? null, // TODO don't pass translatedPoem
             'originalPoem' => $originalPoem ?? null, // TODO don't pass originalPoem
-            'defaultAuthors' => $deftaultAuthors//Author::select('name_lang', 'id')->limit(10)->get()->toArray(),
+            'defaultAuthors' => $deftaultAuthors,//Author::select('name_lang', 'id')->limit(10)->get()->toArray(),
         ]);
     }
 
@@ -212,6 +213,7 @@ class PoemController extends Controller
             'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded'
         ]);
 
+        $poem['_user_name'] = Auth::user()->name;
         $authorIds = array_unique([$poem->poet_id, $poem->translator_id]);
         return view('poems.edit', [
             'poem' => $poem,
