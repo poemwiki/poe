@@ -17,7 +17,10 @@
         @if($poem->_scenario)
           :data="{{ $poem->toFillableJson(0, ['_user_name']) }}"
         @else
-          :data="{{ json_encode(['_user_name' => Auth::user()->name]) }}"
+          :data="{{ json_encode(array_merge($poem->toArray(), [
+            '_user_name' => Auth::user()->name,
+            'is_owner_uploaded' => 0
+          ])) }}"
         @endif
         :trans="{{json_encode($trans)}}"
         :locales="{{ json_encode($locales) }}"

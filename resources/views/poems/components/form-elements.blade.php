@@ -215,7 +215,7 @@
 </div>
 
 {{--poet_cn TODO poet_cn should be poet_name_translated (the translated name coresspond to current language_id) --}}
-<div :class="{'hidden' : _.isNumber(form.poet_id), 'has-danger': errors.has('poet_cn') }">
+<div :class="{'hidden' : _.isNumber(form.poet_id) || form.is_owner_uploaded > 0, 'has-danger': errors.has('poet_cn') }">
 <label for="poet_cn" class="col-form-label text-md-right"
      :class="isFormLocalized ? 'col-md-4' : 'col-md-2'">{{ trans('admin.poem.columns.poet_cn') }}</label>
 <div :class="isFormLocalized ? 'col-md-4' : 'col-md-9 col-xl-8'">

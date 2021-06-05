@@ -45,7 +45,8 @@ Vue.component('poem-form', {
         translator_id: null,
         poet_wikidata_id: null,
         translator_wikidata_id: null,
-        is_owner_uploaded: 0
+        is_owner_uploaded: 0,
+        _user_name: ''
       },
 
       authorList: this.defaultAuthors,
@@ -64,9 +65,19 @@ Vue.component('poem-form', {
   watch: {
     'form.is_owner_uploaded': function(newVal, oldVal) {
       if(newVal === 1) {
+        // 原作所有权
         this.form.is_original = 1;
+
+        this.authorList.push(this.userAuthor);
+        this.form.poet_id = 'new_' + this.form._user_name;
+        // this.form.poet_id = null;
+        this.form.poet = this.form._user_name;
+        this.form.poet_cn = this.form._user_name;
       } else if(newVal === 2) {
+        // 译作所有权
         this.form.is_original = 0;
+        this.translatorList.push(this.userAuthor);
+        this.form.translator = this.form._user_name;
       }
 
     },
@@ -84,7 +95,8 @@ Vue.component('poem-form', {
         this.form.translator = '';
         console.log('clear translator');
       }
-    }
+    },
+
   },
 
   mounted: function() {
@@ -250,6 +262,18 @@ Vue.component('poem-form', {
   computed: {
     codemirror() {
       return this.$refs.cmEditor.codemirror;
+    },
+
+    userAuthor() {
+      return {
+        id: 'new_' + this.form._user_name,
+        label: this.form._user_name,
+        label_en: this.form._user_name,
+        label_cn: this.form._user_name,
+        url: '',
+        source: '',
+        avatar_url: '/images/avatar-default.png'
+      }
     },
     newAuthor() {
       return {
