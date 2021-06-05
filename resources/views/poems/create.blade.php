@@ -14,7 +14,11 @@
       <poem-form
         id="poem-form"
         :action="'{{ url('poems/store') }}'"
-        @if($poem->_scenario) :data="{{ $poem->toFillableJson() }}" @endif
+        @if($poem->_scenario)
+          :data="{{ $poem->toFillableJson(0, ['_user_name']) }}"
+        @else
+          :data="{{ json_encode(['_user_name' => Auth::user()->name]) }}"
+        @endif
         :trans="{{json_encode($trans)}}"
         :locales="{{ json_encode($locales) }}"
         :default-authors="{{ json_encode($defaultAuthors) }}"

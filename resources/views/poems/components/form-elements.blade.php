@@ -26,8 +26,8 @@
     @endif
 
     @if(empty($translatedPoem))
-    <label for="owner_type_translatorUploader"><input type="radio" id="owner_type_translatorUploader"
-       v-model="form.is_owner_uploaded" name="is_owner_uploaded_fake_element" :value="2" />@choice('Authorship', 2)</label>
+{{--    <label for="owner_type_translatorUploader"><input type="radio" id="owner_type_translatorUploader"
+       v-model="form.is_owner_uploaded" name="is_owner_uploaded_fake_element" :value="2" />@choice('Authorship', 2)</label>--}}
     @endif
 
 
@@ -180,7 +180,7 @@
             url: '',
             avatar_url: '/images/avatar-default.png'
            })"
-          :disabled="(form.translated_id || form.original_id) > 0"
+          :disabled="(form.translated_id || form.original_id) > 0 || form.is_owner_uploaded > 0"
           @option:selected="onSelectPoet"
           @search="onSearchPoet"
           @search:focus="onSearchPoetFocus"
