@@ -354,7 +354,7 @@ class PoemRepository extends BaseRepository
                 return $scoreOrder === 0
                     ? ($countOrder === 0 ? $b['score_weight'] <=> $a['score_weight'] : $countOrder)
                     : $scoreOrder;
-            })->map->only($columns)->values()->map(function ($item, $index) {
+            })->map->only(self::$listColumns)->values()->map(function ($item, $index) {
                 // $item = $item->toArray();
                 $item['rank'] = $index + 1;
                 return $item;
@@ -375,7 +375,7 @@ class PoemRepository extends BaseRepository
             'byScore' => $byScoreData,
             // TODO if weapp use virtual list, remove splice
             'byCreatedAt' => $this->getByTagId($tagId, 'created_at')->splice(0,150)
-                ->map->only($columns)
+                ->map->only(self::$listColumns)
         ];
     }
 
