@@ -101,21 +101,23 @@ class PoemController extends Controller
     public function create() {
         $preset = null;
         $poem = new Poem();
+        $mode = 'create new';
         if($t = request()->get('translated_fake_id')) {
             $translatedPoem = $this->poemRepository->getPoemFromFakeId($t);
             $preset = $translatedPoem;
+            $mode = 'create original';
             $poem->translated_id = $translatedPoem->id;
             $poem->is_original = 1;
         }
         if($o = request()->get('original_fake_id')) {
             $originalPoem = $this->poemRepository->getPoemFromFakeId($o);
             $preset = $originalPoem;
+            $mode = 'create translated';
             $poem->original_id = $originalPoem->id;
             $poem->is_original = 0;
         }
 
         if($preset) {
-            $poem->_scenario = 'preset';
             $poem->poet_id = $preset->poet_id;
             $poem->poet_wikidata_id = $preset->poet_wikidata_id;
             $poem->poet = $preset->poet;
@@ -130,6 +132,7 @@ class PoemController extends Controller
             $poem->translator_wikidata_id = null;
         }
         $poem['_user_name'] = Auth::user()->name;
+        // dd($poem->_scenario);
 
         $deftaultAuthors = ($preset && $preset->poetLabel) ? AuthorRepository::searchLabel($preset->poetLabel, [$preset->poet_id]) : [];
         return view('poems.create', [
@@ -140,6 +143,7 @@ class PoemController extends Controller
             'translatedPoem' => $translatedPoem ?? null, // TODO don't pass translatedPoem
             'originalPoem' => $originalPoem ?? null, // TODO don't pass originalPoem
             'defaultAuthors' => $deftaultAuthors,//Author::select('name_lang', 'id')->limit(10)->get()->toArray(),
+            'mode' => $mode
         ]);
     }
 

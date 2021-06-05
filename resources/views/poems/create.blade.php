@@ -42,7 +42,7 @@
           </div>
 
           <div class="card-body">
-            @include('poems.components.form-elements', ['mode' => 'create'])
+            @include('poems.components.form-elements', ['mode' => $mode])
           </div>
 
           <div class="mt-8 card-footer text-right">

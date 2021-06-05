@@ -11,7 +11,7 @@
 
     <input type="hidden" name="translated_id" v-model="form.translated_id">
 
-@if($mode==='create')
+@if($mode==='create new' || $mode==='create original')
 <div>
   <fieldset class="radio_group">
 
