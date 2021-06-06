@@ -46,7 +46,8 @@ Vue.component('poem-form', {
         poet_wikidata_id: null,
         translator_wikidata_id: null,
         is_owner_uploaded: 0,
-        _user_name: ''
+        _user_name: '',
+        original_link: ''
       },
 
       authorList: this.defaultAuthors,
@@ -139,6 +140,7 @@ Vue.component('poem-form', {
         data.translator_id = null;
         data.translator_wikidata_id = null;
         data.translator = null;
+        delete data.original_link;
       }
       return data;
     },

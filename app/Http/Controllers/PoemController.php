@@ -217,6 +217,8 @@ class PoemController extends Controller
             'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded'
         ]);
 
+        $originalLink = $poem->originalPoem ? $poem->originalPoem->url : null;
+
         $poem['_user_name'] = Auth::user()->name;
         $authorIds = array_unique([$poem->poet_id, $poem->translator_id]);
         return view('poems.edit', [
@@ -225,6 +227,7 @@ class PoemController extends Controller
             'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::select('name_lang', 'id')->get(),
             'defaultAuthors' => $poem->poetLabel ? AuthorRepository::searchLabel($poem->poetLabel, $authorIds) : [],
+            'originalLink' => $originalLink
         ]);
     }
 
@@ -243,6 +246,14 @@ class PoemController extends Controller
         $request->validate([
             'poem' => new NoDuplicatedPoem($id),
         ]);
+
+        if(isset($sanitized['original_link'])) {
+            $pattern = '@^' . str_replace('.', '\.', config('app.url')) . '/p/(.*)$@';
+            $fakeId = Str::of($sanitized['original_link'])->match($pattern)->__toString();
+
+            $orginalPoem = Poem::find(Poem::getIdFromFakeId($fakeId));
+            $sanitized['original_id'] = $orginalPoem->id;
+        }
 
         // if wikidata_id valid and not null, create a author by wikidata_id
         if(is_numeric($sanitized['poet_wikidata_id']) && is_null($sanitized['poet_id'])) {

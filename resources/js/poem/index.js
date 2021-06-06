@@ -18,6 +18,12 @@ Vue.use(VeeValidate, {strict: true});
 zh_CN.messages.required = function(n) {
   return n+"是必填的";
 };
+zh_CN.custom = {
+  original_link: {
+    regex: "必须是 https://poemwiki.org/p/ 开头的 URL"
+  }
+};
+
 let lang = document.getElementsByTagName('html')[0].lang;
 if (lang === 'zh-CN') {
   Validator.localize("zh_CN", zh_CN);

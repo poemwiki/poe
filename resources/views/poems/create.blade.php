@@ -33,9 +33,9 @@
           <div class="card-header">
             <i class="fa fa-plus"></i>
             @if($translatedPoem)
-              添加 《<a target="_blank" href="{{$translatedPoem->url}}">{{ $translatedPoem->title }}</a>》 的原作
+              添加&nbsp;&nbsp;<a target="_blank" href="{{$translatedPoem->url}}">{{ $translatedPoem->title }}</a>&nbsp;&nbsp;的原作
             @elseif($originalPoem)
-              添加 《<a target="_blank" href="{{$originalPoem->url}}">{{ $originalPoem->title }}</a>》 的其他版本
+              添加&nbsp;&nbsp;<a target="_blank" href="{{$originalPoem->url}}">{{ $originalPoem->title }}</a>&nbsp;&nbsp;的翻译版本
             @else
               {{ trans('admin.poem.actions.create') }}
             @endif

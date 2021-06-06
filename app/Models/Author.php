@@ -177,6 +177,9 @@ class Author extends Model implements Searchable {
      * @return string
      */
     public function getAvatarUrlAttribute() {
+        if($this->user) {
+            return $this->user->avatar_url;
+        }
         $url = isValidPicUrl($this->pic_url[0] ?? '') ? $this->pic_url[0] : asset(static::$defaultAvatarUrl);
         if (isWikimediaUrl($url)) {
             // $url = route('author-avatar', ['fakeId' => $this->fake_id]);

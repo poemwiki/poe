@@ -72,7 +72,14 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return \Illuminate\Database\Eloquent\Relations\hasMany
      **/
     public function reviews() {
-        return $this->hasMany(\App\Models\review::class, 'user_id', 'id');
+        return $this->hasMany(\App\Models\Review::class, 'user_id', 'id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\hasMany
+     **/
+    public function author() {
+        return $this->hasMany(\App\Models\Author::class, 'user_id', 'id');
     }
 
     public function activityLogs(): MorphMany {

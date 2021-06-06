@@ -252,6 +252,10 @@ class Poem extends Model implements Searchable {
         return $this->hasMany(\App\Models\Poem::class, 'original_id', 'id');
     }
 
+    public function allTranslatedPoems() {
+        return $this->translatedPoems()->with('allTranslatedPoems');
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      **/
@@ -267,14 +271,34 @@ class Poem extends Model implements Searchable {
     }
 
     /**
+     * 其它同一原作下的翻译版本
      * @return \Illuminate\Database\Eloquent\Relations\hasMany
      **/
     public function sameTranslatedPoems() {
         return $this->hasMany(\App\Models\Poem::class, 'original_id', 'original_id');
     }
 
+    /**
+     * 其它同一原作下的翻译版本，排除自身
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function otherTranslatedPoems() {
         return $this->sameTranslatedPoems()->where('id', '<>', $this->id);
+    }
+
+    /**
+     * 其它所有同一原作下的翻译版本，含二级、三级、N级翻译版本
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function allSameTranslatedPoems() {
+        return $this->sameTranslatedPoems()->with('allSameTranslatedPoems');
+    }
+    /**
+     * 其它所有同一原作下的翻译版本，含二级、三级、N级翻译版本，排除自身
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function AllOtherTranslatedPoems() {
+        return $this->allSameTranslatedPoems()->where('id', '<>', $this->id);
     }
 
     /**
