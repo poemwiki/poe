@@ -27,6 +27,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Author poetAuthor
  * @property Illuminate\Support\Collection|Tag[] tags
  * @property User owner
+ * @property mixed translator_label_cn
  */
 class Poem extends Model implements Searchable {
     use SoftDeletes;
@@ -37,11 +38,11 @@ class Poem extends Model implements Searchable {
     protected static $logOnlyDirty = true;
     public static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id' ];
     public static $OWNER = [
-        'none' => 0,
-        'uploader' => 1,
-        'translatorUploader' => 2,
-        'poetAuthor' => 3,
-        'translatorAuthor' => 4
+        'none' => 0,                // 上传时未标注原创，此时应以 poetAuthor 为作者 owner，以 translatorAuthor 为译者 owner
+        'uploader' => 1,            // 作者用户上传，此时以 upload_user_id 代表作者 owner
+        'translatorUploader' => 2,  // 译者用户上传，此时以 upload_user_id 代表译者 owner
+        'poetAuthor' => 3,          // 上传时未标注原创，后来被作者认领且标注原创，upload_user_id 不代表作者 owner，只代表上传人，此时应以 poetAuthor 为作者 owner
+        'translatorAuthor' => 4     // 上传时未标注原创，后来被译者认领且标注原创，upload_user_id 不代表译者 owner，只代表上传人，此时应以 translatorAuthor 为译者 owner
     ];
 
     protected $table = 'poem';
@@ -412,11 +413,11 @@ class Poem extends Model implements Searchable {
         // TODO 考虑认领诗歌的情况。如果一首诗歌被用户成功认领，那么upload_user_id将不代表作者
         // 此时需要用 is_owner_uploaded==Poem::OWNER['author'] 来标志作者上传
         // is_owner_uploaded==Poem::$OWNER['none'] 标志默认状态，无人认领，未标注原创
-        // is_owner_uploaded==Poem::$OWNER['uploader'] 标注原创，作者用户上传，此时以upload_user_id将不代表作者
+        // is_owner_uploaded==Poem::$OWNER['uploader'] 标注原创，作者用户上传，此时以 upload_user_id 代表作者
         // is_owner_uploaded==Poem::$OWNER['translatorUploader'] 标注为原创译作，译者用户上传，此时upload_user_id将代表译者
         // is_owner_uploaded==Poem::$OWNER['poetAuthor'] 标注原创且已被作者认领，upload_user_id不代表作者，只代表上传人，此时应以poetAuthor为作者
         // is_owner_uploaded==Poem::$OWNER['translatorAuthor'] 标注为原创译作且已被译者认领，upload_user_id不代表作者，只代表上传人，此时应以translatorAuthor为作者
-        // TODO if is_owner_uploaded==Poem::OWNER['poet'] && $this->uploader
+        // TODO if is_owner_uploaded==Poem::OWNER['poetAuthor'] && $this->uploader
         // TODO use poetAuthor->label if poem.poet and poem.poet_cn is used for SEO
         if ($this->is_owner_uploaded===static::$OWNER['uploader'] && $this->uploader) {
             return $this->uploader->name;

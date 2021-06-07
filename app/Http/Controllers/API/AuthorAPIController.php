@@ -24,7 +24,7 @@ class AuthorAPIController extends Controller {
         $translationWorks = $this->_prepare($author->translatedPoems);
 
         return $this->responseSuccess([
-            'author' => $author->only(['avatar_url', 'name_lang', 'describe_lang']),
+            'author' => $author->only(['id', 'avatar_url', 'name_lang', 'describe_lang', 'is_v']),
             'original_works' => $originalWorks,
             'translation_works' => $translationWorks
         ]);

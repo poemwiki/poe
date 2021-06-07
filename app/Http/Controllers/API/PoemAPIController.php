@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\StoreOwnerUploaderPoem;
+use App\Models\Author;
 use App\Models\Poem;
 use App\Models\Tag;
 use App\Repositories\PoemRepository;
@@ -111,6 +112,10 @@ class PoemAPIController extends Controller {
             $item['date_ago'] = date_ago($poem->created_at);
             $item['poet'] = $poem->poet_label;
             $item['poet_cn'] = $poem->poet_label_cn;
+            $item['poet_avatar_true'] = $poem->poet_avatar !== asset(Author::$defaultAvatarUrl);
+            $item['poet_is_v'] = ($poem->poetAuthor && $poem->poetAuthor->user && $poem->poetAuthor->user->is_v);
+            $item['translator_label'] = $poem->translator_label;
+            $item['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
             $item['reviews_count'] = $poem->reviews->count();
             $item['reviews'] = $poem->reviews->take(1)->map(function ($review) use ($reviewColumn) {
                 $review->content = $review->pureContent;
@@ -166,6 +171,10 @@ class PoemAPIController extends Controller {
 
         $res['poet'] = $poem->poet_label;
         $res['poet_cn'] = $poem->poet_label_cn;
+        $res['poet_avatar_true'] = $poem->poet_avatar !== asset(Author::$defaultAvatarUrl);
+        $res['poet_is_v'] = ($poem->poetAuthor && $poem->poetAuthor->user && $poem->poetAuthor->user->is_v);
+        $res['translator_label'] = $poem->translator_label;
+        $res['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
         $res['date_ago'] = date_ago($poem->created_at);
         // $res['sell'] = [
         //     'picUrl' => asset('images/campaign/6/sell.jpg'),
