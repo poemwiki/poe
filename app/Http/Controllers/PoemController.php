@@ -158,13 +158,13 @@ class PoemController extends Controller
         $sanitized = $request->getSanitized();
 
         // if wikidata_id valid and not null, create a author by wikidata_id
-        if(is_numeric($sanitized['poet_wikidata_id']) && is_null($sanitized['poet_id'])) {
+        if(isset($sanitized['poet_wikidata_id']) && is_numeric($sanitized['poet_wikidata_id']) && is_null($sanitized['poet_id'])) {
             $poetAuthor = $this->authorRepository->getExistedAuthor($sanitized['poet_wikidata_id']);
             $sanitized['poet_id'] = $poetAuthor->id;
             $sanitized['poet'] = $poetAuthor->label;
             $sanitized['poet_cn'] = $poetAuthor->label_cn;
         }
-        if(is_numeric($sanitized['translator_wikidata_id']) && is_null($sanitized['translator_id'])) {
+        if(isset($sanitized['translator_wikidata_id']) && is_numeric($sanitized['translator_wikidata_id']) && is_null($sanitized['translator_id'])) {
             $translatorAuthor = $this->authorRepository->getExistedAuthor($sanitized['translator_wikidata_id']);
             $sanitized['translator_id'] = $translatorAuthor->id;
             $sanitized['translator'] = $translatorAuthor->label;
