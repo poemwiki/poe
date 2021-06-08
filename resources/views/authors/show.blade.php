@@ -57,31 +57,6 @@ $aliasMaxLength = 4;
         </div>
       @endif
 
-{{--      @if(!empty($author->alias_arr) && count($author->alias_arr) > 1)--}}
-{{--        @if(count($author->alias_arr) > $aliasMaxLength)--}}
-{{--          <span class="poet-label">@lang('admin.author.columns.alias_arr')：</span>--}}
-{{--          @foreach($author->alias_arr as $key=>$alias)--}}
-{{--            @break($key >= $aliasMaxLength)--}}
-{{--            <a class="poet-alias" href="{{route('search', $alias)}}">{{$alias}}</a>--}}
-{{--          @endforeach--}}
-{{--          <details>--}}
-{{--            <summary></summary>--}}
-{{--            @foreach($author->alias_arr as $key=>$alias)--}}
-{{--              @continue($key < $aliasMaxLength)--}}
-{{--              <a class="poet-alias" href="{{route('search', $alias)}}">{{$alias}}</a>--}}
-{{--            @endforeach--}}
-{{--          </details>--}}
-{{--        @else--}}
-
-{{--          <p class="poet-brief">--}}
-{{--            <span class="poet-label">@lang('admin.author.columns.alias_arr')：</span>--}}
-{{--            @foreach($author->alias_arr as $alias)--}}
-{{--              <a class="poet-alias" href="{{route('search', $alias)}}">{{$alias}}</a>--}}
-{{--            @endforeach--}}
-{{--          </p>--}}
-{{--        @endif--}}
-{{--      @endif--}}
-
       @if($author->nation)
         <p class="poet-brief"><span class="poet-label">@lang('admin.author.columns.nation_id')：</span>{{$author->nation->name_lang}}</p>
       @endif
