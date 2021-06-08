@@ -1,4 +1,4 @@
-@extends('layouts.fe')
+@extends('layouts.common')
 
 @section('title', $author->label)
 
@@ -7,13 +7,19 @@
 @section('author', 'PoemWiki')
 
 @section('canonical')<link rel="canonical" href="{{$author->url}}" />@endsection
+
+
+@push('styles')
+  <link href="{{ mix('/css/author.css') }}" rel="stylesheet">
+@endpush
+
 @php
 $aliasMaxLength = 4;
 @endphp
 
 @section('content')
-    <article class="poet">
-      <h1>{{$author->label}}
+    <article class="poet page">
+      <h1 class="text-xl font-bold">{{$author->label}}
         @if($author->wikidata_id)
           <a class="wikidata-link" href="{{$author->wikiData->wikidata_url}}" target="_blank"></a>
         @endif
@@ -97,10 +103,9 @@ $aliasMaxLength = 4;
       <p class="poet-brief" style="white-space: pre-line;"><span class="poet-label">@lang('Introduction')：</span>{{$author->describe_lang}}</p>
 
         @if($poemsAsPoet->isNotEmpty())
-        <h2>
-              {{$author->label}} 的诗歌
-        </h2>
+        <h2>@lang("Author's Poem", ['author' => $author->label])</h2>
         @endif
+
         <ul>
         @foreach($poemsAsPoet as $poem)
             <li class="title-list-item">
@@ -113,8 +118,9 @@ $aliasMaxLength = 4;
         </ul>
 
         @if($poemsAsTranslator->isNotEmpty())
-        <h2>{{$author->label}} 的译作</h2>
+        <h2>@lang("Translation Works", ['author' => $author->label])</h2>
         @endif
+
         <ul>
             @foreach($poemsAsTranslator as $poem)
                 <li class="title-list-item">
@@ -123,7 +129,8 @@ $aliasMaxLength = 4;
                         ->surround('span')!!}</a>
                     <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->poem)->firstLine()->surround('span', function ($i) {
                             return 'style="transition-delay:'.($i*20).'ms"';
-                    })!!}</a>
+                    })!!}<span
+                        class="text-gray-400 float-right item-poem-author {{$poem->poetAuthor ? 'poemwiki-link' : ''}}">{{$poem->poetLabel}}</span></a>
                 </li>
             @endforeach
         </ul>

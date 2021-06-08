@@ -1,37 +1,5 @@
 @import "form-common";
 
-// poet page
-article.poet{
-  padding: 1rem 1.6rem 2rem;
-
-  .author-relate {
-    color: $gray;
-  }
-  .poet-gallery{
-    display: flex;
-    flex-wrap: nowrap;
-    max-width: 100%;
-    overflow-x: auto;
-    gap: 1rem;
-    .poet-pic {
-      height: 20vh;
-    }
-  }
-  .poet-brief {
-    margin-top: 1rem;
-    line-height: 1.4em;
-  }
-  h2 {
-    margin-top: 2rem;
-    font-size: $font-size-h2;
-  }
-
-  ul{
-    list-style: none;
-    padding-left: 0;
-    //line-height: 3em;
-  }
-}
 
 .title-list-item{
   position: relative;
@@ -71,6 +39,8 @@ article.poet{
     position: relative;
   }
 }
+
+// search page
 .search {
   padding: 1rem 1.6rem 2rem;
 
