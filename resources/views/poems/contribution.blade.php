@@ -104,7 +104,7 @@ use Jfcherng\Diff\Factory\RendererFactory;
                       $oldLink = $oldPoem ? "<a href=\"$oldPoem->url\">$oldPoem->title</a>" : '';
                       $newLink = $newPoem ? "<a href=\"$newPoem->url\">$newPoem->title</a>" : '';
                     @endphp
-                    <span class="field">{{trans('poem.original work')}}</span>&nbsp;[&nbsp;<del>{!!$oldLink!!}</del>&nbsp;⟹&nbsp;{!!$newLink!!}&nbsp;]
+                    <span class="field">{{trans('admin.poem.columns.original_id')}}</span>&nbsp;[&nbsp;<del>{!!$oldLink!!}</del>&nbsp;⟹&nbsp;{!!$newLink!!}&nbsp;]
                 @else
                     <span class="field">{{trans('admin.poem.columns.'.$prop)}}</span>&nbsp;[&nbsp;<del>{{$old}}</del>&nbsp;⟹&nbsp;{{$new}}&nbsp;]
                 @endif
