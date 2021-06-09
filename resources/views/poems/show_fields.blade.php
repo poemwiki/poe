@@ -214,7 +214,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                   @include('poems.components.translated', [
                             'poem' => $poem->topOriginalPoem,
                             'currentPageId' => $poem->id,
-                            'currentPageOriginalId' => $poem->original_id
+                            'currentPageOriginalId' => $poem->original_id===$poem->id ? null : $poem->original_id
                         ])
 
                   @if($poem->is_original)
