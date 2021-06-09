@@ -245,7 +245,34 @@ class Poem extends Model implements Searchable {
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo
      **/
     public function originalPoem() {
+        /**
+         * 为什么使用 original_id 和 is_original 两个字段来表述 翻译自和原作译作属性，而不是：
+         *      只用 original_id 来表示，original_id 为0的为原作，不为0的为译作。
+         * 因为还有一种译作没有 original_id，只能将其 original_id 字段置空。
+         * TODO 更改 original_id 为非空(方便使用索引) unsigned int（此类型与 poem.id 相同） 字段，
+         *      并删除 is_original 字段（用 dynamic attribute 代替：original_id为this->id表示原作，为0表示无原作的译作）
+         */
         return $this->belongsTo(\App\Models\Poem::class, 'original_id', 'id');
+    }
+
+    /**
+     * @caution TopOriginalPoem 有可能是译作
+     * TODO 添加 top_original_id 字段（非空，为0表示无原作的译作，为this->id表示原作），表示最顶层的翻译自的 poem id，省去此查询过程
+     *      并删除 is_original 字段（用 dynamic attribute 代替：original_id为this->id表示原作，为0表示无原作的译作）
+     * @return Poem|null
+     */
+    public function getTopOriginalPoemAttribute():?Poem {
+        $ids = [];
+        $translateFrom = $this;
+
+        do {
+            $ids[] = $translateFrom->id; // 保险起见，用笨办法防止环形链引起无限循环
+            if(!$translateFrom->original_id or in_array($translateFrom->original_id, $ids)) {
+                break;
+            }
+        } while ($translateFrom = $translateFrom->originalPoem);
+
+        return $translateFrom;
     }
 
     /**
@@ -431,9 +458,7 @@ class Poem extends Model implements Searchable {
     }
 
     public function getPoetLabelCnAttribute() {
-        // TODO if is_owner_uploaded==Poem::OWNER['poet'] && $this->uploader
-        // TODO use poetAuthor->label_cn if poem.poet and poem.poet_cn is used for SEO
-        if ($this->is_owner_uploaded && $this->uploader) {
+        if ($this->is_owner_uploaded===static::$OWNER['uploader'] && $this->uploader) {
             return $this->uploader->name;
         } else if ($this->poetAuthor) {
             return $this->poetAuthor->label_cn;
