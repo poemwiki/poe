@@ -53,11 +53,30 @@ Vue.component('poem-form', {
       authorList: this.defaultAuthors,
       translatorList: _.clone(this.defaultAuthors),
       cmOptions: {
-        tabSize: 2,
+        tabSize: 4,
         mode: 'text/plain',
         lineNumbers: true,
         line: true,
         lineWrapping: true,
+        extraKeys: {
+          Space: (cm) => {
+            var doc = cm.getDoc();
+            var cursor = doc.getCursor();
+
+            var pos = {
+              line: cursor.line,
+              ch: cursor.ch
+            }
+            var cjkIds = [1, 7, 8, 491];
+
+            if(cjkIds.indexOf(this.form.language_id) === -1) {
+              doc.replaceRange(' ', pos);
+            } else {
+              doc.replaceRange('　', pos);
+            }
+          },
+          // "Shift-Tab": (cm) => cm.execCommand("indentLess"),
+        },
         // more CodeMirror options...
       }
     }
