@@ -217,7 +217,7 @@ class PoemController extends Controller
             'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded'
         ]);
 
-        $originalLink = $poem->originalPoem ? $poem->originalPoem->url : null;
+        $poem['original_link'] = $poem->originalPoem ? $poem->originalPoem->url : null;
 
         $poem['_user_name'] = Auth::user()->name;
         $authorIds = array_unique([$poem->poet_id, $poem->translator_id]);
@@ -227,7 +227,6 @@ class PoemController extends Controller
             'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::select('name_lang', 'id')->get(),
             'defaultAuthors' => $poem->poetLabel ? AuthorRepository::searchLabel($poem->poetLabel, $authorIds) : [],
-            'originalLink' => $originalLink
         ]);
     }
 

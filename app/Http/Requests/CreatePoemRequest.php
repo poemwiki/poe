@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use App\Rules\NoDuplicatedPoem;
+use App\Rules\ValidPoetId;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Poem;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +29,7 @@ class CreatePoemRequest extends FormRequest {
      * @return array
      */
     public function rules(): array {
+        $original_id = request()->input('original_id');
         return [
             'title' => ['required', 'string'],
             'language_id' => Rule::in(LanguageRepository::ids()),
@@ -54,9 +56,9 @@ class CreatePoemRequest extends FormRequest {
             'preface' => ['nullable', 'string', 'max:300'],
             'subtitle' => ['nullable', 'string', 'max:128'],
             'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
-            'poet_id' => ['nullable', Rule::in(array_merge(AuthorRepository::ids()->toArray(), ['new']))],
+            'poet_id' => ['nullable', new ValidPoetId($original_id)],
             'poet_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
-            'translator_id' => ['nullable', Rule::in(array_merge(AuthorRepository::ids()->toArray(), ['new']))],
+            'translator_id' => ['nullable', new ValidPoetId],
             'translator_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
             'upload_user_id' => ['nullable', 'exists:' . \App\User::class . ',id'],
             'is_owner_uploaded' => ['required', Rule::in([Poem::$OWNER['none'], Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])],

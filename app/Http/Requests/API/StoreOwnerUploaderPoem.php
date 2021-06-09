@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * For API request
+ * Class StoreOwnerUploaderPoem
+ * @package App\Http\Requests\API
+ */
 class StoreOwnerUploaderPoem extends CreatePoemRequest {
     /**
      * Determine if the user is authorized to make this request.

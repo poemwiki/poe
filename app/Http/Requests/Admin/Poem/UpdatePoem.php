@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\Poem;
 
 use App\Http\Requests\UpdatePoemRequest;
+use App\Models\Poem;
 use App\Rules\ValidOriginalLink;
 
 // for web
@@ -14,7 +15,9 @@ class UpdatePoem extends UpdatePoemRequest {
      */
     public function rules(): array {
         $rules = parent::rules();
-        $rules['original_link'] = [new ValidOriginalLink, 'sometimes', 'string'];
+        $poemIdToChange = Poem::getIdFromFakeId($this->route('fakeId'));
+        $changeToPoetId = request()->input('poet_id');
+        $rules['original_link'] = [new ValidOriginalLink($poemIdToChange, $changeToPoetId), 'sometimes', 'string'];
         return $rules;
     }
 }

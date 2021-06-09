@@ -6,13 +6,14 @@ use App\Models\Poem;
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use App\Rules\NoDuplicatedPoem;
+use App\Rules\ValidPoetId;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class UpdatePoemRequest extends FormRequest {
-    private $_poemToChange;
+    protected $_poemToChange;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -29,6 +30,8 @@ class UpdatePoemRequest extends FormRequest {
      * @return array
      */
     public function rules(): array {
+        $original_id = request()->input('original_id');
+
         return [
             'title' => ['nullable', 'string'],
             'language_id' => Rule::in(LanguageRepository::ids()),
@@ -55,7 +58,7 @@ class UpdatePoemRequest extends FormRequest {
             'preface' => ['nullable', 'string', 'max:300'],
             'subtitle' => ['nullable', 'string', 'max:128'],
             'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
-            'poet_id' => ['nullable', Rule::in(array_merge(AuthorRepository::ids()->toArray(), ['new']))],
+            'poet_id' => ['nullable', new ValidPoetId($original_id)],
             'poet_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
             'translator_id' => ['nullable', Rule::in(array_merge(AuthorRepository::ids()->toArray(), ['new']))],
             'translator_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
