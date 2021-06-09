@@ -6,8 +6,12 @@
 <div class="child">
 
   @php
-    $children = $poem->translatedPoems;
+    $children = $poem->translatedPoems->filter(function($item)use ($currentPageId) {
+        return $item->id !== $item->original_id;
+    });
+
     $childrenCount = $children->count();
+    //dd($currentPageId, $children->pluck('id'));
     /** @var int $currentPageOriginalId */
     $isTranslatedFrom = $poem->id === $currentPageOriginalId;
   @endphp
@@ -18,7 +22,7 @@
       @if($isTranslatedFrom)
         <span class="translated-from">@lang('Translated from')</span>&nbsp;
       @endif
-      {{$poem->lang->name_lang ?? trans('poem.other')}}
+      {{$poem->lang->name_lang ?? trans('unkown language')}}
       {{$poem->is_original ? '['.trans('poem.original work').']' : ''}}
     </dt>
 
@@ -36,10 +40,12 @@
   @if($childrenCount)
     <div class="parent">
       @foreach($children as $translatedPoem)
+        @if($translatedPoem->id !== $currentPageId)
         @include('poems.components.translated', [
               'poem' => $translatedPoem,
               'currentPageId' => $currentPageId
           ])
+        @endif
       @endforeach
     </div>
   @endif
