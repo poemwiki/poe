@@ -2,7 +2,7 @@
 @if(isset($originalPoem) && $mode==='create translated')
     <div class="form-check">
         <label class="col-form-label text-md-right">
-            {{ trans('poem.original work') }}
+            {{ trans('admin.poem.columns.original_id') }}
         </label>
         <a href="{{$originalPoem->url}}">{{ $originalPoem->title }}</a>
         <input type="hidden" name="original_id"  v-model="form.original_id">
@@ -177,7 +177,7 @@
             url: '',
             avatar_url: '/images/avatar-default.png'
            })"
-          :disabled="(form.translated_id || form.original_id) > 0 || form.is_owner_uploaded > 0"
+          :disabled="form.translated_id > 0 || form.is_owner_uploaded > 0"
           @option:selected="onSelectPoet"
           @search="onSearchPoet"
           @search:focus="onSearchPoetFocus"
@@ -267,7 +267,6 @@
     <div>
       <input type="text" v-model="form.original_link"
              autocomplete="off"
-             value="{{$originalLink}}"
              v-validate="'regex:^https?://{{request()->getHost()}}/p/[a-zA-Z0-9]+'"
              data-vv-as="@lang('Translated From Poem Link')"
              data-vv-name="original_link"
