@@ -6,6 +6,7 @@ use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use App\Rules\NoDuplicatedPoem;
 use App\Rules\ValidPoetId;
+use App\Rules\ValidTranslatorId;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Poem;
 use Illuminate\Support\Facades\Auth;
@@ -58,7 +59,7 @@ class CreatePoemRequest extends FormRequest {
             'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
             'poet_id' => ['nullable', new ValidPoetId($original_id)],
             'poet_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
-            'translator_id' => ['nullable', new ValidPoetId],
+            'translator_id' => ['nullable', new ValidTranslatorId()],
             'translator_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
             'upload_user_id' => ['nullable', 'exists:' . \App\User::class . ',id'],
             'is_owner_uploaded' => ['required', Rule::in([Poem::$OWNER['none'], Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])],

@@ -7,6 +7,7 @@ use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use App\Rules\NoDuplicatedPoem;
 use App\Rules\ValidPoetId;
+use App\Rules\ValidTranslatorId;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -60,7 +61,7 @@ class UpdatePoemRequest extends FormRequest {
             'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
             'poet_id' => ['nullable', new ValidPoetId($original_id)],
             'poet_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
-            'translator_id' => ['nullable', Rule::in(array_merge(AuthorRepository::ids()->toArray(), ['new']))],
+            'translator_id' => ['nullable', new ValidTranslatorId()],
             'translator_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
         ];
     }
