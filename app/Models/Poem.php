@@ -7,6 +7,7 @@ use App\Repositories\ScoreRepository;
 use App\Traits\HasFakeId;
 use App\User;
 use Illuminate\Database\Eloquent\JsonEncodingException;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
@@ -244,20 +245,23 @@ class Poem extends Model implements Searchable {
     /**
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo
      **/
-    public function originalPoem() {
+    private function _originalPoem() {
         /**
-         * 为什么使用 original_id 和 is_original 两个字段来表述 翻译自和原作译作属性，而不是：
+         * 早期版本使用 original_id 和 is_original 两个字段来表述 翻译自和原作译作属性，而不是：
          *      只用 original_id 来表示，original_id 为0的为原作，不为0的为译作。
          * 因为还有一种译作没有 original_id，只能将其 original_id 字段置空。
-         * TODO 更改 original_id 为非空(方便使用索引) unsigned int（此类型与 poem.id 相同） 字段，
-         *      并删除 is_original 字段（用 dynamic attribute 代替：original_id为this->id表示原作，为0表示无原作的译作）
+         * 2021.6.10 更改 original_id 为非空(方便使用索引) unsigned int（此类型与 poem.id 相同） 字段，
+         *      并删除 is_original 字段（用 dynamic attribute 代替：original_id为$this->id表示原作，为0表示无原作的译作）
          */
         return $this->belongsTo(\App\Models\Poem::class, 'original_id', 'id');
+    }
+    public function originalPoem() {
+        return $this->_originalPoem()->with(['lang']);
     }
 
     /**
      * @caution TopOriginalPoem 有可能是译作
-     * TODO 添加 top_original_id 字段（非空，为0表示无原作的译作，为this->id表示原作），表示最顶层的翻译自的 poem id，省去此查询过程
+     * TODO 添加 top_original_id 字段（非空，为0表示无原作的译作，为$this->id表示原作），表示最顶层的翻译自的 poem id，省去此查询过程
      *      并删除 is_original 字段（用 dynamic attribute 代替：original_id为this->id表示原作，为0表示无原作的译作）
      * @return Poem|null
      */
@@ -278,13 +282,19 @@ class Poem extends Model implements Searchable {
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      **/
-    public function translatedPoems() {
+    private function _translatedPoems() {
         return $this->hasMany(\App\Models\Poem::class, 'original_id', 'id');
     }
-
-    public function allTranslatedPoems() {
-        return $this->translatedPoems()->with('allTranslatedPoems');
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     **/
+    public function translatedPoems():HasMany {
+        return $this->_translatedPoems()->with(['lang'])->whereRaw('original_id <> poem.id');
     }
+
+    // public function allTranslatedPoems() {
+    //     return $this->translatedPoems()->with('allTranslatedPoems');
+    // }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -304,32 +314,32 @@ class Poem extends Model implements Searchable {
      * 其它同一原作下的翻译版本
      * @return \Illuminate\Database\Eloquent\Relations\hasMany
      **/
-    public function sameTranslatedPoems() {
-        return $this->hasMany(\App\Models\Poem::class, 'original_id', 'original_id');
-    }
+    // public function sameTranslatedPoems() {
+    //     return $this->hasMany(\App\Models\Poem::class, 'original_id', 'original_id');
+    // }
 
     /**
      * 其它同一原作下的翻译版本，排除自身
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function otherTranslatedPoems() {
-        return $this->sameTranslatedPoems()->where('id', '<>', $this->id);
-    }
+    // public function otherTranslatedPoems() {
+    //     return $this->sameTranslatedPoems()->where('id', '<>', $this->id);
+    // }
 
     /**
      * 其它所有同一原作下的翻译版本，含二级、三级、N级翻译版本
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function allSameTranslatedPoems() {
-        return $this->sameTranslatedPoems()->with('allSameTranslatedPoems');
-    }
+    // public function allSameTranslatedPoems() {
+    //     return $this->sameTranslatedPoems()->with('allSameTranslatedPoems');
+    // }
     /**
      * 其它所有同一原作下的翻译版本，含二级、三级、N级翻译版本，排除自身
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function AllOtherTranslatedPoems() {
-        return $this->allSameTranslatedPoems()->where('id', '<>', $this->id);
-    }
+    // public function AllOtherTranslatedPoems() {
+    //     return $this->allSameTranslatedPoems()->where('id', '<>', $this->id);
+    // }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo
