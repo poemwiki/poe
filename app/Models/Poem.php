@@ -28,6 +28,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Illuminate\Support\Collection|Tag[] tags
  * @property User owner
  * @property mixed translator_label_cn
+ * @property Poem originalPoem
  */
 class Poem extends Model implements Searchable {
     use SoftDeletes;
@@ -50,10 +51,11 @@ class Poem extends Model implements Searchable {
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-
+    // default value for attributes
     protected $attributes = [
         'language_id' => 1,
-        'is_original' => 1
+        'is_original' => 1,
+        'is_owner_uploaded' => 0
     ];
 
     public $fillable = [
