@@ -32,3 +32,53 @@
 .wikipedia-link:before {
   background-image: url("/images/wikipedia.svg");
 }
+
+.nested-tree {
+  position: relative;
+  line-height: 1.5;
+
+  .parent {
+    margin: 0 0 0 20px;
+    .child {
+      position: relative;
+      &:before {
+        position: absolute;
+        left: -15px;
+        top: 0;
+        content: '';
+        display: block;
+        border-left: 1px solid $border-color;
+        height: 1em;
+        border-bottom: 1px solid $border-color;
+        width: 10px;
+      }
+
+      &:after {
+        position: absolute;
+        left: -15px;
+        bottom: -7px;
+        content: '';
+        display: block;
+        border-left: 1px solid $border-color;
+        height: 100%;
+      }
+
+      &.root {
+        margin: 0 0 0 -20px;
+        &:before {
+          display: none;
+        }
+
+        &:after {
+          display: none;
+        }
+      }
+
+      &:last-child {
+        &:after {
+          display: none;
+        }
+      }
+    }
+  }
+}
