@@ -13,7 +13,7 @@
       <poem-form
         id="poem-form"
         :action="'{{ route('poems/update', [$poem->fake_id]) }}'"
-        :data="{{ $poem->toFillableJson(0, ['_user_name']) }}"
+        :data="{{ $poem->toFillableJson(0, ['_user_name', 'original_link']) }}"
         :locales="{{ json_encode($locales) }}"
         :trans="{{json_encode($trans)}}"
         :default-authors="{{ json_encode($defaultAuthors) }}"
