@@ -208,43 +208,26 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                 <a class="btn create"
                    href="{{ Auth::check() ? route('poems/create') : route('login', ['ref' => route('poems/create')]) }}">@lang('poem.add poem')</a>
 
-                <dl class="poem-info poem-versions">
-                    <dt>@lang('poem.Translated/Original Version of This Poem')</dt>
-                    @if(!$poem->is_original)
-                        @if(!$poem->originalPoem)
-                            <dt>@lang('poem.no original work related')</dt>
-                            <dd><a class="" href="{{ Auth::check() ? route('poems/create', ['translated_fake_id' => $fakeId]) : route('login', ['ref' => route('poems/create', ['translated_fake_id' => $fakeId], false)]) }}">
-                                @lang('poem.add original work')</a></dd><br>
-                        @else
-                            <a href="{{$poem->originalPoem->url}}">
-                                <dt>{{$poem->originalPoem->lang ? $poem->originalPoem->lang->name_lang.'['.trans('poem.original work').']' : trans('poem.original work')}}</dt>
-                                <dd>{{$poem->originalPoem->poetAuthor ? $poem->originalPoem->poetAuthor->name_lang : $poem->originalPoem->poet}}</dd><br>
-                            </a>
-                        @endif
 
-                        @foreach($poem->otherTranslatedPoems()->get() as $t)
-                            <a href="{{$t->url}}">
-                                <dt>{{$t->lang->name_lang ?? trans('poem.other')}}</dt>
-                                <dd>{{$t->translatorAuthor ? $t->translatorAuthor->name_lang : ($t->translator ?? '佚名')}}</dd><br>
-                            </a>
-                        @endforeach
+                <dl class="poem-info poem-versions nested-tree">
+                  <dt>@lang('poem.Translated/Original Version of This Poem')</dt>
+                  @include('poems.components.translated', [
+                            'poem' => $poem->topOriginalPoem,
+                            'currentPageId' => $poem->id,
+                            'currentPageOriginalId' => $poem->original_id
+                        ])
 
-                    @elseif($poem->translatedPoems)
-                        @foreach($poem->translatedPoems as $t)
-                            <a href="{{$t->url}}">
-                                <dt>{{$t->lang->name_lang ?? trans('poem.other')}}</dt>
-                                <dd>{{$t->translatorAuthor ? $t->translatorAuthor->name_lang : ($t->translator ?? '佚名')}}</dd><br>
-                            </a>
-                        @endforeach
-                    @endif
-
-                    @if($poem->is_original)
-                        <dt><a class="btn"
-                               href="{{ Auth::check() ? $createPageUrl : route('login', ['ref' => $createPageUrl]) }}">@lang('poem.add another translated version')</a>
-                        </dt>
-                    @endif
-
+                  @if($poem->is_original)
+                    <dt><a class="btn"
+                           href="{{ Auth::check() ? $createPageUrl : route('login', ['ref' => $createPageUrl]) }}">@lang('poem.add another translated version')</a>
+                    </dt>
+                  @elseif(!$poem->originalPoem)
+                    <dt>@lang('poem.no original work related')</dt>
+                    <dd><a class="" href="{{ Auth::check() ? route('poems/create', ['translated_fake_id' => $fakeId]) : route('login', ['ref' => route('poems/create', ['translated_fake_id' => $fakeId], false)]) }}">
+                        @lang('poem.add original work')</a></dd><br>
+                  @endif
                 </dl>
+
             </section>
 
         </article>
@@ -289,6 +272,37 @@ document.addEventListener('DOMContentLoaded', function() {
     $nav.addEventListener('dbclick', function () {
         window.scrollTo({top:0});
     });
+
+
+  $body.addEventListener('copy', function (e) {
+    if (typeof window.getSelection == "undefined") return; //IE8 or earlier...
+
+    var selection = window.getSelection();
+
+    //if the selection is short let's not annoy our users
+    if (("" + selection).length < 10) return;
+
+    //create a div outside of the visible area
+    var newdiv = document.createElement('div');
+    newdiv.style.position = 'absolute';
+    newdiv.style.left = '-99999px';
+    $body.appendChild(newdiv);
+    newdiv.appendChild(selection.getRangeAt(0).cloneContents());
+
+    //we need a <pre> tag workaround
+    //otherwise the text inside "pre" loses all the line breaks!
+    if (selection.getRangeAt(0).commonAncestorContainer.nodeName === "PRE") {
+      newdiv.innerHTML = "<pre>" + newdiv.innerHTML + "</pre>";
+    }
+
+    newdiv.innerHTML += "<br /><br /><a href='"
+      + '{{$poem->weapp_url ?: $poem->url}}' + "'>"
+      + '{{$poem->weapp_url ?: $poem->url}}' + "</a>";
+
+    selection.selectAllChildren(newdiv);
+    window.setTimeout(function () { $body.removeChild(newdiv); }, 200);
+  });
 });
+
 </script>
 @endpush
