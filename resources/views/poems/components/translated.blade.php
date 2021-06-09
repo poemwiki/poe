@@ -36,12 +36,10 @@
   @if($childrenCount)
     <div class="parent">
       @foreach($children as $translatedPoem)
-        @if($translatedPoem->id !== $currentPageId)
-          @include('poems.components.translated', [
-                'poem' => $translatedPoem,
-                'currentPageId' => $currentPageId
-            ])
-        @endif
+        @include('poems.components.translated', [
+              'poem' => $translatedPoem,
+              'currentPageId' => $currentPageId
+          ])
       @endforeach
     </div>
   @endif
