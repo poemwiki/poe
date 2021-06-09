@@ -13,7 +13,7 @@ class ValidTranslatorId implements Rule {
     /**
      * @var int
      */
-    private $poetTestFailed;
+    // private $poetTestFailed;
 
     /**
      * Create a new rule instance.
@@ -21,7 +21,7 @@ class ValidTranslatorId implements Rule {
      * @param $original_id
      */
     public function __construct() {
-        $this->poetTestFailed = 0;
+        // $this->poetTestFailed = 0;
     }
 
     /**
@@ -45,17 +45,8 @@ class ValidTranslatorId implements Rule {
      * @return string
      */
     public function message() {
-        if($this->poetTestFailed == 1) {
-            return trans('error.Not a valid translator', [
-                'reason' => trans('error.The translated form poem should link to a author page.')
-            ]);
-        }
-        if($this->poetTestFailed == 2) {
-            return trans('error.Not a valid translator', [
-                'reason' => trans('error.Two poem should belong to same poet')
-            ]);
-        }
-
-        return trans('error.Not a valid translator');
+        return trans('error.Not a valid translator', [
+            'reason' => ''
+        ]);
     }
 }

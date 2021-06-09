@@ -73,6 +73,8 @@ class ValidPoetId implements Rule {
             ]);
         }
 
-        return trans('error.Not a valid poet');
+        return trans('error.Not a valid poet', [
+            'reason' => ''
+        ]);
     }
 }
