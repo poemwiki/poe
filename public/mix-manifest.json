@@ -1,14 +1,15 @@
 {
     "/js/admin.js": "/js/admin.js?id=752c0b929d9c51fc43d9",
-    "/js/app.js": "/js/app.js?id=c403ad95b8b5d90a4b11",
-    "/css/app.css": "/css/app.css?id=594a93f34466e7e6b8bc",
-    "/css/post.css": "/css/post.css?id=8ee800b007faab49b4de",
-    "/css/search.css": "/css/search.css?id=3ca8f5b3b645ab0803bc",
+    "/js/app.js": "/js/app.js?id=bd56a7be658e7fd48fa7",
+    "/css/app.css": "/css/app.css?id=b837f131657ae02381a7",
+    "/css/post.css": "/css/post.css?id=f7b178c31bf3e8a596fe",
+    "/css/search.css": "/css/search.css?id=5d9c10ddd05bef1bdb00",
+    "/css/author.css": "/css/author.css?id=792d9b9ea8bbf1305cbf",
     "/css/admin.css": "/css/admin.css?id=5fa1340c52b0ed2157e9",
-    "/css/form.css": "/css/form.css?id=97cbc1d85bb3ea9941ee",
-    "/css/calendar.css": "/css/calendar.css?id=7c8a1f5238a12b7f7662",
+    "/css/form.css": "/css/form.css?id=9d106106370d05234583",
+    "/css/calendar.css": "/css/calendar.css?id=df47781df20c4b9572c5",
     "/js/author.js": "/js/author.js?id=cec2c063a224f8387d99",
     "/js/calendar.js": "/js/calendar.js?id=72a137fef8004694de5b",
-    "/js/poem.js": "/js/poem.js?id=2dbe21c600609668ba52",
+    "/js/poem.js": "/js/poem.js?id=1830d88be3b7fde7939f",
     "/js/review.js": "/js/review.js?id=2c15f50d0eb6d12af698"
 }
