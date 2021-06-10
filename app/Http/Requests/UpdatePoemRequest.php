@@ -98,7 +98,14 @@ class UpdatePoemRequest extends FormRequest {
             $sanitized['translator_wikidata_id'] = $this->_poemToChange->translator_wikidata_id;
         }
 
-        //Add your code for manipulation with request data here
+        // 译作提交空 orginal_link 视为取消 orginal_id 链接
+        if(!$sanitized['is_original'] && empty($sanitized['original_link'])) {
+            $sanitized['original_id'] = 0;
+        }
+
+        // TODO 添加测试：原作改为译作，未提交 original_link 时，original_id 应为0；提交 original_link 时，original_id 应为对应的 poem.id
+
+        // TODO 添加测试：译作改为原作，不管是否有 original_link 提交，都应将 original_id 置为自身的 poem.id
 
         return $sanitized;
     }

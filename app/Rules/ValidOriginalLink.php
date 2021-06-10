@@ -44,6 +44,10 @@ class ValidOriginalLink implements Rule {
      * @return bool false if failed
      */
     public function passes($attribute, $value) {
+        if($value === '' or $value === null) {
+            return true;
+        }
+
         $pattern = '@^' . str_replace('.', '\.', config('app.url')) . '/p/(.*)$@';
         $fakeId = Str::of($value)->match($pattern)->__toString();
         if ($fakeId) {
@@ -70,12 +74,30 @@ class ValidOriginalLink implements Rule {
             return false;
         }
 
-        while ($translateFrom = $translateFrom->originalPoem) {
-            if($translateFrom->id === $this->poemId) {
-                $this->ringTestFailed = 2;
+        // while ($translateFrom = $translateFrom->originalPoem) {
+        //     if($translateFrom->id === $this->poemId) {
+        //         $this->ringTestFailed = 2;
+        //         return false;
+        //     }
+        //     dd('sss');
+        //     if(!$translateFrom->is_translated) break;
+        // }
+        // return true;
+
+
+        $ids = [$this->poemId];
+
+        do {
+            $ids[] = $translateFrom->id; // 保险起见，用笨办法防止环形链引起无限循环
+            if(in_array($translateFrom->original_id, $ids)
+                && $translateFrom->is_translated
+            ) {
                 return false;
+            } else if(!$translateFrom->is_translated){
+                return true;
             }
-        }
+        } while ($translateFrom = $translateFrom->originalPoem);
+
         return true;
     }
 
@@ -105,6 +127,8 @@ class ValidOriginalLink implements Rule {
                 'reason' => trans('error.Can not construct a ring')
             ]);
         }
-        return trans('error.Not a valid poem url');
+        return trans('error.Not a valid poem url', [
+            'reason' => ''
+        ]);
     }
 }

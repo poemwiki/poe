@@ -179,6 +179,9 @@ class Poem extends Model implements Searchable {
             $model->length = grapheme_strlen($model->poem);
         });
         self::created(function ($model) {
+            if($model->is_original) {
+                $model->original_id = $model->id;
+            }
             $content = Content::create([
                 'entry_id' => $model->id,
                 'type' => 0,
@@ -233,6 +236,15 @@ class Poem extends Model implements Searchable {
                 $model->need_confirm = 0;
             }
         });
+
+        self::updated(function ($model) {
+            Poem::withoutEvents(function () use ($model) {
+                if($model->is_original) {
+                    $model->original_id = $model->id;
+                    $model->save();
+                }
+            });
+        });
     }
 
     /**
@@ -260,6 +272,14 @@ class Poem extends Model implements Searchable {
     }
 
     /**
+     * TODO remove all is_original ref, remove poem.is_original from database, use is_translated here
+     * @return bool
+     */
+    public function getIsTranslatedAttribute() {
+        return $this->id !== $this->original_id;
+    }
+
+    /**
      * @caution TopOriginalPoem 有可能是译作
      * TODO 添加 top_original_id 字段（非空，为0表示无原作的译作，为$this->id表示原作），表示最顶层的翻译自的 poem id，省去此查询过程
      *      并删除 is_original 字段（用 dynamic attribute 代替：original_id为this->id表示原作，为0表示无原作的译作）
@@ -271,7 +291,10 @@ class Poem extends Model implements Searchable {
 
         do {
             $ids[] = $translateFrom->id; // 保险起见，用笨办法防止环形链引起无限循环
-            if(!$translateFrom->original_id or in_array($translateFrom->original_id, $ids)) {
+            if(!$translateFrom->original_id
+                or in_array($translateFrom->original_id, $ids)
+                or !$translateFrom->is_translated
+            ) {
                 break;
             }
         } while ($translateFrom = $translateFrom->originalPoem);

@@ -70,6 +70,10 @@ class StoreOwnerUploaderPoem extends CreatePoemRequest {
 
         $sanitized['upload_user_id'] = Auth::user()->id;
 
+        if (!isset($sanitized['original_id'])) {
+            $sanitized['original_id'] = 0;
+        }
+
         return $sanitized;
     }
 }

@@ -82,11 +82,11 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                 </span>
 
                 @if($poem->subtitle)
-                  <code class="subtitle font-hei" itemprop="subtitle">{{ $poem->subtitle }}</code>
+                  <pre class="subtitle font-hei" itemprop="subtitle">{{ $poem->subtitle }}</pre>
                 @endif
 
                 @if($poem->preface)
-                    <code class="preface font-hei" itemprop="preface">{{ $poem->preface }}</code>
+                    <pre class="preface font-hei" itemprop="preface">{{ $poem->preface }}</pre>
                 @endif
 
                 <div class="poem-content {{$softWrap ? 'soft-wrap' : ''}} {{$graphemeLength >= config('app.length_too_long') ? 'text-justify' : ''}}"
@@ -96,7 +96,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                     <code class="poem-line @if($poem->subtitle) poem-line-empty @else no-height @endif"><br></code>
                     @foreach(Str::of($poem->poem)->toLines() as $line)
                         @if(trim($line))
-                            <code class="poem-line font-hei">{{$line}}</code>
+                            <pre class="poem-line font-hei">{{$line}}</pre>
                         @else
                             <code class="poem-line poem-line-empty"><br></code>
                         @endif
@@ -217,7 +217,7 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                             'currentPageOriginalId' => $poem->original_id===$poem->id ? null : $poem->original_id
                         ])
 
-                  @if($poem->is_original)
+                  @if(!$poem->is_translated)
                     <dt><a class="btn"
                            href="{{ Auth::check() ? $createPageUrl : route('login', ['ref' => $createPageUrl]) }}">@lang('poem.add another translated version')</a>
                     </dt>
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
       newdiv.innerHTML = "<pre>" + newdiv.innerHTML + "</pre>";
     }
 
-    newdiv.innerHTML += "<br /><br /><a href='"
+    newdiv.innerHTML += "<br /><br />PoemWiki&nbsp;<a href='"
       + '{{$poem->weapp_url ?: $poem->url}}' + "'>"
       + '{{$poem->weapp_url ?: $poem->url}}' + "</a>";
 

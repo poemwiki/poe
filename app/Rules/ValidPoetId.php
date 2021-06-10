@@ -49,6 +49,7 @@ class ValidPoetId implements Rule {
                 return false;
             }
         }
+
         if($value === 'new') {
             return true;
         }

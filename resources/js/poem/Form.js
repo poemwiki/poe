@@ -160,6 +160,7 @@ Vue.component('poem-form', {
         data.translator_wikidata_id = null;
         data.translator = null;
         delete data.original_link;
+        delete data.original_id;
       }
       return data;
     },

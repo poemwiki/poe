@@ -45,7 +45,7 @@ class ReviewRepository extends BaseRepository {
 
     public function paginateByOriginalPoem(Poem $poem, $perPage = 10, $order = 'updated_at', $direction = 'desc', $columns = ['*']) {
         $poemIds = [$poem->id];
-        if ($poem->original_id) {
+        if ($poem->original_id && $poem->is_translated) {
             $poemIds[] = $poem->original_id;
             $op = Poem::where('original_id', $poem->original_id)->get();
             $poemIds = $op->pluck('id')->concat($poemIds)->all();
@@ -59,7 +59,7 @@ class ReviewRepository extends BaseRepository {
 
     public function listByOriginalPoem(Poem $poem, $order = 'review.created_at', $direction = 'desc', $columns = ['*']) {
         $poemIds = [$poem->id];
-        if ($poem->original_id) {
+        if ($poem->original_id && $poem->is_translated) {
             $poemIds[] = $poem->original_id;
             $op = Poem::where('original_id', $poem->original_id)->get();
             $poemIds = $op->pluck('id')->concat($poemIds)->all();

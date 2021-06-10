@@ -173,6 +173,9 @@ class PoemController extends Controller
 
         $sanitized['upload_user_id'] = $request->user()->id;
 
+        if (!isset($sanitized['original_id'])) {
+            $sanitized['original_id'] = 0;
+        }
         // Store the Poem
         $poem = Poem::create($sanitized);
 
@@ -218,7 +221,7 @@ class PoemController extends Controller
             'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded'
         ]);
 
-        $poem['original_link'] = $poem->originalPoem ? $poem->originalPoem->url : null;
+        $poem['original_link'] = ($poem->originalPoem && $poem->is_translated) ? $poem->originalPoem->url : null;
 
         $poem['_user_name'] = Auth::user()->name;
         $authorIds = array_unique([$poem->poet_id, $poem->translator_id]);

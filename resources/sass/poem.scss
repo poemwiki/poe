@@ -62,11 +62,12 @@ section.poem {
       }
 
       & > .poem-line {
-        padding: .4em;
+        padding: .23em;
         display: block;
         line-height: 1.6em;
         border: transparent 0;
         border-radius: .2em;
+        white-space: pre-wrap;
 
         &.poem-line-empty {
           height: 1.4em;
