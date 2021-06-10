@@ -524,7 +524,7 @@ class Poem extends Model implements Searchable {
      * @return string
      */
     public function getPoetAvatarAttribute() {
-        if ($this->is_owner_uploaded && $this->uploader) {
+        if ($this->is_owner_uploaded===self::$OWNER['uploader'] && $this->uploader) {
             return $this->uploader->avatarUrl;
         }
 
@@ -534,6 +534,22 @@ class Poem extends Model implements Searchable {
             }
 
             return $this->poetAuthor->avatar_url;
+        }
+
+        return asset(\App\User::$defaultAvatarUrl);
+    }
+
+    public function getTranslatorAvatarAttribute() {
+        if ($this->is_owner_uploaded===self::$OWNER['translatorUploader'] && $this->uploader) {
+            return $this->uploader->avatarUrl;
+        }
+
+        if ($this->translatorAuthor) {
+            if($this->translatorAuthor->user) {
+                return $this->translatorAuthor->user->avatarUrl;
+            }
+
+            return $this->translatorAuthor->avatar_url;
         }
 
         return asset(\App\User::$defaultAvatarUrl);

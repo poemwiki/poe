@@ -77,7 +77,7 @@ class PoemAPIController extends Controller {
             'id', 'created_at', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
             'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
             'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded',
-            'reviews', 'reviews_count', 'date_ago', 'poet_avatar',
+            'reviews', 'reviews_count', 'date_ago', 'poet_avatar', 'translator_avatar',
             'score', 'score_count', 'score_weight'
         ];
         $reviewColumn = [
@@ -113,6 +113,7 @@ class PoemAPIController extends Controller {
             $item['poet'] = $poem->poet_label;
             $item['poet_cn'] = $poem->poet_label_cn;
             $item['poet_avatar_true'] = $poem->poet_avatar !== asset(Author::$defaultAvatarUrl);
+            $item['translator_avatar_true'] = $poem->translator_avatar !== asset(Author::$defaultAvatarUrl);
             $item['poet_is_v'] = ($poem->poetAuthor && $poem->poetAuthor->user && $poem->poetAuthor->user->is_v);
             $item['translator_label'] = $poem->translator_label;
             $item['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
@@ -147,7 +148,7 @@ class PoemAPIController extends Controller {
     public function detail($id) {
         $columns = [
             'id', 'created_at', 'title', 'subtitle', 'preface', 'poem',
-            'poet', 'poet_cn', 'poet_id', 'poet_avatar',
+            'poet', 'poet_cn', 'poet_id', 'poet_avatar', 'translator_avatar',
             'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
             'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics',
             'campaign_id'
@@ -172,6 +173,7 @@ class PoemAPIController extends Controller {
         $res['poet'] = $poem->poet_label;
         $res['poet_cn'] = $poem->poet_label_cn;
         $res['poet_avatar_true'] = $poem->poet_avatar !== asset(Author::$defaultAvatarUrl);
+        $res['translator_avatar_true'] = $poem->translator_avatar !== asset(Author::$defaultAvatarUrl);
         $res['poet_is_v'] = ($poem->poetAuthor && $poem->poetAuthor->user && $poem->poetAuthor->user->is_v);
         $res['translator_label'] = $poem->translator_label;
         $res['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
