@@ -29,8 +29,8 @@ class QueryController extends Controller {
         return $this->response(NationRepository::searchByName(Str::trimSpaces($keyword), $id));
     }
 
-    public function author($keyword, $id) {
-        return $this->response(AuthorRepository::searchLabel(Str::trimSpaces($keyword), [$id]));
+    public function author($keyword, $id=null) {
+        return $this->response(AuthorRepository::searchLabel(Str::trimSpaces($keyword), $id ? [$id] : null));
     }
 
     // TODO support multiple word search like bot search, order by relative

@@ -55,9 +55,12 @@ class ValidOriginalLink implements Rule {
 
             $hasPoetId = $translateFrom->poet_id && $this->changeToPoetId;
             if(!$hasPoetId) {
-                $this->poetTestFailed = 1;
-                return false;
+                // $this->poetTestFailed = 1;
+                // return false;
+                return true;
             }
+
+            // TODO 原作译作任意一个关联了作者，以此作者为准，更改所有译作的作者
             if($translateFrom->poet_id !== $this->changeToPoetId) {
                 $this->poetTestFailed = 2;
                 return false;

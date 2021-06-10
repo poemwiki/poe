@@ -39,12 +39,12 @@ class ValidPoetId implements Rule {
      */
     public function passes($attribute, $value):bool {
         if($this->originalPoem) {
-            if(!$this->originalPoem->poet_id) {
-                $this->poetTestFailed = 1;
-                return false;
-            }
-
-            if($this->originalPoem->poet_id !== $value) {
+            // if(!$this->originalPoem->poet_id) {
+            //     $this->poetTestFailed = 1;
+            //     return false;
+            // }
+            // TODO 原作译作任意一个关联了作者，以此作者为准，更改所有译作的作者
+            if(!empty($this->originalPoem->poet_id) && is_numeric($this->originalPoem->poet_id) && $this->originalPoem->poet_id !== $value) {
                 $this->poetTestFailed = 2;
                 return false;
             }

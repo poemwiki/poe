@@ -30,6 +30,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property User owner
  * @property mixed translator_label_cn
  * @property Poem originalPoem
+ * @property bool is_translated
+ * @property int poet_id
  */
 class Poem extends Model implements Searchable {
     use SoftDeletes;
@@ -263,7 +265,7 @@ class Poem extends Model implements Searchable {
          *      只用 original_id 来表示，original_id 为0的为原作，不为0的为译作。
          * 因为还有一种译作没有 original_id，只能将其 original_id 字段置空。
          * 2021.6.10 更改 original_id 为非空(方便使用索引) unsigned int（此类型与 poem.id 相同） 字段，
-         *      并删除 is_original 字段（用 dynamic attribute 代替：original_id为$this->id表示原作，为0表示无原作的译作）
+         *      TODO 删除 is_original 字段（用 dynamic attribute 代替：original_id为$this->id表示原作，为0表示无原作的译作）
          */
         return $this->belongsTo(\App\Models\Poem::class, 'original_id', 'id');
     }
@@ -281,8 +283,10 @@ class Poem extends Model implements Searchable {
 
     /**
      * @caution TopOriginalPoem 有可能是译作
-     * TODO 添加 top_original_id 字段（非空，为0表示无原作的译作，为$this->id表示原作），表示最顶层的翻译自的 poem id，省去此查询过程
-     *      并删除 is_original 字段（用 dynamic attribute 代替：original_id为this->id表示原作，为0表示无原作的译作）
+     *
+     * TODO [谨慎考虑！] 添加 top_original_id 字段（非空，为 0 表示无原作的译作，为 $this->id 表示原作），表示最顶层的翻译自的 poem id，省去此查询过程
+     *      删除 is_original 字段（用 dynamic attribute 代替：top_original_id 为 $this->id 表示原作，为 0 表示无原作的译作）
+     *      另外，还需要额外的逻辑实现 一致性
      * @return Poem|null
      */
     public function getTopOriginalPoemAttribute():?Poem {
@@ -316,7 +320,6 @@ class Poem extends Model implements Searchable {
     }
 
     // public function allTranslatedPoems() {
-    //     return $this->translatedPoems()->with('allTranslatedPoems');
     // }
 
     /**

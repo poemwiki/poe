@@ -305,8 +305,8 @@
 </div>
 
 {{--translator_id--}}
-<div :class="{'hidden' : form.is_original==1,'has-danger': errors.has('translator_id') }">
-<label for="translator_id" class="col-form-label text-md-right">{{ trans('admin.poem.columns.translator_id') }}</label>
+<div :class="{'hidden' : form.is_original==1,'has-danger': errors.has('translator_id')}">
+<label for="translator_id" class="col-form-label text-md-right" :class="{'required': form.is_original==0}">{{ trans('admin.poem.columns.translator_id') }}</label>
 <div>
 
 
@@ -329,7 +329,7 @@
           v-model="form.translator_id"
           :class="{'form-control-danger': errors.has('translator_id'), 'form-control-success': fields.translator_id && fields.translator_id.valid}"
           class="relative"
-          v-validate="''"
+          v-validate="form.is_original==0 ? 'required' : ''"
           data-vv-as="{{ trans('admin.poem.columns.translator_id') }}" data-vv-name="translator_id"
           name="translator_id_fake_element"
 >

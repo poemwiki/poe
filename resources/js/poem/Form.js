@@ -168,6 +168,7 @@ Vue.component('poem-form', {
     onSelectPoet: function(option) {
       this.form.poet = option.label;
       this.form.poet_cn = option.label_cn||option.label;
+      console.log('use new poet_cn:', this.form.poet_cn, option)
       if(this.isNew(this.form.poet_id)) {
         this.form.poet_wikidata_id = null;
       }
@@ -222,7 +223,7 @@ Vue.component('poem-form', {
       }
       console.log('searching');
       axios(
-        `/q/author/${encodeURI(search)}/${vm.form[field]}`
+        `/q/author/${encodeURI(search)}/` + (vm.form[field] || '')
       ).then(res => {
         if(res?.data?.length) {
           vm.authorList = res.data;

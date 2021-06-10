@@ -379,4 +379,15 @@ class PoemRepository extends BaseRepository
         ];
     }
 
+    public static function updateAllTranslatedPoemPoetId(Poem $originalPoem, int $poetId) {
+        foreach ($originalPoem->translatedPoems as $p) {
+            if ($p->is_translated) {
+                $p->poet_id = $poetId;
+                $p->save();
+
+                self::updateAllTranslatedPoemPoetId($p, $poetId);
+            }
+        }
+    }
+
 }

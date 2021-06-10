@@ -200,6 +200,8 @@ class PoemController extends Controller
         })->pluck('name_lang', 'locale');
         return [
             'Save' => trans('Save'),
+            'Submit' => trans('Submit'),
+            'Publish' => trans('Publish'),
             'Saving' => trans('Saving'),
             'locales' => $locale
         ];
@@ -272,9 +274,15 @@ class PoemController extends Controller
         }
 
         // Update changed values Poem
-        $this->poemRepository->update($sanitized, $id);
+        $poem = $this->poemRepository->update($sanitized, $id);
+        $poetId = $poem->topOriginalPoem->poet_id ?: $poem->poet_id;
+        // 修改原作作者时，同步修改所有译作作者(仅当顶层原作 poet_id 或当前作品 poet_id 不为空)
+        if($poetId) {
+            $this->poemRepository->updateAllTranslatedPoemPoetId($poem->topOriginalPoem, $poetId);
+        }
 
-        return $this->responseSuccess();
+
+        return $this->responseSuccess(route('poems/show', Poem::getFakeId($poem->id)));
     }
 
 

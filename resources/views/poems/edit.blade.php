@@ -35,7 +35,7 @@
           <div class="mt-8 card-footer text-right">
             <button type="submit" class="btn btn-wire" :disabled="submiting">
               <i class="fa" :class="submiting ? 'fa-spinner' : 'fa-download'"></i>
-              @{{ submiting ? lang.Saving : lang.Save }}
+              @{{ submiting ? lang.Saving : (form.is_owner_uploaded ? lang.Publish : lang.Submit) }}
             </button>
           </div>
         </form>
