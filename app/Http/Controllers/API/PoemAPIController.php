@@ -178,6 +178,13 @@ class PoemAPIController extends Controller {
         $res['translator_label'] = $poem->translator_label;
         $res['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
         $res['date_ago'] = date_ago($poem->created_at);
+
+        if (!$res['poet_id'] && $poem->is_owner_uploaded===Poem::$OWNER['uploader'] && $poem->uploader) {
+            if($poem->uploader->author) {
+                $res['poet_id'] = $poem->uploader->author->id;
+                $res['poet_is_v'] = $poem->uploader->is_v;
+            }
+        }
         // $res['sell'] = [
         //     'picUrl' => asset('images/campaign/6/sell.jpg'),
         //     'appId' => '',

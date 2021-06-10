@@ -166,6 +166,7 @@ class PoemRepository extends BaseRepository
             if(!(config('app.env') === 'production')) {
                 $item['poet'] = $item['poet'] . '-' .$item->id;
             }
+            $item['poet_is_v'] = $item->is_owner_uploaded===Poem::$OWNER['uploader'] && $item->uploader && $item->uploader->is_v;
             $item['reviews_count'] = $item->reviews->count();
             $item['reviews'] = $item->reviews->take(2)->map->only(['id', 'avatar', 'content', 'pure_content', 'created_at', 'name', 'user_id']);
             $item['score_count'] = $endTime ? ScoreRepository::calcCount($item->id, $startTime, $endTime) : ScoreRepository::calcCount($item->id);
@@ -235,7 +236,7 @@ class PoemRepository extends BaseRepository
         'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
         'poem', 'poet', 'poet_id', 'poet_avatar', 'poet_cn',
         'score', 'score_count', 'score_weight', 'rank',
-        'reviews', 'reviews_count'
+        'reviews', 'reviews_count', 'poet_is_v'
     ];
     /**
      * @param $userId
@@ -325,7 +326,6 @@ class PoemRepository extends BaseRepository
             }
 
         } else {
-
             // poem before endDate, scores before endDate
             if($campaign->id >= 6 || (!(config('app.env') === 'production'))) {
                 $byScore = $this->getTopByTagId($tagId, $campaign->start, $campaign->end);
@@ -340,6 +340,7 @@ class PoemRepository extends BaseRepository
                 // TODO should use $item->getCampaignScore returned score_count
                 return $value['score_count'] >= $limit;
             })->map(function (Poem $item) use ($campaign) {
+                $item['poet_is_v'] = $item->is_owner_uploaded===Poem::$OWNER['uploader'] && $item->uploader && $item->uploader->is_v;
                 $score = $item->getCampaignScore($campaign);
                 $item['score'] = $score['score'];
                 $item['score_weight'] = $score['weight'];
