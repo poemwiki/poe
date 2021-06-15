@@ -296,8 +296,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     newdiv.innerHTML += "<br /><br />PoemWiki&nbsp;<a href='"
-      + '{{$poem->weapp_url ?: $poem->url}}' + "'>"
-      + '{{$poem->weapp_url ?: $poem->url}}' + "</a>";
+      + '{!!$poem->weapp_url ? $poem->weapp_url['url'] : $poem->url!!}' + "'>"
+      + '{!!$poem->weapp_url ? $poem->weapp_url['url'] : $poem->url!!}' + "</a>";
 
     selection.selectAllChildren(newdiv);
     window.setTimeout(function () { $body.removeChild(newdiv); }, 200);
