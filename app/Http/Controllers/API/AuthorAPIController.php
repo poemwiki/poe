@@ -21,11 +21,12 @@ class AuthorAPIController extends Controller {
         }
 
         $originalWorks = $this->_prepare($author->poems);
+        $authorUserOriginalWorks = $author->user ? $this->_prepare($author->user->originalPoemsOwned) : [];
         $translationWorks = $this->_prepare($author->translatedPoems);
 
         return $this->responseSuccess([
             'author' => $author->only(['id', 'avatar_url', 'name_lang', 'describe_lang', 'is_v']),
-            'original_works' => $originalWorks,
+            'original_works' => $originalWorks->concat($authorUserOriginalWorks),
             'translation_works' => $translationWorks
         ]);
     }

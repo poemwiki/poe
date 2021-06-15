@@ -33,6 +33,7 @@ class AuthorController extends Controller {
         $id = Author::getIdFromFakeId($fakeId);
         $author = Author::findOrFail($id);
         $poemsAsPoet = Poem::where(['poet_id' => $id])->get();
+        $authorUserOriginalWorks = $author->user ? $author->user->originalPoemsOwned : [];
         $poemsAsTranslator = Poem::where(['translator_id' => $id])->get();
 
         $from = request()->get('from');
@@ -52,7 +53,7 @@ class AuthorController extends Controller {
 
         return view('authors.show')->with([
             'author' => $author,
-            'poemsAsPoet' => $poemsAsPoet,
+            'poemsAsPoet' => $poemsAsPoet->concat($authorUserOriginalWorks),
             'poemsAsTranslator' => $poemsAsTranslator,
             'fromPoetName' => $fromPoetName
         ]);

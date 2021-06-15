@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\Poem;
 use App\Traits\Liker;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -79,7 +80,15 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return \Illuminate\Database\Eloquent\Relations\hasMany
      **/
     public function author() {
-        return $this->hasMany(\App\Models\Author::class, 'user_id', 'id');
+        return $this->hasOne(\App\Models\Author::class, 'user_id', 'id');
+    }
+
+    public function originalPoemsOwned() {
+        return $this->hasMany(Poem::class, 'upload_user_id', 'id')->where('is_owner_uploaded', Poem::$OWNER['uploader']);
+    }
+
+    public function translatedPoemsOwned() {
+        return $this->hasMany(Poem::class, 'upload_user_id', 'id')->where('is_owner_uploaded', Poem::$OWNER['translatorUploader']);
     }
 
     public function activityLogs(): MorphMany {
