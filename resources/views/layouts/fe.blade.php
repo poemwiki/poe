@@ -16,6 +16,7 @@
     <meta name="description" content="@yield('author') @yield('title') 诗歌全文,@yield('author') @yield('title') 评论、评分">
 
     @yield('canonical')
+    @yield('alternate')
     @include('layouts.icon')
 
     @yield('meta-og')
