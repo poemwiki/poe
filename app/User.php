@@ -77,7 +77,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\hasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      **/
     public function author() {
         return $this->hasOne(\App\Models\Author::class, 'user_id', 'id');
