@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasTranslations;
 
+
 class Campaign extends Model {
     use SoftDeletes;
     use HasTranslations;
@@ -87,27 +88,47 @@ class Campaign extends Model {
         // 优先使用masters内ID对应的用户信息，无masters则使用masterInfos
         if(!$masters) {
             if(!$masterInfos) return null;
-            return array_map(function ($item) {
+
+            return array_map(function ($master) {
                 // 优先使用 masterInfos 内的 name 和 avatar
-                $ret = $item;
-                $ret['avatar'] = isset($item['avatar']) ? asset($item['avatar'])
-                    : ((isset($item['id']) && User::find($item['id'])) ? User::find($item['id'])->avatarUrl : asset(User::$defaultAvatarUrl));
+                $ret = $master;
+
+                if(isset($master['id'])) {
+                    $user = User::find($master['id']);
+                    if ($user) {
+                        $ret['avatar'] = asset($user->avatarUrl);
+
+                        if($user->author) {
+                            $ret['author_id'] = $user->author->id;
+                        }
+                    }
+                }
+
+                if (isset($master['avatar'])) {
+                    $ret['avatar'] = asset($master['avatar']);
+                }
+                $ret['avatar'] = $ret['avatar'] ?? (asset(User::$defaultAvatarUrl));
+
                 return $ret;
+
             }, $masterInfos);
         }
 
         $users = [];
         foreach ($masters as $index => $masterID) {
-            $user = User::select(['id', 'avatar', 'name'])->find($masterID);
+            $user = User::find($masterID);
             if(!$user) continue;
 
-            $user = $user->toArray();
+            $masterUser = $user->only(['id', 'avatar', 'name', 'author_id']);
             // 同时存在 masters和 masterInfos 的情况下，优先使用 masterInfos 内的 name 和 avatar
             if($masterInfos && ($info = $masterInfos[$index])) {
-                $user['name'] = $info['name'];
-                $user['avatar'] = asset($info['avatar']);
+                $masterUser['name'] = $info['name'];
+                $masterUser['avatar'] = asset($info['avatar']);
             }
-            $users[] = $user;
+            if($user->author) {
+                $masterUser['author_id'] = $user->author->id;
+            }
+            $users[] = $masterUser;
         }
 
         return $users;
