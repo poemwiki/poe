@@ -221,7 +221,7 @@ Vue.component('poem-form', {
         loading(false);
         return
       }
-      console.log('searching');
+
       axios(
         `/q/author/${encodeURI(search)}/` + (vm.form[field] || '')
       ).then(res => {
