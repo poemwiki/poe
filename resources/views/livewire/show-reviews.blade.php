@@ -36,7 +36,7 @@
                 </div>
 
                 @if(isset($userScore[$review->user_id]))
-                    <svg class="stars"><use href="#stars-{{$userScore[$review->user_id]}}"></use></svg>
+                    <svg class="stars"><use href="#stars-{{floor($userScore[$review->user_id] / 2)}}"></use></svg>
                 @endif
                 <h2 class="review-title">{{$review->title}}</h2>
 
