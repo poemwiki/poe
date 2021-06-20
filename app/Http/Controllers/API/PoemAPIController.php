@@ -185,11 +185,14 @@ class PoemAPIController extends Controller {
                 $res['poet_is_v'] = $poem->uploader->is_v;
             }
         }
-        // $res['sell'] = [
-        //     'picUrl' => asset('images/campaign/6/sell.jpg'),
-        //     'appId' => '',
-        //     'path' => ''
-        // ];
+
+        if($res['poet_id'] === 1033 or ($poem->is_owner_uploaded===1 && $poem->upload_user_id===4806)) {
+            $res['sell'] = [
+                'path' =>  "pages/item/detail/detail?cover=https%3A%2F%2Fm.360buyimg.com%2Fmobilecms%2Fs300x300_jfs%2Ft1%2F163742%2F18%2F11927%2F161606%2F604ae078E6e2ffbba%2Fb15e1a464fea9201.jpg!q70.jpg&price=33.3&name=%E5%A4%9C%E8%A1%8C%E5%88%97%E8%BD%A6&from=wxshare_3&sku=13144162&fb=0",
+                "appId" => "wx91d27dbf599dff74",
+                "picUrl" => "https://poemwiki.org/images/campaign/9/sell.jpg"
+            ];
+        }
 
         $liked_review_ids = [];
 
@@ -410,6 +413,7 @@ class PoemAPIController extends Controller {
         $response = $app->app_code->getUnlimit($scene, [
             'page' => $page,
             'width' => 280,
+            'is_hyaline' => false
         ]);
         if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
             $response->saveAs($appCodeImgDir, $appCodeFileName);
