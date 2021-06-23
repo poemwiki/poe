@@ -16,7 +16,7 @@ class StoreAuthor extends TranslatableFormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('admin.author.create') || Gate::allows('web.author.change', Auth::user());
+        return Gate::allows('web.author.change', Auth::user());
     }
 
 /**

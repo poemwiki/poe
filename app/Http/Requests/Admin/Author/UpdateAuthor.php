@@ -16,7 +16,7 @@ class UpdateAuthor extends TranslatableFormRequest {
      * @return bool
      */
     public function authorize(): bool {
-        return Gate::allows('admin.author.edit', $this->author) || Gate::allows('web.author.change', Auth::user());
+        return Gate::allows('web.author.change', Auth::user());
     }
 
     /**
