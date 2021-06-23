@@ -22,7 +22,7 @@ class UpdatePoemRequest extends FormRequest {
      */
     public function authorize(): bool {
         $this->_poemToChange = Poem::find(Poem::getIdFromFakeId($this->route('fakeId')));
-        return Gate::allows('admin.poem.edit') || Gate::allows('web.poem.change', $this->_poemToChange);
+        return Gate::allows('web.poem.change', $this->_poemToChange);
     }
 
     /**
