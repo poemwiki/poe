@@ -14,7 +14,7 @@
         <div class="card">
           <div class="card-header">
             <i class="fa fa-align-justify"></i> {{ trans('admin.poem.actions.index') }}
-            <a class="btn btn-primary btn-spinner btn-sm pull-right m-b-0" href="{{ url('admin/poems/create') }}"
+            <a class="btn btn-primary btn-spinner btn-sm pull-right m-b-0" href="{{ url('/new') }}"
                role="button"><i class="fa fa-plus"></i>&nbsp; {{ trans('admin.poem.actions.create') }}</a>
           </div>
           <div class="card-body" v-cloak>
