@@ -188,7 +188,7 @@ class PoemController extends Controller
         }
 
         // return $this->responseSuccess();
-        return $this->responseSuccess(route('poems/show', Poem::getFakeId($poem->id)));
+        return $this->responseSuccess(route('p/show', Poem::getFakeId($poem->id)));
     }
 
 
@@ -282,7 +282,7 @@ class PoemController extends Controller
         }
 
 
-        return $this->responseSuccess(route('poems/show', Poem::getFakeId($poem->id)));
+        return $this->responseSuccess(route('p/show', Poem::getFakeId($poem->id)));
     }
 
 

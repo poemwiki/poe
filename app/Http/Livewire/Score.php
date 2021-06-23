@@ -48,7 +48,7 @@ class Score extends Component {
 
     public function updatedRating($value) {
         if(!Auth::check()) {
-            return redirect(route('login', ['ref' => route('poems/show', $this->poem->fake_id)]));
+            return redirect(route('login', ['ref' => route('p/show', $this->poem->fake_id)]));
         }
 
         $this->validateOnly('rating');
