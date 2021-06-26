@@ -6,6 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasTranslations;
 
+/**
+ * App\Models\Nation
+ *
+ * @property int $id
+ * @property array $name_lang
+ * @property int $f_id
+ * @property int|null $wikidata_id
+ * @property array|null $describe_lang
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read mixed $resource_url
+ * @property-read array $translations
+ */
 class Nation extends Model {
     use SoftDeletes;
     use HasTranslations;

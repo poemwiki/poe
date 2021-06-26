@@ -14,14 +14,68 @@ use Spatie\Searchable\SearchResult;
 
 /**
  * Class Author
+ *
  * @property int $id
  * @property string $created_at
  * @property string $updated_at
- * @property User user
- * @property array|null pic_url
- * @property Wikidata wikiData
  * @property mixed fakeId
  * @package App
+ * @property array|null $name_lang
+ * @property int|null $user_id
+ * @property array|null $pic_url
+ * @property int|null $wikidata_id
+ * @property mixed|null $wikipedia_url
+ * @property array|null $describe_lang
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $nation_id
+ * @property int|null $dynasty_id
+ * @property string|null $short_url
+ * @property int|null $upload_user_id
+ * @property array|null $wiki_desc_lang
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
+ * @property-read int|null $activities_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Alias[] $alias
+ * @property-read int|null $alias_count
+ * @property-read \App\Models\Dynasty|null $dynasty
+ * @property-read mixed $alias_arr
+ * @property-read string $avatar_url
+ * @property-read string $fake_id
+ * @property-read mixed|string $label
+ * @property-read mixed $label_cn
+ * @property-read mixed $label_en
+ * @property-read mixed $resource_url
+ * @property-read array $translations
+ * @property-read string $url
+ * @property-read \App\Models\Nation|null $nation
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Poem[] $poems
+ * @property-read int|null $poems_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Poem[] $translatedPoems
+ * @property-read int|null $translated_poems_count
+ * @property-read \App\User|null $uploader
+ * @property-read \App\User|null $user
+ * @property-read \App\Models\Wikidata|null $wikiData
+ * @method static \Illuminate\Database\Eloquent\Builder|Author newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Author newQuery()
+ * @method static \Illuminate\Database\Query\Builder|Author onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Author query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereDescribeLang($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereDynastyId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereNameLang($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereNationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author wherePicUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereShortUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereUploadUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereWikiDescLang($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereWikidataId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Author whereWikipediaUrl($value)
+ * @method static \Illuminate\Database\Query\Builder|Author withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|Author withoutTrashed()
+ * @mixin \Eloquent
  */
 class Author extends Model implements Searchable {
     use SoftDeletes;

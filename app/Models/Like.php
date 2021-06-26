@@ -8,6 +8,29 @@ use Illuminate\Support\Str;
 use App\Events\Liked;
 use App\Events\Unliked;
 
+/**
+ * App\Models\Like
+ *
+ * @property int $id
+ * @property int $user_id
+ * @property int $likeable_id
+ * @property string $likeable_type
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ * @property-read Model|\Eloquent $likeable
+ * @property-read Like $liker
+ * @property-read Like $user
+ * @method static Builder|Like newModelQuery()
+ * @method static Builder|Like newQuery()
+ * @method static Builder|Like query()
+ * @method static Builder|Like whereCreatedAt($value)
+ * @method static Builder|Like whereId($value)
+ * @method static Builder|Like whereLikeableId($value)
+ * @method static Builder|Like whereLikeableType($value)
+ * @method static Builder|Like whereUpdatedAt($value)
+ * @method static Builder|Like whereUserId($value)
+ * @method static Builder|Like withType(string $type)
+ */
 class Like extends Model {
     protected $guarded = [];
 

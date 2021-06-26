@@ -6,6 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasTranslations;
 
+/**
+ * App\Models\Tag
+ *
+ * @property int $id
+ * @property string $name
+ * @property array $name_lang
+ * @property int|null $wikidata_id
+ * @property array|null $describe_lang
+ * @property int|null $category_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Campaign|null $campaign
+ * @property-read mixed $is_campaign
+ * @property-read mixed $resource_url
+ * @property-read array $translations
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Poem[] $poems
+ * @property-read int|null $poems_count
+ */
 class Tag extends Model {
     use SoftDeletes;
     use HasTranslations;

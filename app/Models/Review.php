@@ -8,6 +8,33 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * App\Models\Review
+ *
+ * @property int $id
+ * @property int $poem_id
+ * @property int $user_id
+ * @property int|null $like
+ * @property int|null $content_id
+ * @property string|null $title
+ * @property string $content
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $reply_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
+ * @property-read int|null $activities_count
+ * @property-read string $avatar
+ * @property-read string $name
+ * @property-read mixed $pure_content
+ * @property-read string $reply_to_user
+ * @property-read mixed $rich_content
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\User[] $likers
+ * @property-read int|null $likers_count
+ * @property-read \App\Models\Poem $poem
+ * @property-read Review|null $replyOfReview
+ * @property-read \App\User $user
+ */
 class Review extends Model {
     use SoftDeletes;
     use LogsActivity;

@@ -11,6 +11,42 @@ use Spatie\Activitylog\Models\Activity;
  * and extend Illuminate\Database\Eloquent\Model.
  */
 
+/**
+ * App\Models\ActivityLog
+ *
+ * @property int $id
+ * @property string|null $log_name
+ * @property string $description
+ * @property string|null $subject_type
+ * @property int|null $subject_id
+ * @property string|null $causer_type
+ * @property int|null $causer_id
+ * @property Collection|null $properties
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $causer
+ * @property-read Collection $change
+ * @property-read Collection $changes
+ * @property-read array|bool $diffs
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $subject
+ * @method static Builder|Activity causedBy(\Illuminate\Database\Eloquent\Model $causer)
+ * @method static Builder|Activity forSubject(\Illuminate\Database\Eloquent\Model $subject)
+ * @method static Builder|Activity inLog($logNames)
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog whereCauserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog whereCauserType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog whereLogName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog whereProperties($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog whereSubjectId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog whereSubjectType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class ActivityLog extends Activity {
     const SUBJECT = [
         'poem' => 'App\\Models\\Poem',

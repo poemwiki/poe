@@ -7,6 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * App\Models\Score
+ *
+ * @property int $id
+ * @property int $poem_id
+ * @property int $user_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int $score
+ * @property float $weight
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
+ * @property-read int|null $activities_count
+ * @property-read \App\Models\Content|null $content
+ * @property-read mixed $resource_url
+ * @property-read \App\Models\Poem $poem
+ * @property-read \App\User $user
+ */
 class Score extends Model {
     use SoftDeletes;
     use LogsActivity;

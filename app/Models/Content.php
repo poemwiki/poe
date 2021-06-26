@@ -7,61 +7,42 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 /**
- * @SWG\Definition(
- *      definition="Content",
- *      required={"hash", "new_hash", "type", "entry_id", "content"},
- *      @SWG\Property(
- *          property="id",
- *          description="id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="hash",
- *          description="hash",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="new_hash",
- *          description="new_hash",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="type",
- *          description="type",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="entry_id",
- *          description="entry_id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="content",
- *          description="content",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="created_at",
- *          description="created_at",
- *          type="string",
- *          format="date-time"
- *      ),
- *      @SWG\Property(
- *          property="updated_at",
- *          description="updated_at",
- *          type="string",
- *          format="date-time"
- *      ),
- *      @SWG\Property(
- *          property="deleted_at",
- *          description="deleted_at",
- *          type="string",
- *          format="date-time"
- *      )
- * )
+ * App\Models\Content
+ *
+ * @property int $id
+ * @property int $type
+ * @property int $entry_id
+ * @property int $hash_crc32
+ * @property int $full_hash_crc32
+ * @property string $hash
+ * @property string $hash_f current version's father's hash
+ * @property string $full_hash
+ * @property string $full_hash_f current version's father's full_hash
+ * @property string $content
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Poem $poem
+ * @method static \Illuminate\Database\Eloquent\Builder|Content newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Content newQuery()
+ * @method static \Illuminate\Database\Query\Builder|Content onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Content query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereContent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereEntryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereFullHash($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereFullHashCrc32($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereFullHashF($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereHash($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereHashCrc32($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereHashF($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Content whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Query\Builder|Content withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|Content withoutTrashed()
+ * @mixin \Eloquent
  */
 class Content extends Model
 {

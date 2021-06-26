@@ -9,10 +9,15 @@ use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 
 /**
+ * App\Models\Wikidata
+ *
  * @property mixed data
  * @property mixed entity
  * @property string wiki_desc_lang wikipedia summary
  * @property integer id
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
  */
 class Wikidata extends Model implements Searchable {
     use HasTranslations;

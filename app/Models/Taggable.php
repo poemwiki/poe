@@ -6,6 +6,18 @@ use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * App\Models\Taggable
+ *
+ * @property int $id
+ * @property int $tag_id
+ * @property int $taggable_id
+ * @property string $taggable_type
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
+ * @property-read int|null $activities_count
+ */
 class Taggable extends MorphPivot {
     use LogsActivity;
 

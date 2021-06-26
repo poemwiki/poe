@@ -8,6 +8,51 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasTranslations;
 
 
+/**
+ * App\Models\Campaign
+ *
+ * @property int $id
+ * @property \Illuminate\Support\Carbon $start
+ * @property \Illuminate\Support\Carbon $end
+ * @property string $image
+ * @property array $name_lang
+ * @property array $describe_lang
+ * @property int $tag_id
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property array|null $settings
+ * @property mixed|null $weapp_url
+ * @property-read mixed $image_url
+ * @property-read mixed $master_i_ds
+ * @property-read mixed $masters
+ * @property-read mixed $poem_count
+ * @property-read mixed $share_image_url
+ * @property-read mixed $tag_name
+ * @property-read array $translations
+ * @property-read mixed $upload_user_count
+ * @property-read mixed $user_count
+ * @property-read \App\Models\Tag $tag
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign newQuery()
+ * @method static \Illuminate\Database\Query\Builder|Campaign onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereDescribeLang($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereEnd($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereImage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereNameLang($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereSettings($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereStart($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereTagId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Campaign whereWeappUrl($value)
+ * @method static \Illuminate\Database\Query\Builder|Campaign withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|Campaign withoutTrashed()
+ * @mixin \Eloquent
+ */
 class Campaign extends Model {
     use SoftDeletes;
     use HasTranslations;

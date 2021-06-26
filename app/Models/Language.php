@@ -8,7 +8,45 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * @property string name
+ * App\Models\Language
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $name_cn
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property array $name_lang
+ * @property string $locale
+ * @property string|null $pic_url
+ * @property int|null $wikidata_id
+ * @property mixed|null $wikipedia_url
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
+ * @property-read int|null $activities_count
+ * @property-read mixed|string $label
+ * @property-read mixed $label_cn
+ * @property-read mixed $label_en
+ * @property-read array $translations
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Poem[] $poems
+ * @property-read int|null $poems_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Language newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Language newQuery()
+ * @method static \Illuminate\Database\Query\Builder|Language onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Language query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Language whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Language whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Language whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Language whereLocale($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Language whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Language whereNameCn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Language whereNameLang($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Language wherePicUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Language whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Language whereWikidataId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Language whereWikipediaUrl($value)
+ * @method static \Illuminate\Database\Query\Builder|Language withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|Language withoutTrashed()
+ * @mixin \Eloquent
  */
 class Language extends Model {
     use SoftDeletes;
