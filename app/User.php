@@ -14,6 +14,7 @@ use Spatie\Activitylog\ActivitylogServiceProvider;
 
 /**
  * @property string|null avatar
+ * @property int is_v
  * @property string avatarUrl
  */
 class User extends Authenticatable implements MustVerifyEmail {
@@ -135,7 +136,8 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     /**
-     * @param string $email The email address
+     * @param User $user
+     * @return string
      */
     public static function svgAvatar(User $user) {
         return $user->userBind()->first()->avatar ?? 'https://avatar.tobi.sh/' . $user->email . '.svg';
