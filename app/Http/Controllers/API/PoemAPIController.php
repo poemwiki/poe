@@ -16,7 +16,6 @@ use File;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -114,7 +113,7 @@ class PoemAPIController extends Controller {
             $item['poet_cn'] = $poem->poet_label_cn;
             $item['poet_avatar_true'] = $poem->poet_avatar !== asset(Author::$defaultAvatarUrl);
             $item['translator_avatar_true'] = $poem->translator_avatar !== asset(Author::$defaultAvatarUrl);
-            $item['poet_is_v'] = ($poem->poetAuthor && $poem->poetAuthor->user && $poem->poetAuthor->user->is_v);
+            $item['poet_is_v'] = $poem->poet_is_v;
             $item['translator_label'] = $poem->translator_label;
             $item['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
             $item['reviews_count'] = $poem->reviews->count();
@@ -174,15 +173,15 @@ class PoemAPIController extends Controller {
         $res['poet_cn'] = $poem->poet_label_cn;
         $res['poet_avatar_true'] = $poem->poet_avatar !== asset(Author::$defaultAvatarUrl);
         $res['translator_avatar_true'] = $poem->translator_avatar !== asset(Author::$defaultAvatarUrl);
-        $res['poet_is_v'] = ($poem->poetAuthor && $poem->poetAuthor->user && $poem->poetAuthor->user->is_v);
+        $res['poet_is_v'] = $poem->poet_is_v;
         $res['translator_label'] = $poem->translator_label;
         $res['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
         $res['date_ago'] = date_ago($poem->created_at);
 
+        // TODO poet_id should be set after poem created (if is_owner_uploaded===Poem::$OWNER['uploader'])
         if (!$res['poet_id'] && $poem->is_owner_uploaded===Poem::$OWNER['uploader'] && $poem->uploader) {
             if($poem->uploader->author) {
                 $res['poet_id'] = $poem->uploader->author->id;
-                $res['poet_is_v'] = $poem->uploader->is_v;
             }
         }
 
@@ -200,7 +199,6 @@ class PoemAPIController extends Controller {
         // TODO save score_count to poem.score_count column
         $res['score_count'] = ScoreRepository::calcCount($id);
 
-        DB::enableQueryLog();
         $q = $this->reviewRepository->listByOriginalPoem($poem);
 
         $reviewColumns = ['review.id', 'review.content', 'review.created_at', 'review.user_id', 'review.like', 'review.reply_id'];

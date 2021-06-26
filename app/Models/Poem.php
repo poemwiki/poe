@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
+ * App\Models\Poem
+ *
  * @property mixed original_id
  * @property mixed translatedPoems
  * @property mixed id
@@ -25,13 +27,15 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property string poet_label_cn
  * @property integer is_owner_uploaded
  * @property User uploader
- * @property Author poetAuthor
  * @property Illuminate\Support\Collection|Tag[] tags
  * @property User owner
  * @property mixed translator_label_cn
  * @property Poem originalPoem
  * @property bool is_translated
  * @property int poet_id
+ * @property-read Author|null poetAuthor
+ * @property-read  User|null poetUser
+ * @property-read bool poet_is_v
  */
 class Poem extends Model implements Searchable {
     use SoftDeletes;
@@ -469,6 +473,32 @@ class Poem extends Model implements Searchable {
 
         return null;
     }
+
+    /**
+     * @return \App\User|null
+     */
+    public function getPoetUserAttribute() {
+        if($this->is_owner_uploaded===self::$OWNER['uploader'] && $this->uploader) {
+            return $this->uploader;
+        }
+
+        if($this->is_owner_uploaded===self::$OWNER['poetAuthor'] || $this->is_owner_uploaded===self::$OWNER['none']) {
+            if($this->poetAuthor && $this->poetAuthor->user) {
+                return $this->poetAuthor->user;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getPoetIsVAttribute() {
+        if($this->poetUser) return $this->poetUser->is_v;
+        return false;
+    }
+
 
     /**
      * TODO enable set locales while getting poet name
