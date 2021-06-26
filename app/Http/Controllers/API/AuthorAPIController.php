@@ -16,6 +16,10 @@ class AuthorAPIController extends Controller {
     public function detail($id) {
         $author = Author::find($id);
 
+        if(!$author) {
+            return $this->responseFail();
+        }
+
         if($author->user && $author->user->is_v) {
             $author->is_v = true;
         }
