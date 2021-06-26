@@ -4,14 +4,11 @@
 if($poem->poetAuthor) {
   // dd($poem->poetAuthor->nation);
   $nation = $poem->poetAuthor->dynasty ? $poem->poetAuthor->dynasty->name_lang
-    : ($poem->poetAuthor->nation
-        ? $poem->poetAuthor->nation->name_lang
-        : ''
-      );
+    : '';
 } else {
   $nation = $poem->dynasty
     ? "[$poem->dynasty] "
-    : ($poem->nation ? "[$poem->nation]" : '');
+    : '';
 }
 
 

@@ -4,7 +4,7 @@
 
 @section('keywords', !empty($author->alias_arr) ? $author->alias_arr->join(', ') : '')
 
-@section('author', 'PoemWiki')
+@section('author', $author->label)
 
 @section('canonical')<link rel="canonical" href="{{$author->url}}" />@endsection
 
