@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Author;
 use App\Models\Poem;
+use App\Repositories\AuthorRepository;
 use App\Repositories\PoemRepository;
 use App\Repositories\ScoreRepository;
 use App\User;
@@ -188,67 +189,13 @@ class BotController extends Controller {
     }
 
     public function top($poeDB, $chatroom) {
-        $dataMsg = [];
 
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
-        $monthDuration = $this->_pad($startOfMonth->format('n.j'), 4) . '~' .$this->_pad($endOfMonth->format('n.j'));
-        $startPreviousMonth = Carbon::now()->startOfMonth()->subMonth();
-        $endPreviousMonth = Carbon::now()->subMonth()->endOfMonth();
-        $monthPreviousDuration = $this->_pad($startPreviousMonth->format('n.j'), 4) . '~' .$this->_pad($endPreviousMonth->format('n.j'));
 
-        $monthCount = Poem::where('created_at', '>=', $startOfMonth)
-            ->where('created_at', '<=', $endOfMonth)
-            ->count('id');
-        array_push($dataMsg, "$monthDuration 新增诗歌数 $monthCount");
-
-        $previousMonthCount = Poem::where('created_at', '>=', $startPreviousMonth)
-            ->where('created_at', '<=', $endPreviousMonth)
-            ->count('id');
-        array_push($dataMsg, "$monthPreviousDuration 新增诗歌数 $previousMonthCount");
-
-        $total = Poem::count('id');
-        array_push($dataMsg, "累计诗歌数 $total");
-
-        $sql = <<<SQL
-SELECT causer_id as userID, users.name as `name`, count(*) as `pcount` FROM activity_log as a
-LEFT JOIN users on causer_id=users.id
-WHERE subject_type=? and description="created"
-  AND causer_type=?
-and a.created_at>=? AND a.created_at<=?
-GROUP BY (causer_id)
-ORDER BY `pcount` desc
-LIMIT 10
-SQL;
-        // DB::enableQueryLog();
-        $res = DB::select($sql, [
-            Poem::class,
-            User::class,
-            $startOfMonth->format('Y-m-d H:i:s'),
-            $endOfMonth->format('Y-m-d H:i:s')
-        ]);
-        // print_r($res);
-        // print_r( DB::getQueryLog());
-        array_push($dataMsg, "\n本月上传诗歌 Top 10");
-        array_push($dataMsg, "上传数量 用户名");
-        foreach ($res as $line) {
-            array_push($dataMsg, $this->_pad($line->pcount, 4) . ' ' . str_replace('[from-wechat]', '', $line->name));
-        }
-
-
-        $resPrev = DB::select($sql, [
-            Poem::class,
-            User::class,
-            $startPreviousMonth->format('Y-m-d H:i:s'),
-            $endPreviousMonth->format('Y-m-d H:i:s')
-        ]);
-        // print_r($res);
-        // print_r( DB::getQueryLog());
-        array_push($dataMsg, "\n{$startPreviousMonth->month}月上传诗歌 Top 10");
-        array_push($dataMsg, "上传数量 用户名");
-        foreach ($resPrev as $line) {
-            array_push($dataMsg, $this->_pad($line->pcount, 4) . ' ' . str_replace('[from-wechat]', '', $line->name));
-        }
+        $poemMsg = $this->getTopUploader(Poem::class, '诗歌', $startOfMonth,$endOfMonth);
+        $authorMsg = $this->getTopUploader(Author::class, '作者', $startOfMonth,$endOfMonth);
+        $dataMsg = array_merge($poemMsg, ["\n"], $authorMsg);
 
         $this->_log($poeDB, $chatroom, 'top', null);
 
@@ -263,6 +210,70 @@ SQL;
         return Response::json($msg);
     }
 
+    private function getTopUploader($model, $modelName, $startOfMonth, $endOfMonth) {
+        $dataMsg = [];
+
+        $monthDuration = $this->_pad($startOfMonth->format('n.j'), 4) . '~' .$this->_pad($endOfMonth->format('n.j'));
+        $startPreviousMonth = Carbon::now()->startOfMonth()->subMonth();
+        $endPreviousMonth = Carbon::now()->subMonth()->endOfMonth();
+        $monthPreviousDuration = $this->_pad($startPreviousMonth->format('n.j'), 4) . '~' .$this->_pad($endPreviousMonth->format('n.j'));
+
+        $monthCount = $model::where('created_at', '>=', $startOfMonth)
+            ->where('created_at', '<=', $endOfMonth)
+            ->count('id');
+        array_push($dataMsg, "$monthDuration 新增{$modelName}数 $monthCount");
+
+        $previousMonthCount = $model::where('created_at', '>=', $startPreviousMonth)
+            ->where('created_at', '<=', $endPreviousMonth)
+            ->count('id');
+        array_push($dataMsg, "$monthPreviousDuration 新增{$modelName}数 $previousMonthCount");
+
+        $total = $model::count('id');
+        array_push($dataMsg, "累计{$modelName}数 $total");
+
+        // TOOD including causer_type=AdminUser::class
+        $sql = <<<SQL
+SELECT causer_id as userID, users.name as `name`, count(distinct subject_id) as `pcount` FROM activity_log as a
+LEFT JOIN users on causer_id=users.id
+WHERE subject_type=? and description="created"
+  AND causer_type=?
+and a.created_at>=? AND a.created_at<=?
+GROUP BY (causer_id)
+ORDER BY `pcount` desc
+LIMIT 10
+SQL;
+        // DB::enableQueryLog();
+        $res = DB::select($sql, [
+            $model,
+            User::class,
+            $startOfMonth->format('Y-m-d H:i:s'),
+            $endOfMonth->format('Y-m-d H:i:s')
+        ]);
+        // print_r($res);
+        // print_r( DB::getQueryLog());
+        array_push($dataMsg, "\n本月新增{$modelName} Top 10");
+        array_push($dataMsg, "新增数量 用户名");
+        foreach ($res as $line) {
+            array_push($dataMsg, $this->_pad($line->pcount, 4) . ' ' . str_replace('[from-wechat]', '', $line->name));
+        }
+
+        $resPrev = DB::select($sql, [
+            Poem::class,
+            User::class,
+            $startPreviousMonth->format('Y-m-d H:i:s'),
+            $endPreviousMonth->format('Y-m-d H:i:s')
+        ]);
+        // print_r($res);
+        // print_r( DB::getQueryLog());
+        array_push($dataMsg, "\n{$startPreviousMonth->month}月新增{$modelName} Top 10");
+        array_push($dataMsg, "新增数量 用户名");
+        foreach ($resPrev as $line) {
+            array_push($dataMsg, $this->_pad($line->pcount, 4) . ' ' . str_replace('[from-wechat]', '', $line->name));
+        }
+
+        return $dataMsg;
+    }
+
     /**
      * Display a listing of the Poem.
      *
@@ -274,7 +285,7 @@ SQL;
         $maxLength = $request->input('maxLength', 800);
         $msg = $request->input('keyword', '云朵');
 
-        $topMode = preg_match("@^top($|\s)@i", $msg);
+        $topMode = preg_match("@^top($|\s\d+)$@i", $msg);
         $dataMode = in_array($msg, ['数据', 'data']);
         $keyword = $this->getKeywords($msg);
 
