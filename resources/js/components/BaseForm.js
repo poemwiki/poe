@@ -203,6 +203,7 @@ var BaseForm = {
         return axios.post(_this4.action, _this4.getPostData()).then(function (response) {
           return _this4.onSuccess(response);
         }).catch(function (errors) {
+          console.log('submit error: ', errors);
           return _this4.onFail(errors.response.data);
         });
       });
