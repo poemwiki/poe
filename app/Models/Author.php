@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Traits\HasFakeId;
+use App\Traits\RelatableNode;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasTranslations;
 use Illuminate\Support\Facades\Artisan;
@@ -82,6 +84,7 @@ class Author extends Model implements Searchable {
     use HasTranslations;
     use HasFakeId;
     use LogsActivity;
+    use RelatableNode;
 
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
@@ -137,6 +140,15 @@ class Author extends Model implements Searchable {
     ];
 
     protected $appends = ['resource_url', 'url', 'label', 'label_en', 'label_cn', 'avatar_url'];
+
+    public function poemsAsPoet() : MorphToMany {
+        return $this->morphedByMany(\App\Models\Poem::class, 'start', 'relatable', 'end_id')
+            ->where('relation', '=', Relatable::RELATION['poet_is']);
+    }
+    public function poemsAsTranslator() : MorphToMany {
+        return $this->morphedByMany(\App\Models\Poem::class, 'start', 'relatable', 'end_id')
+            ->where('relation', '=', Relatable::RELATION['translator_is']);
+    }
 
     public function poems() {
         return $this->hasMany(\App\Models\Poem::class, 'poet_id', 'id');

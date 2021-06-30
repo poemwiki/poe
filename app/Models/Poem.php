@@ -8,9 +8,12 @@ use App\Traits\HasFakeId;
 use App\User;
 use Illuminate\Database\Eloquent\JsonEncodingException;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
+use App\Traits\RelatableNode;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -41,6 +44,7 @@ class Poem extends Model implements Searchable {
     use SoftDeletes;
     use LogsActivity;
     use HasFakeId;
+    use RelatableNode;
 
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
@@ -251,6 +255,18 @@ class Poem extends Model implements Searchable {
                 }
             });
         });
+    }
+
+
+    // if poem deleted, all it's relatable record should be deleted?
+    // if author deleted, all it's relatable record should be deleted?
+    public function translators(): MorphToMany {
+        return $this->morphToMany(\App\Models\Author::class, 'start', 'relatable', 'start_id', 'end_id')
+            ->where('relation', '=', Relatable::RELATION['translator_is']);
+    }
+    public function poets(): MorphToMany {
+        return $this->morphToMany(\App\Models\Author::class, 'start', 'relatable', 'start_id', 'end_id')
+            ->where('relation', '=', Relatable::RELATION['poet_is']);
     }
 
     /**
