@@ -12,11 +12,14 @@ use App\Models\Author;
 use App\Models\Dynasty;
 use App\Models\Nation;
 use App\Http\Listing;
+use Brackets\AdminAuth\Models\AdminUser;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
@@ -39,22 +42,38 @@ class AuthorController extends Controller {
 
             // set columns to query
             ['id', 'name_lang', 'wikidata_id', 'user_id', 'updated_at', 'created_at', 'authorUser.name as user_name',
-                'upload_user_id', 'uploader.name as uploader_name'
+                'upload_user_id', 'uploader.name as uploader_name', 'log.causer_type as causer_type', 'log.causer_id as causer_id'
             ],
 
             // set columns to searchIn
             ['name_lang', 'id', 'authorUser.name', 'wikidata_id', 'user_id', 'uploader.name'],
 
-            function ($query) use ($request) {
+            function (Builder $query) use ($request) {
                 if(!$request->input('orderBy'))
                     $query->orderBy('updated_at', 'desc');
 
                 $query->leftJoin('users as authorUser', 'author.user_id', '=', 'authorUser.id');
                 $query->leftJoin('users as uploader', 'author.upload_user_id', '=', 'uploader.id');
+                $query->leftJoin('activity_log as log', function (JoinClause $join) {
+                    $join->on('author.id', '=', 'log.subject_id')
+                        ->where([
+                            ['log.subject_type', '=', Author::class],
+                            ['log.description', '=', 'created']
+                        ])
+                    ;
+                });
             },
 
             app()->getLocale()
         );
+
+        foreach ($data as &$author) {
+            if ($author->causer_type === AdminUser::class && $author->causer_id) {
+                $adminUser = AdminUser::find($author->causer_id);
+                if($adminUser)
+                    $author->uploader_name = $adminUser->email . '[后台用户]';
+            }
+        }
 
         if ($request->ajax()) {
             if ($request->has('bulk')) {
@@ -71,13 +90,16 @@ class AuthorController extends Controller {
     /**
      * Show the form for creating a new resource.
      *
-     * @return Factory|View
+     * @return \Illuminate\Contracts\Foundation\Application|RedirectResponse|Redirector
      * @throws AuthorizationException
      */
     public function create() {
-        $this->authorize('admin.author.create');
 
-        return view('admin.author.create');
+        return redirect(route('author/create'));
+
+        // $this->authorize('admin.author.create');
+        //
+        // return view('admin.author.create');
     }
 
     /**
@@ -117,7 +139,7 @@ class AuthorController extends Controller {
      * Show the form for editing the specified resource.
      *
      * @param Author $author
-     * @return Factory|View
+     * @return \Illuminate\Contracts\Foundation\Application|RedirectResponse|Redirector
      * @throws AuthorizationException
      */
     public function edit(Author $author) {
