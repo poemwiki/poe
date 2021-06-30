@@ -13,15 +13,9 @@ class ValidOriginalLink implements Rule {
      * @var int|null
      */
     private $poemId;
-    /**
-     * @var bool
-     */
-    private $ringTestFailed;
-    /**
-     * @var int
-     */
-    private $poetTestFailed;
+
     private $changeToPoetId;
+    private $reason;
 
     /**
      * Create a new rule instance.
@@ -32,8 +26,7 @@ class ValidOriginalLink implements Rule {
     public function __construct($poem_id, $changeToPoetid) {
         $this->poemId = $poem_id;
         $this->changeToPoetId = $changeToPoetid;
-        $this->ringTestFailed = 0;
-        $this->poetTestFailed = 0;
+        $this->reason = '';
     }
 
     /**
@@ -48,21 +41,28 @@ class ValidOriginalLink implements Rule {
             return true;
         }
 
-        $pattern = '@^' . str_replace('.', '\.', config('app.url')) . '/p/(.*)$@';
+        $pattern = '@^' . request()->getHost() . '/p/(.*)$@';
         $fakeId = Str::of($value)->match($pattern)->__toString();
         if ($fakeId) {
-            $translateFrom = Poem::find(Poem::getIdFromFakeId($fakeId));
+            $idFromFakeId = Poem::getIdFromFakeId($fakeId);
+            if (!is_numeric($idFromFakeId)) {
+                return false;
+            }
+            $translateFrom = Poem::find($idFromFakeId);
+            if(!$translateFrom) {
+                return false;
+            }
 
             $hasPoetId = $translateFrom->poet_id && $this->changeToPoetId;
             if(!$hasPoetId) {
-                // $this->poetTestFailed = 1;
+                // $this->reason = trans('error.Two poem should link to same poet');
                 // return false;
                 return true;
             }
 
             // TODO 原作译作任意一个关联了作者，以此作者为准，更改所有译作的作者
             if($translateFrom->poet_id !== $this->changeToPoetId) {
-                $this->poetTestFailed = 2;
+                $this->reason = trans('error.Two poem should belong to same poet');
                 return false;
             }
 
@@ -73,7 +73,7 @@ class ValidOriginalLink implements Rule {
 
     public function ringTestPass(Poem $translateFrom) {
         if($translateFrom->id === $this->poemId) {
-            $this->ringTestFailed = 1;
+            $this->reason = trans('error.Can not translated from self');
             return false;
         }
 
@@ -95,6 +95,7 @@ class ValidOriginalLink implements Rule {
             if(in_array($translateFrom->original_id, $ids)
                 && $translateFrom->is_translated
             ) {
+                $this->reason = trans('error.Can not construct a ring');
                 return false;
             } else if(!$translateFrom->is_translated){
                 return true;
@@ -110,28 +111,8 @@ class ValidOriginalLink implements Rule {
      * @return string
      */
     public function message() {
-        if($this->poetTestFailed == 1) {
-            return trans('error.Not a valid poem url', [
-                'reason' => trans('error.Two poem should link to same poet')
-            ]);
-        }
-        if($this->poetTestFailed == 2) {
-            return trans('error.Not a valid poem url', [
-                'reason' => trans('error.Two poem should belong to same poet')
-            ]);
-        }
-        if($this->ringTestFailed === 1) {
-            return trans('error.Not a valid poem url', [
-                'reason' => trans('error.Can not translated from self')
-            ]);
-        }
-        if($this->ringTestFailed === 2) {
-            return trans('error.Not a valid poem url', [
-                'reason' => trans('error.Can not construct a ring')
-            ]);
-        }
         return trans('error.Not a valid poem url', [
-            'reason' => ''
+            'reason' => $this->reason
         ]);
     }
 }
