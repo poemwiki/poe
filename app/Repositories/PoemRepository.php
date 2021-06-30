@@ -168,7 +168,7 @@ class PoemRepository extends BaseRepository
             }
             $item['poet_is_v'] = $item->is_owner_uploaded===Poem::$OWNER['uploader'] && $item->uploader && $item->uploader->is_v;
             $item['reviews_count'] = $item->reviews->count();
-            $item['reviews'] = $item->reviews->take(2)->map->only(['id', 'avatar', 'content', 'pure_content', 'created_at', 'name', 'user_id']);
+            $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
             $item['score_count'] = $endTime ? ScoreRepository::calcCount($item->id, $startTime, $endTime) : ScoreRepository::calcCount($item->id);
             return $item;
         });
@@ -209,7 +209,7 @@ class PoemRepository extends BaseRepository
                 $item['poet'] = $item['poet'] . '-' .$item->id;
             }
             $item['reviews_count'] = $item->reviews->count();
-            $item['reviews'] = $item->reviews->take(2)->map->only(['id', 'avatar', 'content', 'pure_content', 'created_at', 'name', 'user_id']);
+            $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
             $item['score_count'] = $endTime ? ScoreRepository::calcCount($item->id, $startTime, $endTime) : ScoreRepository::calcCount($item->id);
             return $item;
         });
@@ -228,6 +228,7 @@ class PoemRepository extends BaseRepository
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet'] = $item->poetLabel;
             $item['score_count'] = ScoreRepository::calcCount($item->id);
+            $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
             return $item->only(self::$listColumns);
         });
     }
@@ -238,6 +239,8 @@ class PoemRepository extends BaseRepository
         'score', 'score_count', 'score_weight', 'rank',
         'reviews', 'reviews_count', 'poet_is_v'
     ];
+    public static $relatedReviewColumns = ['id', 'avatar', 'content', 'pure_content', 'created_at', 'name', 'user_id'];
+
     /**
      * @param $userId
      * @param bool $isCampaignPoem
@@ -274,6 +277,7 @@ class PoemRepository extends BaseRepository
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet'] = $item->poet_label;
             $item['score_count'] = ScoreRepository::calcCount($item->id);
+            $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
             return $item->only(self::$listColumns);
         });
     }
@@ -365,6 +369,7 @@ class PoemRepository extends BaseRepository
             // and in case of command failed to execute, do it again here at controller
             if($campaignEnded) {
                 $newSetting = $campaign->settings;
+                // TODO save poem.id poem.score poem->score_count only
                 $newSetting['result'] = $byScoreData;
                 $campaign->settings = $newSetting;
                 $campaign->save();
