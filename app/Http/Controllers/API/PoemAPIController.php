@@ -148,6 +148,7 @@ class PoemAPIController extends Controller {
         $columns = [
             'id', 'created_at', 'title', 'subtitle', 'preface', 'poem',
             'poet', 'poet_cn', 'poet_id', 'poet_avatar', 'translator_avatar',
+            'subtitle', 'preface', 'date', 'month', 'year', 'location',
             'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
             'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics',
             'campaign_id'
@@ -355,8 +356,11 @@ class PoemAPIController extends Controller {
 
             $sharePics = $poem->share_pics ?? [];
             $sharePics[$compositionId] = $posterStorePath;
-            $poem->share_pics = $sharePics;
-            $poem->save();
+            Poem::withoutEvents(function () use ($poem, $sharePics) {
+                $poem->timestamps = false;
+                $poem->share_pics = $sharePics;
+                $poem->save();
+            });
             return $this->responseSuccess(['url' => $posterUrl]);
 
         } catch (\Throwable $e) {
