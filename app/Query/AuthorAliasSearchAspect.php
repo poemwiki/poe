@@ -19,7 +19,9 @@ class AuthorAliasSearchAspect extends SearchAspect {
     static $searchType = 'authorAlias';
 
     public function getResults(string $term): Collection {
+        // TODO split $term to keywords
         $value = DB::connection()->getPdo()->quote('%' . strtolower($term) . '%');
+
         return Alias::selectRaw('wikidata_id, min(wikidata_id) as id, min(name) as name, author_id')
             ->whereRaw("`name` LIKE $value ")
             ->groupBy(['wikidata_id', 'author_id'])
