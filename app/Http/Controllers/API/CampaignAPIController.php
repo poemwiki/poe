@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Campaign;
 use App\Repositories\CampaignRepository;
 use App\Repositories\PoemRepository;
+use Cache;
 use Illuminate\Http\Request;
 
 /**
@@ -24,30 +25,37 @@ class CampaignAPIController extends Controller {
     }
 
     public function index(Request $request) {
-        $campaigns = $this->campaignRepository->allInUse()->map(function ($campaign) {
-            $ret = $campaign->toArray();
-            $ret['settings'] = collect($campaign->settings)->except(['result']);
-            $ret['poem_count'] = $campaign->poem_count;
-            $ret['user_count'] = $campaign->user_count;
-            return $ret;
+        // todo Cache::forget('api-campaign-index') if new campaign set
+        $campaigns = Cache::remember('api-campaign-index', now()->addMinutes(3), function () {
+            return $this->campaignRepository->allInUse()->map(function ($campaign) {
+                $ret = $campaign->toArray();
+                $ret['settings'] = collect($campaign->settings)->except(['result']);
+                $ret['poem_count'] = $campaign->poem_count;
+                $ret['user_count'] = $campaign->user_count;
+                return $ret;
+            });
         });
 
         return $this->responseSuccess($campaigns);
     }
 
     public function show($id) {
-        /** @var Campaign $campaign */
-        $campaign = $this->campaignRepository->find($id);
+        // todo Cache::forget('api-campaign-index') if new campaign poem uploaded
+        $ret = Cache::remember('api-campaign-show-'.$id, now()->addMinutes(1), function () use($id) {
+            /** @var Campaign $campaign */
+            $campaign = $this->campaignRepository->find($id);
 
-        if (empty($campaign)) {
-            return $this->responseFail([], '没有找到这个活动。', self::$CODE['no_entry']);
-        }
-        $ret = $campaign->toArray();
-        $ret['settings'] = collect($campaign->settings)->except(['result']);
-        $ret['poem_count'] = $campaign->poem_count;
-        $ret['user_count'] = $campaign->user_count;
+            if (empty($campaign)) {
+                return $this->responseFail([], '没有找到这个活动。', self::$CODE['no_entry']);
+            }
+            $ret = $campaign->toArray();
+            $ret['settings'] = collect($campaign->settings)->except(['result']);
+            $ret['poem_count'] = $campaign->poem_count;
+            $ret['user_count'] = $campaign->user_count;
 
-        $ret['poemData'] = $this->poemRepository->getCampaignPoemsByTagId($campaign->tag_id);
+            $ret['poemData'] = $this->poemRepository->getCampaignPoemsByTagId($campaign->tag_id);
+            return $ret;
+        });
 
         return $this->responseSuccess($ret);
     }
