@@ -68,6 +68,9 @@ class QueryController extends Controller {
                     ->addSearchableAttribute('poet')
                     ->addSearchableAttribute('poet_cn')
                     ->addSearchableAttribute('translator')
+                    ->addSearchableAttribute('preface')
+                    ->addSearchableAttribute('subtitle')
+                    ->addSearchableAttribute('location')
                     ->with('poetAuthor')->limit(100);
                 // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
             })
