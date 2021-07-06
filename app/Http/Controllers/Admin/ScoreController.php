@@ -128,20 +128,19 @@ class ScoreController extends Controller
      * @param Score $score
      * @return array|RedirectResponse|Redirector
      */
-    public function update(UpdateScore $request, Score $score)
-    {
-        // Sanitize input
-        $sanitized = $request->getSanitized();
-
-        // Update changed values Score
-        $score->update($sanitized);
-
-        if ($request->ajax()) {
-            return [
-                'redirect' => url('admin/scores'),
-                'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
-            ];
-        }
+    public function update(UpdateScore $request, Score $score) {
+        // // Sanitize input
+        // $sanitized = $request->getSanitized();
+        //
+        // // Update changed values Score
+        // $score->update($sanitized);
+        //
+        // if ($request->ajax()) {
+        //     return [
+        //         'redirect' => url('admin/scores'),
+        //         'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
+        //     ];
+        // }
 
         return redirect('admin/scores');
     }
@@ -154,13 +153,12 @@ class ScoreController extends Controller
      * @throws Exception
      * @return ResponseFactory|RedirectResponse|Response
      */
-    public function destroy(DestroyScore $request, Score $score)
-    {
-        $score->delete();
-
-        if ($request->ajax()) {
-            return response(['message' => trans('brackets/admin-ui::admin.operation.succeeded')]);
-        }
+    public function destroy(DestroyScore $request, Score $score) {
+        // $score->delete();
+        //
+        // if ($request->ajax()) {
+        //     return response(['message' => trans('brackets/admin-ui::admin.operation.succeeded')]);
+        // }
 
         return redirect()->back();
     }
@@ -174,18 +172,18 @@ class ScoreController extends Controller
      */
     public function bulkDestroy(BulkDestroyScore $request) : Response
     {
-        DB::transaction(static function () use ($request) {
-            collect($request->data['ids'])
-                ->chunk(1000)
-                ->each(static function ($bulkChunk) {
-                    DB::table('scores')->whereIn('id', $bulkChunk)
-                        ->update([
-                            'deleted_at' => Carbon::now()->format('Y-m-d H:i:s')
-                    ]);
-
-                    // TODO your code goes here
-                });
-        });
+        // DB::transaction(static function () use ($request) {
+        //     collect($request->data['ids'])
+        //         ->chunk(1000)
+        //         ->each(static function ($bulkChunk) {
+        //             DB::table('scores')->whereIn('id', $bulkChunk)
+        //                 ->update([
+        //                     'deleted_at' => Carbon::now()->format('Y-m-d H:i:s')
+        //             ]);
+        //
+        //             // TODO your code goes here
+        //         });
+        // });
 
         return response(['message' => trans('brackets/admin-ui::admin.operation.succeeded')]);
     }
