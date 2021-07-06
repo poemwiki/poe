@@ -10,6 +10,7 @@ use App\Models\Tag;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
+use Cache;
 use EasyWeChat\Factory;
 use Exception;
 use File;
@@ -34,39 +35,6 @@ class PoemAPIController extends Controller {
         $this->poemRepository = $poemRepository;
         $this->reviewRepository = $reviewRepository;
         $this->scoreRepository = $scoreRepository;
-    }
-
-    // TODO return poem.id only if client don't need
-    public function campaignIndex(Request $request) {
-        $tagId = $request->input('tagId');
-        return $this->responseSuccess($this->poemRepository->getCampaignPoemsByTagId($tagId));
-    }
-
-    // TODO this is a deprecated method
-    public function index(Request $request) {
-        // TODO pagination
-        $tagId = $request->input('tagId');
-        $orderBy = $request->input('orderBy', 'created_at');
-        if(!is_numeric($tagId)) {
-            return $this->responseFail();
-        }
-
-        $data = $this->poemRepository->getByTagId($tagId, $orderBy);
-        if($orderBy === 'score') {
-            $limit = Tag::find($tagId)->campaign->settings['rank_min_weight'] ?? 3;
-            $data = $data->filter(function ($value) use ($limit) {
-                // 票数不足的不参与排名
-                return $value['score_count'] >= $limit;
-            })->sort(function ($a, $b) {
-                $score = $b['score'] <=> $a['score'];
-                return $score === 0 ? $b['score_count'] <=> $a['score_count'] : $score;
-            })->values()->map(function ($item, $index) {
-                $item = $item->toArray();
-                $item['rank'] = $index + 1;
-                return $item;
-            });
-        }
-        return $this->responseSuccess($data);
     }
 
     public function random($num = 5, $id = null) {

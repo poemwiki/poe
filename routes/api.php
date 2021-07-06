@@ -23,8 +23,7 @@ Route::middleware(['api'])->group(static function () {
             Route::get('/show/{id}', '\App\Http\Controllers\API\CampaignAPIController@show')->name('index');
         });
         Route::prefix('poem')->name('poem/')->group(static function() {
-            Route::get('/', '\App\Http\Controllers\API\PoemAPIController@index')->name('index');
-            Route::get('/campaign', '\App\Http\Controllers\API\PoemAPIController@campaignIndex')->name('index');
+            // Route::get('/campaign', '\App\Http\Controllers\API\PoemAPIController@campaignIndex')->name('index');
             Route::get('/random/{num?}/{id?}', '\App\Http\Controllers\API\PoemAPIController@random')->name('random');
 
             Route::get('/detail/{id}', '\App\Http\Controllers\API\PoemAPIController@detail')->name('detail');
