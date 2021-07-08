@@ -10,8 +10,10 @@ use App\Models\Score;
 use App\Models\Tag;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 
 /**
  * Class PoemRepository
@@ -150,6 +152,27 @@ class PoemRepository extends BaseRepository
         return $this->newQuery()->findOrFail($id);
     }
 
+    private function _processTagPoems($poems, $orderBy, $poemScores, $startTime, $endTime) {
+        return $poems->with(['reviews', 'reviews.user', 'uploader'])->orderByDesc($orderBy)->get()->map(function (Poem $poem) use ($poemScores, $startTime, $endTime) {
+            $item = $poem->only(self::$listColumns);
+            $item['date_ago'] = date_ago($poem->created_at);
+            $item['poet'] = $poem->poetLabel;
+            if(!(config('app.env') === 'production')) {
+                $item['poet'] = $item['poet'] . '-' .$poem->id;
+            }
+            $item['poet_is_v'] = $poem->is_owner_uploaded===Poem::$OWNER['uploader'] && $poem->uploader && $poem->uploader->is_v;
+            $item['reviews_count'] = $poem->reviews->count();
+            $item['reviews'] = $poem->reviews->take(2)->map->only(self::$relatedReviewColumns);
+
+            $score = isset($poemScores[$poem->id]) ? $poemScores[$poem->id] : ['score' => null, 'count' => 0, 'weight' => 0];
+            $item['score'] = $score['score'];
+            $item['score_weight'] = $score['weight'];
+            $item['score_count'] = $score['count'];
+
+            return $item;
+        });
+    }
+
     public function getByTagId($tagId, $orderBy, $startTime = null, $endTime = null) {
         // TODO Poem::where() tag_id=$tagId, with(['uploader', 'scores'])
         $poems = \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems();
@@ -160,18 +183,11 @@ class PoemRepository extends BaseRepository
             $poems->where('poem.created_at', '<=', $endTime);
         }
 
-        return $poems->with('reviews')->orderByDesc($orderBy)->get()->map(function (Poem $item) use ($startTime, $endTime) {
-            $item['date_ago'] = date_ago($item->created_at);
-            $item['poet'] = $item->poetLabel;
-            if(!(config('app.env') === 'production')) {
-                $item['poet'] = $item['poet'] . '-' .$item->id;
-            }
-            $item['poet_is_v'] = $item->is_owner_uploaded===Poem::$OWNER['uploader'] && $item->uploader && $item->uploader->is_v;
-            $item['reviews_count'] = $item->reviews->count();
-            $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
-            $item['score_count'] = $endTime ? ScoreRepository::calcCount($item->id, $startTime, $endTime) : ScoreRepository::calcCount($item->id);
-            return $item;
-        });
+        $poemScores = $endTime
+            ? ScoreRepository::batchCalc($poems->pluck('poem.id')->values()->all(), $startTime, $endTime)
+            : ScoreRepository::batchCalc($poems->pluck('poem.id')->values()->all());
+
+        return $this->_processTagPoems($poems, $orderBy, $poemScores, $startTime, $endTime);
     }
 
     /**
@@ -187,14 +203,14 @@ class PoemRepository extends BaseRepository
             $q->where('tag.id', '=', $tagId);
         })->pluck('id');
 
-        $poemIdsScoredByV = Score::select(['user_id', 'poem_id'])
+        $poemIdsScored = Score::select(['user_id', 'poem_id'])
             ->whereIn('poem_id', $poemIds)
             // ->whereHas('user', function ($q) {
             //     $q->where('is_v', '=', 1);
             // })
             ->pluck('poem_id');
 
-        $poems = Poem::whereIn('id', $poemIdsScoredByV)->where('score', '>', $scoreMin);
+        $poems = Poem::whereIn('id', $poemIdsScored)->where('score', '>', $scoreMin);
         if($startTime) {
             $poems->where('poem.created_at', '>=', $startTime);
         }
@@ -202,17 +218,11 @@ class PoemRepository extends BaseRepository
             $poems->where('poem.created_at', '<=', $endTime);
         }
 
-        return $poems->with('reviews')->orderByDesc('score')->get()->map(function (Poem $item) use ($startTime, $endTime) {
-            $item['date_ago'] = date_ago($item->created_at);
-            $item['poet'] = $item->poetLabel;
-            if(!(config('app.env') === 'production')) {
-                $item['poet'] = $item['poet'] . '-' .$item->id;
-            }
-            $item['reviews_count'] = $item->reviews->count();
-            $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
-            $item['score_count'] = $endTime ? ScoreRepository::calcCount($item->id, $startTime, $endTime) : ScoreRepository::calcCount($item->id);
-            return $item;
-        });
+        $poemScores = $endTime
+            ? ScoreRepository::batchCalc($poems->pluck('poem.id')->values()->all(), $startTime, $endTime)
+            : ScoreRepository::batchCalc($poems->pluck('poem.id')->values()->all());
+
+        return $this->_processTagPoems($poems, 'score', $poemScores, $startTime, $endTime);
     }
 
     // TODO withReview in one method
@@ -316,38 +326,22 @@ class PoemRepository extends BaseRepository
         $dateInterval = Carbon::parse($campaign->end)->diff(now());
         $campaignEnded = $dateInterval->invert === 0;
 
-        if(isset($campaign->settings['result'])) {
+        // poem before endDate, scores before endDate
+        $byScore = $this->getTopByTagId($tagId, $campaign->start, $campaign->end);
 
-            $byScoreData = $campaign->settings['result'];
-            foreach ($byScoreData as $key=>&$poem) {
-                $poem['date_ago'] = date_ago($poem['created_at']);
-                // TODO unset this lower than 7 limit if list performance allowed
-                if($poem['score'] <= 7) {
-                    unset($byScoreData[$key]);
-                    continue;
-                }
-                $poem = collect($poem)->only(self::$listColumns);
-            }
+        $limit = $campaign->settings['rank_min_weight'] ?? 3;
 
+        $cacheKey = 'api-topPoemsByScore-' . $campaign->id;
+        $cachedResult = Cache::get($cacheKey);
+        if($campaignEnded && $cachedResult) {
+            $byScoreData = $cachedResult;
         } else {
-            // poem before endDate, scores before endDate
-            if($campaign->id >= 6 || (!(config('app.env') === 'production'))) {
-                $byScore = $this->getTopByTagId($tagId, $campaign->start, $campaign->end);
-            } else {
-                $byScore = $this->getByTagId($tagId, 'score', $campaign->start, $campaign->end);
-            }
-
-            $limit = $campaign->settings['rank_min_weight'] ?? 3;
             $byScoreData = $byScore->filter(function ($value) use ($limit) {
                 // 票数不足的不参与排名
                 // dump($value['score_count']);
-                // TODO should use $item->getCampaignScore returned score_count
                 return $value['score_count'] >= $limit;
-            })->map(function (Poem $item) use ($campaign) {
-                $item['poet_is_v'] = $item->is_owner_uploaded===Poem::$OWNER['uploader'] && $item->uploader && $item->uploader->is_v;
-                $score = $item->getCampaignScore($campaign);
-                $item['score'] = $score['score'];
-                $item['score_weight'] = $score['weight'];
+            })->map(function ($item) use ($campaign) {
+                // TODO 独立以下后处理的过程，使得仅缓存 id, score 成为可能
                 $item['reviews'] = $item['reviews']->map(function ($review) {
                     $review['content'] = $review['pure_content'];
                     return $review;
@@ -359,29 +353,24 @@ class PoemRepository extends BaseRepository
                 return $scoreOrder === 0
                     ? ($countOrder === 0 ? $b['score_weight'] <=> $a['score_weight'] : $countOrder)
                     : $scoreOrder;
-            })->map->only(self::$listColumns)->values()->map(function ($item, $index) {
-                // $item = $item->toArray();
+            })->values()->map(function ($item, $index) {
                 $item['rank'] = $index + 1;
                 return $item;
             });
 
-            // TODO this should be done in a command when campaign ends
-            // and in case of command failed to execute, do it again here at controller
-            if($campaignEnded) {
-                $newSetting = $campaign->settings;
-                // TODO save poem.id poem.score poem->score_count only
-                $newSetting['result'] = $byScoreData;
-                $campaign->settings = $newSetting;
-                $campaign->save();
+            if($campaignEnded && !$cachedResult) {
+                // TODO cache id, score, score_count, poet, title, content_id only
+                // TODO 如果活动结束后，最赞列表中的诗歌被删除，则结果中也不应显示此诗
+                Cache::forever($cacheKey, $byScoreData);
             }
         }
 
 
         return [
+            // TODO paginate $byScoreData
             'byScore' => $byScoreData,
-            // TODO if weapp use virtual list, remove splice
+            // TODO pagination instead of ugly splice
             'byCreatedAt' => $this->getByTagId($tagId, 'created_at')->splice(0,150)
-                ->map->only(self::$listColumns)
         ];
     }
 
