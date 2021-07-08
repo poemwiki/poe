@@ -126,11 +126,23 @@ class ScoreRepository extends BaseRepository {
         }
 
         $scores = $query->get();
-        $groupCount = $scores->groupBy('score')->map(function ($item) {
-            return collect($item)->count();
-        });
+        return self::calcScores($scores);
+    }
 
-        $scoreTotal = ['sum' => 0, 'weight' => 0, 'groupCount' => $groupCount, 'score' => null, 'count' => null];
+    /**
+     * @param \App\Models\Score[] $scores
+     * @param bool $withGroupCount
+     * @return array
+     */
+    public static function calcScores($scores, $withGroupCount = true) {
+        $scoreTotal = ['sum' => 0, 'weight' => 0, 'score' => null, 'count' => null];
+
+        if($withGroupCount) {
+            $scoreTotal['groupCount'] = $scores->groupBy('score')->map(function ($item) {
+                return collect($item)->count();
+            });
+        }
+
         foreach ($scores as $item) {
             $scoreTotal['sum'] += $item['score'] * $item['weight'];
             $scoreTotal['weight'] += $item['weight'];
@@ -141,10 +153,36 @@ class ScoreRepository extends BaseRepository {
         return $scoreTotal;
     }
 
+    /**
+     * @param $poemIds
+     * @param bool $withGroupCount
+     * @param null $start
+     * @param null $end
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
+     */
+    public static function batchCalc($poemIds, $start = null, $end = null, $withGroupCount=false) {
+        $query = Score::query()->whereIn('poem_id', $poemIds);
+
+        if($start) {
+            $query->where('updated_at', '>=', $start);
+        }
+        if($end) {
+            $query->where('updated_at', '<=', $end);
+        }
+
+        $scores = $query->get();
+        $poemScores = $scores->groupBy('poem_id')->map(function ($item) use ($withGroupCount) {
+            return self::calcScores($item, $withGroupCount);
+        });
+
+        return $poemScores->toArray();
+    }
+
     public static function calcWeight($poemId) {
         return Score::query()->select('weight')->where(['poem_id' => $poemId])->sum('weight');
     }
 
+    // TODO save count to poem.score_count and poem.campaign_score_count
     public static function calcCount($poemId, $startTime = null, $endTime = null) {
         $builder = Score::query()->where(['poem_id' => $poemId]);
         if($startTime) {
