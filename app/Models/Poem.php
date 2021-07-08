@@ -518,6 +518,7 @@ class Poem extends Model implements Searchable {
 
     /**
      * TODO enable set locales while getting poet name
+     * or poetLabel depend on client side locale
      * @return string
      */
     public function getPoetLabelAttribute() {

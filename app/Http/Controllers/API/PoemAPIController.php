@@ -139,7 +139,6 @@ class PoemAPIController extends Controller {
         }
 
         $res['poet'] = $poem->poet_label;
-        $res['poet_cn'] = $poem->poet_label_cn;
         $res['poet_avatar_true'] = $poem->poet_avatar !== asset(Author::$defaultAvatarUrl);
         $res['translator_avatar_true'] = $poem->translator_avatar !== asset(Author::$defaultAvatarUrl);
         $res['poet_is_v'] = $poem->poet_is_v;

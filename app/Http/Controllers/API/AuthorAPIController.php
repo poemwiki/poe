@@ -42,6 +42,7 @@ class AuthorAPIController extends Controller {
             $item['score_count'] = $score['count'];
             $item['score_weight'] = $score['weight'];
             $item['poem'] = $item->firstLine;
+            $item['poet'] = $item->poetLabel;
             return $item;
         })->sort(function ($a, $b) {
             $scoreOrder = $b['score'] <=> $a['score'];
@@ -51,7 +52,7 @@ class AuthorAPIController extends Controller {
                 : $scoreOrder;
         })->map->only([
             'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
-            'poem', 'poet', 'poet_id', 'poet_avatar', 'poet_cn',
+            'poem', 'poet', 'poet_id', 'poet_avatar',
             'score', 'score_count', 'score_weight'
         ])->values();
     }
