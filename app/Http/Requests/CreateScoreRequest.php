@@ -6,6 +6,7 @@ use App\Models\Poem;
 use App\Models\Score;
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
+use App\User;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Review;
 use Illuminate\Support\Facades\Auth;
@@ -46,8 +47,16 @@ class CreateScoreRequest extends FormRequest {
         $user = Auth::user();
         $sanitized['user_id'] = $user->id;
 
+        $poem = Poem::find($sanitized['poem_id']);
+
+        $sanitized['weight'] = self::getScoreWeight($poem, $user);
+
+        return $sanitized;
+    }
+
+    public static function getScoreWeight(Poem $poem, User $user) {
         $isMaster = false;
-        $tags = Poem::find($sanitized['poem_id'])->tags;
+        $tags = $poem->tags;
         if($tags->count() && $tags[0] && $tags[0]->campaign) {
             /** @var \App\Models\Campaign $campaign */
             $campaign = $tags[0]->campaign;
@@ -55,8 +64,19 @@ class CreateScoreRequest extends FormRequest {
         }
 
         // TODO weight should from user.weight
-        $sanitized['weight'] = $isMaster ? max(100, $user->weight) : $user->weight;
+        if($poem->is_owner_uploaded===Poem::$OWNER['uploader'] && $poem->uploader) {
+            if ($poem->uploader->id === $user->id) {
+                return 1;
+            }
+        }
+        // TODO $poem->is_owner_uploaded===Poem::$OWNER['translatorUploader']
+        else if($poem->poetAuthor && $poem->poetAuthor->user && $poem->poetAuthor->user->id === $user->id) {
+            return 1;
+        }
 
-        return $sanitized;
+        // TODO $poem->translators has user
+        else {
+            return $isMaster ? max(100, $user->weight) : $user->weight;
+        }
     }
 }

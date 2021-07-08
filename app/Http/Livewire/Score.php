@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Http\Requests\CreateScoreRequest;
 use App\Models\Poem;
 use App\Models\Score as ScoreModel;
 use App\Repositories\ScoreRepository;
@@ -53,21 +54,14 @@ class Score extends Component {
 
         $this->validateOnly('rating');
 
-        // TODO 同 API 路由下的打分逻辑应放在一处
-        $isMaster = false;
         $user = Auth::user();
-        $tags = $this->poem->tags;
-        if($tags->count() && $tags[0] && $tags[0]->campaign) {
-            /** @var \App\Models\Campaign $campaign */
-            $campaign = $tags[0]->campaign;
-            $isMaster = $campaign->isMaster($user->id);
-        }
-        $weight = $user->weight;
+        $weight = CreateScoreRequest::getScoreWeight($this->poem, $user);
+
         return  $this->scoreRepository->updateOrCreate(
             ['poem_id' => $this->poem->id, 'user_id' => $user->id],
             [
                 'score' => $this->rating,
-                'weight' => $isMaster ? max(100, $weight) : $weight
+                'weight' => $weight
             ]
         );
     }
