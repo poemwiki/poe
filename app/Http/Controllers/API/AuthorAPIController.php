@@ -7,7 +7,9 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Author;
 use App\Models\Poem;
+use App\Models\Score;
 use App\Repositories\PoemRepository;
+use App\Repositories\ScoreRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -24,8 +26,8 @@ class AuthorAPIController extends Controller {
             $author->is_v = true;
         }
 
-        $originalWorks = $this->_prepare($author->poems);
-        $authorUserOriginalWorks = $author->user ? $this->_prepare($author->user->originalPoemsOwned) : [];
+        $originalWorks = $this->_prepare($author->poems, ['noAvatar' => true, 'noPoet' => true]);
+        $authorUserOriginalWorks = $author->user ? $this->_prepare($author->user->originalPoemsOwned, ['noAvatar' => true, 'noPoet' => true]) : [];
         $translationWorks = $this->_prepare($author->translatedPoems);
 
         return $this->responseSuccess([
@@ -35,14 +37,28 @@ class AuthorAPIController extends Controller {
         ]);
     }
 
-    private function _prepare(Collection $result) {
-        return $result->map(function (Poem $item) {
-            $score = $item->score_array;
+    private function _prepare(Collection $result, $opt = ['noAvatar' => false, 'noPoet' => false]) {
+        list('noAvatar' => $noAvatar, 'noPoet' => $noPoet) = $opt;
+        $columns = [
+            'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
+            'poem', 'poet', 'poet_id',
+            'score', 'score_count', 'score_weight'
+        ];
+        if(!$noAvatar) {
+            $columns[] = 'poet_avatar';
+        }
+
+        $poemScores = ScoreRepository::batchCalc($result->pluck('id')->values()->all());
+
+        return $result->map(function (Poem $item) use ($noPoet, $poemScores) {
+            $score = isset($poemScores[$item->id]) ? $poemScores[$item->id] : Score::$DEFAULT_SCORE_ARR;
             $item['score'] = $score['score'];
             $item['score_count'] = $score['count'];
             $item['score_weight'] = $score['weight'];
             $item['poem'] = $item->firstLine;
-            $item['poet'] = $item->poetLabel;
+
+            if(!$noPoet) $item['poet'] = $item->poetLabel;
+
             return $item;
         })->sort(function ($a, $b) {
             $scoreOrder = $b['score'] <=> $a['score'];
@@ -50,10 +66,6 @@ class AuthorAPIController extends Controller {
             return $scoreOrder === 0
                 ? ($countOrder === 0 ? $b['score_weight'] <=> $a['score_weight'] : $countOrder)
                 : $scoreOrder;
-        })->map->only([
-            'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
-            'poem', 'poet', 'poet_id', 'poet_avatar',
-            'score', 'score_count', 'score_weight'
-        ])->values();
+        })->map->only($columns)->values();
     }
 }

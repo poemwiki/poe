@@ -135,7 +135,7 @@ class ScoreRepository extends BaseRepository {
      * @return array
      */
     public static function calcScores($scores, $withGroupCount = true) {
-        $scoreTotal = ['sum' => 0, 'weight' => 0, 'score' => null, 'count' => null];
+        $scoreTotal = Score::$DEFAULT_SCORE_ARR;
 
         if($withGroupCount) {
             $scoreTotal['groupCount'] = $scores->groupBy('score')->map(function ($item) {

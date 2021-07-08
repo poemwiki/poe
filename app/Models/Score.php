@@ -36,6 +36,8 @@ class Score extends Model {
     protected static $ignoreChangedAttributes = ['created_at'];
     // public static $RATING = [1, 2, 3, 4, 5];
     public static $SCORE = [2, 4, 6, 8, 10];
+
+    public static $DEFAULT_SCORE_ARR = ['sum' => 0, 'weight' => 0, 'score' => null, 'count' => 0];
     // public static $RATING_TO_SCORE = 2;
 
     protected $fillable = [

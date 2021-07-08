@@ -39,6 +39,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property-read Author|null poetAuthor
  * @property-read  User|null poetUser
  * @property-read bool poet_is_v
+ * @property array scoreArray
  */
 class Poem extends Model implements Searchable {
     use SoftDeletes;
