@@ -31,6 +31,7 @@
     </div>
 
     <div class="links" style="position:absolute; bottom: 1em;">
+      <a class="no-bg" href="{{route('new')}}">上传诗歌</a>
       <a class="no-bg" href="/q">搜索</a>
       <a class="no-bg" href="/page/about">关于</a>
       @auth
