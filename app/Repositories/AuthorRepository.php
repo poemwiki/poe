@@ -179,7 +179,7 @@ class AuthorRepository extends BaseRepository {
     /**
      * Get a existed Author by wikidata_id
      * if not existed, create one from wikidata
-     * @param $wikidata_id
+     * @param $wikidata_id int wikidata_id
      */
     public function getExistedAuthor($wikidata_id) : Author {
         $authorExisted = Author::where('wikidata_id', '=', $wikidata_id)->first();
