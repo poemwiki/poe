@@ -7,6 +7,7 @@ use App\Http\Requests\API\StoreOwnerUploaderPoem;
 use App\Models\Author;
 use App\Models\Poem;
 use App\Models\Tag;
+use App\Query\AuthorAliasSearchAspect;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
@@ -16,8 +17,13 @@ use Exception;
 use File;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Spatie\Searchable\ModelSearchAspect;
+use Spatie\Searchable\Search;
+use Spatie\Searchable\SearchResult;
 
 /**
  * Class LanguageController
@@ -155,8 +161,8 @@ class PoemAPIController extends Controller {
 
         if($res['poet_id'] === 1033 or ($poem->is_owner_uploaded===1 && $poem->upload_user_id===4806)) {
             $res['sell'] = [
-                'path' =>  "pages/item/detail/detail?cover=https%3A%2F%2Fm.360buyimg.com%2Fmobilecms%2Fs300x300_jfs%2Ft1%2F163742%2F18%2F11927%2F161606%2F604ae078E6e2ffbba%2Fb15e1a464fea9201.jpg!q70.jpg&price=33.3&name=%E5%A4%9C%E8%A1%8C%E5%88%97%E8%BD%A6&from=wxshare_3&sku=13144162&fb=0",
-                "appId" => "wx91d27dbf599dff74",
+                'path' =>  "pages/proxy/union/union?spreadUrl=https://u.jd.com/6D7JluJ",
+                "appId" => "wx1edf489cb248852c",
                 "picUrl" => "https://poemwiki.org/images/campaign/9/sell.jpg"
             ];
         }
@@ -422,5 +428,127 @@ class PoemAPIController extends Controller {
 
         imagedestroy($posterImg);
         return $res;
+    }
+
+    public function query(Request $request) {
+        $keyword = Str::trimSpaces($request->json('keyword',''));
+
+        if ($keyword === '' || is_null($keyword)) return $this->responseSuccess([
+            'authors' => [],
+            'poems' => [],
+            'keyword' => $keyword
+        ]);
+
+        $keyword4Query = Str::of($keyword)
+            // ->replace('·', ' ')
+            // ->replaceMatches('@[[:punct:]]+@u', ' ')
+            ->replaceMatches('@\b[a-zA-Z]{1,2}\b@u', ' ')
+            ->replaceMatches('@\s+@u', ' ')
+            ->trim();
+        // dd($keyword4Query);
+        if ($keyword4Query->length < 1) {
+            return $this->responseSuccess([
+                'authors' => [],
+                'poems' => [],
+                'keyword' => $keyword
+            ]);
+        }
+
+        // DB::enableQueryLog();
+        $searchResults = (new Search())
+            ->registerAspect(AuthorAliasSearchAspect::class)
+            ->registerModel(Poem::class, function (ModelSearchAspect $modelSearchAspect) {
+                $modelSearchAspect
+                    ->addSearchableAttribute('title') // return results for partial matches
+                    ->addSearchableAttribute('poem')
+                    ->addSearchableAttribute('poet')
+                    ->addSearchableAttribute('poet_cn')
+                    ->addSearchableAttribute('translator')
+                    ->addSearchableAttribute('preface')
+                    ->addSearchableAttribute('subtitle')
+                    ->addSearchableAttribute('location')
+                    ->with('poetAuthor')->limit(50);
+                // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
+            })
+            // ->registerModel(Poem::class, 'title', 'poem', 'poet', 'poet_cn', 'translator')//, 'poet')
+            ->search($keyword4Query);
+
+        // dd(DB::getQueryLog());
+        $results = $searchResults->groupByType();
+        $authorRes = $results->get('authorAlias') ?: collect();
+
+        $shiftPoems = collect();
+
+        $authors = $authorRes->map(function (SearchResult $authorSearchRes, $index) use ($shiftPoems) {
+            if ($index >= 5) return null;
+
+            if ($authorSearchRes->searchable instanceof \App\Models\Author) {
+
+                $author = $authorSearchRes->searchable;
+                $author['#label'] = $author->label === $authorSearchRes->title ? $author->label : $author->label.' ( '.$authorSearchRes->title.' )';
+                foreach ($author->poems as $poem) {
+                    $item = $poem;
+                    $item['poet_contains_keyword'] = true;
+                    // $item['#from_author'] = true;
+                    $item['#poet_label'] = $poem->poet_label === $authorSearchRes->title
+                        ? $authorSearchRes->title
+                        : ($poem->poet_label . ' ( ' .$authorSearchRes->title. ' )');
+                    $shiftPoems->push($item);
+                }
+            }
+
+            // TODO show wikidata poet on search result page: $author->searchable instanceof \App\Models\Wikidata
+            return $authorSearchRes->searchable instanceof \App\Models\Author ? $authorSearchRes->searchable : null;
+        })->filter(function($author) {
+            return $author;
+        });
+
+        $poems = $results->get('poem') ?: [];
+
+
+        foreach ($poems as $p) {
+            $shiftPoems->push($p->searchable);
+        }
+
+        // TODO append translated poems
+        $mergedPoems = $shiftPoems->unique('id')->map(function ($poem) use ($keyword) {
+            $columns = ['poet_label', '#poet_label', 'poet_is_v', 'translator', 'id', 'title', 'poet_contains_keyword', 'poem'];
+
+            $item = $poem->only($columns);
+
+            if(str_contains($poem->poem, $keyword)) {
+                $pos = mb_strpos($poem->poem, $keyword);
+                $item['poem'] = Str::of($poem->poem)->substr($pos - min(20, $pos), 40)->trimPunct()->noSpace()->__toString();
+                $item['poem_contains_keyword'] = true;
+            } else {
+                $item['poem'] = Str::of($poem->poem)->firstLine->__toString();
+                $item['poem_contains_keyword'] = false;
+            }
+
+            $item['poet_is_v'] = $poem->poet_is_v;
+            $item['poet_label'] = $poem->poet_label;
+            $item['translator_label'] = $poem->translator_label;
+            if($poem->poet_label && str_contains($poem->poet_label, $keyword)) {
+                $item['poet_contains_keyword'] = true;
+            }
+            if($poem->translator_label && str_contains($poem->translator_label, $keyword)) {
+                $item['translator_contains_keyword'] = true;
+            }
+
+            return $item;
+        })->values();
+
+        return $this->responseSuccess([
+            'authors' => $authors->map->only(['id', 'avatar_url', 'label', '#label', 'describe_lang', 'user'])->map(function ($author) {
+                if($author['user']) {
+                    $author['user'] = $author['user']->only(['id', 'avatar_url', 'name']);
+                }
+
+                $author['avatar_true'] = $author['avatar_url'] !== asset(Author::$defaultAvatarUrl);
+                return $author;
+            }),
+            'poems' => $mergedPoems,
+            'keyword' => $keyword
+        ]);
     }
 }
