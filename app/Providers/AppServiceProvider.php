@@ -57,6 +57,14 @@ class AppServiceProvider extends ServiceProvider {
             '&nbsp;<a href="$1" target="_blank">$1</a>&nbsp;');
         });
 
+        Stringable::macro('trimPunct', function () {
+            return new static(preg_replace('#^[[:punct:]]+|[[:punct:]]+$#u', '', $this->value));
+        });
+
+        Stringable::macro('noSpace', function () {
+            return new static(Str::noSpace($this->value));
+        });
+
         // CRC32的修正方法，修正php x86模式下出现的负值情况
         Stringable::macro('crc32', function () {
             return sprintf("%u", crc32($this->value));
