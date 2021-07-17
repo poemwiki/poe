@@ -22,7 +22,7 @@ class initialNation extends Command {
      * @var string
      */
     protected $description = 'Update author.nation_id by wikidata_id.
-        This command will retrieve data from wikidata table, and update nation table.';
+        This command will retrieve data(id=fromId) from wikidata table, and update nation table.';
 
     /**
      * Create a new command instance.
@@ -71,7 +71,7 @@ class initialNation extends Command {
      */
     public function import(int $fromId = 0){
         $nations = Wikidata::query()->where([
-            ['id', '>=', $fromId],
+            ['id', '=', $fromId],
             ['type', '=', Wikidata::TYPE['country']]
         ])->orderBy('id');
 
