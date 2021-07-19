@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
+use Illuminate\Support\Stringable;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 use App\Traits\RelatableNode;
@@ -40,6 +41,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property-read  User|null poetUser
  * @property-read bool poet_is_v
  * @property array scoreArray
+ * @property string firstLine
  */
 class Poem extends Model implements Searchable {
     use SoftDeletes;
@@ -178,7 +180,7 @@ class Poem extends Model implements Searchable {
         return url('/admin/poems/' . $this->getKey());
     }
     public function getFirstLineAttribute() {
-        return Str::of($this->poem)->firstLine();
+        return Str::firstLine($this->poem, 20);
     }
 
     public static function boot() {
@@ -189,6 +191,7 @@ class Poem extends Model implements Searchable {
             $model->poem = Str::trimEmptyLines(Str::trimTailSpaces($model->poem));
             $model->length = grapheme_strlen($model->poem);
         });
+
         self::created(function ($model) {
             if($model->is_original) {
                 $model->original_id = $model->id;
@@ -265,6 +268,24 @@ class Poem extends Model implements Searchable {
         return $this->morphToMany(\App\Models\Author::class, 'start', 'relatable', 'start_id', 'end_id')
             ->where('relation', '=', Relatable::RELATION['translator_is']);
     }
+
+    /**
+     * add translator_is relation to author
+     * @param array $ids
+     */
+    public function relateToTranslators(array $ids) {
+        foreach ($ids as $id) {
+            Relatable::create([
+                'relation' => Relatable::RELATION['translator_is'],
+                'start_type' => self::class,
+                'start_id' => $this->id,
+                'end_type' => Author::class,
+                'end_id' => $id
+            ]);
+        }
+    }
+
+
     public function poets(): MorphToMany {
         return $this->morphToMany(\App\Models\Author::class, 'start', 'relatable', 'start_id', 'end_id')
             ->where('relation', '=', Relatable::RELATION['poet_is']);

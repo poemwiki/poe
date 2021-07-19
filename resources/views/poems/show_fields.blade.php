@@ -39,7 +39,7 @@ $softWrap = false;
 /** @var String $fakeId */
 $createPageUrl = $poem->is_original ? route('poems/create', ['original_fake_id' => $fakeId], false) : null;
 
-$firstLine = Str::of($poem->poem)->firstLine();
+$firstLine = $poem->firstLine;
 $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.org/icon/apple-touch-icon.png'
 // TODO @section('keywords', !empty($poem->keywrods) ? $poem->keywrods->join(', ') : '')
 ?>

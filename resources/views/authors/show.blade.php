@@ -85,7 +85,7 @@ $aliasMaxLength = 4;
         @foreach($poemsAsPoet as $poem)
             <li class="title-list-item">
                 <a class="title title-bar font-song no-bg" href="{{$poem->url}}">{{trim($poem->title) ? trim($poem->title) : '无题'}}</a>
-                <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->poem)->firstLine()->surround('span', function ($i) {
+                <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->firstLine)->surround('span', function ($i) {
                             return 'style="transition-delay:'.($i*20).'ms"';
                     })!!}</a>
             </li>
@@ -102,7 +102,7 @@ $aliasMaxLength = 4;
                     <a class="title title-bar font-song no-bg" href="{{$poem->url}}">{!!
                     Str::of(trim($poem->title) ? trim($poem->title) : '无题')
                         ->surround('span')!!}</a>
-                    <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->poem)->firstLine()->surround('span', function ($i) {
+                    <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->firstLine)->surround('span', function ($i) {
                             return 'style="transition-delay:'.($i*20).'ms"';
                     })!!}<span
                         class="text-gray-400 float-right item-poem-author {{$poem->poetAuthor ? 'poemwiki-link' : ''}}">{{$poem->poetLabel}}</span></a>

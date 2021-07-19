@@ -95,6 +95,8 @@ class PoemAPIController extends Controller {
                 $review->content = $review->pureContent;
                 return $review->makeHidden('user')->only($reviewColumn);
             });
+            $item['famous_line'] = $poem->firstLine;
+            // dd($poem->firstLine);
             $res[] = $item;
         };
 
@@ -521,7 +523,7 @@ class PoemAPIController extends Controller {
                 $item['poem'] = Str::of($poem->poem)->substr($pos - min(20, $pos), 40)->trimPunct()->noSpace()->__toString();
                 $item['poem_contains_keyword'] = true;
             } else {
-                $item['poem'] = Str::of($poem->poem)->firstLine->__toString();
+                $item['poem'] = $poem->firstLine;
                 $item['poem_contains_keyword'] = false;
             }
 

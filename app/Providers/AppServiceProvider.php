@@ -33,13 +33,7 @@ class AppServiceProvider extends ServiceProvider {
         });
 
         Stringable::macro('firstLine', function ($lengthLimit = 20) {
-            $arr = explode("\n", $this->value);
-            $firstLine = (new static($arr[0]))->replaceMatches('@[[:punct:]]+$@u', '')
-                ->replaceMatches('@^\s+@u', '')
-                ->replaceMatches('@\s+@u', ' ');
-            return $firstLine->length > $lengthLimit
-                ? new static($firstLine->split('@[,，.。:：;；]@u', 2)->first())
-                : $firstLine;
+            return new static(Str::firstLine(Str::of($this->value)));
         });
 
         Stringable::macro('toLines', function () {
@@ -90,6 +84,16 @@ class AppServiceProvider extends ServiceProvider {
         });
         Str::macro('pureStr', function ($str) {
             return Str::noPunct(Str::noSpace($str));
+        });
+
+        Str::macro('firstLine', function ($str, $lengthLimit = 20) {
+            $arr = explode("\n", $str);
+            $firstLine = (Str::of($arr[0]))->replaceMatches('@[[:punct:]]+$@u', '')
+                ->replaceMatches('@^\s+@u', '')
+                ->replaceMatches('@\s+@u', ' ');
+            return mb_strlen($firstLine) > $lengthLimit
+                ? $firstLine->split('@[,，.。:：;；]@u', 2)->first()->__toString()
+                : $firstLine->__toString();
         });
 
         // TODO 考虑大小写，简繁体
