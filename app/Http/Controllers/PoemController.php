@@ -16,6 +16,7 @@ use App\Repositories\GenreRepository;
 use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use App\Rules\NoDuplicatedPoem;
+use App\Rules\ValidTranslatorId;
 use Auth;
 use Brackets\AdminListing\Facades\AdminListing;
 use Carbon\Carbon;
@@ -31,8 +32,7 @@ use Illuminate\View\View;
 use Spatie\Activitylog\Models\Activity;
 
 
-class PoemController extends Controller
-{
+class PoemController extends Controller {
     /** @var  PoemRepository */
     private $poemRepository;
     /** @var  AuthorRepository */
@@ -53,7 +53,7 @@ class PoemController extends Controller
             'poem' => $poem,
             'randomPoemUrl' => $randomPoem->url,
             'randomPoemTitle' => $randomPoem->title,
-            'randomPoemFirstLine' => Str::of($randomPoem->poem)->firstLine(),
+            'randomPoemFirstLine' => $randomPoem->firstLine,
             'fakeId' => $poem->fake_id,
             'logs' => $logs
         ]);
@@ -165,19 +165,19 @@ class PoemController extends Controller
             $sanitized['poet'] = $poetAuthor->label;
             $sanitized['poet_cn'] = $poetAuthor->label_cn;
         }
-        if(isset($sanitized['translator_wikidata_id']) && is_numeric($sanitized['translator_wikidata_id']) && is_null($sanitized['translator_id'])) {
-            $translatorAuthor = $this->authorRepository->getExistedAuthor($sanitized['translator_wikidata_id']);
-            $sanitized['translator_id'] = $translatorAuthor->id;
-            $sanitized['translator'] = $translatorAuthor->label;
-        }
+
 
         $sanitized['upload_user_id'] = $request->user()->id;
 
         if (!isset($sanitized['original_id'])) {
             $sanitized['original_id'] = 0;
         }
+
         // Store the Poem
         $poem = Poem::create($sanitized);
+        if($sanitized['translator_ids']) {
+            $poem->relateToTranslators($sanitized['translator_ids']);
+        }
 
         if(isset($sanitized['translated_id'])) {
             $translatedPoem = Poem::find($sanitized['translated_id']);

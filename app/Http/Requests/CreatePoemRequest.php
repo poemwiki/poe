@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Author;
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use App\Rules\NoDuplicatedPoem;
@@ -59,7 +60,8 @@ class CreatePoemRequest extends FormRequest {
             'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
             'poet_id' => ['nullable', new ValidPoetId($original_id)],
             'poet_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
-            'translator_id' => ['nullable', new ValidTranslatorId()],
+            'translator_ids' => ['nullable', 'array', new ValidTranslatorId()],
+            // 'translator_ids' = [],
             'translator_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
             'upload_user_id' => ['nullable', 'exists:' . \App\User::class . ',id'],
             'is_owner_uploaded' => ['required', Rule::in([Poem::$OWNER['none'], Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])],
@@ -83,9 +85,28 @@ class CreatePoemRequest extends FormRequest {
             $sanitized['poet_id'] = null;
             $sanitized['poet_wikidata_id'] = null;
         }
-        if (isset($sanitized['translator_id']) && $sanitized['translator_id'] === 'new') {
-            $sanitized['translator_id'] = null;
-            $sanitized['translator_wikidata_id'] = null;
+
+        if (isset($sanitized['translator_ids'])) {
+            $sanitized['translator'] = '';
+
+            $translatorLabels = [];
+            foreach ($sanitized['translator_ids'] as $key => $id) {
+                if(ValidTranslatorId::isWikidataQID($id)) {
+                    $translatorAuthor = $this->authorRepository->getExistedAuthor($id);
+                    $sanitized['translator_ids'][$key] = $translatorAuthor->id;
+                    $translatorLabels[] = $translatorAuthor->label;
+                } else if(ValidTranslatorId::isNew($id)) {
+                    $sanitized['translator_ids'][$key] = null;
+                    $translatorLabels[] = substr($id, 4, strlen($id));
+                } else {
+                    $translatorLabels[] = Author::find($id)->label;
+                }
+            }
+            $sanitized['translator'] = implode(', ', $translatorLabels);
+
+            $sanitized['translator_ids'] = array_filter($sanitized['translator_ids'], function($id) {
+                return is_numeric($id);
+            });
         }
 
         $user = Auth::user();
