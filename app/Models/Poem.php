@@ -218,20 +218,22 @@ class Poem extends Model implements Searchable {
             if(!$model->content) {
                 $oldPoem = Poem::find($model->id);
                 $oldFullHash = Str::contentFullHash($oldPoem->poem);
+                $oldHash = Str::contentHash($oldPoem->poem);
                 $oldContent = Content::create([
                     'entry_id' => $oldPoem->id,
                     'type' => 0,
                     'content' => $oldPoem->poem,
                     'hash_f' => '',             // parent pure content hash
-                    'hash' => Str::contentHash($oldPoem->poem),        // current pure content hash（用于去重）
+                    'hash' => $oldHash,        // current pure content hash（用于去重）
                     'full_hash_f' => '',        // parent version's full hash
                     'full_hash' => $oldFullHash
                 ]);
                 // does this trigger a infinite recursion?
-                // $oldPoem->content_id = $oldContent->id;
-                // $oldPoem->save();
+                $oldPoem->content_id = $oldContent->id;
+                $oldPoem->save();
             }else {
                 $oldFullHash = $model->content->full_hash ?: Str::contentFullHash($model->content->content);
+                $oldHash = $model->content->hash;
             }
 
             if ($fullHash !== $oldFullHash) {
@@ -240,7 +242,7 @@ class Poem extends Model implements Searchable {
                     'entry_id' => $model->id,
                     'type' => 0,
                     'content' => $model->poem,
-                    'hash_f' => $model->content->hash,
+                    'hash_f' => $oldHash,
                     'hash' => Str::contentHash($model->poem),
                     'full_hash_f' => $oldFullHash,
                     'full_hash' => $fullHash
@@ -259,12 +261,15 @@ class Poem extends Model implements Searchable {
                 }
             });
         });
+
+        // TODO delete related scores?
     }
 
 
     // if poem deleted, all it's relatable record should be deleted?
     // if author deleted, all it's relatable record should be deleted?
     public function translators(): MorphToMany {
+        // TODO if end_type is string
         return $this->morphToMany(\App\Models\Author::class, 'start', 'relatable', 'start_id', 'end_id')
             ->where('relation', '=', Relatable::RELATION['translator_is']);
     }
