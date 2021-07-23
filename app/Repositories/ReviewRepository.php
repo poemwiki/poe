@@ -43,7 +43,7 @@ class ReviewRepository extends BaseRepository {
         return $query->paginate($perPage, $columns);
     }
 
-    public function paginateByOriginalPoem(Poem $poem, $perPage = 10, $order = 'updated_at', $direction = 'desc', $columns = ['*']) {
+    public function paginateByOriginalPoem(Poem $poem, $perPage = 10, $order = 'created_at', $direction = 'desc', $columns = ['*']) {
         $poemIds = [$poem->id];
         if ($poem->original_id && $poem->is_translated) {
             $poemIds[] = $poem->original_id;

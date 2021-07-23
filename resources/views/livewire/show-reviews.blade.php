@@ -32,7 +32,7 @@
             <li class="review-card">
                 <div class="review-h flex-center-vertically">
                     <div><img class="avatar" src="{{$review->avatar}}"></div>
-                    <div class="review-info"><b>{{$review->name}}</b><span class="review-time" title="{{$review->updated_at ?? $review->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($review->updated_at ?? $review->created_at)->diffForHumans(now())}}</span></div>
+                    <div class="review-info"><b>{{$review->name}}</b><span class="review-time" title="{{$review->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($review->created_at)->diffForHumans(now())}}</span></div>
                 </div>
 
                 @if(isset($userScore[$review->user_id]))

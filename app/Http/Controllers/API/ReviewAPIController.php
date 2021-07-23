@@ -28,10 +28,15 @@ class ReviewAPIController extends Controller {
 
         if($action === 'like' && !$hasLiked) {
             $user->like($review);
+
+            $review->timestamps = false;
             $review->like = $review->likers()->count();
             $review->save();
+
         } else if($action === 'unlike' && $hasLiked) {
             $user->unlike($review);
+
+            $review->timestamps = false;
             $review->like = $review->likers()->count();
             $review->save();
         }
@@ -57,5 +62,9 @@ class ReviewAPIController extends Controller {
             return $this->responseSuccess();
         }
         return $this->responseFail();
+    }
+
+    public function delete($id) {
+        // TODO
     }
 }
