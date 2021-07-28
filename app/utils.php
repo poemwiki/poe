@@ -301,6 +301,6 @@ function getTmpWxUrlLink($expireIntervalDays, $query, $path = 'pages/poems/index
         'query' =>  $query,
         'is_expire' => true,
         "expire_type" => 1,
-        "expire_interval" => $expireIntervalDays,
+        "expire_interval" => $expireIntervalDays >= 30 ? 30 : $expireIntervalDays,
     ]);
 }

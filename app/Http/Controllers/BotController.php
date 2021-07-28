@@ -153,11 +153,11 @@ class BotController extends Controller {
         if (!$poem->weapp_url or $shouldRenew) {
             try {
                 $permanent = $poem->id <= 4000;
-                $expireIntervalDays = 365;
+                $expireIntervalDays = 30;
                 $res = $permanent ? getPermanentWxUrlLink('id=' . $poem->id)
                     : getTmpWxUrlLink($expireIntervalDays, 'id=' . $poem->id);
                 if($res->errcode) {
-                    throw new \Exception('get permanent wxUrlLink error' . $res->errmsg);
+                    throw new \Exception('get wxUrlLink error' . $res->errmsg);
                 }
                 $url = $res->url_link;
 
@@ -282,7 +282,7 @@ SQL;
      */
     public function index(Request $request) {
         $chatroom = $request->input('chatroom', '');
-        $maxLength = $request->input('maxLength', 800);
+        $maxLength = $request->input('maxLength', 750);
         $msg = $request->input('keyword', '云朵');
 
         $topMode = preg_match("@^top($|\s\d+)$@i", $msg);
@@ -312,7 +312,7 @@ SQL;
         // TODO add search for translator author name
         $subSql = <<<SQL
 SELECT
-    (select {$this->factor['dushui']} from wx_post WHERE poem_id=p.id limit 1) as `wx`,
+    (select IF(p.campaign_id, 0, {$this->factor['dushui']})) as `wx`,
     (select {$this->factor['ugc']}) as `base`,
     IF(`selected_count`, `selected_count`, 0) as times,
     p.score,
@@ -334,7 +334,7 @@ SQL;
 
             foreach ($keyword as $idx => $word) {
                 $subSql .= "(
-                    `poem` like :keyword1_$idx OR `title` like :keyword2_$idx
+                    replace(replace(`poem`, ' ', ''), '\n', '') like :keyword1_$idx OR replace(`title`,' ', '') like :keyword2_$idx
                     OR `poet` like :keyword3_$idx OR `poet_cn` like :keyword4_$idx
                     OR `translator` like :keyword5_$idx
                     OR JSON_SEARCH(lower(poet_author.`name_lang`), 'all', :keyword6_$idx)
@@ -369,14 +369,16 @@ SQL;
         } else {
             $originWords = $keyword;
 
-            $subSql .= '(
-                `poem` like :keyword1 OR `title` like :keyword2
+            $subSql .=<<<'SQL'
+            (
+                replace(replace(`poem`, " ", ""), "\n", "") like :keyword1 OR replace(`title`,' ', '')  like :keyword2
                 OR `poet` like :keyword3 OR `poet_cn` like :keyword4
                 OR `translator` like :keyword5
-                OR JSON_SEARCH(lower(poet_author.`name_lang`), \'all\', :keyword6)
+                OR JSON_SEARCH(lower(poet_author.`name_lang`), 'all', :keyword6)
                 OR `subtitle` like :keyword7
                 OR `preface` like :keyword8
-            )';
+            )
+SQL;
             $subSql .= ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1) AND p.`deleted_at` is NULL';
             $sql = <<<SQL
 SELECT (IF(ISNULL(`wx`), 0, `wx`)+`base`) * IF(ISNULL(score), 1, 1+(score-6)/20) / (1+times) as `rank`, t.* FROM (
@@ -400,7 +402,7 @@ SQL;
         $q->bindValue(':chatroomId', $chatroom, PDO::PARAM_STR);
         $q->bindValue(':maxLength', $maxLength, PDO::PARAM_INT);
 
-        //$q->debugDumpParams();
+        // $q->debugDumpParams();
         $code = -1;
         $poem = '';
         $data = [];
