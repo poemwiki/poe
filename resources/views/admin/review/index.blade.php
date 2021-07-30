@@ -81,7 +81,7 @@
                                         <td v-html="item.content"></td>
                                         <td>@{{ item.id }}</td>
 {{--                                        <td>@{{ item.like }}</td>--}}
-                                        <td><a :href="'/' + item.poem_id" target="_blank">@{{ item.poem_title }}</a></td>
+                                        <td><a :href="item.poem_url" target="_blank">@{{ item.poem_title + (item.poem_url ? '' : `[已删除诗歌条目 id ${item.poem_id}]`) }}</a></td>
 {{--                                        <td>@{{ item.title }}</td>--}}
                                         <td>@{{ item.user_name }}</td>
                                         <td>@{{ item.updated_at | datetime }}</td>

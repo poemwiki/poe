@@ -54,6 +54,10 @@ class ReviewController extends Controller
             }
         );
 
+        foreach ($data as &$review) {
+            $review['poem_url'] = $review->poem ? $review->poem->url : null;
+        }
+
         if ($request->ajax()) {
             if ($request->has('bulk')) {
                 return [
