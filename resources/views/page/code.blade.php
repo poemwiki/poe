@@ -23,17 +23,12 @@
       align-items: center;
       justify-content: space-around;
       height: 100vh;
-      text-align: justify;
+      overflow: hidden;
       line-height: 2em;
-    }
-    main p {
-      width: 100%;
     }
     main .code{
       display: block;
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto;
+      height: 100vh;
     }
   </style>
 @endpush
