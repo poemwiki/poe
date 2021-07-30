@@ -257,7 +257,7 @@ class PoemRepository extends BaseRepository
      * @param bool $excludeSelf exclude poem that upload_user_id=userId. ONLY for $isCampaignPoem == true
      * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
      */
-    public function getRelated($userId, $isCampaignPoem=false, $excludeSelf=true) {
+    public function getRelated($userId, $limit=100, $isCampaignPoem=false, $excludeSelf=true) {
         $q = self::newQuery();
 
         if($isCampaignPoem) {
@@ -283,7 +283,8 @@ class PoemRepository extends BaseRepository
             });
         });
 
-        return $q->with('reviews')->orderByDesc('created_at')->get()->map(function ($item) {
+        // TOOD pagination
+        return $q->limit($limit)->with('reviews')->orderByDesc('created_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet'] = $item->poet_label;
             $item['score_count'] = ScoreRepository::calcCount($item->id);
