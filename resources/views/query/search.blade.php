@@ -74,7 +74,7 @@
               {{--                    <a class="" href="{{ $item->url }}">{{ $item->title }}</a>--}}
               <div class="item-right title-list-item">
                 <a class="item-link title-bar title font-song no-bg" target="_blank" href="{{$poem->url}}">{{trim($poem->title) ?: '无题'}}</a>
-                <a class="first-line no-bg" target="_blank" href="{{$poem->url}}">{!!$poem->firstLine->surround('span', function ($i) {
+                <a class="first-line no-bg" target="_blank" href="{{$poem->url}}">{!!Str::of($poem->firstLine)->surround('span', function ($i) {
                             return 'style="transition-delay:'.($i*20).'ms"';
                     })!!}
                   <span
