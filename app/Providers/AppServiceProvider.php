@@ -80,7 +80,7 @@ class AppServiceProvider extends ServiceProvider {
             return preg_replace("#\s+#u", '', $str);
         });
         Str::macro('noPunct', function ($str) {
-            return preg_replace("#[[:punct:]]+#u", '', $str);
+            return preg_replace("#[[:punct:]┄┅┉┈─━⦁₋∙●◎▪︎▶︎▼´¨˛¸°˝˙ª˚º­¯¦ˉˆ˘ˇ❜❛︎︎❝❞❢❣❡⎧⎫⎡⎤⎛⎞⎨⎬⎜⎟⎢⎥⎪⎪⎣⎦⎝⎠⎩⎭−∘∗∖∕∴∵∶∷⊙⋄⋅⋆⋮⋯⨾⁻⧫℃℉®©℗™℠❤⭐★☆➤➣➢▲▵▴▿▾▽△▸▹►▻◁◀▷❖◇◆◘◼□☐☑☒▫◻■⦿◉◦○❗️❕❓❔️️]+#u", '', $str);
         });
         Str::macro('pureStr', function ($str) {
             return Str::noPunct(Str::noSpace($str));
@@ -88,7 +88,8 @@ class AppServiceProvider extends ServiceProvider {
 
         Str::macro('firstLine', function ($str, $lengthLimit = 20) {
             $arr = explode("\n", $str);
-            $firstLine = (Str::of($arr[0]))->replaceMatches('@[[:punct:]]+$@u', '')
+            // TODO first line like (1) 一 1 should be ignored
+            $firstLine = Str::of(Str::noPunct($arr[0]))
                 ->replaceMatches('@^\s+@u', '')
                 ->replaceMatches('@\s+@u', ' ');
             return mb_strlen($firstLine) > $lengthLimit
