@@ -132,7 +132,7 @@ class BotController extends Controller {
             $longUrl = 'https://poemwiki.org/p/' . Poem::getFakeId($poem->id);
             $url = short_url($longUrl);
             if ($url === $longUrl) {
-                return 'https://poemwiki.org/' . $poem->id;
+                return $url;
             } else {
                 Poem::withoutEvents(function () use ($poem, $url) {
                     $poem->timestamps = false;
@@ -333,6 +333,7 @@ SQL;
             $originWords = implode(' ', $keyword);
 
             foreach ($keyword as $idx => $word) {
+                // TODO remove replace if too slow
                 $subSql .= "(
                     replace(replace(`poem`, ' ', ''), '\n', '') like :keyword1_$idx OR replace(`title`,' ', '') like :keyword2_$idx
                     OR `poet` like :keyword3_$idx OR `poet_cn` like :keyword4_$idx
@@ -369,6 +370,7 @@ SQL;
         } else {
             $originWords = $keyword;
 
+            // TODO remove replace if too slow
             $subSql .=<<<'SQL'
             (
                 replace(replace(`poem`, " ", ""), "\n", "") like :keyword1 OR replace(`title`,' ', '')  like :keyword2

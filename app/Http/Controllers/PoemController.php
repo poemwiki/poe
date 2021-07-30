@@ -71,10 +71,10 @@ class PoemController extends Controller {
     }
 
     // route('poem');
-    public function showPoem($id){
-        $poem = Poem::findOrFail($id);
-        return $this->_poem($poem);
-    }
+    // public function showPoem($id){
+    //     $poem = Poem::findOrFail($id);
+    //     return $this->_poem($poem);
+    // }
 
     public function showContributions($fakeId) {
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId);

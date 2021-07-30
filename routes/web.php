@@ -402,12 +402,3 @@ Route::any('/author-avatar/{fakeId}', function($fakeId) {
 
     return responseFile($storePath);
 })->name('author-avatar');
-
-// TODO move it to PoemController
-Route::get('/{id}', function ($id) {
-    if(is_numeric($id)) {
-        // Bot return fakeId url, deprecate /{id} url
-        return redirect(route('p/show', ['fakeId' => Poem::getFakeId($id)]));
-    }
-    return redirect('/');
-})->name('poem');
