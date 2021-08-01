@@ -93,7 +93,7 @@ class AppServiceProvider extends ServiceProvider {
                 ->replaceMatches('@^\s+@u', '')
                 ->replaceMatches('@\s+@u', ' ');
             return mb_strlen($firstLine) > $lengthLimit
-                ? $firstLine->split('@[,，.。:：;；]@u', 2)->first()->__toString()
+                ? $firstLine->split('@[,，.。:：;；]@u', 2)->first()
                 : $firstLine->__toString();
         });
 
