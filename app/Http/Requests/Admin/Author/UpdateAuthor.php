@@ -16,7 +16,7 @@ class UpdateAuthor extends TranslatableFormRequest {
      * @return bool
      */
     public function authorize(): bool {
-        return Gate::allows('web.author.change', Auth::user());
+        return Gate::allows('admin.author.edit', $this->author) || Gate::allows('web.author.change', Auth::user());
     }
 
     /**
@@ -27,7 +27,7 @@ class UpdateAuthor extends TranslatableFormRequest {
     public function untranslatableRules(): array {
         return [
             // 'pic_url' => ['sometimes', 'string'],
-            'user_id' => ['nullable', 'string'],
+            'user_id' => ['nullable', 'integer'],
             'wikidata_id' => ['nullable', 'integer'],
             'nation_id' => ['nullable', Rule::in(NationRepository::ids())],
             'dynasty_id' => ['nullable', Rule::in(DynastyRepository::ids())],
