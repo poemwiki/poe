@@ -11,17 +11,6 @@ if($poem->poetAuthor) {
     : '';
 }
 
-
-$poetName = '';
-if($poem->poet_cn) {
-    $poetName = $poem->poet_cn;
-    if ($poem->poet_cn !== $poem->poet) {
-        $poetName .= ' ('.$poem->poet.')';
-    }
-} else {
-    $poetName = $poem->poet;
-}
-
 $graphemeLength = max(array_map(function($line) {
     return grapheme_strlen($line);
 }, explode("\n", $poem->poem)));
@@ -131,21 +120,34 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                             @if($poem->poetAuthor)
                               <a href="{{route('author/show',  ['fakeId' => $poem->poetAuthor->fakeId, 'from' => $poem->id])}}" class="poemwiki-link">{{$poem->poetLabel}}</a>
                             @else
-                              <a href="{{route('search', $poetName)}}" class="search-link">{{$poetName}}</a>
+                              <a href="{{route('search', $poem->poet_label)}}" class="search-link">{{$poem->poet_label}}</a>
                             @endif
                         </address>
                     </dd><br>
 
-                    @if($poem->translatorLabel)
+
+                    @if($poem->translators->count())
                         <dt>@lang('admin.poem.columns.translator')</dt>
                         <dd itemprop="translator" class="poem-translator">
-                        @if($poem->translatorAuthor)
+                          @foreach($poem->translators as $translator)
+                            @if($translator instanceof \App\Models\Author)
+                              <a href="{{route('author/show', ['fakeId' => $translator->fakeId])}}" class="author-label poemwiki-link">{{$translator->label}}</a>
+                            @elseif($translator instanceof \App\Models\Entry)
+                              <a href="{{route('search', $translator->name)}}" class="author-label search-link">{{$translator->name}}</a>
+                            @endif
+                          @endforeach
+                        </dd><br>
+                    @elseif($poem->translatorLabel)
+                        <dt>@lang('admin.poem.columns.translator')</dt>
+                        <dd itemprop="translator" class="poem-translator">
+                          @if($poem->translatorAuthor)
                             <a href="{{route('author/show', ['fakeId' => $poem->translatorAuthor->fakeId])}}" class="poemwiki-link">{{$poem->translatorLabel}}</a>
-                        @else
+                          @else
                             <a href="{{route('search', $poem->translator)}}" class="search-link">{{$poem->translator}}</a>
-                        @endif
+                          @endif
                         </dd><br>
                     @endif
+
 
                     @if($poem->from)
                         <dt>@lang('admin.poem.columns.from')</dt>

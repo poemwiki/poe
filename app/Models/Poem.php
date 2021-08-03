@@ -266,12 +266,38 @@ class Poem extends Model implements Searchable {
     }
 
 
+    /**
     // if poem deleted, all it's relatable record should be deleted?
     // if author deleted, all it's relatable record should be deleted?
-    public function translators(): MorphToMany {
-        // TODO if end_type is string
-        return $this->morphToMany(\App\Models\Author::class, 'start', 'relatable', 'start_id', 'end_id')
-            ->where('relation', '=', Relatable::RELATION['translator_is']);
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
+     */
+    public function getTranslatorsAttribute() {
+        // return $this->morphToMany(\App\Models\Author::class, 'start', 'relatable', 'start_id', 'end_id')
+            // ->where('relation', '=', Relatable::RELATION['translator_is']);
+        $translators = Relatable::where([
+            'relation' => Relatable::RELATION['translator_is'],
+            'start_type' => self::class,
+            'start_id' => $this->id
+        ])->get();
+        return $translators->map(function($translator) {
+            if($translator->end_type === Author::class) {
+                return Author::find($translator->end_id);
+            } else if($translator->end_type === Entry::class) {
+                return Entry::find($translator->end_id);
+            } else {
+                throw new \Error('unexpected end_type: ' . $translator->end_type);
+            }
+        });
+    }
+
+    public function getTranslatorsLabelArrAttribute() {
+        return $this->translators->map(function($translator) {
+            if($translator instanceof Author) {
+                return ['id' => $translator->id, 'name' => $translator->label];
+            } else if($translator instanceof Entry) {
+                return ['name' => $translator->name];
+            }
+        })->toArray();
     }
 
     /**
@@ -280,12 +306,23 @@ class Poem extends Model implements Searchable {
      */
     public function relateToTranslators(array $ids) {
         foreach ($ids as $id) {
+            if (is_integer($id) && Author::find($id)) {
+                $endType = Author::class;
+                $endID = $id;
+            } else {
+                $endType = Entry::class;
+                $newEntry = Entry::create([
+                    'name'=> $id,
+                    'type' => Entry::class
+                ]);
+                $endID = $newEntry->id;
+            }
             Relatable::create([
                 'relation' => Relatable::RELATION['translator_is'],
                 'start_type' => self::class,
                 'start_id' => $this->id,
-                'end_type' => Author::class,
-                'end_id' => $id
+                'end_type' => $endType,
+                'end_id' => $endID
             ]);
         }
     }
@@ -559,7 +596,7 @@ class Poem extends Model implements Searchable {
         // TODO if is_owner_uploaded==Poem::OWNER['poetAuthor'] && $this->uploader
         // TODO use poetAuthor->label if poem.poet and poem.poet_cn is used for SEO
         if ($this->is_owner_uploaded===static::$OWNER['uploader'] && $this->uploader) {
-            return $this->uploader->name;
+            return $this->uploader->name === $this->poet ? $this->poet : $this->uploader->name.'（'.$this->poet.'）';
         } else if ($this->poetAuthor) {
             return $this->poetAuthor->label;
         } else {
@@ -663,10 +700,10 @@ class Poem extends Model implements Searchable {
     /**
      * Convert the model instance to JSON.
      *
-     * @param  int  $options
+     * @param int $options
+     * @param array $extraList
      * @return string
      *
-     * @throws \Illuminate\Database\Eloquent\JsonEncodingException
      */
     public function toFillableJson($options = 0, $extraList = []) {
         $allowedFields = $this->fillable;
