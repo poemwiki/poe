@@ -323,6 +323,8 @@ class Poem extends Model implements Searchable {
                 'end_id' => $endID
             ]);
         }
+        // TODO log relatedTranslators change
+        // TODO make translators change revertible
     }
 
 
