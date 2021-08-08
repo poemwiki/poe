@@ -30,8 +30,8 @@
     }
     main .qr{
       display: block;
-      width: 300px;
-      max-width: 80%;
+      width: 200px;
+      max-width: 60%;
       margin: 0 auto;
     }
   </style>
