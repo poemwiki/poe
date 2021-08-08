@@ -17,11 +17,18 @@ use Illuminate\Validation\Rule;
 class CreatePoemRequest extends FormRequest {
 
     /**
+     * @var AuthorRepository $authorRepository
+     */
+    protected $authorRepository;
+
+    /**
      * Determine if the user is authorized to make this request.
      *
+     * @param AuthorRepository $authorRepository
      * @return bool
      */
-    public function authorize(): bool {
+    public function authorize(AuthorRepository $authorRepository): bool {
+        $this->authorRepository = $authorRepository;
         return Gate::allows('api.poem.create', Auth::user());
     }
 
@@ -92,21 +99,19 @@ class CreatePoemRequest extends FormRequest {
             $translatorLabels = [];
             foreach ($sanitized['translator_ids'] as $key => $id) {
                 if(ValidTranslatorId::isWikidataQID($id)) {
-                    $translatorAuthor = $this->authorRepository->getExistedAuthor($id);
+                    $translatorAuthor = $this->authorRepository->getExistedAuthor(ltrim($id, 'Q'));
                     $sanitized['translator_ids'][$key] = $translatorAuthor->id;
                     $translatorLabels[] = $translatorAuthor->label;
                 } else if(ValidTranslatorId::isNew($id)) {
-                    $sanitized['translator_ids'][$key] = null;
+                    $sanitized['translator_ids'][$key] = mb_substr($id, strlen('new_'));
                     $translatorLabels[] = substr($id, 4, strlen($id));
                 } else {
+                    $sanitized['translator_ids'][$key] = (int)$id;
                     $translatorLabels[] = Author::find($id)->label;
                 }
             }
             $sanitized['translator'] = implode(', ', $translatorLabels);
 
-            $sanitized['translator_ids'] = array_filter($sanitized['translator_ids'], function($id) {
-                return is_numeric($id);
-            });
         }
 
         $user = Auth::user();

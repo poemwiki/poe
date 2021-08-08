@@ -41,8 +41,9 @@ class ValidOriginalLink implements Rule {
             return true;
         }
 
-        $pattern = '@^' . request()->getHost() . '/p/(.*)$@';
+        $pattern = '@^(?>https?://)?' . request()->getHost() . '/p/(.*)$@';
         $fakeId = Str::of($value)->match($pattern)->__toString();
+
         if ($fakeId) {
             $idFromFakeId = Poem::getIdFromFakeId($fakeId);
             if (!is_numeric($idFromFakeId)) {

@@ -7,10 +7,36 @@ use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 
 /**
- * @property Wikidata wikidata
- * @property Author|null author
- * @property string name
- * @property integer id
+ * App\Models\Alias
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $locale
+ * @property int|null $author_id
+ * @property int|null $language_id
+ * @property int|null $wikidata_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Author|null $author
+ * @property-read mixed $label
+ * @property-read mixed $label_cn
+ * @property-read mixed $label_en
+ * @property-read mixed $q_i_d
+ * @property-read mixed $resource_url
+ * @property-read mixed $url
+ * @property-read \App\Models\Wikidata|null $wikidata
+ * @method static \Illuminate\Database\Eloquent\Builder|Alias newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Alias newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Alias query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Alias whereAuthorId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Alias whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Alias whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Alias whereLanguageId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Alias whereLocale($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Alias whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Alias whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Alias whereWikidataId($value)
+ * @mixin \Eloquent
  */
 class Alias extends Model implements Searchable {
     protected $table = 'alias';
@@ -60,11 +86,12 @@ class Alias extends Model implements Searchable {
     }
     public function getLabelCnAttribute() {
         return $this->wikidata
-            ? ($this->wikidata->getLabel('zh') ?? $this->wikidata->getLabel('zh-hant') ?? $this->wikidata->getLabel('lzh') ?? null)
+            // TODO use fallback list here
+            ? ($this->wikidata->getLabel('zh-CN') ?? $this->wikidata->getLabel('zh') ?? $this->wikidata->getLabel('zh-hant') ?? $this->wikidata->getLabel('lzh') ?? null)
             : null;
     }
     public function getQIDAttribute() {
-        return 'Q'.$this->id;
+        return $this->wikidata_id ? 'Q'.$this->wikidata_id : null;
     }
 
     public function wikidata() {

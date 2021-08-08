@@ -55,4 +55,12 @@ class Relatable extends MorphPivot {
     public function end() : MorphTo {
         return $this->morphTo();
     }
+
+    public function scopeTranslatorIs($query, $startType, $startId) {
+        $query->where([
+            'relation' => Relatable::RELATION['translator_is'],
+            'start_type' => $startType,
+            'start_id' => $startId
+        ]);
+    }
 }

@@ -17,7 +17,7 @@ Vue.component('poem-form', {
     codemirror, vSelect
   },
   mixins: [BaseForm],
-  props: ['defaultAuthors'],
+  props: ['defaultAuthors', 'defaultTranslators'],
   data: function () {
     return {
       form: {
@@ -42,16 +42,17 @@ Vue.component('poem-form', {
         translated_id: '',
         genre_id: '',
         poet_id: null,
-        translator_id: null,
+        translator_ids: null,
         poet_wikidata_id: null,
         translator_wikidata_id: null,
         is_owner_uploaded: 0,
-        _user_name: '',
+        '#user_name': '',
         original_link: ''
       },
 
       authorList: this.defaultAuthors,
-      translatorList: _.clone(this.defaultAuthors),
+      translatorList: this.defaultTranslators,
+      selectedTranslatorOptions: [],
       cmOptions: {
         tabSize: 4,
         mode: 'text/plain',
@@ -89,15 +90,15 @@ Vue.component('poem-form', {
         this.form.is_original = 1;
 
         this.authorList.push(this.userAuthor);
-        this.form.poet_id = 'new_' + this.form._user_name;
+        this.form.poet_id = 'new_' + this.form['#user_name'];
         // this.form.poet_id = null;
-        this.form.poet = this.form._user_name;
-        this.form.poet_cn = this.form._user_name;
+        this.form.poet = this.form['#user_name'];
+        this.form.poet_cn = this.form['#user_name'];
       } else if(newVal === 2) {
         // 译作所有权
         this.form.is_original = 0;
         this.translatorList.push(this.userAuthor);
-        this.form.translator = this.form._user_name;
+        this.form.translator = this.form['#user_name'];
       }
 
     },
@@ -110,12 +111,12 @@ Vue.component('poem-form', {
       }
     },
 
-    'form.translator_id': function (newVal) {
-      if(newVal === null) {
-        this.form.translator = '';
-        console.log('clear translator');
-      }
-    },
+    // 'form.translator_ids': function (newVal) {
+    //   if(newVal === null) {
+    //     this.form.translator = '';
+    //     console.log('clear translator');
+    //   }
+    // },
 
   },
 
@@ -124,9 +125,15 @@ Vue.component('poem-form', {
       this.authorList.push(this.newAuthor);
       this.form.poet_id = 'new_' + this.form.poet;
     }
-    if(!this.form.translator_id && this.form.translator) {
-      this.translatorList.push(this.newTranslator);
-      this.form.translator_id = 'new_' + this.form.translator;
+    if(!this.form.translator_ids && this.form.translator) {
+      this.form.translator_ids = [];
+      this.form['#translators_label_arr'].forEach((translator) => {
+        var id = translator.id ? translator.id : 'new_' + translator.name
+        this.form.translator_ids.push(id)
+
+        if(!translator.id)
+          this.translatorList.push(this.getNewTranslator(translator.name, translator.id));
+      });
     }
   },
 
@@ -141,22 +148,25 @@ Vue.component('poem-form', {
         data.poet_wikidata_id = this.form.poet_id.replace('Q', '');
         data.poet_id = null;
       }
-      if(_.startsWith(data.translator_id, 'Q')) {
-        data.translator_wikidata_id = this.form.translator_id.replace('Q', '');
-        data.translator_id = null;
-      }
 
       if(this.isNew(data.poet_id)) {
         data.poet_id = 'new';
         data.poet_wikidata_id = null; // you need to set wikidata_id null here because initial wikidata_id may not null
       }
-      if(this.isNew(data.translator_id)) {
-        data.translator_id = 'new';
-        data.translator_wikidata_id = null;
+
+      if(Array.isArray(data.translator_ids)) {
+        data.translator_ids.forEach((id, index) => {
+
+          // if(this.isNew(id)) {
+          //   data.translator_ids[index] = 'new';
+          //   data.translator_wikidata_id = null;
+          // }
+        });
       }
+
       if(data.is_original === 1) {
         console.log('clear translator info on submit');
-        data.translator_id = null;
+        data.translator_ids = null;
         data.translator_wikidata_id = null;
         data.translator = null;
         delete data.original_link;
@@ -172,14 +182,24 @@ Vue.component('poem-form', {
       if(this.isNew(this.form.poet_id)) {
         this.form.poet_wikidata_id = null;
       }
-      console.log('selected poet', option, this.form.poet, this.form.poet_cn, this.form.poet_id);
+      console.log('selected poet option', option);
+      console.log(this.form.poet, this.form.poet_cn, this.form.poet_id);
     },
     onSelectTranslator: function(option) {
-      this.form.translator = option.label;
-      if(this.isNew(this.form.translator_id)) {
-        this.form.translator_wikidata_id = null;
-      }
-      console.log('selected translator', option, this.form.translator, this.form.translator_id);
+      debugger
+      this.form.translator = option[option.length-1].label;
+      this.selectedTranslatorOptions = option.filter(opt => {
+        return opt.label;
+      });
+
+      console.log('selectedTranslatorOptions', this.selectedTranslatorOptions, this.translatorList);
+      console.log('selected translator', this.form.translator, this.form.translator_ids);
+    },
+    onDeselectTranslator: function(option) {
+      this.selectedTranslatorOptions = this.selectedTranslatorOptions.filter(selected => {
+        return option.id === selected
+      });
+      console.log('selected translator after deselect', this.selectedTranslatorOptions);
     },
 
     onSearchPoetFocus: function(query, loading) {
@@ -193,10 +213,11 @@ Vue.component('poem-form', {
     onSearchTranslatorFocus: function(query, loading) {
       console.log('translator input focus');
       loading = loading || this.$refs.translator.toggleLoading;
-      if(this.isNew(this.form.translator_id) && query === undefined) {
-        loading(true);
-        this.searchTranslator('translator_id', loading, this.form.translator, this);
-      }
+      // TODO 获取焦点时请求一次查询
+      // if(this.isNew(this.form.translator_ids) && query === undefined) {
+      //   loading(true);
+      //   this.searchTranslator('translator_ids', loading, this.form.translator, this);
+      // }
     },
 
     onSearchPoet: function(keyword, loading) {
@@ -212,7 +233,7 @@ Vue.component('poem-form', {
       if(keyword.length) {
         this.form.translator = keyword;
         loading(true);
-        this.searchTranslator('translator_id', loading, keyword, this);
+        this.searchTranslator('translator_ids', loading, keyword, this);
       }
     },
 
@@ -236,6 +257,7 @@ Vue.component('poem-form', {
         loading(false);
       });
     }, 500),
+
     searchTranslator: _.debounce((field, loading, search, vm) => {
       if(!search) {
         loading(false);
@@ -246,10 +268,21 @@ Vue.component('poem-form', {
       ).then(res => {
         if(res?.data?.length) {
           vm.translatorList = res.data;
-          if(vm.isNew(vm.form.translator_id)) {
-            vm.translatorList.push(vm.newTranslator);
-          }
+
+          console.log(vm.$refs.translator.selectedValue);
+          // vm.selectedTranslatorOptions && vm.selectedTranslatorOptions.forEach(option => {
+          //   vm.translatorList.push(option)
+          // });
+          // if(vm.isNew(vm.form.translator_ids[vm.form.translator_ids.length - 1])) {
+          //   vm.translatorList.push(vm.newTranslator);
+          // }
         }
+
+        // vm.form.translator_ids && vm.form.translator_ids.forEach(id => {
+        //   if(vm.isNew(id)) {
+        //     vm.translatorList.push(vm.getNewTranslator(id))
+        //   }
+        // })
 
         console.log(res?.data?.length, _.map(vm.translatorList, 'id'), _.map(vm.translatorList, 'label'));
         loading(false);
@@ -280,6 +313,18 @@ Vue.component('poem-form', {
     onCmCodeChange() {
       console.log('content: ', this.form.poem);
       this.$validator.validate('poem', this.form.poem);
+    },
+
+    getNewTranslator(label, id=null) {
+      return {
+        id: id ? id : 'new_' + label,
+        label: label,
+        label_en: label,
+        label_cn: label,
+        url: '',
+        source: id ? 'PoemWiki' : '',
+        avatar_url: '/images/avatar-default.png'
+      }
     }
   },
   computed: {
@@ -289,10 +334,10 @@ Vue.component('poem-form', {
 
     userAuthor() {
       return {
-        id: 'new_' + this.form._user_name,
-        label: this.form._user_name,
-        label_en: this.form._user_name,
-        label_cn: this.form._user_name,
+        id: 'new_' + this.form['#user_name'],
+        label: this.form['#user_name'],
+        label_en: this.form['#user_name'],
+        label_cn: this.form['#user_name'],
         url: '',
         source: '',
         avatar_url: '/images/avatar-default.png'

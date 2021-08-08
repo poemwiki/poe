@@ -133,7 +133,7 @@ class PoemController extends Controller {
             // TODO 前端可编辑 original_id 而非 original_link，这样输入翻译自链接时，自动转换为作者+标题的链接，
             // 此处给出翻译自的 id 作为表单默认 original_id 即可
         }
-        $poem['_user_name'] = Auth::user()->name;
+        $poem['#user_name'] = Auth::user()->name;
 
         $deftaultAuthors = ($preset && $preset->poetLabel) ? AuthorRepository::searchLabel($preset->poetLabel, [$preset->poet_id]) : [];
         return view('poems.create', [
@@ -223,17 +223,40 @@ class PoemController extends Controller {
             'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded'
         ]);
 
-        $poem['original_link'] = ($poem->originalPoem && $poem->is_translated) ? $poem->originalPoem->url : null;
+        $poem['original_link'] = $poem->originalLink;
 
-        $poem['_user_name'] = Auth::user()->name;
-        $authorIds = array_unique([$poem->poet_id, $poem->translator_id]);
+        $poem['#user_name'] = Auth::user()->name;
+        $poem['#translators_label_arr'] = empty($poem->translatorsLabelArr) ? $this->_splitTranslatorStr($poem->translator) : $poem->translatorsLabelArr;
+
+        $translatorIds = [];
+        if(empty($poem->translatorsLabelArr) && $poem->translator_id) {
+            $translatorIds = [$poem->translator_id];
+        } else {
+            foreach ($poem->translatorsLabelArr as $translator) {
+                if(isset($translator['id'])) {
+                    $translatorIds[] = $translator['id'];
+                }
+            }
+        }
+
+
         return view('poems.edit', [
             'poem' => $poem,
             'trans' => $this->trans(),
             'languageList' => LanguageRepository::allInUse(),
             'genreList' => Genre::select('name_lang', 'id')->get(),
-            'defaultAuthors' => $poem->poetLabel ? AuthorRepository::searchLabel($poem->poetLabel, $authorIds) : [],
+            'defaultAuthors' => $poem->poetLabel ? AuthorRepository::searchLabel($poem->poetLabel, [$poem->poet_id]) : [],
+            'defaultTranslators' => $poem->translatorLabel ? AuthorRepository::searchLabel($poem->translatorLabel, $translatorIds) : [],
         ]);
+    }
+
+    private function _splitTranslatorStr($str) {
+        $arr = explode(',', $str);
+        $res = [];
+        foreach ($arr as $translator) {
+            $res[] = ['name' => trim($translator)];
+        }
+        return $res;
     }
 
     /**
@@ -245,6 +268,7 @@ class PoemController extends Controller {
      */
     public function update($fakeId, UpdatePoem $request) {
         $id = intval(Poem::getIdFromFakeId($fakeId));
+        $poem = Poem::find($id);
         // Sanitize input
         $sanitized = $request->getSanitized();
         // manually validate if poem is duplicated
@@ -271,6 +295,24 @@ class PoemController extends Controller {
             $translatorAuthor = $this->authorRepository->getExistedAuthor($sanitized['translator_wikidata_id']);
             $sanitized['translator_id'] = $translatorAuthor->id;
             $sanitized['translator'] = $translatorAuthor->label_cn;
+        }
+
+
+        if($sanitized['translator_ids']) {
+            if($poem->translators->count()) {
+                $translatorsArr = collect($poem->translatorsLabelArr)->map(function ($label) {
+                    return isset($label['id']) ? $label['id'] : $label['name'];
+                })->toArray();
+
+                if($translatorsArr !== $sanitized['translator_ids']) {
+                    // TODO update relatable records instead of delete and insert
+                    // TODO add order property for "translator is" relation
+                    $poem->relatedTranslators()->delete();
+                    $poem->relateToTranslators($sanitized['translator_ids']);
+                }
+            } else {
+                $poem->relateToTranslators($sanitized['translator_ids']);
+            }
         }
 
         // Update changed values Poem

@@ -272,13 +272,7 @@ class Poem extends Model implements Searchable {
      * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
      */
     public function getTranslatorsAttribute() {
-        // return $this->morphToMany(\App\Models\Author::class, 'start', 'relatable', 'start_id', 'end_id')
-            // ->where('relation', '=', Relatable::RELATION['translator_is']);
-        $translators = Relatable::where([
-            'relation' => Relatable::RELATION['translator_is'],
-            'start_type' => self::class,
-            'start_id' => $this->id
-        ])->get();
+        $translators = $this->relatedTranslators()->get();
         return $translators->map(function($translator) {
             if($translator->end_type === Author::class) {
                 return Author::find($translator->end_id);
@@ -288,6 +282,10 @@ class Poem extends Model implements Searchable {
                 throw new \Error('unexpected end_type: ' . $translator->end_type);
             }
         });
+    }
+
+    public function relatedTranslators() {
+        return Relatable::translatorIs(self::class, $this->id);
     }
 
     public function getTranslatorsLabelArrAttribute() {
@@ -363,6 +361,10 @@ class Poem extends Model implements Searchable {
      */
     public function getIsTranslatedAttribute() {
         return $this->id !== $this->original_id;
+    }
+
+    public function getOriginalLinkAttribute() {
+        return ($this->is_translated && $this->originalPoem) ? $this->originalPoem->url : null;
     }
 
     /**

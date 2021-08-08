@@ -15,9 +15,9 @@
         id="poem-form"
         :action="'{{ url('poems/store') }}'"
         @if($poem->_scenario)
-          :data="{{ $poem->toFillableJson(0, ['_user_name']) }}"
+          :data="{{ $poem->toFillableJson(0, ['#user_name']) }}"
         @else
-          :data="{{ $poem->toFillableJson(0, ['_user_name']) }}"
+          :data="{{ $poem->toFillableJson(0, ['#user_name']) }}"
         @endif
         :trans="{{json_encode($trans)}}"
         :locales="{{ json_encode($locales) }}"
@@ -43,9 +43,13 @@
           </div>
 
           <div class="mt-8 card-footer text-right">
+            <button type="submit" class="btn btn-wire" v-if="form.poet">
+              <i class="fa" :class="submiting ? 'fa-spinner' : 'fa-download'"></i>
+              @{{ submiting ? lang.Saving : lang.Submit }}并继续添加 @{{form.poet}} 的作品
+            </button>
             <button type="submit" class="btn btn-wire" :disabled="submiting">
               <i class="fa" :class="submiting ? 'fa-spinner' : 'fa-download'"></i>
-              @{{ submiting ? lang.Saving : lang.Save }}
+              @{{ submiting ? lang.Saving : lang.Submit }}
             </button>
           </div>
 

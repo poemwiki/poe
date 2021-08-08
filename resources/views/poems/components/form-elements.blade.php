@@ -177,7 +177,7 @@
             url: '',
             avatar_url: '/images/avatar-default.png'
            })"
-          :disabled="form.translated_id > 0 || form.is_owner_uploaded > 0"
+          :disabled="form.translated_id > 0 || form.is_owner_uploaded == 1"
           @option:selected="onSelectPoet"
           @search="onSearchPoet"
           @search:focus="onSearchPoetFocus"
@@ -320,18 +320,20 @@
             url: '',
             avatar_url: '/images/avatar-default.png'
            })"
+          :multiple="true"
+          :push-tags="true"
           @option:selected="onSelectTranslator"
+          @option:deselected="onDeselectTranslator"
           @search="onSearchTranslator"
           @search:focus="onSearchTranslatorFocus"
-
           ref="translator"
-          id="translator_id"
-          v-model="form.translator_id"
-          :class="{'form-control-danger': errors.has('translator_id'), 'form-control-success': fields.translator_id && fields.translator_id.valid}"
+          id="translator_ids"
+          v-model="form.translator_ids"
+          :class="{'form-control-danger': errors.has('translator_ids'), 'form-control-success': fields.translator_ids && fields.translator_ids.valid}"
           class="relative"
           v-validate="form.is_original==0 ? 'required' : ''"
-          data-vv-as="{{ trans('admin.poem.columns.translator_id') }}" data-vv-name="translator_id"
-          name="translator_id_fake_element"
+          data-vv-as="{{ trans('admin.poem.columns.translator_ids') }}" data-vv-name="translator_ids"
+          name="translator_ids_fake_element"
 >
 
   <template slot="option" slot-scope="option">
@@ -350,10 +352,10 @@
   </template>
 </v-select>
 
-<input type="hidden" name="translator_id" :value="form.translator_id">
+<input type="hidden" name="translator_ids" :value="form.translator_ids">
 
-<div v-if="errors.has('translator_id')" class="form-control-feedback form-text" v-cloak>@{{
-  errors.first('translator_id') }}
+<div v-if="errors.has('translator_ids')" class="form-control-feedback form-text" v-cloak>@{{
+  errors.first('translator_ids') }}
 </div>
 </div>
 </div>

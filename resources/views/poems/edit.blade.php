@@ -13,10 +13,11 @@
       <poem-form
         id="poem-form"
         :action="'{{ route('poems/update', [$poem->fake_id]) }}'"
-        :data="{{ $poem->toFillableJson(0, ['_user_name', 'original_link']) }}"
+        :data="{{ $poem->toFillableJson(0, ['#user_name', 'original_link', '#translators_label_arr']) }}"
         :locales="{{ json_encode($locales) }}"
         :trans="{{json_encode($trans)}}"
         :default-authors="{{ json_encode($defaultAuthors) }}"
+        :default-translators="{{ json_encode($defaultTranslators) }}"
         v-cloak
         inline-template>
 

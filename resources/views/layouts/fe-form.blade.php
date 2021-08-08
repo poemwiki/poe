@@ -16,7 +16,7 @@
       <v-dialog/>
     </div>
     <div>
-      <notifications position="bottom right" :duration="2000"/>
+      <notifications position="bottom right" :duration="3000"/>
     </div>
 
     @yield('form')

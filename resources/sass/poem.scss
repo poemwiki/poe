@@ -147,6 +147,10 @@ section.poem {
       .poemwiki-link:before{
         line-height: 2.5em;
       }
+
+      .author-label+.author-label{
+        margin-left: .8em;
+      }
     }
     dl.poem-ugc {
       margin: 0

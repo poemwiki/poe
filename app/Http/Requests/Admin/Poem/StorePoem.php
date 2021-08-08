@@ -21,8 +21,8 @@ class StorePoem extends CreatePoemRequest {
      *
      * @return bool
      */
-    public function authorize(): bool {
-        // return true;
+    public function authorize(AuthorRepository $authorRepository): bool {
+        $this->authorRepository = $authorRepository;
         return Gate::allows('web.poem.create', Auth::user());
     }
 

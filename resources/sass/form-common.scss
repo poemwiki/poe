@@ -93,9 +93,6 @@ input[type],select {
     padding-left: 4.2em;
   }
   .vs__dropdown-option--highlight {
-    .poemwiki-link:before {
-      background-color: transparent;
-    }
     .author-option-source,
     .author-option-desc {
       background-color: $vs-state-active-bg;

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\StoreOwnerUploaderPoem;
 use App\Models\Author;
+use App\Models\Entry;
 use App\Models\Poem;
 use App\Models\Tag;
 use App\Query\AuthorAliasSearchAspect;
@@ -71,7 +72,7 @@ class PoemAPIController extends Controller {
         if($id) {
             $poemById = $this->poemRepository->findMany([$id]);
             if($poemById) {
-                $poems = $poemById->concat($poems);//;
+                $poems = $poemById->concat($poems);
             }
         }
 
@@ -88,15 +89,32 @@ class PoemAPIController extends Controller {
             $item['poet_avatar_true'] = $poem->poet_avatar !== asset(Author::$defaultAvatarUrl);
             $item['translator_avatar_true'] = $poem->translator_avatar !== asset(Author::$defaultAvatarUrl);
             $item['poet_is_v'] = $poem->poet_is_v;
-            $item['translator_label'] = $poem->translator_label;
+
             $item['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
+            $translatorLabels = [];
+            $item['translators'] = $poem->translators->map(function ($translator) use (&$translatorLabels) {
+                if ($translator instanceof Author) {
+                    $translatorLabels[] = $translator->label;
+                    return [
+                        'name' => $translator->label,
+                        'id' => $translator->id,
+                        'avatar' => $translator->avatar_url,
+                        'avatar_true' => $translator->avatar_url !== asset(Author::$defaultAvatarUrl)
+                    ];
+                } else if($translator instanceof Entry) {
+                    $translatorLabels[] = $translator->name;
+                    return ['name' => $translator->name];
+                }
+            });
+
+            $item['translator_label'] = count($translatorLabels) ? join(', ', $translatorLabels) : $poem->translator_label;
+
             $item['reviews_count'] = $poem->reviews->count();
             $item['reviews'] = $poem->reviews->take(1)->map(function ($review) use ($reviewColumn) {
                 $review->content = $review->pureContent;
                 return $review->makeHidden('user')->only($reviewColumn);
             });
-            $item['famous_line'] = $poem->firstLine;
-            // dd($poem->firstLine);
+
             $res[] = $item;
         };
 
@@ -108,7 +126,7 @@ class PoemAPIController extends Controller {
     }
 
     public function relatedAll(Request $request) {
-        return $this->responseSuccess($this->poemRepository->getRelated($request->user()->id));
+        return $this->responseSuccess($this->poemRepository->getRelated($request->user()->id, 100));
     }
 
     /**
@@ -117,7 +135,7 @@ class PoemAPIController extends Controller {
      * @return array
      */
     public function related(Request $request) {
-        return $this->responseSuccess($this->poemRepository->getRelated($request->user()->id, true));
+        return $this->responseSuccess($this->poemRepository->getRelated($request->user()->id, 100, true));
     }
 
     public function detail($id) {
@@ -150,8 +168,27 @@ class PoemAPIController extends Controller {
         $res['poet_avatar_true'] = $poem->poet_avatar !== asset(Author::$defaultAvatarUrl);
         $res['translator_avatar_true'] = $poem->translator_avatar !== asset(Author::$defaultAvatarUrl);
         $res['poet_is_v'] = $poem->poet_is_v;
-        $res['translator_label'] = $poem->translator_label;
+
         $res['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
+
+        $translatorLabels = [];
+        $res['translators'] = $poem->translators->map(function ($translator) use (&$translatorLabels) {
+            if ($translator instanceof Author) {
+                $translatorLabels[] = $translator->label;
+                return [
+                    'name' => $translator->label,
+                    'id' => $translator->id,
+                    'avatar' => $translator->avatar_url,
+                    'avatar_true' => $translator->avatar_url !== asset(Author::$defaultAvatarUrl)
+                ];
+            } else if($translator instanceof Entry) {
+                $translatorLabels[] = $translator->name;
+                return ['name' => $translator->name];
+            }
+        });
+
+        $res['translator_label'] = count($translatorLabels) ? join(', ', $translatorLabels) : $poem->translator_label;
+
         $res['date_ago'] = date_ago($poem->created_at);
 
         // TODO poet_id should be set after poem created (if is_owner_uploaded===Poem::$OWNER['uploader'])
@@ -299,9 +336,14 @@ class PoemAPIController extends Controller {
         $hash = crc32(json_encode($postData));
         if(!$force && $poem->share_pics && isset($poem->share_pics[$compositionId])
             && file_exists(storage_path($poem->share_pics[$compositionId]))) {
-            // TODO if posterUrl not contain $hash, remove old poem and poster file and generate new
 
-            return $this->responseSuccess(['url' => $posterUrl]);
+            if(str_contains($poem->share_pics[$compositionId], $hash)) {
+                return $this->responseSuccess(['url' => $posterUrl . '?t=' . time()]);
+            } else {
+                unlink(storage_path($poem->share_pics[$compositionId]));
+                // TODO if posterUrl not contain $hash, remove old poemImg file
+            }
+
         }
 
 
@@ -336,7 +378,7 @@ class PoemAPIController extends Controller {
                 $poem->share_pics = $sharePics;
                 $poem->save();
             });
-            return $this->responseSuccess(['url' => $posterUrl]);
+            return $this->responseSuccess(['url' => $posterUrl . '?t=' . time()]);
 
         } catch (\Throwable $e) {
             Log::error($e->getMessage());

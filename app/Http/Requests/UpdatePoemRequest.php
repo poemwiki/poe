@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Author;
 use App\Models\Poem;
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
@@ -14,13 +15,20 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class UpdatePoemRequest extends FormRequest {
+    /**
+     * @var AuthorRepository $authorRepository
+     */
+    protected $authorRepository;
     protected $_poemToChange;
+
     /**
      * Determine if the user is authorized to make this request.
      *
+     * @param AuthorRepository $authorRepository
      * @return bool
      */
-    public function authorize(): bool {
+    public function authorize(AuthorRepository $authorRepository): bool {
+        $this->authorRepository = $authorRepository;
         $this->_poemToChange = Poem::find(Poem::getIdFromFakeId($this->route('fakeId')));
         return Gate::allows('web.poem.change', $this->_poemToChange);
     }
@@ -61,7 +69,7 @@ class UpdatePoemRequest extends FormRequest {
             'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
             'poet_id' => ['nullable', new ValidPoetId($original_id)],
             'poet_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
-            'translator_id' => ['nullable', new ValidTranslatorId()],
+            'translator_ids' => ['nullable', 'array', new ValidTranslatorId()],
             'translator_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
         ];
     }
@@ -87,18 +95,42 @@ class UpdatePoemRequest extends FormRequest {
             $sanitized['translator_wikidata_id'] = null;
         }
 
-        // 原创作品不允许更改作者
+        // 原创作品不允许更改作者，只允许选择当前用户关联的作者作为 poet_id
         if(in_array($this->_poemToChange->is_owner_uploaded, [Poem::$OWNER['uploader'], Poem::$OWNER['poetAuthor']])) {
             $sanitized['poet_id'] = $this->_poemToChange->poet_id;
             $sanitized['poet_wikidata_id'] = $this->_poemToChange->poet_wikidata_id;
         }
-        // 原创译作不允许更改译者
-        if(in_array($this->_poemToChange->is_owner_uploaded, [Poem::$OWNER['translatorUploader'], Poem::$OWNER['translatorAuthor']])) {
-            $sanitized['translator_id'] = $this->_poemToChange->translator_id;
-            $sanitized['translator_wikidata_id'] = $this->_poemToChange->translator_wikidata_id;
+        // TODO 原创译作不允许更改译者，只允许选择当前用户关联的作者作为 translator_id
+        // if(in_array($this->_poemToChange->is_owner_uploaded, [Poem::$OWNER['translatorUploader'], Poem::$OWNER['translatorAuthor']])) {
+        //     $sanitized['translator_ids'] = ;
+        // }
+        // TODO 原创共有译作（多译者中有一个为用户关联的作者）
+
+
+
+        if (isset($sanitized['translator_ids'])) {
+            $sanitized['translator'] = '';
+
+            $translatorLabels = [];
+            foreach ($sanitized['translator_ids'] as $key => $id) {
+                if(ValidTranslatorId::isWikidataQID($id)) {
+                    $translatorAuthor = $this->authorRepository->getExistedAuthor(ltrim($id, 'Q'));
+                    $sanitized['translator_ids'][$key] = $translatorAuthor->id;
+                    $translatorLabels[] = $translatorAuthor->label;
+                } else if(ValidTranslatorId::isNew($id)) {
+                    $sanitized['translator_ids'][$key] = mb_substr($id, strlen('new_'));
+                    $translatorLabels[] = substr($id, 4, strlen($id));
+                } else {
+                    $sanitized['translator_ids'][$key] = (int)$id;
+                    $translatorLabels[] = Author::find($id)->label;
+                }
+            }
+            $sanitized['translator'] = implode(', ', $translatorLabels);
+
         }
 
-        // 译作提交空 orginal_link 视为取消 orginal_id 链接
+
+        // 译作提交空 original_link 视为取消 original_id 链接
         if(!$sanitized['is_original'] && empty($sanitized['original_link'])) {
             $sanitized['original_id'] = 0;
         }

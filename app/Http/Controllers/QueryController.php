@@ -30,7 +30,8 @@ class QueryController extends Controller {
     }
 
     public function author($keyword, $id=null) {
-        return $this->response(AuthorRepository::searchLabel(Str::trimSpaces($keyword), $id ? [$id] : null));
+        // TODO do i need urldecode $id here?
+        return $this->response(AuthorRepository::searchLabel(Str::trimSpaces($keyword), $id ? explode(',', $id) : null));
     }
 
     // TODO support multiple word search like bot search, order by relative
