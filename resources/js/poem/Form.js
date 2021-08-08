@@ -52,7 +52,6 @@ Vue.component('poem-form', {
 
       authorList: this.defaultAuthors,
       translatorList: this.defaultTranslators,
-      selectedTranslatorOptions: [],
       cmOptions: {
         tabSize: 4,
         mode: 'text/plain',
@@ -131,8 +130,9 @@ Vue.component('poem-form', {
         var id = translator.id ? translator.id : 'new_' + translator.name
         this.form.translator_ids.push(id)
 
-        if(!translator.id)
+        if(!translator.id) {
           this.translatorList.push(this.getNewTranslator(translator.name, translator.id));
+        }
       });
     }
   },
@@ -186,20 +186,10 @@ Vue.component('poem-form', {
       console.log(this.form.poet, this.form.poet_cn, this.form.poet_id);
     },
     onSelectTranslator: function(option) {
-      debugger
+      console.log('onselectTranslator', option);
       this.form.translator = option[option.length-1].label;
-      this.selectedTranslatorOptions = option.filter(opt => {
-        return opt.label;
-      });
-
-      console.log('selectedTranslatorOptions', this.selectedTranslatorOptions, this.translatorList);
-      console.log('selected translator', this.form.translator, this.form.translator_ids);
     },
     onDeselectTranslator: function(option) {
-      this.selectedTranslatorOptions = this.selectedTranslatorOptions.filter(selected => {
-        return option.id === selected
-      });
-      console.log('selected translator after deselect', this.selectedTranslatorOptions);
     },
 
     onSearchPoetFocus: function(query, loading) {
@@ -213,6 +203,7 @@ Vue.component('poem-form', {
     onSearchTranslatorFocus: function(query, loading) {
       console.log('translator input focus');
       loading = loading || this.$refs.translator.toggleLoading;
+
       // TODO 获取焦点时请求一次查询
       // if(this.isNew(this.form.translator_ids) && query === undefined) {
       //   loading(true);
@@ -266,25 +257,12 @@ Vue.component('poem-form', {
       axios(
         `/q/author/${encodeURI(search)}/${vm.form[field]}`
       ).then(res => {
-        if(res?.data?.length) {
-          vm.translatorList = res.data;
-
-          console.log(vm.$refs.translator.selectedValue);
-          // vm.selectedTranslatorOptions && vm.selectedTranslatorOptions.forEach(option => {
-          //   vm.translatorList.push(option)
-          // });
-          // if(vm.isNew(vm.form.translator_ids[vm.form.translator_ids.length - 1])) {
-          //   vm.translatorList.push(vm.newTranslator);
-          // }
-        }
-
-        // vm.form.translator_ids && vm.form.translator_ids.forEach(id => {
-        //   if(vm.isNew(id)) {
-        //     vm.translatorList.push(vm.getNewTranslator(id))
-        //   }
-        // })
-
-        console.log(res?.data?.length, _.map(vm.translatorList, 'id'), _.map(vm.translatorList, 'label'));
+        vm.translatorList = res.data.map(item => {
+          if(vm.isNew(item.id)) {
+            return vm.getNewTranslator(item.id.slice(4));
+          }
+          return item;
+        });
         loading(false);
       });
     }, 450),

@@ -102,15 +102,29 @@ class AuthorRepository extends BaseRepository {
      */
     public static function searchLabel(string $name, array $authorId=null): Collection {
         $authorIds = collect($authorId)->toArray();
+
+        $newAuthors = [];
+        foreach ($authorIds as $id) {
+            if(starts_with($id, 'new_')) {
+                $label = substr($id, 4);
+                $newAuthors[] = [
+                    'id' => $id,
+                    'label' => $label,
+                    'label_cn' => $label,
+                    'label_en' => $label,
+                    'url' => '',
+                    'source' => '',
+                    'avatar_url' => '/images/avatar-default.png'
+                ];
+            }
+        }
         if(is_array($authorIds)) {
             $resById = Author::select(['id', 'name_lang', 'pic_url', 'describe_lang'])->whereIn('id', $authorIds)->get()
                 ->map->only(['id', 'label_en', 'label_cn', 'label', 'url', 'pic_url', 'describe_lang', 'avatar_url'])->map(function ($item) {
                     $item['source'] = 'PoemWiki';
                     $item['desc'] = $item['describe_lang'];
-                    // $item['avatar_url'] = $item['avatar_url'];
-                    // dd($item);
                     return $item;
-                });
+                })->concat($newAuthors);
         }
 
         $aliasRes = self::_searchAlias($name, [], $authorId);
