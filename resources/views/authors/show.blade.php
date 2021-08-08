@@ -20,7 +20,7 @@ $aliasMaxLength = 4;
 @section('content')
     <article class="poet page">
       <h1 class="text-xl font-bold">{{$author->label}}
-        @if($author->wikidata_id)
+        @if($author->wikiData)
           <a class="wikidata-link" href="{{$author->wikiData->wikidata_url}}" target="_blank"></a>
         @endif
       </h1>

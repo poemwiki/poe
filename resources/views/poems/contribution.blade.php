@@ -65,7 +65,7 @@ use Jfcherng\Diff\Factory\RendererFactory;
 
                       echo $result;
                   @endphp
-                  @elseif($prop === 'poet_id')
+                @elseif($prop === 'poet_id')
                     @php
                       $oldAuthor = $old ? App\Models\Author::find($old) : null;
                       $newAuthor = $new ? App\Models\Author::find($new) : null;
@@ -74,7 +74,7 @@ use Jfcherng\Diff\Factory\RendererFactory;
                     <del>@if($oldAuthor) <a href="{{$oldAuthor->url}}">{{$oldAuthor->label}}</a> @endif</del>&nbsp;⟹&nbsp;
                     @if($newAuthor) <a href="{{$newAuthor->url}}">{{$newAuthor->label}}</a> @endif
                     &nbsp;]
-                  @elseif($prop === 'translator_id')
+                @elseif($prop === 'translator_id')
                     @php
                       $oldTranslator = $old ? App\Models\Author::find($old) : null;
                       $newTranslator = $new ? App\Models\Author::find($new) : null;
@@ -82,6 +82,42 @@ use Jfcherng\Diff\Factory\RendererFactory;
                     <span class="field">{{trans('admin.poem.columns.translator_id')}}</span>&nbsp;[&nbsp;
                     <del>@if($oldTranslator) <a href="{{$oldTranslator->url}}">{{$oldTranslator->label}}</a> @endif</del>&nbsp;⟹&nbsp;
                     @if($newTranslator) <a href="{{$newTranslator->url}}">{{$newTranslator->label}}</a> @endif
+                    &nbsp;]
+                @elseif($prop === 'translator')
+                    @php
+                      $oldTrans = json_decode($old);
+                      $oldTrans = is_array($oldTrans) ? $oldTrans : [$old];
+
+                      $newTrans = json_decode($new);
+                      $newTrans = is_array($newTrans) ? $newTrans : [$new];
+                    @endphp
+                    <span class="field">{{trans('admin.poem.columns.translator')}}</span>&nbsp;[&nbsp;
+                    <del>@foreach($oldTrans as $k => $t)
+                           @if(is_string($t))
+                             {{$t}}
+                           @elseif(is_numeric($t))
+                             @php
+                             $transAuthor = \App\Models\Author::find($t);
+                             @endphp
+                             @if($transAuthor)
+                              <a href="{{$transAuthor->url}}">{{$transAuthor->label}}</a>
+                             @endif
+                           @endif
+                           @if($k < count($oldTrans)-1),&nbsp;@endif
+                      @endforeach</del>&nbsp;⟹&nbsp;
+                    @foreach($newTrans as $i => $t)
+                      @if(is_string($t))
+                        {{$t}}
+                      @elseif(is_numeric($t))
+                        @php
+                          $transAuthor = \App\Models\Author::find($t);
+                        @endphp
+                        @if($transAuthor)
+                          <a href="{{$transAuthor->url}}">{{$transAuthor->label}}</a>
+                        @endif
+                      @endif
+                      @if($i < count($newTrans)-1),&nbsp;@endif
+                    @endforeach
                     &nbsp;]
                 @elseif($prop === 'content_id')
                     @php

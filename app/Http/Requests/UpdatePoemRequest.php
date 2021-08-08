@@ -111,21 +111,21 @@ class UpdatePoemRequest extends FormRequest {
         if (isset($sanitized['translator_ids'])) {
             $sanitized['translator'] = '';
 
-            $translatorLabels = [];
+            $translatorsOrder = [];
             foreach ($sanitized['translator_ids'] as $key => $id) {
                 if(ValidTranslatorId::isWikidataQID($id)) {
                     $translatorAuthor = $this->authorRepository->getExistedAuthor(ltrim($id, 'Q'));
                     $sanitized['translator_ids'][$key] = $translatorAuthor->id;
-                    $translatorLabels[] = $translatorAuthor->label;
+                    $translatorsOrder[] = $translatorAuthor->id;
                 } else if(ValidTranslatorId::isNew($id)) {
                     $sanitized['translator_ids'][$key] = mb_substr($id, strlen('new_'));
-                    $translatorLabels[] = substr($id, 4, strlen($id));
+                    $translatorsOrder[] = substr($id, 4, strlen($id));
                 } else {
                     $sanitized['translator_ids'][$key] = (int)$id;
-                    $translatorLabels[] = Author::find($id)->label;
+                    $translatorsOrder[] = $id;
                 }
             }
-            $sanitized['translator'] = implode(', ', $translatorLabels);
+            $sanitized['translator'] = json_encode($translatorsOrder);
 
         }
 
