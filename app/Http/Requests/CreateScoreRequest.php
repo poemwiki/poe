@@ -55,6 +55,17 @@ class CreateScoreRequest extends FormRequest {
     }
 
     public static function getScoreWeight(Poem $poem, User $user) {
+        // TODO weight should from user.weight
+        if($poem->is_owner_uploaded===Poem::$OWNER['uploader'] && $poem->uploader) {
+            if ($poem->uploader->id === $user->id) {
+                return 1;
+            }
+        }
+        // TODO $poem->is_owner_uploaded===Poem::$OWNER['translatorUploader']
+        if($poem->poetAuthor && $poem->poetAuthor->user && $poem->poetAuthor->user->id === $user->id) {
+            return 1;
+        }
+
         $isMaster = false;
         $tags = $poem->tags;
         if($tags->count() && $tags[0] && $tags[0]->campaign) {
@@ -63,20 +74,7 @@ class CreateScoreRequest extends FormRequest {
             $isMaster = $campaign->isMaster($user->id) || $user->id===29;
         }
 
-        // TODO weight should from user.weight
-        if($poem->is_owner_uploaded===Poem::$OWNER['uploader'] && $poem->uploader) {
-            if ($poem->uploader->id === $user->id) {
-                return 1;
-            }
-        }
-        // TODO $poem->is_owner_uploaded===Poem::$OWNER['translatorUploader']
-        else if($poem->poetAuthor && $poem->poetAuthor->user && $poem->poetAuthor->user->id === $user->id) {
-            return 1;
-        }
-
         // TODO $poem->translators has user
-        else {
-            return $isMaster ? max(100, $user->weight) : $user->weight;
-        }
+        return $isMaster ? max(100, $user->weight) : $user->weight;
     }
 }
