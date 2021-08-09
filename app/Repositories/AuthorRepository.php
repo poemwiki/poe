@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Class LanguageRepository
@@ -105,7 +106,7 @@ class AuthorRepository extends BaseRepository {
 
         $newAuthors = [];
         foreach ($authorIds as $id) {
-            if(starts_with($id, 'new_')) {
+            if(Str::startsWith($id, 'new_')) {
                 $label = substr($id, 4);
                 $newAuthors[] = [
                     'id' => $id,
