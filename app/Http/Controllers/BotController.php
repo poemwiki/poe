@@ -488,7 +488,12 @@ SQL;
                 array_push($parts, $writer);
 
 
-                if(isset($translatorAuthor)) {
+                if ($p->translators->count()) {
+                    $translator = '翻译 / ' . array_reduce($p->translatorsLabelArr, function ($carry, $t) {
+                            return $carry.($carry ? ', ' : '').$t['name'];
+                        }, '');
+                    array_push($parts, $translator);
+                } else if(isset($translatorAuthor)) {
                     $translator = '翻译 / ' . $translatorAuthor->name_lang;
                     array_push($parts, $translator);
                 } else if($translatorName = trim($post->translator)){
