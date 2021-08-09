@@ -34,7 +34,12 @@ class AuthorController extends Controller {
         $author = Author::findOrFail($id);
         $poemsAsPoet = Poem::where(['poet_id' => $id])->get();
         $authorUserOriginalWorks = $author->user ? $author->user->originalPoemsOwned : [];
-        $poemsAsTranslator = Poem::where(['translator_id' => $id])->get();
+
+        // TODO poem.translator_id should be deprecated
+        $poemsAsTranslatorAuthor = Poem::where(['translator_id' => $id])->get();
+        $poemsAsRelatedTranslator = $author->poemsAsTranslator;
+        $poemsAsTranslator = $poemsAsTranslatorAuthor->concat($poemsAsRelatedTranslator);
+
 
         $from = request()->get('from');
         $fromPoetName = '';

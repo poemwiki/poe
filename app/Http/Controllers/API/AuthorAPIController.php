@@ -28,7 +28,12 @@ class AuthorAPIController extends Controller {
 
         $originalWorks = $this->_prepare($author->poems, ['noAvatar' => true, 'noPoet' => true]);
         $authorUserOriginalWorks = $author->user ? $this->_prepare($author->user->originalPoemsOwned, ['noAvatar' => true, 'noPoet' => true]) : [];
-        $translationWorks = $this->_prepare($author->translatedPoems);
+
+
+        // TODO poem.translator_id should be deprecated
+        // TODO consider different type of poem owner
+        $poemsAsTranslator = $author->translatedPoems->concat($author->poemsAsTranslator);
+        $translationWorks = $this->_prepare($poemsAsTranslator);
 
         return $this->responseSuccess([
             'author' => $author->only(['id', 'avatar_url', 'name_lang', 'describe_lang', 'is_v']),
