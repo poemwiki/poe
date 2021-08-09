@@ -4,6 +4,7 @@ namespace App\Http\Requests\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreatePoemRequest;
+use App\Repositories\AuthorRepository;
 use App\Rules\NoDuplicatedPoem;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -22,7 +23,8 @@ class StoreOwnerUploaderPoem extends CreatePoemRequest {
      *
      * @return bool
      */
-    public function authorize(): bool {
+    public function authorize(AuthorRepository $authorRepository): bool {
+        $this->authorRepository = $authorRepository;
         return Gate::allows('api.poem.create', Auth::user());
     }
 
