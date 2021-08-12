@@ -14,8 +14,8 @@
       <poem-form
         id="poem-form"
         :action="'{{ url('poems/store') }}'"
-        @if($poem->_scenario)
-          :data="{{ $poem->toFillableJson(0, ['#user_name']) }}"
+        @if($mode === 'create original')
+          :data="{{ $poem->toFillableJson(0, ['#user_name', '#translated_id']) }}"
         @else
           :data="{{ $poem->toFillableJson(0, ['#user_name']) }}"
         @endif

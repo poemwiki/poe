@@ -10,7 +10,7 @@
 @endif
 
 
-<input type="hidden" name="translated_id" v-model="form.translated_id">
+<input type="hidden" name="translated_id" v-model="form['#translated_id']">
 
 
 @if($mode==='create new' || $mode==='create original')

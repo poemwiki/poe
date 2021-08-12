@@ -61,7 +61,7 @@ class CreatePoemRequest extends FormRequest {
             'is_lock' => ['nullable', 'boolean'],
             'content_id' => ['nullable', 'integer'],
             'original_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
-            'translated_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'], // TODO use fake ID here
+            '#translated_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'], // TODO use fake ID here
             'preface' => ['nullable', 'string', 'max:300'],
             'subtitle' => ['nullable', 'string', 'max:128'],
             'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],

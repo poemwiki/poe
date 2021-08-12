@@ -106,7 +106,8 @@ class PoemController extends Controller {
             $translatedPoem = $this->poemRepository->getPoemFromFakeId($t);
             $preset = $translatedPoem;
             $mode = 'create original';
-            $poem->translated_id = $translatedPoem->id;
+            // TODO should use fake id $t here
+            $poem['#translated_id'] = $translatedPoem->id;
             $poem->is_original = 1;
         }
         if($o = request()->get('original_fake_id')) {
@@ -179,8 +180,8 @@ class PoemController extends Controller {
             $poem->relateToTranslators($sanitized['translator_ids']);
         }
 
-        if(isset($sanitized['translated_id'])) {
-            $translatedPoem = Poem::find($sanitized['translated_id']);
+        if (isset($sanitized['#translated_id'])) {
+            $translatedPoem = Poem::find($sanitized['#translated_id']);
             if($translatedPoem) {
                 $translatedPoem->original_id = $poem->id;
                 $translatedPoem->save();
