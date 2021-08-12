@@ -29,6 +29,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property string poetLabel
  * @property string poet_label
  * @property string poet_label_cn
+ * @property string translator For poems have related translator(relatable record), poem.translator is a json string just for indicating translator order
  * @property integer is_owner_uploaded
  * @property User uploader
  * @property Illuminate\Support\Collection|Tag[] tags
@@ -54,10 +55,12 @@ class Poem extends Model implements Searchable {
     public static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id' ];
     public static $OWNER = [
         'none' => 0,                // 上传时未标注原创，此时应以 poetAuthor 为作者 owner，以 translatorAuthor 为译者 owner
-        'uploader' => 1,            // 作者用户上传，此时以 upload_user_id 代表作者 owner
-        'translatorUploader' => 2,  // 译者用户上传，此时以 upload_user_id 代表译者 owner
+        'uploader' => 1,            // 作者用户上传原创原作，此时以 upload_user_id 代表作者 owner
+        'translatorUploader' => 2,  // 译者用户上传原创译作，且为单译者情况，此时以 upload_user_id 代表译者 owner
         'poetAuthor' => 3,          // 上传时未标注原创，后来被作者认领且标注原创，upload_user_id 不代表作者 owner，只代表上传人，此时应以 poetAuthor 为作者 owner
-        'translatorAuthor' => 4     // 上传时未标注原创，后来被译者认领且标注原创，upload_user_id 不代表译者 owner，只代表上传人，此时应以 translatorAuthor 为译者 owner
+        'translatorAuthor' => 4,     // 上传时未标注原创译作，后来被译者认领且标注原创，upload_user_id 不代表译者 owner，只代表上传人，此时应以 translatorAuthor或唯一的related translator 为译者 owner
+        'multiTranslatorUploader' => 5, // 译者之一的用户上传，且为多译者情况，此时以 related translator 为共有译者 owner
+        'multiTranslatorAuthor' => 6,   // 上传时未标注原创译作，后来被译者中的任何一个认领且标注原创，upload_user_id 不代表译者 owner，只代表上传人，此时应以 related translator 为共有译者 owner
     ];
 
     protected $table = 'poem';

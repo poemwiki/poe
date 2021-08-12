@@ -110,6 +110,7 @@ class CreatePoemRequest extends FormRequest {
                     $translatorsOrder[] = $id;
                 }
             }
+            // WARNING for poems have related translator(relatable record), poem.translator is just for indicating translator order
             $sanitized['translator'] = json_encode($translatorsOrder);
 
         }
