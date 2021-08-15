@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 
 
 use App\Http\Controllers\Controller;
+use App\Models\Campaign;
 use Illuminate\Http\Request;
 
 class UserAPIController extends Controller{
@@ -27,6 +28,7 @@ class UserAPIController extends Controller{
         if($request->avatar) {
             $user->avatar = $request->avatar;
         }
+
         $user->update();
 
         return $this->responseSuccess($user);
@@ -34,6 +36,13 @@ class UserAPIController extends Controller{
 
     public function data(Request $request) {
         $user = $request->user();
+        $campaign = Campaign::whereRaw('JSON_EXTRACT(settings, "$.resultUrl")')
+            ->orderBy('end', 'desc')->limit(1)->first();
+
+        $user->notify = 1;
+        $user->notify_url = $campaign->settings ? $campaign->settings['resultUrl'] : null;
+        $user->notify_title = "赛诗会 #$campaign->name_lang 结果公布";
+        $user->notify_campaign_id = $campaign->id;
         return $this->responseSuccess($user);
     }
 }
