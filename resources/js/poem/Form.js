@@ -135,6 +135,7 @@ Vue.component('poem-form', {
         }
       });
     }
+    this.form.agree = false;
   },
 
   methods: {

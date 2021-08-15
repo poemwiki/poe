@@ -1,4 +1,4 @@
-@extends('layouts.fe')
+@extends(App\User::isWechat() ? 'layouts.webview' : 'layouts.fe')
 
 @section('title')关于诗歌维基@endsection
 @section('author')

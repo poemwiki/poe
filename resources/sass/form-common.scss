@@ -29,12 +29,17 @@ input[type],select {
   input[type=text],select {
     @apply mt-0 block w-full px-0.5 border-0 border-b border-gray-200 focus:ring-0 focus:border-black text-base placeholder-gray-300;
   }
-  input[type=radio]{
+  input[type=radio], input[type=checkbox]{
     width: .8em;
     height: .8em;
     vertical-align: middle;
     line-height: 2.4em;
     margin-right: .3em;
+  }
+  input[type=checkbox] {
+    width: 1em;
+    height: 1em;
+    box-shadow: none;
   }
   textarea{
     @apply mt-0 block w-full px-0.5 border border-b border-gray-200 rounded-md focus:ring-0 focus:border-black text-base placeholder-gray-300;
