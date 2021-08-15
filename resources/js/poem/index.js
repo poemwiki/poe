@@ -21,6 +21,9 @@ zh_CN.messages.required = function(n) {
 zh_CN.custom = {
   original_link: {
     regex: "必须是 https://poemwiki.org/p/ 开头的 URL"
+  },
+  agree: {
+    required: "请阅读公约并勾选同意"
   }
 };
 
