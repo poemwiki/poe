@@ -460,3 +460,19 @@
     <input type="hidden" name="need_confirm" :value="0">
 </div>
 </div>
+
+<div class="form-check" style="margin-top: 2em;">
+  <div class="ml-md-auto">
+    <label class="form-check-label" for="agree">
+      <input class="form-check-input" id="agree" type="checkbox"
+             v-model="form.agree"
+             v-validate="'required:true'"
+             data-vv-as="@lang('同意《公约》')"
+             data-vv-name="agree" name="agree_fake_element">
+      @lang('Agree')
+    </label>
+    <div v-if="errors.has('agree')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('agree') }}
+    </div>
+    <input type="hidden" name="agree" :value="0">
+  </div>
+</div>
