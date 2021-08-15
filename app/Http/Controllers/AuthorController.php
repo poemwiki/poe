@@ -11,6 +11,7 @@ use App\Repositories\AuthorRepository;
 use App\Repositories\DynastyRepository;
 use App\Repositories\LanguageRepository;
 use App\Repositories\NationRepository;
+use Cache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Routing\Redirector;
 
@@ -55,12 +56,23 @@ class AuthorController extends Controller {
             }
         }
 
+        $lastOnlineAgo = '';
+        if($author->user) {
+            $key = 'online_' . $author->user->id;
+            $lastOnline = Cache::get($key);
+
+            if($lastOnline) {
+                $lastOnlineAgo = date_ago($lastOnline);
+            }
+        }
+
 
         return view('authors.show')->with([
             'author' => $author,
             'poemsAsPoet' => $poemsAsPoet->concat($authorUserOriginalWorks),
             'poemsAsTranslator' => $poemsAsTranslator,
-            'fromPoetName' => $fromPoetName
+            'fromPoetName' => $fromPoetName,
+            'lastOnline' => $lastOnlineAgo
         ]);
     }
 

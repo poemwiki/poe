@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Cache;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
@@ -13,12 +14,9 @@ class LastOnline {
             return $next($request);
         }
 
-        $redis = Redis::connection();
-
         $key = 'online_' . Auth::id();
         $value = (new \DateTime())->format("Y-m-d H:i:s");
-
-        $redis->set($key, $value);
+        Cache::set($key, $value);
 
         return $next($request);
     }

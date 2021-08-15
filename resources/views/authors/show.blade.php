@@ -31,7 +31,7 @@ $aliasMaxLength = 4;
       <div class="author-relate">
         @if($author->user)
         <div class="avatar-wrapper">{!!$author->user->getVerifiedAvatarHtml()!!}</div>
-            <span>此作者页已关联到用户 {{$author->user->name}}@PoemWiki</span>
+            <span>此作者页已关联到用户 {{$author->user->name}}{{$lastOnline ? " ($lastOnline 在线)" : ''}}</span>
         @endif
       </div>
 
