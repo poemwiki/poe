@@ -554,15 +554,20 @@ class PoemAPIController extends Controller {
             $shiftPoems->push($p->searchable);
         }
 
+        $keywordArr = $keyword4Query->split('#\s+#');
+
         // TODO append translated poems
-        $mergedPoems = $shiftPoems->unique('id')->map(function ($poem) use ($keyword) {
+        $mergedPoems = $shiftPoems->unique('id')->map(function ($poem) use ($keywordArr) {
             $columns = ['poet_label', '#poet_label', 'poet_is_v', 'translator', 'id', 'title', 'poet_contains_keyword', 'poem'];
 
             $item = $poem->only($columns);
 
-            if(str_contains($poem->poem, $keyword)) {
-                $pos = mb_strpos($poem->poem, $keyword);
-                $item['poem'] = Str::of($poem->poem)->substr($pos - min(20, $pos), 40)->trimPunct()->noSpace()->__toString();
+            // TODO str_pos_one_of should support case insensitive mode
+            $posOnPoem = str_pos_one_of($poem->poem, $keywordArr, 1);
+            if($posOnPoem) {
+                $pos = $posOnPoem['pos'];
+                // TODO don't do noSpace for english poem
+                $item['poem'] = Str::of($poem->poem)->substr($pos - min(20, $pos), 40)->trimPunct()->replace("\n", ' ')->__toString();
                 $item['poem_contains_keyword'] = true;
             } else {
                 $item['poem'] = $poem->firstLine;
@@ -572,10 +577,11 @@ class PoemAPIController extends Controller {
             $item['poet_is_v'] = $poem->poet_is_v;
             $item['poet_label'] = $poem->poet_label;
             $item['translator_label'] = $poem->translator_label;
-            if($poem->poet_label && str_contains($poem->poet_label, $keyword)) {
+
+            if($poem->poet_label && str_pos_one_of($poem->poet_label, $keywordArr)) {
                 $item['poet_contains_keyword'] = true;
             }
-            if($poem->translator_label && str_contains($poem->translator_label, $keyword)) {
+            if($poem->translator_label && str_pos_one_of($poem->translator_label, $keywordArr)) {
                 $item['translator_contains_keyword'] = true;
             }
 

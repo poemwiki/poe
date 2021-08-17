@@ -304,3 +304,16 @@ function getTmpWxUrlLink($expireIntervalDays, $query, $path = 'pages/poems/index
         "expire_interval" => $expireIntervalDays >= 30 ? 30 : $expireIntervalDays,
     ]);
 }
+
+function str_pos_one_of($str, $needles, $insensitive) {
+    if($insensitive) {
+        $str = strtolower($str);
+    }
+    foreach ($needles as $needle) {
+        $pos = mb_strpos($str, $insensitive ? strtolower($needle) : $needle);
+        if($pos !== false) {
+            return ['pos' => $pos, 'word' => $needle];
+        }
+    }
+    return false;
+}
