@@ -124,6 +124,7 @@ Vue.component('poem-form', {
       this.authorList.push(this.newAuthor);
       this.form.poet_id = 'new_' + this.form.poet;
     }
+
     if(!this.form.translator_ids && this.form.translator) {
       this.form.translator_ids = [];
       this.form['#translators_label_arr'].forEach((translator) => {
@@ -135,6 +136,7 @@ Vue.component('poem-form', {
         }
       });
     }
+
     this.form.agree = false;
   },
 
@@ -289,9 +291,63 @@ Vue.component('poem-form', {
     onCmInput(newContent) {
       this.form.poem = newContent;
     },
+
     onCmCodeChange() {
       console.log('content: ', this.form.poem);
       this.$validator.validate('poem', this.form.poem);
+    },
+
+    onCmBeforechange(cm, change) {
+      // console.log('beforeChange', cm, change.text.join("\n"))
+
+      // clean unnecessary empty lines
+      if(change.origin === 'paste') {
+        let lineCount=0, lenthSum=0, emptyLineCount=0;
+        change.text.forEach(line => {
+          lineCount++;
+          lenthSum += line.length;
+          if(isEmptyLine(line)) emptyLineCount++;
+
+          return line.replace(/\s+$/g, '');
+        });
+        const avgLength = lenthSum / lineCount;
+
+        // TODO write a same function for server side empty line clean and detect
+        if(emptyLineCount >= (lineCount-1)/2 && avgLength<40) {
+          const delMark = '##_@DELETE@_##';
+          let newText = change.text.map((line, index) => {
+            if(isEmptyLine(line)) {
+              const nextLine = index <= change.text.length - 1 ? change.text[index + 1] : null;
+
+              if(nextLine!==null && !isEmptyLine(nextLine)) {
+                return delMark;
+              }
+            }
+            return line.replace(/\s+$/g, '');
+          })
+
+          newText = newText.map((line, index) => {
+            const prevLine = index >= 1 ? newText[index - 1] : null;
+            const nextLine = index <= newText.length - 1 ? newText[index + 1] : null;
+
+            if(prevLine!==null && isEmptyLine(prevLine) && nextLine && nextLine===delMark) {
+              return delMark;
+            }
+            return line;
+          }).filter(line => line!==delMark);
+
+          console.log('empty line cleaned:', newText)
+          change.update(null, null, newText);
+        }
+
+        function shouldDel(prevLine, nextLine) {
+          return !isEmptyLine(prevLine) && !isEmptyLine(nextLine)
+        }
+
+        function isEmptyLine(str) {
+          return !str.trim().length;
+        }
+      }
     },
 
     getNewTranslator(label, id=null) {
