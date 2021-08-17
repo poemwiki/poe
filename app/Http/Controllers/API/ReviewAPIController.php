@@ -47,15 +47,17 @@ class ReviewAPIController extends Controller {
     public function store(CreateReviewRequest $request) {
         $sanitized = $request->getSanitized();
 
-        $wechatApp = Factory::miniProgram([
-            'app_id' => env('WECHAT_MINI_PROGRAM_APPID'),
-            'secret' => env('WECHAT_MINI_PROGRAM_SECRET'),
-            'response_type' => 'object',
-        ]);
-        $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['content']);
+        if(config('app.env') === 'production') {
+            $wechatApp = Factory::miniProgram([
+                'app_id' => env('WECHAT_MINI_PROGRAM_APPID'),
+                'secret' => env('WECHAT_MINI_PROGRAM_SECRET'),
+                'response_type' => 'object',
+            ]);
+            $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['content']);
 
-        if($result->errcode) {
-            return $this->responseFail([], '请检查是否含有敏感词', Controller::$CODE['content_security_failed']);
+            if ($result->errcode) {
+                return $this->responseFail([], '请检查是否含有敏感词', Controller::$CODE['content_security_failed']);
+            }
         }
 
         if(Review::create($sanitized)) {
