@@ -96,6 +96,7 @@
             :options="cmOptions"
             :class="{'form-control-danger': errors.has('poem'), 'form-control-success': fields.poem && fields.poem.valid}"
             @input="onCmInput"
+            v-on:before-change="onCmBeforechange"
             @blur="onCmCodeChange"
         />
     </div>
