@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Models\Poem;
+use App\Traits\HasFakeId;
 use App\Traits\Liker;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -20,6 +21,9 @@ use Spatie\Activitylog\ActivitylogServiceProvider;
 class User extends Authenticatable implements MustVerifyEmail {
     use HasApiTokens, Notifiable;
     use Liker;
+    use HasFakeId;
+    static $FAKEID_KEY = 'user'; // Symmetric-key for xor
+    static $FAKEID_SPARSE = 66773;
 
     static public $defaultAvatarUrl = 'images/avatar-default.png';
     /**
@@ -55,7 +59,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     protected $dates = [
         'last_online_at'
     ];
-    protected $appends = ['last_online_at', 'resource_url'];
+    protected $appends = ['last_online_at', 'resource_url', 'fakeId'];
 
 
     /**
@@ -131,6 +135,22 @@ class User extends Authenticatable implements MustVerifyEmail {
             && strpos($_SERVER['HTTP_REFERER'], config('wechat.mini_program.default.app_id')) !== false
         ){
             return true;
+        }
+        return false;
+    }
+
+    public static function isWeAppNoneProduction() {
+        $appID = config('wechat.mini_program.default.app_id');
+        if (isset($_SERVER['HTTP_REFERER'])
+            && strpos($_SERVER['HTTP_REFERER'], $appID) !== false
+        ){
+            $matches = null;
+            if(preg_match("@//servicewechat.com/$appID/([^/]+)/@", $_SERVER['HTTP_REFERER'], $matches)) {
+                if(in_array($matches[1], ['devtools', 1])) {
+                    return true;
+                }
+            }
+            return false;
         }
         return false;
     }

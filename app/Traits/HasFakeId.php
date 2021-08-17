@@ -6,8 +6,6 @@ namespace App\Traits;
 
 trait HasFakeId {
 
-    static $FAKEID_KEY = 'PoemWikikiWmeoP'; // Symmetric-key for xor
-    static $FAKEID_SPARSE = 96969696969;
     /**
      * @return string A xor encrypted string
      */

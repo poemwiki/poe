@@ -86,6 +86,10 @@ class Author extends Model implements Searchable {
     use LogsActivity;
     use RelatableNode;
 
+
+    static $FAKEID_KEY = 'PoemWikikiWmeoP'; // Symmetric-key for xor
+    static $FAKEID_SPARSE = 96969696969;
+
     protected static $logFillable = true;
     protected static $logOnlyDirty = true;
     protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length'];
