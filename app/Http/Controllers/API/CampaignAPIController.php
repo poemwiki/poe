@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Campaign;
 use App\Repositories\CampaignRepository;
 use App\Repositories\PoemRepository;
+use App\User;
 use Cache;
 use Illuminate\Http\Request;
 
@@ -26,7 +27,7 @@ class CampaignAPIController extends Controller {
 
     public function index(Request $request) {
         // todo Cache::forget('api-campaign-index') if new campaign set
-        $campaigns = Cache::remember('api-campaign-index', now()->addMinutes(3), function () {
+        $campaigns = Cache::remember('api-campaign-index', now()->addMinutes(config('app.env') === 'production' ? 3 : 0), function () {
             return $this->campaignRepository->allInUse()->map(function ($campaign) {
                 $ret = $campaign->toArray();
                 $ret['settings'] = collect($campaign->settings)->except(['result']);
@@ -41,7 +42,7 @@ class CampaignAPIController extends Controller {
 
     public function show($id) {
         // todo Cache::forget('api-campaign-index') if new campaign poem uploaded
-        $ret = Cache::remember('api-campaign-show-'.$id, now()->addMinutes(1), function () use($id) {
+        $ret = Cache::remember('api-campaign-show-'.$id, now()->addMinutes(config('app.env') === 'production' ? 1 : 0), function () use($id) {
             /** @var Campaign $campaign */
             $campaign = $this->campaignRepository->find($id);
 
