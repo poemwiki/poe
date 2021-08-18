@@ -44,10 +44,10 @@ class ValidTranslatorId implements Rule {
     }
 
     public static function isNew($value) {
-        return starts_with($value, 'new_');
+        return Str::startsWith($value, 'new_');
     }
     public static function isWikidataQID($value) {
-        if(starts_with($value, 'Q')) {
+        if(Str::startsWith($value, 'Q')) {
             $wikidataId = substr($value, 1, strlen($value));
             if (is_numeric($wikidataId)) {
                 return !!Wikidata::find($wikidataId);
