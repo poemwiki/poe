@@ -125,7 +125,7 @@ class UpdatePoemRequest extends FormRequest {
                     $translatorsOrder[] = $id;
                 }
             }
-            $sanitized['translator'] = json_encode($translatorsOrder);
+            $sanitized['translator'] = json_encode($translatorsOrder, JSON_UNESCAPED_UNICODE);
 
         }
 
