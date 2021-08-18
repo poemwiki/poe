@@ -305,7 +305,7 @@ function getTmpWxUrlLink($expireIntervalDays, $query, $path = 'pages/poems/index
     ]);
 }
 
-function str_pos_one_of($str, $needles, $insensitive) {
+function str_pos_one_of($str, $needles, $insensitive=false) {
     if($insensitive) {
         $str = strtolower($str);
     }
