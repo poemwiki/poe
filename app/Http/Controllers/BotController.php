@@ -258,7 +258,7 @@ SQL;
         }
 
         $resPrev = DB::select($sql, [
-            Poem::class,
+            $model,
             User::class,
             $startPreviousMonth->format('Y-m-d H:i:s'),
             $endPreviousMonth->format('Y-m-d H:i:s')
