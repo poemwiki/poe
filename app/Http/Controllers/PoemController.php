@@ -292,11 +292,12 @@ class PoemController extends Controller {
             $sanitized['poet'] = $poetAuthor->label;
             $sanitized['poet_cn'] = $poetAuthor->label_cn;
         }
-        if(is_numeric($sanitized['translator_wikidata_id']) && is_null($sanitized['translator_id'])) {
-            $translatorAuthor = $this->authorRepository->getExistedAuthor($sanitized['translator_wikidata_id']);
-            $sanitized['translator_id'] = $translatorAuthor->id;
-            $sanitized['translator'] = $translatorAuthor->label_cn;
-        }
+        // TODO translator_wikidata_id and translator_id is deprecated
+        // if(is_numeric($sanitized['translator_wikidata_id']) && is_null($sanitized['translator_id'])) {
+        //     $translatorAuthor = $this->authorRepository->getExistedAuthor($sanitized['translator_wikidata_id']);
+        //     $sanitized['translator_id'] = $translatorAuthor->id;
+        //     $sanitized['translator'] = $translatorAuthor->label_cn;
+        // }
 
 
         if($sanitized['translator_ids']) {
