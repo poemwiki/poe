@@ -494,7 +494,8 @@ class Poem extends Model implements Searchable {
     public function poetThroughWikidata() {
         return $this->belongsTo(\App\Models\Author::class, 'poet_wikidata_id', 'wikidata_id');
     }
-    // TODO poem hasMany translators
+
+    // TODO poem.translator_id should be deprecated
     public function translatorAuthor() {
         return $this->belongsTo(\App\Models\Author::class, 'translator_id', 'id');
     }

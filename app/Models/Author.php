@@ -159,6 +159,7 @@ class Author extends Model implements Searchable {
     public function poems() {
         return $this->hasMany(\App\Models\Poem::class, 'poet_id', 'id');
     }
+    // TODO poem.translator_id should be deprecated
     public function translatedPoems() {
         return $this->hasMany(\App\Models\Poem::class, 'translator_id', 'id');
     }
