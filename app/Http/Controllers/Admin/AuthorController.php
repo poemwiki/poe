@@ -203,7 +203,8 @@ class AuthorController extends Controller {
      * @throws Exception
      */
     public function destroy(DestroyAuthor $request, Author $author) {
-        if($author->poems->count() || $author->translatedPoems->count()) {
+        // TODO $author->translatedPoems should be deprecated
+        if($author->poems->count() || $author->poemsAsTranslator->count() || $author->translatedPoems->count()) {
             $ids = [];
             foreach ($author->poems as $p) {
                 $ids[] = $p->id;
