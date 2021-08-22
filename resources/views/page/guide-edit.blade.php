@@ -12,22 +12,8 @@
   <h2>格式和结构化</h2>
   <dl>
     <dt>认真确认诗词标题、作者、译者、来源、副标题、题记等信息，保留原文排版</dt>
-    <dt>根据上传时表单的提示，在标题、作者等字段填入对应的内容，不在诗歌正文部分添加多余的标题、作者、写作时间、写作地点等信息
-      <figure>
-        <img src="/images/guide/fields.jpg" style="zoom: .9;" />
-        <figcaption><span class="error">❌ 错误示例</span>：原诗并无题记，题记处不应添加作者信息和写作时间；诗歌正文部分不应添加赏析等和原文无关的内容</figcaption>
-      </figure>
-      <figure>
-        <img src="/images/guide/fields-1.jpg" style="zoom: .9;" />
-        <figcaption><span class="error">❌ 错误示例</span>：诗歌正文处不应添加作者名和标题</figcaption>
-      </figure>
-      <figure>
-        <img src="/images/guide/fields-r.jpg" style="zoom: .7;" />
-        <figcaption>✅ 正确示范：作者，写作时间填在相应的位置，诗歌正文部分保持和原文一致</figcaption>
-      </figure>
-    </dt>
 
-    <dt>不在诗题处添加多余的书名号和空格
+    <dt>不在诗题处添加多余的符号（书名号、空格等）
       <div>
         <figure>
           <img src="/images/guide/title.jpg" />
@@ -39,6 +25,7 @@
         </figure>
       </div>
     </dt>
+
     <dt>不在诗歌正文处添加多余空行和空格
       <div>
         <figure>
@@ -48,6 +35,23 @@
         <figure>
           <img src="/images/guide/empty-line-r.jpg" style="zoom: .7;" />
           <figcaption>✅ 正确示范：只保留原文空行和空格</figcaption>
+        </figure>
+      </div>
+    </dt>
+
+    <dt>根据上传时表单的提示，在标题、作者等字段填入对应的内容，不在诗歌正文部分添加多余的标题、作者、写作时间、写作地点等信息
+      <div>
+        <figure>
+          <img src="/images/guide/fields-1.jpg" style="zoom: .9;" />
+          <figcaption><span class="error">❌ 错误示例</span>：诗歌正文处不应添加作者名和标题</figcaption>
+        </figure>
+        <figure>
+          <img src="/images/guide/fields.jpg" style="zoom: .9;" />
+          <figcaption><span class="error">❌ 错误示例</span>：原诗并无题记，题记处不应添加作者信息和写作时间；诗歌正文部分不应添加赏析等和原文无关的内容</figcaption>
+        </figure>
+        <figure>
+          <img src="/images/guide/fields-r.jpg" style="zoom: .7;" />
+          <figcaption>✅ 正确示范：作者，写作时间填在相应的位置，诗歌正文部分保持和原文一致</figcaption>
         </figure>
       </div>
     </dt>
@@ -76,7 +80,6 @@
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
-      height: 90vh;
       padding: 1em;
       text-align: justify;
       line-height: 2em;
