@@ -14,7 +14,7 @@
                 </a>
             @else
                 <a href="{{ route('login', ['ref' => isset($poem) ? route('p/show', $poem->fake_id, false) : '']) }}" class="menu-button no-bg" alt="Menu button">@lang('Login')</a>
-            @endif
+            @endauth
         </li>
         @auth
             <li class="flex-center-vertically search-logo" id="search-logo"><a class="no-bg" href="{{route('q')}}"></a></li>
