@@ -149,11 +149,13 @@ class Author extends Model implements Searchable {
 
     public function poemsAsPoet() : MorphToMany {
         return $this->morphedByMany(\App\Models\Poem::class, 'start', 'relatable', 'end_id')
-            ->where('relation', '=', Relatable::RELATION['poet_is']);
+            ->where('relation', '=', Relatable::RELATION['poet_is'])
+            ->where('end_type', '=', self::class);
     }
     public function poemsAsTranslator() : MorphToMany {
         return $this->morphedByMany(\App\Models\Poem::class, 'start', 'relatable', 'end_id')
-            ->where('relation', '=', Relatable::RELATION['translator_is']);
+            ->where('relation', '=', Relatable::RELATION['translator_is'])
+            ->where('end_type', '=', self::class);
     }
 
     public function poems() {
