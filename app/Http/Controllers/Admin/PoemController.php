@@ -92,9 +92,10 @@ class PoemController extends Controller
      */
     public function create()
     {
-        $this->authorize('admin.poem.create');
-
-        return view('admin.poem.create');
+        return redirect(route('new'));
+        // $this->authorize('admin.poem.create');
+        //
+        // return view('admin.poem.create');
     }
 
     /**
