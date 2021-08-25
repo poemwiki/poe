@@ -438,25 +438,11 @@ SQL;
                     $translatorAuthor = Author::find($post->translator_id);
                 }
 
-                // TODO nation should be $poetAuthor->nation->name_lang
-                $nation = isset($poetAuthor) && $poetAuthor->nation
-                    ? ($poetAuthor->nation->id !== 32
-                        ? "[{$poetAuthor->nation->name_lang}] "
-                        : ($poetAuthor->dynasty && $poetAuthor->dynasty->id !== 75
-                            ? "[{$poetAuthor->dynasty->name_lang}] "
-                            : ''
-                        )
-                    )
-                    : ($post->dynasty
-                        ? "[$post->dynasty] "
-                        : (($post->nation && $post->nation !== '中国') ? "[$post->nation] " : '')
-                    );
-
                 $content = preg_replace('@[\r\n]{3,}@', "\n\n", $post->poem);
 
 
                 $p = Poem::find($post->id);
-                $writer = '作者 / ' . $nation . $p->poetLabelCn;
+                $writer = '作者 / ' . $p->poetLabelCn;
 
 
                 // poem content
