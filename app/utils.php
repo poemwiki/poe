@@ -265,12 +265,12 @@ function responseFile($path) {
  * @throws EasyWeChat\Kernel\Exceptions\InvalidConfigException
  */
 function getWxUrlLink(array $param = []) {
-    $wechatApp = EasyWeChat\Factory::miniProgram([
+    $wechatApp = \EasyWeChat\Factory::miniProgram([
         'app_id' => config('wechat.mini_program.default.app_id'),
         'secret' => config('wechat.mini_program.default.secret'),
         'response_type' => 'object',
     ]);
-    $client = new EasyWeChat\Kernel\BaseClient($wechatApp);
+    $client = new \EasyWeChat\Kernel\BaseClient($wechatApp);
     return $client->httpPostJson('wxa/generate_urllink', $param);
 }
 
@@ -302,6 +302,21 @@ function getTmpWxUrlLink($expireIntervalDays, $query, $path = 'pages/poems/index
         'is_expire' => true,
         "expire_type" => 1,
         "expire_interval" => $expireIntervalDays >= 30 ? 30 : $expireIntervalDays,
+    ]);
+}
+
+
+function submitPage2SYS(array $pages, \EasyWeChat\Kernel\BaseClient $client = null) {
+    if(!$client) {
+        $wechatApp = \EasyWeChat\Factory::miniProgram([
+            'app_id' => config('wechat.mini_program.default.app_id'),
+            'secret' => config('wechat.mini_program.default.secret'),
+            'response_type' => 'object',
+        ]);
+        $client = new \EasyWeChat\Kernel\BaseClient($wechatApp);
+    }
+    return $client->httpPostJson('wxa/search/wxaapi_submitpages', [
+        'pages' => $pages
     ]);
 }
 
