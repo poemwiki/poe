@@ -35,7 +35,18 @@ class Relatable extends MorphPivot {
     ];
     const RELATION = [
         'poet_is' => 0,
-        'translator_is' => 1
+        'translator_is' => 1,
+        'merged_to_poem' => 2,
+        'merged_to_author' => 3,
+        'heteronymy_of' => 4
+    ];
+    // TODO check for start_type and end_type before add relation
+    // TODO check for relation limit before add relation(e.g. poem1 has been merged to poem2, then poem1 can not be merged to poem3)
+    const RELATION_RULES = [
+        'poet_is' => ['start_type' => Poem::class, 'end_type' => Author::class, 'limit' => 1],
+        'translator_is' => ['start_type' => Poem::class, 'end_type' => Author::class, 'limit' => 6],
+        'merged_to_poem' => ['start_type' => Poem::class, 'end_type' => Poem::class, 'limit' => 1],
+        'merged_to_author' => ['start_type' => Author::class, 'end_type' => Author::class, 'limit' => 1]
     ];
 
     const CREATED_AT = 'created_at';
@@ -62,5 +73,21 @@ class Relatable extends MorphPivot {
             'start_type' => $startType,
             'start_id' => $startId
         ]);
+    }
+
+    public function scopePoetIs($query, $startType, $startId) {
+        $query->where([
+            'relation' => Relatable::RELATION['poet_is'],
+            'start_type' => $startType,
+            'start_id' => $startId
+        ]);
+    }
+
+    public function scopeMergedTo($query, $startType, $startId) {
+        $query->where([
+            'relation' => Relatable::RELATION['merged_to_poem'],
+            'start_type' => $startType,
+            'start_id' => $startId
+        ])->limit(1);
     }
 }

@@ -296,6 +296,14 @@ class Poem extends Model implements Searchable {
         return Relatable::translatorIs(self::class, $this->id);
     }
 
+    public function relatedPoets(): MorphToMany {
+        return Relatable::poetIs(self::class, $this->id);
+    }
+
+    public function relatedMergedTo() {
+        return Relatable::mergedTo(self::class, $this->id);
+    }
+
     public function getTranslatorsLabelArrAttribute() {
         return $this->translators->map(function($translator) {
             if($translator instanceof Author) {
@@ -335,11 +343,19 @@ class Poem extends Model implements Searchable {
         // TODO make translators change revertible
     }
 
-
-    public function poets(): MorphToMany {
-        return $this->morphToMany(\App\Models\Author::class, 'start', 'relatable', 'start_id', 'end_id')
-            ->where('relation', '=', Relatable::RELATION['poet_is']);
+    /**
+     * merge current poem to main poem
+     */
+    public function mergeToMainPoem($id) {
+        return Relatable::create([
+            'relation' => Relatable::RELATION['merged_to_poem'],
+            'start_type' => self::class,
+            'start_id' => $this->id,
+            'end_type' => self::class,
+            'end_id' => $id
+        ]);
     }
+
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo
