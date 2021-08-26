@@ -302,6 +302,7 @@ Vue.component('poem-form', {
 
       // clean unnecessary empty lines
       if(change.origin === 'paste') {
+        // TOOD replace spaceX2~4 to full width space
         let lineCount=0, lenthSum=0, emptyLineCount=0;
         change.text.forEach(line => {
           lineCount++;
