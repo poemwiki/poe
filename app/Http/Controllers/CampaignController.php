@@ -6,9 +6,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Campaign;
 use App\Models\Poem;
+use App\Models\Reward;
+use App\Models\RewardResult;
 use App\Repositories\AuthorRepository;
 use App\Repositories\PoemRepository;
 use App\User;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Auth;
 
 class CampaignController extends Controller {
     public function __construct(PoemRepository $poemRepo) {
@@ -20,11 +24,13 @@ class CampaignController extends Controller {
         $uid = User::getIdFromFakeId($fakeUID);
         $user = User::find($uid);
         $campaign = Campaign::find($campaignId);
-        if(!$user or !$campaign) {
+        if (!$user or !$campaign) {
             return view('campaign.reward', [
                 'error' => '参数错误'
             ]);
         }
+
+        Auth::loginUsingId($uid);
 
 
         $isParticipated = $user->originalPoemsOwned->filter(function (Poem $poem) use ($campaignId) {
@@ -32,9 +38,19 @@ class CampaignController extends Controller {
         })->count();
 
         $reward = '';
-        if($isParticipated) {
-            $reward = '喜马拉雅会员兑换码 aabbcc';
-        }else {
+        $error = '';
+        if ($isParticipated) {
+            // TODO get code from xmly.secret
+            try {
+                $reward = $this->getOrConsumeReward($campaignId, $uid);
+            } catch (\Exception $e) {
+                $error = '获取奖励失败，请刷新重试';
+            }
+
+            if (!$reward && !$error) {
+                $error = '本次活动奖励已领完，欢迎参加下次活动。';
+            }
+        } else {
             $error = ('请先在 #' . $campaign->name_lang . ' 活动页面发表你的原创作品，再来此页面领取奖励');
         }
 
@@ -43,5 +59,40 @@ class CampaignController extends Controller {
             'error' => $error,
             'campaignId' => $campaignId
         ]);
+    }
+
+    public function getRewardResult($campaignID, $userID) {
+        $consumedReward = RewardResult::where('user_id', '=', $userID)
+            ->whereHas('reward', function ($query) use ($campaignID) {
+                return $query->where('campaign_id', '=', $campaignID);
+            })->get();
+        if ($consumedReward->count()) {
+            return $consumedReward[0]->reward->reward;
+        }
+        return null;
+    }
+
+    public function getOrConsumeReward($campaignID, $userID) {
+        $res = $this->getRewardResult($campaignID, $userID);
+        if($res) return $res;
+
+        $reward = Reward::where('campaign_id', '=', $campaignID)->doesntHave('rewardResult')->limit(1)->get();
+        if ($reward->count()) {
+            $toSave = $reward[0];
+
+            try{
+                $result = RewardResult::create([
+                    'user_id' => $userID,
+                    'campaign_id' => $campaignID,
+                    'reward_id' => $toSave->id
+                ]);
+                return $result->reward->reward;
+            } catch (QueryException $e) {
+                throw new \Exception('获取奖励失败，请刷新重试');
+            }
+
+        } else {
+            return null;
+        }
     }
 }

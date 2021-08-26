@@ -6,29 +6,58 @@
 @endsection
 
 @section('content')
-  <h1>赛诗会奖励领取</h1>
-  @if(isset($error))
+  @if(isset($error) && $error!=='')
+    <h1>赛诗会奖励领取</h1>
     <p class="error">{{$error}}</p>
-  @elseif($campaignId === 21 or $campaignId === 19)
-    <p>{{$reward}}</p>
-    <p>复制兑换码后，请下载或打开喜马拉雅App，登录账户后，点击“账号-VIP会员”，进入“我的VIP会员”页，找到“使用兑换码”进行兑换。请在领取后半年内兑换。</p>
+  @elseif($campaignId === 21 or $campaignId === 20)
+    <img class="full-vw" src="{{asset('/images/campaign/xmly.jpg')}}" alt="领取说明">
+    <input class="reward" value="{{$reward}}" disabled />
+{{--    <p>复制兑换码后，请下载或打开喜马拉雅App，登录账户后，点击“账号-VIP会员”，进入“我的VIP会员”页，找到“使用兑换码”进行兑换。请在领取后半年内兑换。</p>--}}
   @endif
 @endsection
 
+@push('head-scripts')
+  <script>
+
+  </script>
+@endpush
+
 @push('styles')
   <style>
+    * {
+      box-sizing: border-box;
+    }
     main{
       display: flex;
+      padding: 0;
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
       height: 90vh;
-      padding: 1em;
       text-align: justify;
       line-height: 2em;
+      position: relative;
     }
     main p {
       width: 100%;
+    }
+    .full-vw{
+      width: 100vw;
+    }
+    .reward{    position: absolute;
+      display: inline-block;
+      width: 56vw;
+      top: 99.5vw;
+      left: 50vw;
+      transform: translateX(-50%);
+      font-size: 4vw;
+      margin: 0;
+      border: none;
+      background: transparent;
+      line-height: 12vw;
+      height: 12vw;
+      outline: none;
+      text-align: center;
     }
     h1 {
       width: 100%;
