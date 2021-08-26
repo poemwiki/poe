@@ -131,6 +131,7 @@ class PoemController extends Controller {
             $poem->date = $preset->date;
             $poem->translator_id = null;
             $poem->translator_wikidata_id = null;
+            $poem->language_id = null;
             // TODO 前端可编辑 original_id 而非 original_link，这样输入翻译自链接时，自动转换为作者+标题的链接，
             // 此处给出翻译自的 id 作为表单默认 original_id 即可
         }
