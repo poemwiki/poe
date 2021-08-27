@@ -527,6 +527,10 @@ class Poem extends Model implements Searchable {
         return $this->belongsTo(\App\User::class, 'upload_user_id', 'id');
     }
 
+    public function campaign() {
+        return $this->belongsTo(\App\Models\Campaign::class, 'campaign_id', 'id');
+    }
+
     // TODO public function getCampaginsAttribute() {}
 
     public function getIsCampaignAttribute() {
