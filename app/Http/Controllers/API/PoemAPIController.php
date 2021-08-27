@@ -299,7 +299,7 @@ class PoemAPIController extends Controller {
         }
 
 
-        return $this->responseSuccess();
+        return $this->responseSuccess(['id' => $poem->id, 'fid' => $poem->fakeId]);
     }
 
     public function delete($poemId) {
