@@ -343,7 +343,7 @@ SQL;
                     OR `preface` like :keyword8_$idx
                 ) AND";
             }
-            $subSql = trim($subSql, 'AND') . ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR`need_confirm`<>1) AND p.`deleted_at` is NULL';
+            $subSql = trim($subSql, 'AND') . ' AND (`need_confirm` IS NULL OR`need_confirm`<>1) AND p.`deleted_at` is NULL';
 
             $sql = <<<SQL
 SELECT (IF(ISNULL(`wx`), 0, `wx`)+`base`) * IF(ISNULL(score), 1, 1+(score-6)/20) / (1+times) as `rank`, t.* FROM (
@@ -381,7 +381,7 @@ SQL;
                 OR `preface` like :keyword8
             )
 SQL;
-            $subSql .= ' AND `length` < :maxLength AND (`need_confirm` IS NULL OR `need_confirm`<>1) AND p.`deleted_at` is NULL';
+            $subSql .= ' AND (`need_confirm` IS NULL OR `need_confirm`<>1) AND p.`deleted_at` is NULL';
             $sql = <<<SQL
 SELECT (IF(ISNULL(`wx`), 0, `wx`)+`base`) * IF(ISNULL(score), 1, 1+(score-6)/20) / (1+times) as `rank`, t.* FROM (
     $subSql
@@ -402,7 +402,6 @@ SQL;
         }
 
         $q->bindValue(':chatroomId', $chatroom, PDO::PARAM_STR);
-        $q->bindValue(':maxLength', $maxLength, PDO::PARAM_INT);
 
         // $q->debugDumpParams();
         $code = -1;
@@ -431,6 +430,8 @@ SQL;
                 $data = $res[0];
                 $post = (object)$res[0];
 
+                $isSubstr = $post->length > $maxLength;
+
                 if($post->poet_id) {
                     $poetAuthor = Author::find($post->poet_id);
                 }
@@ -438,19 +439,35 @@ SQL;
                     $translatorAuthor = Author::find($post->translator_id);
                 }
 
-                $content = preg_replace('@[\r\n]{3,}@', "\n\n", $post->poem);
-
-
                 $p = Poem::find($post->id);
                 $writer = '作者 / ' . $p->poetLabelCn;
 
-
                 // poem content
-                $parts = ['▍ ' . $post->title];
-                if($post->subtitle) array_push($parts, $post->subtitle);
-                if($post->preface) array_push($parts, '        '. $post->preface);
-                array_push($parts, "\n".$content."\n");
+                $parts = [];
+                if(!$isSubstr) {
+                    array_push($parts, '▍ ' . $post->title);
+                    if($post->subtitle) array_push($parts, $post->subtitle);
+                    if($post->preface) array_push($parts, '        '. $post->preface);
+                }
 
+
+                if($isSubstr) {
+                    $keywordArr = is_array($keyword) ? $keyword : Str::of($keyword)->split('#\s+#')->toArray();
+                    $posOnPoem = str_pos_one_of($post->poem, $keywordArr, 1);
+                    if($posOnPoem) {
+                        $pos = $posOnPoem['pos'];
+                        $content = Str::of($post->poem)->substr($pos - min(20, $pos), 100)
+                            ->replaceMatches("@^[^\n]+\n@", "……")
+                            ->replaceMatches("@\n.+$@", "\n……")->__toString();
+                    } else {
+                        $content = Str::of($post->poem)->substr(0, 100)
+                            ->replaceMatches("@\n.+$@", "\n……")->__toString();
+                    }
+                } else {
+                    $content = $post->poem;
+                }
+
+                array_push($parts, ($isSubstr ? '' : "\n").$content."\n");
 
                 // poem's other properties
 
@@ -487,9 +504,14 @@ SQL;
                     array_push($parts, $translator);
                 }
 
+                array_push($parts, "\n");
+                if($isSubstr) {
+                    array_push($parts, "节选自 《{$post->title}》");
+                }
+
                 // links & score
                 $url = $this->getWeappUrl($p);
-                $wikiLink = "\n\n诗歌维基：$url";
+                $wikiLink = ($isSubstr ? '查看全文：' : '诗歌维基：').$url;
 
                 $scoreRepo = new ScoreRepository(app());
                 $score = $scoreRepo->calcScoreByPoemId($post->id);
@@ -498,8 +520,8 @@ SQL;
                     array_push($parts, $wikiLink);
                     array_push($parts, $wikiScore);
                 } else {
-                    $wikiScore = "点这里：$url 消灭零评分";
-                    array_push($parts, "\n\n$wikiScore");
+                    $wikiScore = "点这里：$url " . ($isSubstr ? '查看全文' : '消灭零评分');
+                    array_push($parts, "$wikiScore");
                 }
 
                 if($count >= 2 || is_array($keyword)) {
