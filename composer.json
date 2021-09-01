@@ -110,6 +110,7 @@
     ],
     "dev": [
       "@php artisan serve --host=0.0.0.0 --port=8881"
-    ]
+    ],
+    "php-cs-fixer": "php-cs-fixer --config=./.php-cs-fixer.dist.php"
   }
 }
