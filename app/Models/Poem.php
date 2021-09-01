@@ -301,7 +301,16 @@ class Poem extends Model implements Searchable {
     }
 
     public function relatedMergedTo() {
-        return Relatable::mergedTo(self::class, $this->id);
+        return Relatable::mergedToPoem(self::class, $this->id);
+    }
+
+    public function getMergedToPoemAttribute() {
+        $relatable = $this->relatedMergedTo()->first();
+        if($relatable) {
+            return self::find($relatable->end_id);
+        } else {
+            return null;
+        }
     }
 
     public function getTranslatorsLabelArrAttribute() {
