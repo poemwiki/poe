@@ -66,6 +66,7 @@
                   <th :column="'translator'">{{ trans('admin.poem.columns.translator') }}</th>
                   <th is='sortable' :column="'updated_at'">{{ trans('admin.poem.columns.updated_at') }}</th>
                   <th is='sortable' :column="'created_at'">{{ trans('admin.poem.columns.created_at') }}</th>
+                  <th is='sortable' :column="'length'">长度</th>
                   <th>{{ trans('admin.actions.operation') }}</th>
                 </tr>
                 <tr v-show="(clickedBulkItemsCount > 0) || isClickedAll">
@@ -109,6 +110,7 @@
                   <td><a :href="item.translator_url" target="_blank" v-if="item.translator_url">@{{ item.translator_label }}</a><span v-else>@{{ item.translator_label }}</span></td>
                   <td>@{{ item.updated_at | datetime }}</td>
                   <td>@{{ item.created_at | datetime }}</td>
+                  <td>@{{ item.length }}[@{{ item.line_num }}行]</td>
 
                   <td>
                     <div class="row no-gutters">
@@ -117,6 +119,11 @@
                            title="{{ trans('brackets/admin-ui::admin.btn.edit') }}" role="button"><i
                             class="fa fa-edit"></i></a>
                       </div>
+                      <form class="col" @submit.prevent="mergeToItem(item.resource_url)">
+                        <button type="submit" class="btn btn-sm btn-warning"
+                                title="{{ trans('brackets/admin-ui::admin.btn.merge') }}"><i class="fa fa-code-fork"></i>
+                        </button>
+                      </form>
                       <form class="col" @submit.prevent="deleteItem(item.resource_url)">
                         <button type="submit" class="btn btn-sm btn-danger"
                                 title="{{ trans('brackets/admin-ui::admin.btn.delete') }}"><i class="fa fa-trash-o"></i>
