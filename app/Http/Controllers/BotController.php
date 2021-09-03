@@ -8,8 +8,8 @@ use App\Models\Poem;
 use App\Repositories\PoemRepository;
 use App\Repositories\ScoreRepository;
 use App\User;
-use Fukuball\Jieba\Finalseg;
-use Fukuball\Jieba\Jieba;
+// use Fukuball\Jieba\Finalseg;
+// use Fukuball\Jieba\Jieba;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
@@ -29,9 +29,9 @@ class BotController extends Controller {
     ];
 
     public function __construct() {
-        ini_set('memory_limit', '300M');
-        Jieba::init(['mode' => 'default', 'dict' => 'small']);
-        Finalseg::init();
+        // ini_set('memory_limit', '300M');
+        // Jieba::init(['mode' => 'default', 'dict' => 'small']);
+        // Finalseg::init();
     }
 
     public function data($poeDB, $chatroom) {
@@ -607,7 +607,7 @@ SQL;
         }
 
         if ($divide) {
-            return Jieba::cut($keyword);
+            // return Jieba::cut($keyword);
         }
 
         return strstr($keyword, ' ')
