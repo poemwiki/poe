@@ -350,13 +350,16 @@ class Poem extends Model implements Searchable {
 
     /**
      * merge current poem to main poem.
+     * @param int $id
+     * @return Relatable
      */
-    public function mergeToMainPoem($id) {
-        return Relatable::create([
+    public function mergeToMainPoem(int $id) {
+        return Relatable::updateOrCreate([
             'relation'   => Relatable::RELATION['merged_to_poem'],
             'start_type' => self::class,
             'start_id'   => $this->id,
             'end_type'   => self::class,
+        ], [
             'end_id'     => $id
         ]);
     }
@@ -713,6 +716,7 @@ class Poem extends Model implements Searchable {
 
     public function getActivityLogsAttribute() {
         // it's right to order by id desc instead of by created_at!
+        // TODO including relatable record logs: mergeTo, translator...
         return $this->activities()->orderBy('id', 'desc')->get()->map(function ($activity) {
             $oldVal = $activity->properties->get('old');
 
