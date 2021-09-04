@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * This file is part of the poemwiki.
+ * (c) poemwiki <poemwiki@126.com>
+ */
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -7,22 +12,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * App\Reward
+ * App\Reward.
  *
- * @property int $campaign_id
+ * @property int    $campaign_id
  * @property string $reward
- * @package App
  */
-class Reward extends Model{
+class Reward extends Model {
     use SoftDeletes;
     use LogsActivity;
+
     protected $table = 'reward';
+
+    protected static $logFillable          = true;
+    protected static $logOnlyDirty         = true;
+    public static $ignoreChangedAttributes = ['created_at', 'updated_at'];
 
     protected $fillable = [
         'campaign_id',
-        'reward'
+        'reward',
+        'level'
     ];
-
 
     protected $dates = [
         'created_at',
