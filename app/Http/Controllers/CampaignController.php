@@ -51,7 +51,7 @@ class CampaignController extends Controller {
                 $error = '本次活动奖励已领完，欢迎参加下次活动。';
             }
         } else {
-            $error = ('请先在 #' . $campaign->name_lang . ' 活动页面发表你的原创作品，再来此页面领取奖励');
+            $error = ('请先在 #' . $campaign->name_lang . ' 活动页面发表你的原创作品，再来此页面领取奖励。');
         }
 
         return view('campaign.reward', [
