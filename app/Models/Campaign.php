@@ -2,37 +2,36 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslations;
 use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasTranslations;
-
 
 /**
- * App\Models\Campaign
+ * App\Models\Campaign.
  *
- * @property int $id
- * @property \Illuminate\Support\Carbon $start
- * @property \Illuminate\Support\Carbon $end
- * @property string $image
- * @property array $name_lang
- * @property array $describe_lang
- * @property int $tag_id
- * @property \Illuminate\Support\Carbon $created_at
+ * @property int                             $id
+ * @property \Illuminate\Support\Carbon      $start
+ * @property \Illuminate\Support\Carbon      $end
+ * @property string                          $image
+ * @property array                           $name_lang
+ * @property array                           $describe_lang
+ * @property int                             $tag_id
+ * @property \Illuminate\Support\Carbon      $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property array|null $settings
- * @property mixed|null $weapp_url
- * @property-read mixed $image_url
- * @property-read mixed $master_i_ds
- * @property-read mixed $masters
- * @property-read mixed $poem_count
- * @property-read mixed $share_image_url
- * @property-read mixed $tag_name
- * @property-read array $translations
- * @property-read mixed $upload_user_count
- * @property-read mixed $user_count
- * @property-read \App\Models\Tag $tag
+ * @property array|null                      $settings
+ * @property mixed|null                      $weapp_url
+ * @property mixed                           $image_url
+ * @property mixed                           $master_i_ds
+ * @property mixed                           $masters
+ * @property mixed                           $poem_count
+ * @property mixed                           $share_image_url
+ * @property mixed                           $tag_name
+ * @property array                           $translations
+ * @property mixed                           $upload_user_count
+ * @property mixed                           $user_count
+ * @property \App\Models\Tag                 $tag
  * @method static \Illuminate\Database\Eloquent\Builder|Campaign newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Campaign newQuery()
  * @method static \Illuminate\Database\Query\Builder|Campaign onlyTrashed()
@@ -70,14 +69,12 @@ class Campaign extends Model {
         'settings'
     ];
 
-
     protected $dates = [
         'created_at',
         'deleted_at',
         'updated_at',
         'start',
         'end'
-
     ];
     // these attributes are translatable
     public $translatable = [
@@ -112,12 +109,16 @@ class Campaign extends Model {
     }
 
     public function getMasterIDsAttribute() {
-        if(isset($this->settings['masters'])) return $this->settings['masters'];
+        if (isset($this->settings['masters'])) {
+            return $this->settings['masters'];
+        }
 
         $masterInfos = $this->settings['masterInfos'] ?? [];
-        if(!$masterInfos) return [];
+        if (!$masterInfos) {
+            return [];
+        }
 
-        return array_map(function($master) {
+        return array_map(function ($master) {
             return $master['id'];
         }, $masterInfos);
     }
@@ -127,23 +128,25 @@ class Campaign extends Model {
     }
 
     public function getMastersAttribute() {
-        $masters = $this->settings['masters'] ?? null; // master user ids
+        $masters     = $this->settings['masters']     ?? null; // master user ids
         $masterInfos = $this->settings['masterInfos'] ?? [];
 
         // 优先使用masters内ID对应的用户信息，无masters则使用masterInfos
-        if(!$masters) {
-            if(!$masterInfos) return null;
+        if (!$masters) {
+            if (!$masterInfos) {
+                return null;
+            }
 
             return array_map(function ($master) {
                 // 优先使用 masterInfos 内的 name 和 avatar
                 $ret = $master;
 
-                if(isset($master['id'])) {
+                if (isset($master['id'])) {
                     $user = User::find($master['id']);
                     if ($user) {
                         $ret['avatar'] = asset($user->avatarUrl);
 
-                        if($user->author) {
+                        if ($user->author) {
                             $ret['author_id'] = $user->author->id;
                         }
                     }
@@ -155,22 +158,23 @@ class Campaign extends Model {
                 $ret['avatar'] = $ret['avatar'] ?? (asset(User::$defaultAvatarUrl));
 
                 return $ret;
-
             }, $masterInfos);
         }
 
         $users = [];
         foreach ($masters as $index => $masterID) {
             $user = User::find($masterID);
-            if(!$user) continue;
+            if (!$user) {
+                continue;
+            }
 
             $masterUser = $user->only(['id', 'avatar', 'name', 'author_id']);
             // 同时存在 masters和 masterInfos 的情况下，优先使用 masterInfos 内的 name 和 avatar
-            if($masterInfos && ($info = $masterInfos[$index])) {
-                $masterUser['name'] = $info['name'];
+            if ($masterInfos && ($info = $masterInfos[$index])) {
+                $masterUser['name']   = $info['name'];
                 $masterUser['avatar'] = asset($info['avatar']);
             }
-            if($user->author) {
+            if ($user->author) {
                 $masterUser['author_id'] = $user->author->id;
             }
             $users[] = $masterUser;
@@ -184,6 +188,7 @@ class Campaign extends Model {
     }
 
     public function getPoemCountAttribute() {
+        // TODO delete taggable while delete poem
         return Taggable::where([
             ['tag_id', '=', $this->tag->id],
             ['taggable_type', '=', Poem::class]
@@ -192,11 +197,12 @@ class Campaign extends Model {
 
     public function getUploadUserCountAttribute() {
         $poems = Tag::where('id', '=', $this->tag->id)->first()->poems();
+
         return $poems->where('is_owner_uploaded', '=', '1')->distinct('upload_user_id')->count('upload_user_id');
     }
 
     public function getUserCountAttribute() {
-        $poemIds = Poem::select('id')->whereHas('tags', function($q) {
+        $poemIds = Poem::select('id')->whereHas('tags', function ($q) {
             $q->where('tag.id', '=', $this->tag->id);
         })->pluck('id');
         // scorer
