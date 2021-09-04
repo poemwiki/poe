@@ -148,7 +148,7 @@
                 <i class="icon-magnifier"></i>
                 <h3>{{ trans('brackets/admin-ui::admin.index.no_items') }}</h3>
                 <p>{{ trans('brackets/admin-ui::admin.index.try_changing_items') }}</p>
-                <a class="btn btn-primary btn-spinner" href="{{ url('admin/poems/create') }}" role="button"><i
+                <a class="btn btn-primary btn-spinner" href="{{ url('admin/poems/create') }}" target="_blank" role="button"><i
                     class="fa fa-plus"></i>&nbsp; {{ trans('admin.poem.actions.create') }}</a>
               </div>
             </div>
