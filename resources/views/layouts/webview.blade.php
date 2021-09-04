@@ -27,8 +27,6 @@
 
     @stack('styles')
 
-    @include('layouts.analyze')
-
     @stack('head-scripts')
 </head>
 <body class="position-ref">
