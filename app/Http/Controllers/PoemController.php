@@ -46,6 +46,9 @@ class PoemController extends Controller {
 
     private function _poem(Poem $poem){
         $randomPoem = $this->poemRepository->randomOne();
+        if($poem->mergedToPoem) {
+            return redirect($poem->mergedToPoem->url);
+        }
 
         $logs = $poem->activityLogs;
 
