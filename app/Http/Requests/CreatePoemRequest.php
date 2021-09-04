@@ -3,23 +3,23 @@
 namespace App\Http\Requests;
 
 use App\Models\Author;
+use App\Models\Poem;
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use App\Rules\NoDuplicatedPoem;
 use App\Rules\ValidPoetId;
 use App\Rules\ValidTranslatorId;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Models\Poem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class CreatePoemRequest extends FormRequest {
-
     /**
-     * @var AuthorRepository $authorRepository
+     * @var AuthorRepository
      */
     protected $authorRepository;
+    public $poemMinLength = 2;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -29,6 +29,7 @@ class CreatePoemRequest extends FormRequest {
      */
     public function authorize(AuthorRepository $authorRepository): bool {
         $this->authorRepository = $authorRepository;
+
         return Gate::allows('api.poem.create', Auth::user());
     }
 
@@ -39,45 +40,57 @@ class CreatePoemRequest extends FormRequest {
      */
     public function rules(): array {
         $original_id = request()->input('original_id');
+
         return [
-            'title' => ['required', 'string'],
-            'language_id' => Rule::in(LanguageRepository::ids()),
-            'is_original' => ['nullable', 'boolean'],
-            'poet' => ['nullable', 'string'],
-            'poet_cn' => ['nullable', 'string'],
-            'bedtime_post_id' => ['nullable', 'integer'],
+            'title'              => ['required', 'string'],
+            'language_id'        => Rule::in(LanguageRepository::ids()),
+            'is_original'        => ['nullable', 'boolean'],
+            'poet'               => ['nullable', 'string'],
+            'poet_cn'            => ['nullable', 'string'],
+            'bedtime_post_id'    => ['nullable', 'integer'],
             'bedtime_post_title' => ['nullable', 'string'],
-            'poem' => [new NoDuplicatedPoem(null), 'required', 'string'],
-            'length' => ['nullable', 'integer'],
-            'translator' => ['nullable', 'string'],
-            'from' => ['nullable', 'string'],
-            'year' => ['nullable', 'string'],
-            'month' => ['nullable', 'string'],
-            'date' => ['nullable', 'string'],
-            'location' => ['nullable', 'string'],
-            'dynasty' => ['nullable', 'string'],
-            'nation' => ['nullable', 'string'],
-            'need_confirm' => ['nullable', 'boolean'],
-            'is_lock' => ['nullable', 'boolean'],
-            'content_id' => ['nullable', 'integer'],
-            'original_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
-            '#translated_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'], // TODO use fake ID here
-            'preface' => ['nullable', 'string', 'max:300'],
-            'subtitle' => ['nullable', 'string', 'max:128'],
-            'genre_id' => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
-            'poet_id' => ['nullable', new ValidPoetId($original_id)],
-            'poet_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
-            'translator_ids' => ['nullable', 'array', new ValidTranslatorId()],
+            'poem'               => [new NoDuplicatedPoem(null), 'required', 'string', 'min:' . $this->poemMinLength],
+            'length'             => ['nullable', 'integer'],
+            'translator'         => ['nullable', 'string'],
+            'from'               => ['nullable', 'string'],
+            'year'               => ['nullable', 'string'],
+            'month'              => ['nullable', 'string'],
+            'date'               => ['nullable', 'string'],
+            'location'           => ['nullable', 'string'],
+            'dynasty'            => ['nullable', 'string'],
+            'nation'             => ['nullable', 'string'],
+            'need_confirm'       => ['nullable', 'boolean'],
+            'is_lock'            => ['nullable', 'boolean'],
+            'content_id'         => ['nullable', 'integer'],
+            'original_id'        => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
+            '#translated_id'     => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'], // TODO use fake ID here
+            'preface'            => ['nullable', 'string', 'max:300'],
+            'subtitle'           => ['nullable', 'string', 'max:128'],
+            'genre_id'           => ['nullable', 'exists:' . \App\Models\Genre::class . ',id'],
+            'poet_id'            => ['nullable', new ValidPoetId($original_id)],
+            'poet_wikidata_id'   => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
+            'translator_ids'     => ['nullable', 'array', new ValidTranslatorId()],
             // 'translator_ids' = [],
             'translator_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
-            'upload_user_id' => ['nullable', 'exists:' . \App\User::class . ',id'],
-            'is_owner_uploaded' => ['required', Rule::in([Poem::$OWNER['none'], Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])],
-            'tag_id' => ['nullable', 'exists:' . \App\Models\Tag::class . ',id'],
+            'upload_user_id'         => ['nullable', 'exists:' . \App\User::class . ',id'],
+            'is_owner_uploaded'      => ['required', Rule::in([Poem::$OWNER['none'], Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])],
+            'tag_id'                 => ['nullable', 'exists:' . \App\Models\Tag::class . ',id'],
         ];
     }
 
     /**
-     * Modify input data
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages() {
+        return [
+            'poem.min' => '诗歌正文至少 ' . $this->poemMinLength . '个字。'
+        ];
+    }
+
+    /**
+     * Modify input data.
      *
      * @return array
      */
@@ -89,7 +102,7 @@ class CreatePoemRequest extends FormRequest {
         // 故此处暂时不创建新作者，不写入 poem.poet_id,
         // 只将作者名写入 poem.poet
         if (isset($sanitized['poet_id']) && $sanitized['poet_id'] === 'new') {
-            $sanitized['poet_id'] = null;
+            $sanitized['poet_id']          = null;
             $sanitized['poet_wikidata_id'] = null;
         }
 
@@ -98,21 +111,20 @@ class CreatePoemRequest extends FormRequest {
 
             $translatorsOrder = [];
             foreach ($sanitized['translator_ids'] as $key => $id) {
-                if(ValidTranslatorId::isWikidataQID($id)) {
-                    $translatorAuthor = $this->authorRepository->getExistedAuthor(ltrim($id, 'Q'));
+                if (ValidTranslatorId::isWikidataQID($id)) {
+                    $translatorAuthor                  = $this->authorRepository->getExistedAuthor(ltrim($id, 'Q'));
                     $sanitized['translator_ids'][$key] = $translatorAuthor->id;
-                    $translatorsOrder[] = $translatorAuthor->id;
-                } else if(ValidTranslatorId::isNew($id)) {
+                    $translatorsOrder[]                = $translatorAuthor->id;
+                } elseif (ValidTranslatorId::isNew($id)) {
                     $sanitized['translator_ids'][$key] = mb_substr($id, strlen('new_'));
-                    $translatorsOrder[] = substr($id, 4, strlen($id));
+                    $translatorsOrder[]                = substr($id, 4, strlen($id));
                 } else {
-                    $sanitized['translator_ids'][$key] = (int)$id;
-                    $translatorsOrder[] = $id;
+                    $sanitized['translator_ids'][$key] = (int) $id;
+                    $translatorsOrder[]                = $id;
                 }
             }
             // WARNING for poems have related translator(relatable record), poem.translator is just for indicating translator order
             $sanitized['translator'] = json_encode($translatorsOrder, JSON_UNESCAPED_UNICODE);
-
         }
 
         $user = Auth::user();

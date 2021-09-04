@@ -10,14 +10,14 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\ValidationException;
 
 /**
  * For API request
- * Class StoreOwnerUploaderPoem
- * @package App\Http\Requests\API
+ * Class StoreOwnerUploaderPoem.
  */
 class StoreOwnerUploaderPoem extends CreatePoemRequest {
+    public $poemMinLength = 10;
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -25,6 +25,7 @@ class StoreOwnerUploaderPoem extends CreatePoemRequest {
      */
     public function authorize(AuthorRepository $authorRepository): bool {
         $this->authorRepository = $authorRepository;
+
         return Gate::allows('api.poem.create', Auth::user());
     }
 
@@ -34,37 +35,39 @@ class StoreOwnerUploaderPoem extends CreatePoemRequest {
      * @return array
      */
     public function rules(): array {
-        $rules = parent::rules();
-        $rules['poem'] = [new NoDuplicatedPoem(null, 'id'), 'required', 'string'];
+        $rules         = parent::rules();
+        $rules['poem'] = [new NoDuplicatedPoem(null, 'id'), 'required', 'string', 'min:' . $this->poemMinLength];
+
         return $rules;
     }
-
 
     /**
      * Handle a failed validation attempt.
      *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @param \Illuminate\Contracts\Validation\Validator $validator
      * @return void
      *
      * @throws \Illuminate\Validation\ValidationException|HttpResponseException
      */
     protected function failedValidation(Validator $validator) {
         $failedRules = $validator->failed();
-        if(isset($failedRules['poem']['App\Rules\NoDuplicatedPoem'])) {
+        if (isset($failedRules['poem']['App\Rules\NoDuplicatedPoem'])) {
             $messages = $validator->getMessageBag()->getMessages();
-            throw new HttpResponseException(response()->json([
-                'message' => '与已有诗歌重复',
-                'id' => $messages['poem'][0],
-                'errors' => $messages,
-                // TODO NoDuplicatedPoem validation should be in controller
-                'code' => Controller::$CODE['duplicated']
-            ]));
+
+            throw new HttpResponseException(response()->json(['message' => '与已有诗歌重复', 'id' => $messages['poem'][0], 'errors' => $messages, /* TODO NoDuplicatedPoem validation should be in controller */ 'code' => Controller::$CODE['duplicated']]));
+        }
+
+        if (isset($failedRules['poem']['Min'])) {
+            $messages = $validator->getMessageBag()->getMessages();
+
+            throw new HttpResponseException(response()->json(['message' => $messages['poem'], 'errors' => $messages, /* TODO NoDuplicatedPoem validation should be in controller */ 'code' => Controller::$CODE['invalid_poem_length']]));
         }
 
         parent::failedValidation($validator);
     }
+
     /**
-     * Modify input data
+     * Modify input data.
      * @return array
      */
     public function getSanitized(): array {
