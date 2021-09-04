@@ -19,13 +19,14 @@ use Spatie\Activitylog\ActivitylogServiceProvider;
  * @property string avatarUrl
  */
 class User extends Authenticatable implements MustVerifyEmail {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens;
+    use Notifiable;
     use Liker;
     use HasFakeId;
-    static $FAKEID_KEY = 'user'; // Symmetric-key for xor
-    static $FAKEID_SPARSE = 66773;
+    public static $FAKEID_KEY    = 'user'; // Symmetric-key for xor
+    public static $FAKEID_SPARSE = 66773;
 
-    static public $defaultAvatarUrl = 'images/avatar-default.png';
+    public static $defaultAvatarUrl = 'images/avatar-default.png';
     /**
      * The attributes that are mass assignable.
      *
@@ -51,9 +52,9 @@ class User extends Authenticatable implements MustVerifyEmail {
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'invite_code' => 'string',
-        'last_online_at' => 'datetime',
-        'weight' => 'float'
+        'invite_code'       => 'string',
+        'last_online_at'    => 'datetime',
+        'weight'            => 'float'
     ];
 
     protected $dates = [
@@ -61,19 +62,20 @@ class User extends Authenticatable implements MustVerifyEmail {
     ];
     protected $appends = ['last_online_at', 'resource_url', 'fakeId'];
 
-
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasMany
      **/
     public function userBind() {
         return $this->hasMany(\App\Models\UserBind::class, 'user_id', 'id');
     }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasMany
      **/
     public function scores() {
         return $this->hasMany(\App\Models\Score::class, 'user_id', 'id');
     }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasMany
      **/
@@ -100,10 +102,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->morphMany(ActivitylogServiceProvider::determineActivityModel(), 'causer');
     }
 
-
     public function getResourceUrlAttribute() {
         return url('/admin/users/' . $this->getKey());
     }
+
     /**
      * @return string
      */
@@ -117,9 +119,14 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public static function inviteFromStr($inviteCode) {
         $user = self::where(['invite_code' => $inviteCode])->first();
+
         return $user->name . ' (' . $user->email . ')';
     }
 
+    /**
+     * request from wechat browser.
+     * @return bool
+     */
     public static function isWechat() {
         if (isset($_SERVER['HTTP_USER_AGENT'])
             && strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false
@@ -127,31 +134,58 @@ class User extends Authenticatable implements MustVerifyEmail {
         ) {
             return true;
         }
+
         return false;
     }
 
+    /**
+     * request from wechat mini program.
+     * @return bool
+     */
     public static function isWeApp() {
         if (isset($_SERVER['HTTP_REFERER'])
             && strpos($_SERVER['HTTP_REFERER'], config('wechat.mini_program.default.app_id')) !== false
-        ){
+        ) {
             return true;
         }
+
         return false;
     }
 
+    /**
+     * request from wechat mini program's webview component.
+     * @return bool
+     */
+    public static function isWeAppWebview() {
+        if (isset($_SERVER['HTTP_USER_AGENT'])
+            && strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false
+            && strpos($_SERVER['HTTP_USER_AGENT'], 'miniprogramhtmlwebview') !== false
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * request from wechat mini program, but not production version.
+     * @return bool
+     */
     public static function isWeAppNoneProduction() {
         $appID = config('wechat.mini_program.default.app_id');
         if (isset($_SERVER['HTTP_REFERER'])
             && strpos($_SERVER['HTTP_REFERER'], $appID) !== false
-        ){
+        ) {
             $matches = null;
-            if(preg_match("@//servicewechat.com/$appID/([^/]+)/@", $_SERVER['HTTP_REFERER'], $matches)) {
-                if(in_array($matches[1], ['devtools', 1])) {
+            if (preg_match("@//servicewechat.com/$appID/([^/]+)/@", $_SERVER['HTTP_REFERER'], $matches)) {
+                if (in_array($matches[1], ['devtools', 1])) {
                     return true;
                 }
             }
+
             return false;
         }
+
         return false;
     }
 
@@ -167,30 +201,31 @@ class User extends Authenticatable implements MustVerifyEmail {
      * Get either a Gravatar URL or complete image tag for a specified email address.
      *
      * @param string $email The email address
-     * @param string $s Size in pixels, defaults to 80px [ 1 - 2048 ]
-     * @param string $d Default imageset to use [ 404 | mp | identicon | monsterid | wavatar ]
-     * @param string $r Maximum rating (inclusive) [ g | pg | r | x ]
-     * @param bool $img True to return a complete IMG tag False for just the URL
-     * @param array $atts Optional, additional key/value attributes to include in the IMG tag
-     * @return String containing either just a URL or a complete image tag
+     * @param string $s     Size in pixels, defaults to 80px [ 1 - 2048 ]
+     * @param string $d     Default imageset to use [ 404 | mp | identicon | monsterid | wavatar ]
+     * @param string $r     Maximum rating (inclusive) [ g | pg | r | x ]
+     * @param bool   $img   True to return a complete IMG tag False for just the URL
+     * @param array  $atts  Optional, additional key/value attributes to include in the IMG tag
+     * @return string containing either just a URL or a complete image tag
      * @source https://gravatar.com/site/implement/images/php/
      */
-    public static function getGravatar($email, $s = 80, $d = 'mp', $r = 'g', $img = false, $atts = array() ) {
-
+    public static function getGravatar($email, $s = 80, $d = 'mp', $r = 'g', $img = false, $atts = []) {
         $url = 'https://www.gravatar.com/avatar/';
-        $url .= md5( strtolower( trim( $email ) ) );
+        $url .= md5(strtolower(trim($email)));
         $url .= "?s=$s&d=$d&r=$r";
-        if ( $img ) {
+        if ($img) {
             $url = '<img src="' . $url . '"';
-            foreach ( $atts as $key => $val )
+            foreach ($atts as $key => $val) {
                 $url .= ' ' . $key . '="' . $val . '"';
+            }
             $url .= ' />';
         }
+
         return $url;
     }
 
     /**
-     * use avatarUrl in case users.avatar is null
+     * use avatarUrl in case users.avatar is null.
      * @return string
      */
     public function getAvatarUrlAttribute() {
@@ -198,15 +233,16 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public function getVerifiedAvatarHtml() {
-        $html =<<<HTML
+        $html = <<<HTML
 <div class="avatar verify-avatar" title="$this->name" style="background-image: url(&quot;/images/verified.svg&quot;), url(&quot;$this->avatarUrl&quot;);"></div>
 HTML;
-        return $html;
 
+        return $html;
     }
 
     public function getLastOnlineAtAttribute() {
         $redis = Redis::connection();
+
         return $redis->get('online_' . $this->id);
     }
 }

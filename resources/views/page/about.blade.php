@@ -1,4 +1,7 @@
-@extends(App\User::isWechat() ? 'layouts.webview' : 'layouts.fe')
+@php
+$isWeappWebview = App\User::isWeAppWebview();
+@endphp
+@extends($isWeappWebview ? 'layouts.webview' : 'layouts.fe')
 
 @section('title')关于诗歌维基@endsection
 @section('author')
@@ -12,6 +15,8 @@
   <p>目前项目由几位发起人组成的“诗歌维基实验室”推动，我们在编辑、开发、设计、运营各环节都需要支持，如果有兴趣加入实验室，欢迎联系下方微信。</p>
   <p><img class="qr" src="{{asset('images/xfg-ds.jpg')}}" alt="二维码"></p>
   <img class="weapp" src="{{asset('images/weapp.png')}}" alt="微信扫码，使用诗歌维基小程序">
+
+  @if(!$isWeappWebview)<p style="margin-top: 3em;">友情链接: &emsp;<a href="https://bedtimepoem.com" target="_blank">读首诗再睡觉</a>&emsp;<a href="https://www.chinese-poetry.org/" target="_blank">华语现代诗歌语料库</a></p>@endif
 @endsection
 
 @push('styles')
