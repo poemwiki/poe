@@ -6,6 +6,7 @@ poemwiki（诗歌维基）是一个跨语种的诗歌库系统，收集并记录
 ## Environment Requirements
 MySQL 8.0+  
 php 7.4+  
+Nginx  
 redis  
 
 ## Contribution
