@@ -265,6 +265,12 @@ function responseFile($path) {
  * @throws EasyWeChat\Kernel\Exceptions\InvalidConfigException
  */
 function getWxUrlLink(array $param = []) {
+    if(config('app.env') === 'local') {
+        return (object)[
+            'url_link' => 'https://wxaurl.cn/sLOfqBytest',
+            'errcode' => null
+        ];
+    }
     $wechatApp = \EasyWeChat\Factory::miniProgram([
         'app_id' => config('wechat.mini_program.default.app_id'),
         'secret' => config('wechat.mini_program.default.secret'),
