@@ -312,6 +312,7 @@ Route::any('/calendar', 'CalendarController@index')->name('calendar');
 Route::any('/calendar/q/{month}/{day}', 'CalendarController@query')->name('calendar.query');
 
 Route::prefix('campaign')->name('campaign/')->group(static function () {
+    Route::get('reward/show/{awardID}', [\App\Http\Controllers\CampaignController::class, 'show'])->name('reward/show');
     Route::get('reward/{campaignId}/{fakeUID}', [\App\Http\Controllers\CampaignController::class, 'reward'])->name('reward');
 });
 

@@ -15,7 +15,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * App\Reward.
  *
  * @property int    $campaign_id
- * @property string $reward
+ * @property string $award_id
  */
 class Reward extends Model {
     use SoftDeletes;
@@ -30,7 +30,7 @@ class Reward extends Model {
     protected $fillable = [
         'campaign_id',
         'reward',
-        'level'
+        'award_id'
     ];
 
     protected $dates = [
@@ -41,5 +41,9 @@ class Reward extends Model {
 
     public function rewardResult() {
         return $this->belongsTo(\App\Models\RewardResult::class, 'id', 'reward_id');
+    }
+
+    public function award() {
+        return $this->belongsTo(\App\Models\Award::class, 'award_id', 'id');
     }
 }
