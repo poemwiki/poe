@@ -8,14 +8,15 @@
 @section('content')
   @if(isset($error) && $error==='')
     <h1>{{$campaign->name_lang}} 赛诗会奖励领取</h1>
+    @if($error)
     <p class="error">{{$error}}</p>
-
+    @else
     <div class="reward">
       @foreach($awards as $award)
         <label class="reward-label">恭喜获得 {{$award->name}}，<a href="{{route('campaign/reward/show', $award->id)}}">点击领取奖励</a></label>
       @endforeach
     </div>
-
+    @endif
   @endif
 @endsection
 
