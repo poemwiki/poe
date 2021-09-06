@@ -23,6 +23,7 @@ class RewardResult extends Model {
         'poem_id'
     ];
 
+    // TODO add opened_at to know the moment that the user opened the reward/show page
     protected $dates = [
         'created_at',
         'updated_at'
