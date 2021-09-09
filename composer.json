@@ -33,6 +33,7 @@
     "brackets/craftable": "dev-dev-fix-private-admin-translations-depend",
     "doctrine/dbal": "~2.3",
     "fideloper/proxy": "^4.2",
+    "freyo/flysystem-qcloud-cos-v5": "^2.0",
     "fruitcake/laravel-cors": "^1.0",
     "fukuball/jieba-php": "^0.33.0",
     "guzzlehttp/guzzle": "^6.3",
