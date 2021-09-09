@@ -105,7 +105,7 @@ class Campaign extends Model {
     }
 
     public function getImageUrlAttribute() {
-        return asset($this->image);
+        return \Illuminate\Support\Facades\Storage::disk('cosv5')->url($this->image);
     }
 
     public function getMasterIDsAttribute() {
