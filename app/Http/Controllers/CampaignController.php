@@ -47,14 +47,14 @@ class CampaignController extends Controller {
             });
 
             try {
-                $autoAward = Award::where([
-                    ['campaign_id', $campaignId],
-                    ['result_type', Award::$RESULT_TYPE['auto']]
-                ])->first();
-                if ($autoAward) {
-                    // TODO show autoRewardResult
-                    $autoRewardResult = $this->getOrConsumeReward($campaignId, $autoAward->id, $uid);
-                }
+                // $autoAward = Award::where([
+                //     ['campaign_id', $campaignId],
+                //     ['result_type', Award::$RESULT_TYPE['auto']]
+                // ])->first();
+                // if ($autoAward) {
+                //     // TODO show autoRewardResult
+                //     $autoRewardResult = $this->getOrConsumeReward($campaignId, $autoAward->id, $uid);
+                // }
             } catch (\Exception $e) {
                 $error = '获取奖励失败，请刷新重试';
             }
@@ -75,6 +75,8 @@ class CampaignController extends Controller {
 
     public function show(int $awardID) {
         $userID  = auth()->user()->id;
+        // TODO save show time to reward_result
+        logger()->info('award:' . $awardID . '-' . $userID);
         $results = RewardResult::where([
             ['user_id', $userID]
         ])->whereHas('reward', function ($query) use ($awardID) {
