@@ -1,4 +1,4 @@
-@extends(App\User::isWeAppWebview() ? 'layouts.webview' : 'layouts.webview')
+@extends(App\User::isWeAppWebview() ? 'layouts.webview' : 'layouts.fe')
 
 @section('title')赛诗会奖励领取@endsection
 @section('author')
