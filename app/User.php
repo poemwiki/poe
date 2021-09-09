@@ -159,7 +159,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     public static function isWeAppWebview() {
         if (isset($_SERVER['HTTP_USER_AGENT'])
             && strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false
-            && strpos($_SERVER['HTTP_USER_AGENT'], 'miniprogramhtmlwebview') !== false
+            && strpos($_SERVER['HTTP_USER_AGENT'], 'miniProgram') !== false
         ) {
             return true;
         }
