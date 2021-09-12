@@ -6,7 +6,7 @@
 @endsection
 
 @section('content')
-  <img class="code" src="/images/campaign/dushuijun.jpg" alt="读睡君">
+  <img class="code" src="https://poemwiki-1254719278.cos.ap-guangzhou.myqcloud.com/campaign/dushuijun.jpg" alt="读睡君">
 
 @endsection
 

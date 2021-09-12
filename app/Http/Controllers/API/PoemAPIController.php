@@ -206,7 +206,7 @@ class PoemAPIController extends Controller {
             $res['sell'] = [
                 'path'   => 'pages/proxy/union/union?spreadUrl=https://u.jd.com/6D7JluJ',
                 'appId'  => 'wx1edf489cb248852c',
-                'picUrl' => 'https://poemwiki.org/images/campaign/9/sell.jpg'
+                'picUrl' => 'https://poemwiki-1254719278.cos.ap-guangzhou.myqcloud.com/campaign/9/sell.jpg'
             ];
         }
 
