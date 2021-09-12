@@ -59,15 +59,14 @@
                                 <tbody>
                                     <tr v-for="(item, index) in collection" :key="item.id + '_' + item.bind_id" :class="bulkItems[item.id] ? 'bg-bulk' : ''">
 
-                                        <td>@{{ item.name }}</td>
+                                        <td><img :src="item.avatar" alt="avatar" class="avatar">@{{ item.name }}</td>
                                         <td>@{{ item.id }}</td>
                                         <td>@{{ item.email }}</td>
                                         <td><span v-for="(bind) in item.binds" :key="bind.id"
                                           >
                                             [@{{ bind.bind_status ? '已绑定' : '已解绑' }}]
                                             [@{{ bindRefType(bind.bind_ref)  }}]
-                                            <img :src="bind.avatar" alt="" style="width: 3em; height: 3em; border-radius: 4px; object-fit: cover" />
-                                            @{{ bind.nickname }}
+                                            <img :src="bind.avatar" class="avatar-sm" />@{{ bind.nickname }}
                                           <br/></span></td>
                                         <td>@{{ item.is_admin ? 'Yes' : 'No' }}</td>
                                         <td>@{{ item.is_v ? 'Yes' : 'No' }}</td>
@@ -115,3 +114,4 @@
     </user-listing>
 
 @endsection
+

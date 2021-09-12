@@ -695,7 +695,7 @@ class Poem extends Model implements Searchable {
             return $this->poetAuthor->avatar_url;
         }
 
-        return asset(\App\User::$defaultAvatarUrl);
+        return config('app.avatar.default');
     }
 
     public function getTranslatorAvatarAttribute() {
@@ -711,7 +711,7 @@ class Poem extends Model implements Searchable {
             return $this->translatorAuthor->avatar_url;
         }
 
-        return asset(\App\User::$defaultAvatarUrl);
+        return config('app.avatar.default');
     }
 
     public function getActivityLogsAttribute() {

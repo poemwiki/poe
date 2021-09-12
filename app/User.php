@@ -25,8 +25,6 @@ class User extends Authenticatable implements MustVerifyEmail {
     use HasFakeId;
     public static $FAKEID_KEY    = 'user'; // Symmetric-key for xor
     public static $FAKEID_SPARSE = 66773;
-
-    public static $defaultAvatarUrl = 'images/avatar-default.png';
     /**
      * The attributes that are mass assignable.
      *
@@ -201,7 +199,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * Get either a Gravatar URL or complete image tag for a specified email address.
      *
      * @param string $email The email address
-     * @param string $s     Size in pixels, defaults to 80px [ 1 - 2048 ]
+     * @param int    $s     Size in pixels, defaults to 80px [ 1 - 2048 ]
      * @param string $d     Default imageset to use [ 404 | mp | identicon | monsterid | wavatar ]
      * @param string $r     Maximum rating (inclusive) [ g | pg | r | x ]
      * @param bool   $img   True to return a complete IMG tag False for just the URL
@@ -229,7 +227,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return string
      */
     public function getAvatarUrlAttribute() {
-        return $this->avatar ?? asset(static::$defaultAvatarUrl);
+        return $this->avatar ?? config('app.avatar.default');
     }
 
     public function getVerifiedAvatarHtml() {

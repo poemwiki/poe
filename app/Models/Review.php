@@ -9,31 +9,31 @@ use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * App\Models\Review
+ * App\Models\Review.
  *
- * @property int $id
- * @property int $poem_id
- * @property int $user_id
- * @property int|null $like
- * @property int|null $content_id
- * @property string|null $title
- * @property string $content
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property int|null $reply_id
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
- * @property-read int|null $activities_count
- * @property-read string $avatar
- * @property-read string $name
- * @property-read mixed $pure_content
- * @property-read string $reply_to_user
- * @property-read mixed $rich_content
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\User[] $likers
- * @property-read int|null $likers_count
- * @property-read \App\Models\Poem $poem
- * @property-read Review|null $replyOfReview
- * @property-read \App\User $user
+ * @property int                                                                $id
+ * @property int                                                                $poem_id
+ * @property int                                                                $user_id
+ * @property int|null                                                           $like
+ * @property int|null                                                           $content_id
+ * @property string|null                                                        $title
+ * @property string                                                             $content
+ * @property \Illuminate\Support\Carbon|null                                    $created_at
+ * @property \Illuminate\Support\Carbon|null                                    $updated_at
+ * @property \Illuminate\Support\Carbon|null                                    $deleted_at
+ * @property int|null                                                           $reply_id
+ * @property \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
+ * @property int|null                                                           $activities_count
+ * @property string                                                             $avatar
+ * @property string                                                             $name
+ * @property mixed                                                              $pure_content
+ * @property string                                                             $reply_to_user
+ * @property mixed                                                              $rich_content
+ * @property \Illuminate\Database\Eloquent\Collection|\App\User[]               $likers
+ * @property int|null                                                           $likers_count
+ * @property \App\Models\Poem                                                   $poem
+ * @property Review|null                                                        $replyOfReview
+ * @property \App\User                                                          $user
  */
 class Review extends Model {
     use SoftDeletes;
@@ -42,8 +42,8 @@ class Review extends Model {
 
     protected $table = 'review';
 
-    protected static $logFillable = true;
-    protected static $logOnlyDirty = true;
+    protected static $logFillable             = true;
+    protected static $logOnlyDirty            = true;
     protected static $ignoreChangedAttributes = ['created_at'];
 
     protected $fillable = [
@@ -61,7 +61,6 @@ class Review extends Model {
     ];
 
     protected $appends = ['name', 'avatar', 'reply_to_user'];
-
 
     // public static function boot() {
     //     parent::boot();
@@ -83,6 +82,7 @@ class Review extends Model {
     public function getNameAttribute() {
         return $this->user ? $this->user->name : '[已注销]';
     }
+
     /**
      * @return string
      */
@@ -94,13 +94,12 @@ class Review extends Model {
      * @return string
      */
     public function getAvatarAttribute() {
-        return $this->user ? $this->user->avatarUrl : asset(\App\User::$defaultAvatarUrl);
+        return $this->user ? $this->user->avatarUrl : config('app.avatar.default');
     }
 
     public function getPureContentAttribute() {
         return str_replace('&nbsp;', ' ', strip_tags($this->content));
     }
-
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo
@@ -123,8 +122,7 @@ class Review extends Model {
         return $this->belongsTo(\App\User::class, 'user_id', 'id');
     }
 
-
-    /**
+    /*
      * @return \Illuminate\Database\Eloquent\Relations\hasOne
      **/
     // public function content() {

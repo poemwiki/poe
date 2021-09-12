@@ -19,7 +19,9 @@ class Controller extends BaseController {
         'no_entry'                => -3,
         'duplicated'              => -4,
         'invalid_poem_length'     => -5,
-        'poem_content_invalid'    => -6
+        'poem_content_invalid'    => -6,
+        'img_format_invalid'      => -7,
+        'upload_img_size_limit'   => -8
     ];
 
     public function response($data, string $message = '', int $code = 0) {

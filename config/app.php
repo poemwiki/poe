@@ -1,7 +1,6 @@
 <?php
 
 $config = [
-
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -137,7 +136,6 @@ $config = [
     */
 
     'providers' => [
-
         /*
          * Laravel Framework Service Providers...
          */
@@ -168,7 +166,6 @@ $config = [
          * Package Service Providers...
          */
 
-
         /*
          * Application Service Providers...
          */
@@ -193,7 +190,6 @@ $config = [
     */
 
     'aliases' => [
-
         'App'          => Illuminate\Support\Facades\App::class,
         'Arr'          => Illuminate\Support\Arr::class,
         'Artisan'      => Illuminate\Support\Facades\Artisan::class,
@@ -233,19 +229,23 @@ $config = [
         'Form'         => Collective\Html\FormFacade::class,
         'Html'         => Collective\Html\HtmlFacade::class,
         'Flash'        => Laracasts\Flash\Flash::class,
-        'Captcha' => Mews\Captcha\Facades\Captcha::class,
+        'Captcha'      => Mews\Captcha\Facades\Captcha::class,
     ],
 
     'invite_limited' => env('INVITE_LIMITED', false),
 
-    'length_too_long' => 80,
+    'length_too_long'          => 80,
     'default_soft_wrap_length' => 20,
-    'language_line_length_max' => [1 => 20, 2=>45, 7 => 20],
-    'campaign_caution' => "活动评分细则：\n1. 不允许恶意刷票行为\n2. 排行榜评分仅以活动期间评分计算。活动结束后仍可评分，但不影响已确认排行榜评分及排名。",
+    'language_line_length_max' => [1 => 20, 2 => 45, 7 => 20],
+    'campaign_caution'         => "活动评分细则：\n1. 不允许恶意刷票行为\n2. 排行榜评分仅以活动期间评分计算。活动结束后仍可评分，但不影响已确认排行榜评分及排名。",
 
     'render_server' => env('POE_RENDER_SERVER', 'http://47.105.165.228:8888'),
 
+    'avatar' => [
+        'default'     => 'http://' . env('COSV5_BUCKET') . '.cos.' . env('COSV5_REGION') . '.myqcloud.com/avatar/_.png',
+        'user_path'   => 'avatar/u',
+        'author_path' => 'avatar/a'
+    ]
 ];
-
 
 return $config;

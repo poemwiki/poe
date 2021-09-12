@@ -12,11 +12,11 @@ use App\Http\Requests\Admin\User\UpdateUser;
 use App\Models\UserBind;
 use App\User;
 use Brackets\AdminListing\Facades\AdminListing;
-use Illuminate\Database\Eloquent\Builder;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
@@ -24,7 +24,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class UsersController extends Controller {
-
     /**
      * Display a listing of the resource.
      *
@@ -49,11 +48,12 @@ class UsersController extends Controller {
 
             function (Builder $query) use ($request) {
                 $query->select(DB::raw(
-                    "GROUP_CONCAT(`bind`.`id`) as `bind_ids`,
-                    users.id, users.name, users.email, users.email_verified_at, users.is_admin, users.updated_at, users.created_at, is_v, weight"
+                    'GROUP_CONCAT(`bind`.`id`) as `bind_ids`,
+                    users.id, users.name, users.avatar, users.email, users.email_verified_at, users.is_admin, users.updated_at, users.created_at, is_v, weight'
                 ));
-                if (!$request->input('orderBy'))
+                if (!$request->input('orderBy')) {
                     $query->orderBy('users.updated_at', 'desc');
+                }
 
                 $query->leftJoin('user_bind_info as bind', 'users.id', '=', 'bind.user_id')
                     ->groupBy('users.id');
@@ -61,10 +61,13 @@ class UsersController extends Controller {
         );
 
         $binds = $data->reduce(function ($carry, $item) {
-            if(!$item['bind_ids']) return $carry;
+            if (!$item['bind_ids']) {
+                return $carry;
+            }
+
             return $item['bind_ids'] . ',' . $carry;
         });
-        $bindIDs = explode(',', trim($binds, ','));
+        $bindIDs   = explode(',', trim($binds, ','));
         $userBinds = UserBind::findMany($bindIDs)->keyBy('id')
             ->map->only(['id', 'bind_status', 'bind_ref', 'nickname', 'gender', 'avatar'])->toArray();
 
@@ -72,11 +75,12 @@ class UsersController extends Controller {
         // $users = collect([]);
         foreach ($data as &$userWithBinds) {
             $userWithBinds['binds'] = $userWithBinds['bind_ids']
-                ? collect(explode(',', $userWithBinds['bind_ids']))->map(function ($id) use($userBinds) {
+                ? collect(explode(',', $userWithBinds['bind_ids']))->map(function ($id) use ($userBinds) {
                     return $userBinds[$id];
                 })
                 : [];
-        };
+            $userWithBinds['avatar'] = $userWithBinds->avatarUrl;
+        }
 
         if ($request->ajax()) {
             return ['data' => $data];
@@ -140,7 +144,6 @@ class UsersController extends Controller {
     public function edit(User $user) {
         $this->authorize('admin.user.edit', $user);
 
-
         return view('admin.user.edit', [
             'user' => $user,
         ]);
@@ -148,7 +151,6 @@ class UsersController extends Controller {
 
     public function addV(User $user) {
         $this->authorize('admin.user.edit', $user);
-
 
         return view('admin.user.addV', [
             'user' => $user,
@@ -159,7 +161,7 @@ class UsersController extends Controller {
      * Update the specified resource in storage.
      *
      * @param UpdateUser $request
-     * @param User $user
+     * @param User       $user
      * @return array|RedirectResponse|Redirector
      */
     public function update(UpdateUser $request, User $user) {
@@ -172,7 +174,7 @@ class UsersController extends Controller {
         if ($request->ajax()) {
             return [
                 'redirect' => url('admin/users'),
-                'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
+                'message'  => trans('brackets/admin-ui::admin.operation.succeeded'),
             ];
         }
 
@@ -183,7 +185,7 @@ class UsersController extends Controller {
      * Remove the specified resource from storage.
      *
      * @param DestroyUser $request
-     * @param User $user
+     * @param User        $user
      * @return ResponseFactory|RedirectResponse|Response
      * @throws Exception
      */

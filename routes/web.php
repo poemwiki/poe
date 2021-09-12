@@ -354,7 +354,7 @@ Route::get('/poem-card/{id}/{compositionId?}', function ($id, $compositionId = n
 // TODO move it to pic controller
 Route::any('/author-avatar/{fakeId}', function ($fakeId) {
     $author = Author::find(Author::getIdFromFakeId($fakeId));
-    $url = isValidPicUrl($author->pic_url[0] ?? '') ? $author->pic_url[0] : Author::$defaultAvatarUrl;
+    $url = isValidPicUrl($author->pic_url[0] ?? '') ? $author->pic_url[0] : config('app.avatar.default');
 
     if (isWikimediaUrl($url)) {
         $options = config('app.env') === 'production' ? [] : [
@@ -366,7 +366,7 @@ Route::any('/author-avatar/{fakeId}', function ($fakeId) {
         $response = Illuminate\Support\Facades\Http::withOptions($options)->timeout(3)->retry(1, 1)->get($url);
 
         if ($response->status() !== 200) {
-            return responseFile(Author::$defaultAvatarUrl);
+            return responseFile(config('app.avatar.default'));
         }
 
         $relativeStoreDir = 'app/public/author/' . ceil($author->id / 500);
@@ -378,7 +378,7 @@ Route::any('/author-avatar/{fakeId}', function ($fakeId) {
         $storePath = "{$dir}/{$author->id}.jpg";
         file_put_contents($storePath, $response);
         if (!file_exists($storePath)) {
-            return responseFile(Author::$defaultAvatarUrl);
+            return responseFile(config('app.avatar.default'));
         }
 
         $fileInfo = pathinfo($url);

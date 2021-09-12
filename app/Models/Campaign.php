@@ -155,7 +155,7 @@ class Campaign extends Model {
                 if (isset($master['avatar'])) {
                     $ret['avatar'] = asset($master['avatar']);
                 }
-                $ret['avatar'] = $ret['avatar'] ?? (asset(User::$defaultAvatarUrl));
+                $ret['avatar'] = $ret['avatar'] ?? config('app.avatar.default');
 
                 return $ret;
             }, $masterInfos);

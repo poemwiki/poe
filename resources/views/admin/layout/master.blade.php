@@ -13,6 +13,15 @@
 
     @include('brackets/admin-ui::admin.partials.main-styles')
 
+    <style>
+      .avatar{
+        width: 3em; height: 3em; margin-right: .5em; border-radius: 4px; object-fit: cover;
+      }
+      .avatar-sm {
+        width: 2em; height: 2em; margin-right: .5em; border-radius: 2px; object-fit: cover;
+      }
+    </style>
+    @stack('head-styles')
     @yield('styles')
 
 </head>

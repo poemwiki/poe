@@ -84,8 +84,8 @@ class PoemAPIController extends Controller {
             $item['date_ago']               = date_ago($poem->created_at);
             $item['poet']                   = $poem->poet_label;
             $item['poet_cn']                = $poem->poet_label_cn;
-            $item['poet_avatar_true']       = $poem->poet_avatar             !== asset(Author::$defaultAvatarUrl);
-            $item['translator_avatar_true'] = $poem->translator_avatar       !== asset(Author::$defaultAvatarUrl);
+            $item['poet_avatar_true']       = $poem->poet_avatar !== config('app.avatar.default');
+            $item['translator_avatar_true'] = $poem->translator_avatar !== config('app.avatar.default');
             $item['poet_is_v']              = $poem->poet_is_v;
 
             $item['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
@@ -98,7 +98,7 @@ class PoemAPIController extends Controller {
                         'name'        => $translator->label,
                         'id'          => $translator->id,
                         'avatar'      => $translator->avatar_url,
-                        'avatar_true' => $translator->avatar_url !== asset(Author::$defaultAvatarUrl)
+                        'avatar_true' => $translator->avatar_url !== config('app.avatar.default')
                     ];
                 } elseif ($translator instanceof Entry) {
                     $translatorLabels[] = $translator->name;
@@ -167,8 +167,8 @@ class PoemAPIController extends Controller {
         }
 
         $res['poet']                   = $poem->poet_label;
-        $res['poet_avatar_true']       = $poem->poet_avatar             !== asset(Author::$defaultAvatarUrl);
-        $res['translator_avatar_true'] = $poem->translator_avatar       !== asset(Author::$defaultAvatarUrl);
+        $res['poet_avatar_true']       = $poem->poet_avatar !== config('app.avatar.default');
+        $res['translator_avatar_true'] = $poem->translator_avatar !== config('app.avatar.default');
         $res['poet_is_v']              = $poem->poet_is_v;
 
         $res['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
@@ -182,7 +182,7 @@ class PoemAPIController extends Controller {
                     'name'        => $translator->label,
                     'id'          => $translator->id,
                     'avatar'      => $translator->avatar_url,
-                    'avatar_true' => $translator->avatar_url !== asset(Author::$defaultAvatarUrl)
+                    'avatar_true' => $translator->avatar_url !== config('app.avatar.default')
                 ];
             } elseif ($translator instanceof Entry) {
                 $translatorLabels[] = $translator->name;
@@ -618,7 +618,7 @@ class PoemAPIController extends Controller {
                     $author['user'] = $author['user']->only(['id', 'avatar_url', 'name']);
                 }
 
-                $author['avatar_true'] = $author['avatar_url'] !== asset(Author::$defaultAvatarUrl);
+                $author['avatar_true'] = $author['avatar_url'] !== config('app.avatar.default');
 
                 return $author;
             }),

@@ -81,7 +81,7 @@
                                         </td>
 
                                         <td>@{{ item.id }}</td>
-                                        <td><a :href="item.url" target="_blank">@{{ item.name_lang }}</a></td>
+                                        <td><a :href="item.url" target="_blank"><img :src="item.avatar_url" alt="avatar" class="avatar">@{{ item.name_lang }}</a></td>
                                         <td><a :href="'https://www.wikidata.org/wiki/Q'+item.wikidata_id" target="_blank">@{{ item.wikidata_id }}</a></td>
                                         <td>@{{ item.uploader_name }}</td>
                                         <td>@{{ item.user_id }}</td>

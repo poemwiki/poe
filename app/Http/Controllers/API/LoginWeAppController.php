@@ -1,19 +1,14 @@
 <?php
 
-
 namespace App\Http\Controllers\API;
-
 
 use App\Http\Controllers\Controller;
 use App\Models\UserBind;
 use App\User;
-
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class LoginWeAppController extends Controller {
@@ -26,7 +21,7 @@ class LoginWeAppController extends Controller {
             'secret' => config('wechat.mini_program.default.secret'),
 
             // 指定 API 调用返回结果的类型：array(default)/collection/object/raw/自定义类名
-            'response_type' => 'array',]);
+            'response_type' => 'array', ]);
     }
 
     /**
@@ -36,7 +31,7 @@ class LoginWeAppController extends Controller {
     public function login(Request $request) {
         Log::info('try weApp login', $request->toArray());
 
-        if(!isset($request->code) or is_null($request->code)) {
+        if (!isset($request->code) or is_null($request->code)) {
             return $this->responseFail([], 'need code');
         }
 
@@ -45,17 +40,17 @@ class LoginWeAppController extends Controller {
         $data = $this->weApp->auth->session($code);
         if (isset($data['errcode'])) {
             Log::info('try weApp login failed:', $data);
+
             return $this->responseFail([], 'code已过期或不正确');
         }
         Log::info('wechat server reply:', $data);
-        $weappOpenid = $data['openid'];
+        $weappOpenid      = $data['openid'];
         $weixinSessionKey = $data['session_key']; // 用于 this->decrypt 获取加密的用户信息
-        $avatar = $request->avatar ?? '';
-        $nickName = $request->nickName ?? '';
-        $gender = $request->gender ?? 0;
-        $email = $request->email ?? '';
+        $avatar           = $request->avatar   ?? '';
+        $nickName         = $request->nickName ?? '';
+        $gender           = $request->gender   ?? 0;
+        $email            = $request->email    ?? '';
         // $avatar = str_replace('/132', '/0', $request->avatar);//拿到分辨率高点的头像
-
 
         // 找到 openid 对应的用户
         // TODO 考虑同一unionid下不同openid的虚拟身份（欢乐马、神经蛙等）
@@ -66,18 +61,17 @@ class LoginWeAppController extends Controller {
         if ($userBind) {
             // 已经登录过小程序
             $attributes = [
-                'updated_at' => now(),
-                'open_id' => $weappOpenid,
-                'nickname' => $nickName,
-                'avatar' => $avatar,
-                'gender' => $gender,
-                'info' => json_encode($data),
+                'updated_at'        => now(),
+                'open_id'           => $weappOpenid,
+                'nickname'          => $nickName,
+                'avatar'            => $avatar,
+                'gender'            => $gender,
+                'info'              => json_encode($data),
                 'weapp_session_key' => $weixinSessionKey
             ];
             // 更新用户数据
             $userBind->update($attributes);
             $user = $userBind->user;
-            $user->avatar = $avatar;
             $user->save();
         } else {
             // 从未注册过的用户
@@ -91,28 +85,28 @@ class LoginWeAppController extends Controller {
             } else {
                 // TODO user.name should be unique
                 $newUser = User::create([
-                    'name' => $nickName . '[from-weapp]',
-                    'email' => $email,
-                    'nickname' => $nickName,
-                    'avatar' => $avatar,
-                    'gender' => $gender,
+                    'name'        => $nickName . '[from-weapp]',
+                    'email'       => $email,
+                    'nickname'    => $nickName,
+                    'avatar'      => $avatar,
+                    'gender'      => $gender,
                     'invite_code' => hash('crc32', sha1(2 . $email)),
-                    'invited_by' => 2,
-                    'password' => ''
+                    'invited_by'  => 2,
+                    'password'    => ''
                 ]);
                 event(new Registered($newUser));
             }
 
             $userBind = UserBind::create([
-                'open_id' => $weappOpenid,
-                'union_id' => isset($data['unionid']) ? $data['unionid'] : '',
-                'user_id' => $newUser->id,
-                'bind_status' => 1, // TODO 暂无avatar nickname等详细信息时，暂为待绑状态 2
-                'bind_ref' => UserBind::BIND_REF['weapp'],
-                'nickname' => $nickName,
-                'avatar' => $avatar,
-                'gender' => $gender,
-                'info' => json_encode($data),
+                'open_id'           => $weappOpenid,
+                'union_id'          => isset($data['unionid']) ? $data['unionid'] : '',
+                'user_id'           => $newUser->id,
+                'bind_status'       => 1, // TODO 暂无avatar nickname等详细信息时，暂为待绑状态 2
+                'bind_ref'          => UserBind::BIND_REF['weapp'],
+                'nickname'          => $nickName,
+                'avatar'            => $avatar,
+                'gender'            => $gender,
+                'info'              => json_encode($data),
                 'weapp_session_key' => $weixinSessionKey
             ]);
             Log::info('new userBind from weapp:', $userBind->toArray());
@@ -123,11 +117,12 @@ class LoginWeAppController extends Controller {
         $createToken->token->save();
 
         $token = $createToken->accessToken;
+
         return $this->responseSuccess([
             'access_token' => $token,
-            'token_type' => "Bearer",
-            'expires_in' => $createToken->token->expires_at,
-            'data' => $userBind->user,
+            'token_type'   => 'Bearer',
+            'expires_in'   => $createToken->token->expires_at,
+            'data'         => $userBind->user,
         ]);
     }
 
@@ -138,16 +133,15 @@ class LoginWeAppController extends Controller {
 
         $userBind = UserBind::where([
             'bind_ref' => UserBind::BIND_REF['weapp'],
-            'user_id' => $request->user()->id
+            'user_id'  => $request->user()->id
         ])->first();
         $decrypted = $this->weApp->encryptor->decryptData($userBind->weapp_session_key, $detail['iv'], $detail['encryptedData']);
 
         return $this->responseSuccess([
-            'user' => $userBind->user,
+            'user'      => $userBind->user,
             'decrypted' => $decrypted
         ]);
     }
-
 
     /**
      * Get the guard to be used during authentication.
@@ -162,19 +156,20 @@ class LoginWeAppController extends Controller {
      * @param $openID
      * @param $bindRef
      * @param int $bindStatus
-     * TODO move it to BindInfoRepository
+     *                        TODO move it to BindInfoRepository
      * @return UserBind|null
      */
-    public function getUserBindInfoByOpenID($openID, $bindRef = UserBind::BIND_REF['weapp'], $bindStatus=null) {
+    public function getUserBindInfoByOpenID($openID, $bindRef = UserBind::BIND_REF['weapp'], $bindStatus = null) {
         try {
             $q = UserBind::where([
                 'open_id_crc32' => Str::crc32($openID),
-                'open_id' => $openID,
-                'bind_ref' => $bindRef
+                'open_id'       => $openID,
+                'bind_ref'      => $bindRef
             ]);
-            if(!is_null($bindStatus)) {
+            if (!is_null($bindStatus)) {
                 $q->where('bind_status', '=', $bindStatus);
             }
+
             return $q->first();
         } catch (\Exception $exception) {
             return null;
@@ -187,16 +182,17 @@ class LoginWeAppController extends Controller {
      * @param int $bindStatus
      * @return UserBind|null
      */
-    public function getUserBindInfoByUnionID($unionID, $bindRef = UserBind::BIND_REF['weapp'], $bindStatus=null) {
+    public function getUserBindInfoByUnionID($unionID, $bindRef = UserBind::BIND_REF['weapp'], $bindStatus = null) {
         try {
             $q = UserBind::where([
                 'union_id_crc32' => Str::crc32($unionID),
-                'union_id' => $unionID,
-                'bind_ref' => $bindRef
+                'union_id'       => $unionID,
+                'bind_ref'       => $bindRef
             ]);
-            if(!is_null($bindStatus)) {
+            if (!is_null($bindStatus)) {
                 $q->where('bind_status', '=', $bindStatus);
             }
+
             return $q->first();
         } catch (\Exception $exception) {
             return null;
