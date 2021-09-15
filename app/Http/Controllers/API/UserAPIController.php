@@ -46,7 +46,7 @@ class UserAPIController extends Controller {
             }
 
             $user     = $request->user();
-            $fileName = $user->id . '.' . $ext;
+            $fileName = $user->fakeId . '.' . $ext;
 
             $fileID = $file->storeAs(
                 config('app.avatar.user_path'),
