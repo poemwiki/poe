@@ -4,8 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
+use App\Services\Tx;
 use Illuminate\Http\Request;
-use Qcloud\Cos\Client;
 
 class UserAPIController extends Controller {
     public function update(Request $request) {
@@ -40,31 +40,21 @@ class UserAPIController extends Controller {
             }
 
             $size = $file->getSize();
-            $size = $size / 1024 / 1024;
-            if ($size > 3) {
+            if ($size > 3 * 1024 * 1024) {
                 return $this->responseFail([], '上传的图片不能超过3M', Controller::$CODE['upload_img_size_limit']);
             }
 
             $user     = $request->user();
             $fileName = $user->fakeId . '.' . $ext;
 
-            $fileID = $file->storeAs(
-                config('app.avatar.user_path'),
-                $fileName,
-                'cosv5'
-            );
+            $client     = new Tx();
+            $format     = TX::SUPPORTED_FORMAT['webp'];
+            $toFileName = $user->fakeId . '.' . $format;
+            $fileID     = config('app.avatar.user_path') . '/' . $fileName;
+            $result     = $client->thumbnailAndUpload($fileID, $toFileName, $file->getContent(), $format);
 
-            $client = new Client([
-                'region'      => config('filesystems.disks.cosv5.region'),
-                'credentials' => [
-                    'secretId'  => config('filesystems.disks.cosv5.credentials.secretId'),
-                    'secretKey' => config('filesystems.disks.cosv5.credentials.secretKey')
-                ]
-            ]);
-            $bucket = config('filesystems.disks.cosv5.bucket');
-
-            if ($fileID) {
-                $objectUrlWithoutSign = $client->getObjectUrlWithoutSign($bucket, $fileID);
+            if (isset($result['Data']['ProcessResults']['Object'][0])) {
+                $objectUrlWithoutSign = 'https://' . $result['Data']['ProcessResults']['Object'][0]['Location'];
                 $user->avatar         = $objectUrlWithoutSign;
                 $user->save();
 
