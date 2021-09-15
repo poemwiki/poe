@@ -84,7 +84,7 @@ class PoemAPIController extends Controller {
             $item['date_ago']               = date_ago($poem->created_at);
             $item['poet']                   = $poem->poet_label;
             $item['poet_cn']                = $poem->poet_label_cn;
-            $item['poet_avatar_true']       = $poem->poet_avatar !== config('app.avatar.default');
+            $item['poet_avatar_true']       = $poem->poet_avatar       !== config('app.avatar.default');
             $item['translator_avatar_true'] = $poem->translator_avatar !== config('app.avatar.default');
             $item['poet_is_v']              = $poem->poet_is_v;
 
@@ -167,7 +167,7 @@ class PoemAPIController extends Controller {
         }
 
         $res['poet']                   = $poem->poet_label;
-        $res['poet_avatar_true']       = $poem->poet_avatar !== config('app.avatar.default');
+        $res['poet_avatar_true']       = $poem->poet_avatar       !== config('app.avatar.default');
         $res['translator_avatar_true'] = $poem->translator_avatar !== config('app.avatar.default');
         $res['poet_is_v']              = $poem->poet_is_v;
 
