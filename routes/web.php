@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Author;
 use App\Models\Poem;
 use App\Repositories\PoemRepository;
 use App\User;
@@ -350,47 +349,3 @@ Route::get('/poem-card/{id}/{compositionId?}', function ($id, $compositionId = n
 
     return $response;
 })->name('poem-card');
-
-// TODO move it to pic controller
-Route::any('/author-avatar/{fakeId}', function ($fakeId) {
-    $author = Author::find(Author::getIdFromFakeId($fakeId));
-    $url = isValidPicUrl($author->pic_url[0] ?? '') ? $author->pic_url[0] : config('app.avatar.default');
-
-    if (isWikimediaUrl($url)) {
-        $options = config('app.env') === 'production' ? [] : [
-            'proxy' => 'http://127.0.0.1:1087',
-            // 'https' => 'tcp://127.0.0.1:1087'
-        ];
-
-        // dd($url);
-        $response = Illuminate\Support\Facades\Http::withOptions($options)->timeout(3)->retry(1, 1)->get($url);
-
-        if ($response->status() !== 200) {
-            return responseFile(config('app.avatar.default'));
-        }
-
-        $relativeStoreDir = 'app/public/author/' . ceil($author->id / 500);
-        $dir = storage_path($relativeStoreDir);
-        if (!is_dir($dir)) {
-            mkdir($dir);
-        }
-
-        $storePath = "{$dir}/{$author->id}.jpg";
-        file_put_contents($storePath, $response);
-        if (!file_exists($storePath)) {
-            return responseFile(config('app.avatar.default'));
-        }
-
-        $fileInfo = pathinfo($url);
-        // 获取 wikimedia 链接及版权信息，保存至 image 表
-        $picInfo = get_wikimedia_pic_info([
-            'title' => $fileInfo['basename'],
-        ]);
-    // dd($picInfo);
-        // save to image, and link to author
-    } else {
-        $storePath = $url;
-    }
-
-    return responseFile($storePath);
-})->name('author-avatar');

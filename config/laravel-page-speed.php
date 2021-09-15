@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Enable Laravel Page Speed
@@ -28,7 +27,7 @@ return [
         '*.jpeg',
         'admin*',
         'poem-card*',
-        'author-avatar*',
+        'avatar*',
         // '*contribution*',
         'captcha*',
         '*.xml',
@@ -64,5 +63,4 @@ return [
         '*.m4v',
         '*.torrent'
     ],
-
 ];

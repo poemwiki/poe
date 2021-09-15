@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Listing;
 use App\Http\Requests\Admin\Author\BulkDestroyAuthor;
 use App\Http\Requests\Admin\Author\DestroyAuthor;
 use App\Http\Requests\Admin\Author\IndexAuthor;
@@ -11,7 +12,6 @@ use App\Http\Requests\Admin\Author\UpdateAuthor;
 use App\Models\Author;
 use App\Models\Dynasty;
 use App\Models\Nation;
-use App\Http\Listing;
 use Brackets\AdminAuth\Models\AdminUser;
 use Carbon\Carbon;
 use Exception;
@@ -27,7 +27,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AuthorController extends Controller {
-
     /**
      * Display a listing of the resource.
      *
@@ -41,7 +40,7 @@ class AuthorController extends Controller {
             $request,
 
             // set columns to query
-            ['id', 'name_lang', 'wikidata_id', 'user_id', 'updated_at', 'created_at', 'authorUser.name as user_name',
+            ['id', 'name_lang', 'wikidata_id', 'user_id', 'updated_at', 'created_at', 'authorUser.name as user_name', 'avatar',
                 'upload_user_id', 'uploader.name as uploader_name', 'log.causer_type as causer_type', 'log.causer_id as causer_id'
             ],
 
@@ -49,8 +48,9 @@ class AuthorController extends Controller {
             ['name_lang', 'id', 'authorUser.name', 'wikidata_id', 'user_id', 'uploader.name'],
 
             function (Builder $query) use ($request) {
-                if(!$request->input('orderBy'))
+                if (!$request->input('orderBy')) {
                     $query->orderBy('updated_at', 'desc');
+                }
 
                 $query->leftJoin('users as authorUser', 'author.user_id', '=', 'authorUser.id');
                 $query->leftJoin('users as uploader', 'author.upload_user_id', '=', 'uploader.id');
@@ -70,8 +70,9 @@ class AuthorController extends Controller {
         foreach ($data as &$author) {
             if ($author->causer_type === AdminUser::class && $author->causer_id) {
                 $adminUser = AdminUser::find($author->causer_id);
-                if($adminUser)
+                if ($adminUser) {
                     $author->uploader_name = $adminUser->email . '[后台用户]';
+                }
             }
         }
 
@@ -81,6 +82,7 @@ class AuthorController extends Controller {
                     'bulkItems' => $data->pluck('id')
                 ];
             }
+
             return ['data' => $data];
         }
 
@@ -94,7 +96,6 @@ class AuthorController extends Controller {
      * @throws AuthorizationException
      */
     public function create() {
-
         return redirect(route('author/create'));
 
         // $this->authorize('admin.author.create');
@@ -143,7 +144,6 @@ class AuthorController extends Controller {
      * @throws AuthorizationException
      */
     public function edit(Author $author) {
-
         return redirect(route('author/edit', $author->fakeId));
 
         // $this->authorize('admin.author.edit', $author);
@@ -174,7 +174,7 @@ class AuthorController extends Controller {
      * Update the specified resource in storage.
      *
      * @param UpdateAuthor $request
-     * @param Author $author
+     * @param Author       $author
      * @return array|RedirectResponse|Redirector
      */
     public function update(UpdateAuthor $request, Author $author) {
@@ -187,7 +187,7 @@ class AuthorController extends Controller {
         if ($request->ajax()) {
             return [
                 'redirect' => url('admin/authors'),
-                'message' => trans('brackets/admin-ui::admin.operation.succeeded'),
+                'message'  => trans('brackets/admin-ui::admin.operation.succeeded'),
             ];
         }
 
@@ -198,13 +198,13 @@ class AuthorController extends Controller {
      * Remove the specified resource from storage.
      *
      * @param DestroyAuthor $request
-     * @param Author $author
+     * @param Author        $author
      * @return ResponseFactory|RedirectResponse|Response
      * @throws Exception
      */
     public function destroy(DestroyAuthor $request, Author $author) {
         // TODO $author->translatedPoems should be deprecated
-        if($author->poems->count() || $author->poemsAsTranslator->count() || $author->translatedPoems->count()) {
+        if ($author->poems->count() || $author->poemsAsTranslator->count() || $author->translatedPoems->count()) {
             $ids = [];
             foreach ($author->poems as $p) {
                 $ids[] = $p->id;
@@ -212,7 +212,8 @@ class AuthorController extends Controller {
             foreach ($author->translatedPoems as $p) {
                 $ids[] = $p->id;
             }
-            return response(['message' => '删除失败，请先删除本作者关联的作品(ID:'.join(', ', $ids).')'], 405);
+
+            return response(['message' => '删除失败，请先删除本作者关联的作品(ID:' . join(', ', $ids) . ')'], 405);
         }
 
         $author->delete();

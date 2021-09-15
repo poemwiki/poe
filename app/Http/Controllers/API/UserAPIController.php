@@ -53,7 +53,7 @@ class UserAPIController extends Controller {
             $fileID     = config('app.avatar.user_path') . '/' . $fileName;
             $result     = $client->thumbnailAndUpload($fileID, $toFileName, $file->getContent(), $format);
 
-            if (isset($result['Data']['ProcessResults']['Object'][0])) {
+            if (isset($result['Data']['ProcessResults']['Object'][0]['Location'])) {
                 $objectUrlWithoutSign = 'https://' . $result['Data']['ProcessResults']['Object'][0]['Location'];
                 $user->avatar         = $objectUrlWithoutSign;
                 $user->save();

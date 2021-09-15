@@ -1,40 +1,40 @@
 <?php
 
-if (! function_exists('file_get_contents_post')) {
+if (!function_exists('file_get_contents_post')) {
     /**
-     * post $data to $url
+     * post $data to $url.
      * @param $url
      * @param $data
      * @param string $contentType
-     * @param int $timeout
+     * @param int    $timeout
      * @return false|string
      * @throws Exception
      */
     function file_get_contents_post(string $url, $data, string $contentType = 'application/x-www-form-urlencoded', $timeout = 15) {
-
         $options = [
             'http' => [
-                'header'  => "Content-type: " . $contentType,
-                'method'  => "POST",
-                'content' => $contentType==='application/json' ? json_encode($data) : http_build_query($data),
+                'header'  => 'Content-type: ' . $contentType,
+                'method'  => 'POST',
+                'content' => $contentType === 'application/json' ? json_encode($data) : http_build_query($data),
                 'timeout' => $timeout,
             ],
         ];
         $context = stream_context_create($options);
+
         try {
             return file_get_contents($url, false, $context);
         } catch (Exception $e) {
-            throw new Exception("Error on file_get_contents_post: " . $e->getMessage());
+            throw new Exception('Error on file_get_contents_post: ' . $e->getMessage());
         }
     }
 }
 
-if (! function_exists('curl_post')) {
+if (!function_exists('curl_post')) {
     function curl_post(string $url, $data, string $contentType = 'application/x-www-form-urlencoded') {
         $ch = curl_init();
         //请求地址
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 
         $postData = $contentType === 'application/json' ? json_encode($data) : http_build_query($data);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
@@ -48,21 +48,21 @@ if (! function_exists('curl_post')) {
         //获取的信息以文件流的形式返回，而不是直接输出
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         // 设置请求头
-        $headers[] = "Content-type:" . $contentType;
+        $headers[] = 'Content-type:' . $contentType;
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
         //发起请求
         try {
             return curl_exec($ch);
         } catch (Exception $e) {
-            throw new Exception("Error on curl_post: " . $e->getMessage());
+            throw new Exception('Error on curl_post: ' . $e->getMessage());
         }
     }
 }
 
-if (! function_exists('short_url')) {
+if (!function_exists('short_url')) {
     /**
-     * get a short url from api.xiaomark.com started with https://sourl.cn
+     * get a short url from api.xiaomark.com started with https://sourl.cn.
      * @param $origin string Origin url should under these 3 domains: mp.weixin.qq.com, poemwiki.com, poemwiki.org
      * @param null $cb
      * @return mixed
@@ -71,8 +71,8 @@ if (! function_exists('short_url')) {
         // TODO check redis if n_links_today <= 0, return $origin
 
         $request_url = 'https://api.xiaomark.com/v1/link/create';
-        $data = [
-            'apikey' => 'fccab0cf923086937191cb3d7a523772',
+        $data        = [
+            'apikey'     => 'fccab0cf923086937191cb3d7a523772',
             'origin_url' => $origin,
         ];
 
@@ -84,12 +84,13 @@ if (! function_exists('short_url')) {
 
         $result = json_decode($result_str, true);
 
-        if ($result && $result['code'] == "0" && isset($result['data']['link'])) {
+        if ($result && $result['code'] == '0' && isset($result['data']['link'])) {
             $url = $result['data']['link']['url'];
             // TODO save $result['data']['n_links_today'] to redis
-            if(is_callable($cb)) {
+            if (is_callable($cb)) {
                 $cb($url, $result['data']['n_links_today'] ?? 0);
             }
+
             return $url;
         }
 
@@ -97,8 +98,7 @@ if (! function_exists('short_url')) {
     }
 }
 
-if (! function_exists('create_image')) {
-
+if (!function_exists('create_image')) {
     /**
      * @param $imgPath
      * @return false|resource
@@ -109,18 +109,21 @@ if (! function_exists('create_image')) {
         switch ($type) {
             case 'image/jpeg':
                 $image = imagecreatefromjpeg($imgPath);
+
                 break;
             case 'image/png':
                 $image = imagecreatefrompng($imgPath);
+
                 break;
             default:
                 throw new Exception('Image type not supported. front image: ' . $imgPath);
         }
+
         return $image;
     }
 }
 
-if (! function_exists('img_overlay')) {
+if (!function_exists('img_overlay')) {
     /**
      * @param $bg
      * @param $front
@@ -131,20 +134,20 @@ if (! function_exists('img_overlay')) {
      */
     function img_overlay($bg, $front, $dist_x, $dist_y, $dist_w, $dist_h) {
         // TODO use image type from getimagesize
-        $bgImg = create_image($bg);
+        $bgImg    = create_image($bg);
         $frontImg = create_image($front);
 
-        list($width, $height) = getimagesize($bg);
+        list($width, $height)           = getimagesize($bg);
         list($frontWidth, $frontHeight) = getimagesize($front);
-        $out = imagecreatetruecolor($width, $height);
+        $out                            = imagecreatetruecolor($width, $height);
         imagecopyresampled($out, $bgImg, 0, 0, 0, 0, $width, $height, $width, $height);
-        imagecopyresampled($out, $frontImg, $width-220, $height-160, 0, 0, $dist_w, $dist_h, $frontWidth, $frontHeight);
+        imagecopyresampled($out, $frontImg, $width - 220, $height - 160, 0, 0, $dist_w, $dist_h, $frontWidth, $frontHeight);
+
         return $out;
     }
-
 }
 
-if (! function_exists('date_ago')) {
+if (!function_exists('date_ago')) {
     function date_ago($time) {
         return \Illuminate\Support\Carbon::parse($time)->diffForHumans(now());
     }
@@ -152,88 +155,99 @@ if (! function_exists('date_ago')) {
 
 function get_causer_name($log) {
     if ($log->causer_type === "App\User") {
-        $user=\App\User::find($log->causer_id);
+        $user = \App\User::find($log->causer_id);
+
         return $user ? $user->name : "User[{$log->causer_id}]";
-    } else {
-        return 'PoemWiki';
     }
+
+    return 'PoemWiki';
 }
 
 function fuckGWF(string $url, $userAgent = 'normal'): string {
-
     $options = config('app.env') === 'production' ? [] : [
         'proxy' => 'http://localhost:1087',
     ];
 
     $UAs = [
-        'normal' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4485.0 Safari/537.36',
+        'normal'   => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4485.0 Safari/537.36',
         'poemwiki' => 'PoemWiki-bot/0.1 (https://poemwiki.org; poemwiki@126.com) PHP/' . PHP_VERSION, // TODO adjust this; see https://w.wiki/CX6
     ];
 
     $response = Illuminate\Support\Facades\Http::withOptions($options)->withHeaders([
-        'Accept' => 'application/json',
+        'Accept'       => 'application/json',
         'Content-Type' => 'application/json',
-        'User-Agent' => $UAs[$userAgent] ?? ''
+        'User-Agent'   => $UAs[$userAgent] ?? ''
     ])->timeout(3)->retry(1, 2)->get($url);
 
-    if(!$response->successful()) {
+    if (!$response->successful()) {
         return false;
     }
 
-    $body = (string)$response->getBody();
+    $body = (string) $response->getBody();
 
-    if (!$body) return false;
+    if (!$body) {
+        return false;
+    }
 
     return $body;
 }
 
 function get_wikipedia_summary(array $titleLocale) {
     $title = $titleLocale['title'];
-    if(!$title) {
+    if (!$title) {
         return '';
     }
 
-    $endPoint = 'https://'.$titleLocale['locale'].'.wikipedia.org/api/rest_v1/page/summary/';
-    $url = $endPoint . urlencode(str_replace(' ', '_', $title));
+    $endPoint = 'https://' . $titleLocale['locale'] . '.wikipedia.org/api/rest_v1/page/summary/';
+    $url      = $endPoint . urlencode(str_replace(' ', '_', $title));
     // dd($url);
     try {
         $str = fuckGWF($url);
     } catch (Exception $e) {
         Log::warning('request fail. url:' . $url . '\nException:' . $e->getMessage());
+
         return false;
     }
 
-    if(!$str) return '';
+    if (!$str) {
+        return '';
+    }
+
     return json_decode($str)->extract;
 }
 
 function get_wikimedia_pic_info(array $titleLocale) {
     $title = $titleLocale['title'];
-    if(!$title) {
+    if (!$title) {
         return '';
     }
 
     // https://en.wikipedia.org/w/api.php?format=json&prop=imageinfo&iiprop=extmetadata&titles=File:Marcel_Proust_1895.jpg
     // https://en.wikipedia.org/w/api.php?format=json&prop=imageinfo&iiprop=extmetadata&titles=File:Marcel_Proust_1895.jpg
     // https://en.wikipedia.org/w/api.php?action=query&format=json&prop=imageinfo&titles=File%3AMarcel%20Proust%201895.jpg&iiprop=extmetadata
-    $endPoint = 'https://'.($titleLocale['locale'] ?? 'en').'.wikipedia.org/w/api.php?action=query&format=json&prop=imageinfo&iiprop=extmetadata&titles=';
-    $url = $endPoint .urlencode('File:'.$title);
+    $endPoint = 'https://' . ($titleLocale['locale'] ?? 'en') . '.wikipedia.org/w/api.php?action=query&format=json&prop=imageinfo&iiprop=extmetadata&titles=';
+    $url      = $endPoint . urlencode('File:' . $title);
 
     try {
         $str = fuckGWF($url);
     } catch (Exception $e) {
         Log::warning('request fail. url:' . $url . '\nException:' . $e->getMessage());
+
         return false;
     }
 
-    if(!$str) return '';
+    if (!$str) {
+        return '';
+    }
+
     return json_decode($str);
 }
 
 function t2s($str) {
-    $od = opencc_open("t2s.json");
+    $od      = opencc_open('t2s.json');
     $content = opencc_convert($str, $od);
     opencc_close($od);
+
     return $content;
 }
 function isValidPicUrl($url) {
@@ -251,32 +265,34 @@ function responseFile($path) {
     $type = File::mimeType($path);
 
     $response = Response::make($file, 200);
-    $response->header("Content-Type", $type);
+    $response->header('Content-Type', $type);
+
     return $response;
 }
 
 /**
  * 获取小程序scheme码
  *
- * @param  array  $param
+ * @param array $param
  * @return array|Illuminate\Support\Collection|object|Psr\Http\Message\ResponseInterface|string
  *
  * @throws GuzzleHttp\Exception\GuzzleException
  * @throws EasyWeChat\Kernel\Exceptions\InvalidConfigException
  */
 function getWxUrlLink(array $param = []) {
-    if(config('app.env') === 'local') {
-        return (object)[
+    if (config('app.env') === 'local') {
+        return (object) [
             'url_link' => 'https://wxaurl.cn/sLOfqBytest',
-            'errcode' => null
+            'errcode'  => null
         ];
     }
     $wechatApp = \EasyWeChat\Factory::miniProgram([
-        'app_id' => config('wechat.mini_program.default.app_id'),
-        'secret' => config('wechat.mini_program.default.secret'),
+        'app_id'        => config('wechat.mini_program.default.app_id'),
+        'secret'        => config('wechat.mini_program.default.secret'),
         'response_type' => 'object',
     ]);
     $client = new \EasyWeChat\Kernel\BaseClient($wechatApp);
+
     return $client->httpPostJson('wxa/generate_urllink', $param);
 }
 
@@ -292,9 +308,10 @@ function getWxUrlLink(array $param = []) {
  */
 function getPermanentWxUrlLink($query, $path = 'pages/poems/index') {
     logger()->info('getting permanent wx urlLink:' . $path . $query);
+
     return getWxUrlLink([
-        'path' => $path,
-        'query' =>  $query,
+        'path'      => $path,
+        'query'     => $query,
         'is_expire' => false,
         // "expire_type" => 1,
         // "expire_interval" => 365,
@@ -303,38 +320,39 @@ function getPermanentWxUrlLink($query, $path = 'pages/poems/index') {
 
 function getTmpWxUrlLink($expireIntervalDays, $query, $path = 'pages/poems/index') {
     return getWxUrlLink([
-        'path' => $path,
-        'query' =>  $query,
-        'is_expire' => true,
-        "expire_type" => 1,
-        "expire_interval" => $expireIntervalDays >= 30 ? 30 : $expireIntervalDays,
+        'path'            => $path,
+        'query'           => $query,
+        'is_expire'       => true,
+        'expire_type'     => 1,
+        'expire_interval' => $expireIntervalDays >= 30 ? 30 : $expireIntervalDays,
     ]);
 }
 
-
-function submitPage2SYS(array $pages, \EasyWeChat\Kernel\BaseClient $client = null) {
-    if(!$client) {
+function submitPage2SYS(array $pages, EasyWeChat\Kernel\BaseClient $client = null) {
+    if (!$client) {
         $wechatApp = \EasyWeChat\Factory::miniProgram([
-            'app_id' => config('wechat.mini_program.default.app_id'),
-            'secret' => config('wechat.mini_program.default.secret'),
+            'app_id'        => config('wechat.mini_program.default.app_id'),
+            'secret'        => config('wechat.mini_program.default.secret'),
             'response_type' => 'object',
         ]);
         $client = new \EasyWeChat\Kernel\BaseClient($wechatApp);
     }
+
     return $client->httpPostJson('wxa/search/wxaapi_submitpages', [
         'pages' => $pages
     ]);
 }
 
-function str_pos_one_of($str, $needles, $insensitive=false) {
-    if($insensitive) {
+function str_pos_one_of($str, $needles, $insensitive = false) {
+    if ($insensitive) {
         $str = strtolower($str);
     }
     foreach ($needles as $needle) {
         $pos = mb_strpos($str, $insensitive ? strtolower($needle) : $needle);
-        if($pos !== false) {
+        if ($pos !== false) {
             return ['pos' => $pos, 'word' => $needle];
         }
     }
+
     return false;
 }

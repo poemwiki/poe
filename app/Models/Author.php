@@ -23,6 +23,7 @@ use Spatie\Searchable\SearchResult;
  * @property mixed fakeId
  * @property array|null                                                         $name_lang
  * @property int|null                                                           $user_id
+ * @property string|null                                                        $avatar
  * @property array|null                                                         $pic_url
  * @property int|null                                                           $wikidata_id
  * @property mixed|null                                                         $wikipedia_url
@@ -106,7 +107,8 @@ class Author extends Model implements Searchable {
         'nation_id',
         'dynasty_id',
         'upload_user_id',
-        'wiki_desc_lang'
+        'wiki_desc_lang',
+        'avatar'
     ];
 
     protected $dates = [
@@ -185,6 +187,10 @@ class Author extends Model implements Searchable {
         return $this->hasMany(\App\Models\Alias::class, 'author_id', 'id');
     }
 
+    public function relatedAvatar() {
+        return Relatable::authorHasAvatar(self::class, $this->id);
+    }
+
     public static function boot() {
         parent::boot();
 
@@ -258,11 +264,14 @@ class Author extends Model implements Searchable {
      * @return string
      */
     public function getAvatarUrlAttribute() {
+        if ($this->avatar) {
+            return $this->avatar;
+        }
         if ($this->user) {
             return $this->user->avatar_url;
         }
         $defaultAvatar = config('app.avatar.default');
-        $url = isValidPicUrl($this->pic_url[0] ?? '') ? $this->pic_url[0] : $defaultAvatar;
+        $url           = isValidPicUrl($this->pic_url[0] ?? '') ? $this->pic_url[0] : $defaultAvatar;
         if (isWikimediaUrl($url)) {
             // $url = route('author-avatar', ['fakeId' => $this->fake_id]);
             $url = $defaultAvatar;
