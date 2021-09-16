@@ -72,7 +72,15 @@ Vue.component('poem-form', {
             if(cjkIds.indexOf(this.form.language_id) === -1) {
               doc.replaceRange(' ', pos);
             } else {
-              doc.replaceRange('　', pos);
+              // if previous character is [a-zA-Z0-9], do not replace
+              var prevChar = doc.getLine(cursor.line).slice(cursor.ch-1, cursor.ch);
+              var nextChar = doc.getLine(cursor.line).slice(cursor.ch, cursor.ch+1);
+              // TODO test for all none CJK characters
+              if(/[a-zA-Z0-9]+$/.test(prevChar) || /[a-zA-Z0-9]+$/.test(nextChar)) {
+                doc.replaceRange(' ', pos);
+              } else {
+                doc.replaceRange('　', pos);
+              }
             }
           },
           // "Shift-Tab": (cm) => cm.execCommand("indentLess"),
@@ -303,18 +311,23 @@ Vue.component('poem-form', {
       // clean unnecessary empty lines
       if(change.origin === 'paste') {
         // TOOD replace spaceX2~4 to full width space
-        let lineCount=0, lenthSum=0, emptyLineCount=0;
+        let lineCount=0, lenthSum=0, emptyLineCount=0, minStartSpace=0, spaceStartLineCount=0;
         change.text.forEach(line => {
           lineCount++;
           lenthSum += line.length;
           if(isEmptyLine(line)) emptyLineCount++;
 
+          if(startWithSpace(line)) spaceStartLineCount++;
+
+          var startSpace = startSpaceNum(line)
+          minStartSpace = startSpace < minStartSpace ? startSpace : minStartSpace;
+
           return line.replace(/\s+$/g, '');
         });
-        const avgLength = lenthSum / lineCount;
+        const avgLength = lenthSum / (lineCount - emptyLineCount);
 
         // TODO write a same function for server side empty line clean and detect
-        if(emptyLineCount >= (lineCount-1)/2 && avgLength<40) {
+        if(emptyLineCount >= (lineCount-1)/2 && avgLength<70) {
           const delMark = '##_@DELETE@_##';
           let newText = change.text.map((line, index) => {
             if(isEmptyLine(line)) {
@@ -341,12 +354,31 @@ Vue.component('poem-form', {
           change.update(null, null, newText);
         }
 
+        // remove space before each line
+        var newText = change.text.map((line, index) => {
+          if (spaceStartLineCount >= lineCount-emptyLineCount) {
+            return line.trim();
+          }
+          return line.trimRight();
+        })
+        change.update(null, null, newText);
+
+
+
         function shouldDel(prevLine, nextLine) {
           return !isEmptyLine(prevLine) && !isEmptyLine(nextLine)
         }
 
         function isEmptyLine(str) {
           return !str.trim().length;
+        }
+
+        function startWithSpace(str) {
+          return /^\s/.test(str)
+        }
+
+        function startSpaceNum(str) {
+          return str.length - str.trimLeft().length;
         }
       }
     },
