@@ -10,6 +10,7 @@ use Spatie\Searchable\SearchResult;
  * App\Models\Alias
  *
  * @property int $id
+ * @property int $fid
  * @property string $name
  * @property string|null $locale
  * @property int|null $author_id
@@ -62,6 +63,9 @@ class Alias extends Model implements Searchable {
 
     public function author() {
         return $this->belongsTo(Author::class, 'author_id', 'id');
+    }
+    public function translatedFrom() {
+        return $this->belongsTo(self::class, 'fid', 'id');
     }
 
     /* ************************ ACCESSOR ************************* */
