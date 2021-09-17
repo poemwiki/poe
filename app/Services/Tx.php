@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use GuzzleHttp\Command\Result;
 use Qcloud\Cos\Client as CosClient;
+use Qcloud\Cos\Exception\ServiceResponseException;
 use Qcloud\Cos\ImageParamTemplate\ImageMogrTemplate;
 use Qcloud\Cos\ImageParamTemplate\PicOperationsTransformation;
 use function Qcloud\Cos\region_map;
@@ -15,7 +17,8 @@ class Tx {
         'webp' => 'webp',
         'jpg'  => 'jpg',
         'png'  => 'png',
-        'gif'  => 'gif'
+        'gif'  => 'gif',
+        'bmp'  => 'bmp'
     ];
     // see [九宫格方位图](https://cloud.tencent.com/document/product/436/44881)
     public const GRAVITY = [
@@ -82,54 +85,88 @@ class Tx {
 
     /**
      * @param string $fileID
-     * @param string $toFileName
+     * @param string $toFileID
+     * @param string $format
+     * @param int    $w
+     * @param int    $h
+     * @param int    $q
+     * @return array
+     * @throws ServiceResponseException
+     */
+    public function scropFile(string $fileID, string $toFileID, string $format = self::SUPPORTED_FORMAT['webp'],
+                              int $w = 600, int $h = 600, int $q = 80) {
+        $imageMogrTemplate = new \Qcloud\Cos\ImageParamTemplate\ImageMogrTemplate();
+        $imageMogrTemplate->scrop($w, $h);
+        $imageMogrTemplate->thumbnailByMinWH($w, $h);
+        $imageMogrTemplate->cropByWH($w, $h, self::GRAVITY['center']);
+        $imageMogrTemplate->format($format);
+        $imageMogrTemplate->quality($q, 1);
+        $picOperationsTemplate = new \Qcloud\Cos\ImageParamTemplate\PicOperationsTransformation();
+        $picOperationsTemplate->setIsPicInfo(1);
+        $picOperationsTemplate->addRule($imageMogrTemplate, '/' . $toFileID);
+
+        // dd($picOperationsTemplate->queryString());
+        /** @var Result $result */
+        $result = $this->cosClient->ImageProcess([
+            'Bucket'         => $this->bucket,
+            'PicOperations'  => $picOperationsTemplate->queryString(),
+            'Key'            => $fileID,
+        ]);
+
+        return $result->toArray();
+    }
+
+    /**
+     * @param string $fileID
+     * @param string $toFileID
      * @param string $content
      * @param string $format
      * @param int    $w
      * @param int    $h
      * @param int    $q
      * @return array
+     * @throws ServiceResponseException
      */
-    public function scropAndUpload(string $fileID, string $toFileName, string $content, string $format = self::SUPPORTED_FORMAT['webp'],
-                                   int $w = 300, int $h = 300, int $q = 80) {
+    public function scropAndUpload(string $fileID, string $toFileID, string $content, string $format = self::SUPPORTED_FORMAT['webp'],
+                                   int $w = 600, int $h = 600, int $q = 80) {
         $imageMogrTemplate = new \Qcloud\Cos\ImageParamTemplate\ImageMogrTemplate();
         $imageMogrTemplate->scrop($w, $h);
+        $imageMogrTemplate->thumbnailByMinWH($w, $h);
+        $imageMogrTemplate->cropByWH($w, $h, self::GRAVITY['center']);
         $imageMogrTemplate->format($format);
         $imageMogrTemplate->quality($q);
         $picOperationsTemplate = new \Qcloud\Cos\ImageParamTemplate\PicOperationsTransformation();
-        $picOperationsTemplate->setIsPicInfo(1); // 是否返回原图信息
-        $picOperationsTemplate->addRule($imageMogrTemplate, $toFileName);
+        $picOperationsTemplate->setIsPicInfo(1);
+        $picOperationsTemplate->addRule($imageMogrTemplate, '/' . $toFileID);
 
-        /** @var \GuzzleHttp\Command\Result $result */
+        /** @var Result $result */
         $result = $this->cosClient->putObject([
             'Bucket'         => $this->bucket,
             'Key'            => $fileID,
             'Body'           => $content,
-            'PicOperations'  => $picOperationsTemplate->queryString(), //生成图片持久化处理参数
+            'PicOperations'  => $picOperationsTemplate->queryString(),
         ]);
+
+        logger()->info('scropAndUpload:', $result->toArray());
 
         return $result->toArray();
     }
 
-    public function scropFile(string $fileID, string $toFileID, string $format = self::SUPPORTED_FORMAT['webp'],
-                              int $w = 300, int $h = 300, int $q = 80) {
-        $imageMogrTemplate = new \Qcloud\Cos\ImageParamTemplate\ImageMogrTemplate();
-        $imageMogrTemplate->scrop($w, $h);
-        $imageMogrTemplate->format($format);
-        $imageMogrTemplate->quality($q);
-        $picOperationsTemplate = new \Qcloud\Cos\ImageParamTemplate\PicOperationsTransformation();
-        $picOperationsTemplate->setIsPicInfo(0); // 是否返回原图信息
-        $picOperationsTemplate->addRule($imageMogrTemplate, $toFileID);
+    /**
+     * @param $fileID
+     * @param null $versionID
+     * @return mixed
+     */
+    public function deleteObject($fileID, $versionID = null) {
+        $options = [
+            'Bucket' => $this->bucket,
+            'Key'    => $fileID
+        ];
+        if ($versionID) {
+            $options['VersionId'] = $versionID;
+        }
 
-        /** @var \GuzzleHttp\Command\Result $result */
-        $result = $this->cosClient->imageProcess([
-            'Bucket'         => $this->bucket,
-            'Key'            => $fileID,
-            // 'Body'           => '',
-            'PicOperations'  => $picOperationsTemplate->queryString(), //生成图片持久化处理参数
-        ]);
-
-        return $result->toArray();
+        return $this->cosClient->deleteObject($options)->toArray();
     }
 
     /**
@@ -142,9 +179,10 @@ class Tx {
      * @param int    $q
      * @param string $gravity
      * @return array
+     * @throws ServiceResponseException
      */
     public function thumbnailAndUpload(string $fileID, string $fileName, $content, string $format = self::SUPPORTED_FORMAT['webp'],
-                                       int $w, int $h, int $q = 70, $gravity = self::GRAVITY['center']) {
+                                       int $w = null, int $h = null, int $q = 70, $gravity = self::GRAVITY['center']) {
         $imageMogrTemplate = new ImageMogrTemplate();
         if ($w && $h) {
             $imageMogrTemplate->thumbnailByMinWH($w, $h);
@@ -153,14 +191,14 @@ class Tx {
         $imageMogrTemplate->quality($q);
         $imageMogrTemplate->format($format);
         $picOperationsTemplate = new PicOperationsTransformation();
-        $picOperationsTemplate->setIsPicInfo(1); // 是否返回原图信息
-        $picOperationsTemplate->addRule($imageMogrTemplate, 't/' . $fileName);
+        $picOperationsTemplate->setIsPicInfo(1);
+        $picOperationsTemplate->addRule($imageMogrTemplate, '/' . $fileName);
 
         return $this->cosClient->putObject([
             'Bucket'        => $this->bucket,
             'Key'           => $fileID,
             'Body'          => $content,
-            'PicOperations' => $picOperationsTemplate->queryString(), //生成图片持久化处理参数
+            'PicOperations' => $picOperationsTemplate->queryString(),
         ])->toArray();
     }
 }

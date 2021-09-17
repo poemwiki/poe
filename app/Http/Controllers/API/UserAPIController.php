@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Author;
 use App\Models\Campaign;
+use App\Models\MediaFile;
 use App\Services\Tx;
+use App\User;
 use Illuminate\Http\Request;
+use League\MimeTypeDetection\GeneratedExtensionToMimeTypeMap;
 
 class UserAPIController extends Controller {
     public function update(Request $request) {
@@ -32,37 +36,86 @@ class UserAPIController extends Controller {
     public function avatar(Request $request) {
         $file = $request->file('avatar');
 
-        if ($file->isValid()) {
-            $ext      = $file->getClientOriginalExtension();
-            $allow    = ['jpg', 'webp', 'png', 'jpeg']; // 支持的类型
-            if (!in_array($ext, $allow)) {
-                return $this->responseFail([], '不支持的图片类型，请上传 jpg/jpeg/png/webp 格式图片。', Controller::$CODE['img_format_invalid']);
-            }
+        if (!$file->isValid()) {
+            logger()->error('user avatar upload Error: file invalid.');
 
-            $size = $file->getSize();
-            if ($size > 3 * 1024 * 1024) {
-                return $this->responseFail([], '上传的图片不能超过3M', Controller::$CODE['upload_img_size_limit']);
-            }
+            return $this->responseFail([], '图片上传失败。请稍后再试。');
+        }
 
-            $user     = $request->user();
-            $fileName = $user->fakeId . '.' . $ext;
+        $ext      = $file->getClientOriginalExtension();
+        $allow    = ['jpg', 'webp', 'png', 'jpeg']; // 支持的类型
+        if (!in_array($ext, $allow)) {
+            return $this->responseFail([], '不支持的图片类型，请上传 jpg/jpeg/png/webp 格式图片。', Controller::$CODE['img_format_invalid']);
+        }
 
-            $client     = new Tx();
-            $format     = TX::SUPPORTED_FORMAT['webp'];
-            $toFileName = $user->fakeId . '.' . $format;
-            $fileID     = config('app.avatar.user_path') . '/' . $fileName;
-            $result     = $client->thumbnailAndUpload($fileID, $toFileName, $file->getContent(), $format);
+        $size = $file->getSize();
+        if ($size > 3 * 1024 * 1024) {
+            return $this->responseFail([], '上传的图片不能超过3M', Controller::$CODE['upload_img_size_limit']);
+        }
 
-            if (isset($result['Data']['ProcessResults']['Object'][0]['Location'])) {
-                $objectUrlWithoutSign = 'https://' . $result['Data']['ProcessResults']['Object'][0]['Location'];
-                $user->avatar         = $objectUrlWithoutSign;
-                $user->save();
+        $user     = $request->user();
+        $fileName = $user->fakeId . '.' . $ext;
 
-                return $this->responseSuccess(['avatar' => $objectUrlWithoutSign]);
-            }
+        [$width, $height] = getimagesize($file);
+        $corpSize         = min($width, $height, 600);
+
+        $client     = new Tx();
+        $format     = TX::SUPPORTED_FORMAT['webp'];
+        $toFileName = config('app.avatar.user_path') . '/' . $user->fakeId . '.' . $format;
+        $fileID     = config('app.avatar.user_path') . '/' . $fileName;
+
+        try {
+            $result = $client->scropAndUpload($fileID, $toFileName, $file->getContent(), $format, $corpSize, $corpSize);
+            logger()->info('scropAndUpload finished:', $result);
+        } catch (\Exception $e) {
+            logger()->error('scropAndUpload Error:' . $e->getMessage());
+
+            return $this->responseFail([], '图片上传失败。请稍后再试。');
+        }
+
+        $avatarImage = $result['Data']['ProcessResults']['Object'][0];
+        if (isset($avatarImage['Location'])) {
+            $objectUrlWithoutSign = 'https://' . $avatarImage['Location'];
+            $user->avatar         = $objectUrlWithoutSign . '?v=' . now();
+            $user->save();
+
+            $this->saveAuthorMediaFile($user, MediaFile::TYPE['avatar'], $avatarImage['Key'], $fileName, $format, $avatarImage['Size']);
+
+            $client->deleteObject($fileID);
+
+            return $this->responseSuccess(['avatar' => $objectUrlWithoutSign]);
         }
 
         return $this->responseFail([], '图片上传失败。请稍后再试。');
+    }
+
+    /**
+     * @param Author $author
+     * @param string $type
+     * @param string $path
+     * @param string $name
+     * @param string $toFormat
+     * @param int    $size
+     * @param int    $fid
+     * @return MediaFile
+     */
+    protected function saveAuthorMediaFile(User $user, string $type, string $path, string $name, string $format, int $size, int $fid = 0): MediaFile {
+        $mediaFile = MediaFile::updateOrCreate([
+            'model_type'     => User::class,
+            'model_id'       => $user->id,
+            'type'           => $type,
+        ], [
+            'path'      => $path,
+            'name'      => $name,
+            'mime_type' => GeneratedExtensionToMimeTypeMap::MIME_TYPES_FOR_EXTENSIONS[$format],
+            'disk'      => 'cosv5',
+            'size'      => $size,
+            'fid'       => $fid
+        ]);
+
+        $user->relateToAvatar($mediaFile->id);
+        /* @var MediaFile $mediaFile */
+        return $mediaFile;
     }
 
     public function data(Request $request) {

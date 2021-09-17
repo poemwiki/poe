@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\Models\MediaFile;
 use App\Models\Poem;
+use App\Models\Relatable;
 use App\Traits\HasFakeId;
 use App\Traits\Liker;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -14,6 +16,7 @@ use Laravel\Passport\HasApiTokens;
 use Spatie\Activitylog\ActivitylogServiceProvider;
 
 /**
+ * @property int id
  * @property string|null avatar
  * @property int is_v
  * @property string avatarUrl
@@ -98,6 +101,28 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public function activityLogs(): MorphMany {
         return $this->morphMany(ActivitylogServiceProvider::determineActivityModel(), 'causer');
+    }
+
+    public function relateToImage($ID) {
+        return Relatable::updateOrCreate([
+            'relation'   => Relatable::RELATION['user_has_image'],
+            'start_type' => self::class,
+            'start_id'   => $this->id,
+            'end_type'   => MediaFile::class
+        ], [
+            'end_id'     => $ID
+        ]);
+    }
+
+    public function relateToAvatar($ID) {
+        return Relatable::updateOrCreate([
+            'relation'   => Relatable::RELATION['user_has_image'],
+            'start_type' => self::class,
+            'start_id'   => $this->id,
+            'end_type'   => MediaFile::class
+        ], [
+            'end_id'     => $ID
+        ]);
     }
 
     public function getResourceUrlAttribute() {

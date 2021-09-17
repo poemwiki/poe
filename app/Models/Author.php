@@ -191,6 +191,31 @@ class Author extends Model implements Searchable {
         return Relatable::authorHasAvatar(self::class, $this->id);
     }
 
+    public function relatedImageFile() {
+        return Relatable::authorHasImage(self::class, $this->id);
+    }
+
+    public function relateToImage($ID) {
+        return Relatable::updateOrCreate([
+            'relation'   => Relatable::RELATION['author_has_image'],
+            'start_type' => self::class,
+            'start_id'   => $this->id,
+            'end_type'   => MediaFile::class,
+            'end_id'     => $ID
+        ]);
+    }
+
+    public function relateToAvatar($ID) {
+        return Relatable::updateOrCreate([
+            'relation'   => Relatable::RELATION['author_has_avatar'],
+            'start_type' => self::class,
+            'start_id'   => $this->id,
+            'end_type'   => MediaFile::class
+        ], [
+            'end_id'     => $ID
+        ]);
+    }
+
     public static function boot() {
         parent::boot();
 
@@ -304,6 +329,10 @@ class Author extends Model implements Searchable {
         return $this->wiki_desc_lang;
     }
 
+    /**
+     * TODO move this to Query service
+     * search poems within this author's works.
+     */
     public static function searchPoems() {
     }
 

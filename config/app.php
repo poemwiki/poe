@@ -243,12 +243,13 @@ $config = [
 
     'avatar' => [
         'default'     => 'http://' . env('COSV5_BUCKET') . '.cos.' . env('COSV5_REGION') . '.myqcloud.com/avatar/_.png',
-        'user_path'   => 'avatar/u', // user avatar path
-        'author_path' => 'a/avatar'  // author avatar path
+        'user_path'   => env('USER_AVATAR_PATH', 'avatar/u'), // user avatar path
+        'author_path' => env('AUTHOR_AVATAR_PATH', 'avatar/a')  // author avatar path
     ],
-    'cos_author_path'  => 'a', // for author images
-    'cos_page_path'    => 'page',
-    'cos_poster'       => 'poster', // for poem poster
+    'cos_author_path'  => env('AUTHOR_IMAGE_PATH', 'a'), // for author images
+    'cos_page_path'    => env('COS_PAGE_PATH', 'page'),
+    'cos_poster'       => env('COS_POSTER_PATH', 'poster'), // for poem poster
+    'cos_tmp_path'     => env('COS_TMP_PATH', 'tmp')
 ];
 
 return $config;
