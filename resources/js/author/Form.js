@@ -21,7 +21,8 @@ Vue.component('author-form', {
         nation_id: null,
         dynasty_id: null
       },
-      nationList: this.defaultNation
+      nationList: this.defaultNation,
+      avatarFile: null
     }
   },
 
@@ -38,6 +39,24 @@ Vue.component('author-form', {
   },
 
   methods: {
+
+    onAvatarChange: function (e) {
+      this.avatarFile = e.target.files[0];
+
+      var fd = new FormData();
+      fd.append('avatar', this.avatarFile, this.avatarFile.name);
+      fd.append('author', this.form.id);
+
+      axios.post('/author/avatar', fd).then(res => {
+        if(!res) throw '上传失败。';
+        console.log('upload author avatar finished', res);
+        this.form.avatar = res.data.avatar;
+      }).catch(e => {
+        window.alert('上传失败。')
+      });
+
+      console.log(this.avatarFile, e);
+    },
 
     getPostData: function () {
       let data = _.clone(this.form);

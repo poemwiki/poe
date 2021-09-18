@@ -272,6 +272,7 @@ Route::prefix('author')->name('author/')->group(static function () {
     Route::post('/update/{fakeId}', 'AuthorController@update')->name('update');
     Route::post('/store', 'AuthorController@store')->name('store');
     Route::get('/{fakeId}', 'AuthorController@show')->name('show');
+    Route::post('/{avatar}', 'AuthorController@avatar')->name('avatar');
 });
 
 //Route::get('/login-wechat', function () {

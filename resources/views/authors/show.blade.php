@@ -36,10 +36,13 @@ $aliasMaxLength = 4;
       </div>
 
       <div class="poet-gallery">
+        @if($author->avatar)
+          <img class="poet-pic" src="{{$author->avatar}}" alt="avatar of {{$author->name_lang}}">
+        @endif
         @if($author->pic_url)
-        @foreach($author->pic_url as $url)
+          @foreach($author->pic_url as $url)
             <img class="poet-pic" src="{{$url}}" alt="image of {{$author->name_lang}}">
-        @endforeach
+          @endforeach
         @endif
       </div>
 

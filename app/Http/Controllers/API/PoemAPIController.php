@@ -291,7 +291,7 @@ class PoemAPIController extends Controller {
 
         $tag  = Tag::find($sanitized['tag_id']);
         if ($tag) {
-            if ($tag->campaign && $tag->campaign->settings['gameType']) {
+            if ($tag->campaign && isset($tag->campaign->settings['gameType'])) {
                 $validator = Validator::make($sanitized, [
                     'poem' => [new ValidPoemContent(3)],
                 ]);

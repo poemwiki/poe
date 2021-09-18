@@ -2,6 +2,27 @@
 
 <div class="row">
 
+  <div class="form-group row align-items-center"
+       :class="{'has-danger': errors.has('avatar'), 'has-success': fields['avatar'] && fields['avatar'].valid, 'hidden': !form.id }">
+    <label :for="'avatar'"
+           class="col-md-2 col-form-label text-md-right required">{{ trans('admin.author.columns.avatar') }}</label>
+    <div>
+      <div class="wiki-avatar">
+        <img :src="form.avatar || form.avatar_url" :alt="form.name_lang[locales[0]]" class="wiki-avatar-img">
+        <span class="wiki-avatar-mask wiki-avatar-btn">@lang('Change Avatar')</span>
+        <input type="file" @change="onAvatarChange" class="wiki-avatar-mask" name="avatar-file" accept=".webp, .jpg, .jpeg, .png">
+      </div>
+
+      <div v-visible="errors.has('avatar')" class="form-control-feedback form-text" v-cloak>@{{errors.first('avatar') }}
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="row">
+
     <div v-for="locale in locales" :v-key="locale" v-show="shouldShowLangGroup(locale)" v-cloak class="col-md">
       <div class="form-group row align-items-center"
            :class="{'has-danger': errors.has('name_lang_' + locale), 'has-success': fields['name_lang_' + locale] && fields['name_lang_' + locale].valid }">

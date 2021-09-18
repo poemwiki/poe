@@ -4,16 +4,17 @@ namespace App\Repositories;
 
 use App\Models\Alias;
 use App\Models\Author;
+use App\Models\MediaFile;
 use App\Models\Wikidata;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use League\MimeTypeDetection\GeneratedExtensionToMimeTypeMap;
 
 /**
- * Class LanguageRepository
- * @package App\Repositories
+ * Class LanguageRepository.
  * @version July 19, 2020, 11:24 am UTC
  */
 class AuthorRepository extends BaseRepository {
@@ -26,21 +27,23 @@ class AuthorRepository extends BaseRepository {
     ];
 
     /**
-     * @param string $name
-     * @param array $authorIds
+     * @param string   $name
+     * @param array    $authorIds
      * @param int|null $excludeAuthorId author_id that should be ignored
      * @return Collection
      */
-    private static function _searchAlias(string $name, $authorIds=[], array $excludeAuthorId=null): Collection {
+    private static function _searchAlias(string $name, $authorIds = [], array $excludeAuthorId = null): Collection {
         $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
         $query = Alias::selectRaw('wikidata_id, min(wikidata_id) as id, min(name) as name, author_id')
             ->whereRaw("`name` LIKE $value");
 
-        if (is_array($authorIds) && !empty($authorIds))
+        if (is_array($authorIds) && !empty($authorIds)) {
             $query->whereIn('author_id', $authorIds);
+        }
 
-        if (is_null($authorIds))
+        if (is_null($authorIds)) {
             $query->whereNull('author_id');
+        }
 
         if (is_array($excludeAuthorId)) {
             $query->where(function ($q) use ($excludeAuthorId) {
@@ -59,13 +62,15 @@ class AuthorRepository extends BaseRepository {
                 $item['source'] = $item['author_id'] ? 'PoemWiki' : 'Wikidata';
                 $item['avatar_url'] = $item['author_id'] ? Author::find($item['author_id'])->avatarUrl : Wikidata::find($item['wikidata_id'])->first_pic_url;
                 $item['desc'] = $item['author_id'] ? Author::find($item['author_id'])->describe_lang : Wikidata::find(str_replace('Q', '', $item['QID']))->getDescription(config('app.locale'));
+
                 return $item;
             });
+
         return $res;
     }
 
     /**
-     * Return searchable fields
+     * Return searchable fields.
      *
      * @return array
      */
@@ -75,82 +80,85 @@ class AuthorRepository extends BaseRepository {
 
     public static function findByName($name) {
         $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
+
         return Author::select(['id', 'name_lang'])
             ->whereRaw('LOWER(author.name_lang) LIKE ' . $value)->first()->toArray();
     }
 
-    public static function searchByName($name, $id=null) {
+    public static function searchByName($name, $id = null) {
         $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
         $query = Author::select(['id', 'name_lang'])
             ->whereRaw("JSON_SEARCH(lower(`name_lang`), 'all', $value)");
 
-        if(is_numeric($id))
+        if (is_numeric($id)) {
             $query->union(Author::find($id)->select(['id', 'name_lang']));
+        }
 
         return $query->get()->toArray();
     }
 
-    public static function searchByAlias($name, $authorId=null) {
+    public static function searchByAlias($name, $authorId = null) {
         $res = self::_searchAlias($name, [$authorId]);
 
         return $res->toArray();
     }
 
     /**
-     * @param string $name
-     * @param integer[]|null $authorId
+     * @param string     $name
+     * @param int[]|null $authorId
      * @return Collection
      */
-    public static function searchLabel(string $name, array $authorId=null): Collection {
+    public static function searchLabel(string $name, array $authorId = null): Collection {
         $authorIds = collect($authorId)->toArray();
 
         $newAuthors = [];
         foreach ($authorIds as $id) {
-            if(Str::startsWith($id, 'new_')) {
-                $label = substr($id, 4);
+            if (Str::startsWith($id, 'new_')) {
+                $label        = substr($id, 4);
                 $newAuthors[] = [
-                    'id' => $id,
-                    'label' => $label,
-                    'label_cn' => $label,
-                    'label_en' => $label,
-                    'url' => '',
-                    'source' => '',
+                    'id'         => $id,
+                    'label'      => $label,
+                    'label_cn'   => $label,
+                    'label_en'   => $label,
+                    'url'        => '',
+                    'source'     => '',
                     'avatar_url' => '/images/avatar-default.png'
                 ];
             }
         }
-        if(is_array($authorIds)) {
+        if (is_array($authorIds)) {
             $resById = Author::select(['id', 'name_lang', 'pic_url', 'describe_lang'])->whereIn('id', $authorIds)->get()
                 ->map->only(['id', 'label_en', 'label_cn', 'label', 'url', 'pic_url', 'describe_lang', 'avatar_url'])->map(function ($item) {
                     $item['source'] = 'PoemWiki';
                     $item['desc'] = $item['describe_lang'];
+
                     return $item;
                 })->concat($newAuthors);
         }
 
         $aliasRes = self::_searchAlias($name, [], $authorId);
 
-        if(isset($resById))
+        if (isset($resById)) {
             $aliasRes = $resById->concat($aliasRes);
+        }
 
         return $aliasRes;
     }
 
     /**
-     * Configure the Model
+     * Configure the Model.
      **/
     public static function model() {
         return Author::class;
     }
 
-
     /**
-     * TODO this process should be a command
+     * TODO this process should be a command.
      * @param Wikidata $wiki
      * @param int|null $user_id
      * @return AuthorRepository|\Illuminate\Database\Eloquent\Model
      */
-    public function importFromWikidata(Wikidata $wiki, int $userID=null) {
+    public function importFromWikidata(Wikidata $wiki, int $userID = null) {
         $entity = json_decode($wiki->data);
 
         $authorNameLang = [];
@@ -170,37 +178,37 @@ class AuthorRepository extends BaseRepository {
                     continue;
                 }
                 $fileName = str_replace(' ', '_', $image->mainsnak->datavalue->value);
-                $ab = substr(md5($fileName), 0, 2);
-                $a = substr($ab, 0, 1);
+                $ab       = substr(md5($fileName), 0, 2);
+                $a        = substr($ab, 0, 1);
                 $picUrl[] = Wikidata::$PIC_URL_BASE . $a . '/' . $ab . '/' . $fileName;
             }
         }
 
         // insert or update poet detail data into author
         $insert = [
-            'name_lang' => $authorNameLang,         // Don't json_encode translatable attributes
-            'pic_url' => $picUrl,                   // And Don't json_encode attributes that casted to json
-            'wikidata_id' => $wiki->id,
-            'wikipedia_url' => json_encode($entity->sitelinks),
-            'describe_lang' => $descriptionLang,    // Don't json_encode translatable attributes
+            'name_lang'      => $authorNameLang,         // Don't json_encode translatable attributes
+            'pic_url'        => $picUrl,                   // And Don't json_encode attributes that casted to json
+            'wikidata_id'    => $wiki->id,
+            'wikipedia_url'  => json_encode($entity->sitelinks),
+            'describe_lang'  => $descriptionLang,    // Don't json_encode translatable attributes
             'upload_user_id' => $userID,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at'     => now(),
+            'updated_at'     => now(),
         ];
+
         return $this->updateOrCreate(['wikidata_id' => $wiki->id], $insert);
     }
 
-
     /**
      * Get a existed Author by wikidata_id
-     * if not existed, create one from wikidata
+     * if not existed, create one from wikidata.
      * @param $wikidata_id int wikidata_id
      */
-    public function getExistedAuthor($wikidata_id) : Author {
+    public function getExistedAuthor($wikidata_id): Author {
         $authorExisted = Author::where('wikidata_id', '=', $wikidata_id)->first();
 
         if (!$authorExisted) {
-            $wiki = Wikidata::find($wikidata_id);
+            $wiki          = Wikidata::find($wikidata_id);
             $authorExisted = $this->importFromWikidata($wiki, Auth::user()->id);
             // Does this necessary?
             // 以下一步对于在前端查询前已导入过 wikidata label&alias 的 author 来说是不必要的，
@@ -209,6 +217,41 @@ class AuthorRepository extends BaseRepository {
             $authorExisted->fetchWikiDesc();
             Artisan::call('alias:import', ['--id' => $wikidata_id]);
         }
+
         return $authorExisted;
+    }
+
+    public function saveAuthorMediaFile(Author $author, string $type, string $path, string $name, string $toFormat, int $size, int $fid = 0): MediaFile {
+        $mediaFile = MediaFile::updateOrCreate([
+            'model_type'     => Author::class,
+            'model_id'       => $author->id,
+            'type'           => $type,
+            'path'           => $path,
+        ], [
+            'model_type'     => Author::class,
+            'model_id'       => $author->id,
+            'path'           => $path,
+            'name'           => $name,
+            'type'           => $type,
+            'mime_type'      => GeneratedExtensionToMimeTypeMap::MIME_TYPES_FOR_EXTENSIONS[$toFormat],
+            'disk'           => 'cosv5',
+            'size'           => $size,
+            'fid'            => $fid
+        ]);
+
+        switch ($type) {
+            case MediaFile::TYPE['image']:
+                $author->relateToImage($mediaFile->id);
+
+                break;
+
+            case MediaFile::TYPE['avatar']:
+                $author->relateToAvatar($mediaFile->id);
+
+                break;
+        }
+
+        /* @var MediaFile $mediaFile */
+        return $mediaFile;
     }
 }
