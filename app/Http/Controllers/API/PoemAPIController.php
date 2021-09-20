@@ -247,8 +247,8 @@ class PoemAPIController extends Controller {
             ->where('id', '<>', $id);
 
         $res['is_campaign'] = $poem->is_campaign;
-        if ($poem->is_campaign) {
-            $res['campaign_reward'] = ($poem->campaign && $poem->campaign->settings) ? ($poem->campaign->settings['reward'] ?? 0) : null;
+        if ($poem->campaign) {
+            $res['campaign_reward'] = $poem->campaign->settings ? ($poem->campaign->settings['reward'] ?? 0) : null;
         }
 
         if ($poem->tags->count()) {
