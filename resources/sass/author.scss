@@ -64,6 +64,7 @@ article.poet{
     gap: 1rem;
     .poet-pic {
       height: 20vh;
+      max-width: unset;
     }
   }
   .poet-brief {
