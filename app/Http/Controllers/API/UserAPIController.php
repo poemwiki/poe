@@ -43,9 +43,9 @@ class UserAPIController extends Controller {
         }
 
         $ext      = $file->getClientOriginalExtension();
-        $allow    = ['jpg', 'webp', 'png', 'jpeg']; // 支持的类型
+        $allow    = ['jpg', 'webp', 'png', 'jpeg', 'bmp']; // 支持的类型
         if (!in_array($ext, $allow)) {
-            return $this->responseFail([], '不支持的图片类型，请上传 jpg/jpeg/png/webp 格式图片。', Controller::$CODE['img_format_invalid']);
+            return $this->responseFail([], '不支持的图片类型，请上传 jpg/jpeg/png/webp/bmp 格式图片。', Controller::$CODE['img_format_invalid']);
         }
 
         $size = $file->getSize();
@@ -76,7 +76,7 @@ class UserAPIController extends Controller {
         $avatarImage = $result['Data']['ProcessResults']['Object'][0];
         if (isset($avatarImage['Location'])) {
             $objectUrlWithoutSign = 'https://' . $avatarImage['Location'];
-            $user->avatar         = $objectUrlWithoutSign . '?v=' . now();
+            $user->avatar         = $objectUrlWithoutSign . '?v=' . now()->timestamp;
             $user->save();
 
             $this->saveAuthorMediaFile($user, MediaFile::TYPE['avatar'], $avatarImage['Key'], $fileName, $format, $avatarImage['Size']);
