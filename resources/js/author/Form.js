@@ -22,7 +22,8 @@ Vue.component('author-form', {
         dynasty_id: null
       },
       nationList: this.defaultNation,
-      avatarFile: null
+      avatarFile: null,
+      uploadProgress: false
     }
   },
 
@@ -41,21 +42,34 @@ Vue.component('author-form', {
   methods: {
 
     onAvatarChange: function (e) {
-      this.avatarFile = e.target.files[0];
+      const files = e.target.files;
+      if(!files.length) return;
+
+      let avatarFile = files[0];
 
       var fd = new FormData();
-      fd.append('avatar', this.avatarFile, this.avatarFile.name);
+      fd.append('avatar', avatarFile, avatarFile.name);
       fd.append('author', this.form.id);
 
-      axios.post('/author/avatar', fd).then(res => {
+      axios.post('/author/avatar', fd, {
+        onUploadProgress: e => {
+          // TODO establish a websocket connection to pass image processing progress
+          this.uploadProgress = (e.loaded / e.total) * 50 + '%';
+        }
+      }).then(res => {
         if(!res) throw '上传失败。';
+        if(res.code !== 0) {
+          window.alert('上传失败。' + res.message);
+        }
+        this.$refs.avatar.value = null;
+        this.uploadProgress = false;
         console.log('upload author avatar finished', res);
         this.form.avatar = res.data.avatar;
       }).catch(e => {
         window.alert('上传失败。')
       });
 
-      console.log(this.avatarFile, e);
+      console.log(avatarFile, e);
     },
 
     getPostData: function () {

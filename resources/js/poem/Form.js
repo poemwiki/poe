@@ -370,7 +370,6 @@ Vue.component('poem-form', {
         }
 
         function isEmptyLine(str) {
-          if(str === undefined) {debugger}
           return !str.trim().length;
         }
 
