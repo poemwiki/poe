@@ -322,16 +322,16 @@ Vue.component('poem-form', {
           var startSpace = startSpaceNum(line)
           minStartSpace = startSpace < minStartSpace ? startSpace : minStartSpace;
 
-          return line.replace(/\s+$/g, '');
         });
         const avgLength = lenthSum / (lineCount - emptyLineCount);
 
+        console.log({emptyLineCount, lineCount, textLineCount: lineCount-emptyLineCount, avgLength})
         // TODO write a same function for server side empty line clean and detect
-        if(emptyLineCount >= (lineCount-1)/2 && avgLength<70) {
+        if(emptyLineCount >= (lineCount - emptyLineCount -1) && avgLength<70) {
           const delMark = '##_@DELETE@_##';
           let newText = change.text.map((line, index) => {
             if(isEmptyLine(line)) {
-              const nextLine = index <= change.text.length - 1 ? change.text[index + 1] : null;
+              const nextLine = index < change.text.length - 1 ? change.text[index + 1] : null;
 
               if(nextLine!==null && !isEmptyLine(nextLine)) {
                 return delMark;
@@ -342,7 +342,7 @@ Vue.component('poem-form', {
 
           newText = newText.map((line, index) => {
             const prevLine = index >= 1 ? newText[index - 1] : null;
-            const nextLine = index <= newText.length - 1 ? newText[index + 1] : null;
+            const nextLine = index < newText.length - 1 ? newText[index + 1] : null;
 
             if(prevLine!==null && isEmptyLine(prevLine) && nextLine && nextLine===delMark) {
               return delMark;
@@ -356,7 +356,7 @@ Vue.component('poem-form', {
 
         // remove space before each line
         var newText = change.text.map((line, index) => {
-          if (spaceStartLineCount >= lineCount-emptyLineCount) {
+          if (spaceStartLineCount >= lineCount-emptyLineCount-2) {
             return line.trim();
           }
           return line.trimRight();
@@ -370,6 +370,7 @@ Vue.component('poem-form', {
         }
 
         function isEmptyLine(str) {
+          if(str === undefined) {debugger}
           return !str.trim().length;
         }
 
