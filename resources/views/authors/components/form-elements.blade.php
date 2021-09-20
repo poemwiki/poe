@@ -9,8 +9,10 @@
     <div>
       <div class="wiki-avatar">
         <img :src="form.avatar || form.avatar_url" :alt="form.name_lang[locales[0]]" class="wiki-avatar-img">
-        <span class="wiki-avatar-mask wiki-avatar-btn">@lang('Change Avatar')</span>
-        <input type="file" @change="onAvatarChange" class="wiki-avatar-mask" name="avatar-file" accept=".webp, .jpg, .jpeg, .png">
+        <span class="wiki-avatar-mask wiki-avatar-btn">@{{
+          uploadProgress===false ? '@lang('Change Avatar')' : uploadProgress
+          }}</span>
+        <input type="file" ref="avatar" @change="onAvatarChange" class="wiki-avatar-mask" name="avatar-file" accept="image/*">
       </div>
 
       <div v-visible="errors.has('avatar')" class="form-control-feedback form-text" v-cloak>@{{errors.first('avatar') }}
