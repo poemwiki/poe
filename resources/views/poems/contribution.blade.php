@@ -201,6 +201,7 @@ use Jfcherng\Diff\Factory\RendererFactory;
       margin-right: .5em;
     }
     .log del {
+      white-space: pre;
       background-color: lightpink;
       text-decoration: none;
     }

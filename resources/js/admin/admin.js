@@ -37,6 +37,23 @@ Vue.filter('lang', function (value) {
   return value[lang];
 });
 
+function niceDateTime(dateStr) {
+  var date = Date.parse(dateStr);
+  return new Intl.DateTimeFormat('zh', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23'
+  }).format(date).replace(/\//g, '-');
+}
+Vue.filter('niceDateTime', function (v) {
+  return niceDateTime(v);
+})
+
+
 Vue.component('datetime', flatPickr);
 Vue.use(VModal, { dialog: true, dynamic: true, injectModalsContainer: true });
 Vue.use(VueQuillEditor);
