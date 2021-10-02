@@ -303,14 +303,16 @@ class PoemAPIController extends Controller {
             }
         }
 
-        $wechatApp = Factory::miniProgram([
-            'app_id'        => config('wechat.mini_program.default.app_id'),
-            'secret'        => config('wechat.mini_program.default.secret'),
-            'response_type' => 'object',
-        ]);
-        $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['poem']);
-        if ($result->errcode) {
-            return $this->responseFail([], '请检查是否含有敏感词', Controller::$CODE['content_security_failed']);
+        if (config('app.env') !== 'local') {
+            $wechatApp = Factory::miniProgram([
+                'app_id'        => config('wechat.mini_program.default.app_id'),
+                'secret'        => config('wechat.mini_program.default.secret'),
+                'response_type' => 'object',
+            ]);
+            $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['poem']);
+            if ($result->errcode) {
+                return $this->responseFail([], '请检查是否含有敏感词', Controller::$CODE['content_security_failed']);
+            }
         }
 
         $poem = Poem::create($sanitized);
