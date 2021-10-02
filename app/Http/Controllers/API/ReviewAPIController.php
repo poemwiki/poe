@@ -5,16 +5,14 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateReviewRequest;
 use App\Models\Review;
-use App\Models\Score;
 use App\Repositories\ScoreRepository;
 use EasyWeChat\Factory;
 
 /**
- * Class LanguageController
- * @package App\Http\Controllers\API
+ * Class ReviewAPIController.
  */
 class ReviewAPIController extends Controller {
-    /** @var  ScoreRepository */
+    /** @var ScoreRepository */
     private $repository;
 
     public function __construct(ScoreRepository $itemRepository) {
@@ -22,22 +20,21 @@ class ReviewAPIController extends Controller {
     }
 
     public function like($action, $id) {
-        $review = Review::find($id);
-        $user = request()->user();
+        $review   = Review::find($id);
+        $user     = request()->user();
         $hasLiked = $user->hasLiked($review);
 
-        if($action === 'like' && !$hasLiked) {
+        if ($action === 'like' && !$hasLiked) {
             $user->like($review);
 
             $review->timestamps = false;
-            $review->like = $review->likers()->count();
+            $review->like       = $review->likers()->count();
             $review->save();
-
-        } else if($action === 'unlike' && $hasLiked) {
+        } elseif ($action === 'unlike' && $hasLiked) {
             $user->unlike($review);
 
             $review->timestamps = false;
-            $review->like = $review->likers()->count();
+            $review->like       = $review->likers()->count();
             $review->save();
         }
 
@@ -47,10 +44,10 @@ class ReviewAPIController extends Controller {
     public function store(CreateReviewRequest $request) {
         $sanitized = $request->getSanitized();
 
-        if(config('app.env') === 'production') {
+        if (config('app.env') === 'production') {
             $wechatApp = Factory::miniProgram([
-                'app_id' => env('WECHAT_MINI_PROGRAM_APPID'),
-                'secret' => env('WECHAT_MINI_PROGRAM_SECRET'),
+                'app_id'        => config('wechat.mini_program.default.app_id'),
+                'secret'        => config('wechat.mini_program.default.secret'),
                 'response_type' => 'object',
             ]);
             $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['content']);
@@ -60,9 +57,10 @@ class ReviewAPIController extends Controller {
             }
         }
 
-        if(Review::create($sanitized)) {
+        if (Review::create($sanitized)) {
             return $this->responseSuccess();
         }
+
         return $this->responseFail();
     }
 
