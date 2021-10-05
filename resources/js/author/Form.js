@@ -61,12 +61,14 @@ Vue.component('author-form', {
         if(res.code !== 0) {
           window.alert('上传失败。' + res.message);
         }
-        this.$refs.avatar.value = null;
-        this.uploadProgress = false;
+
         console.log('upload author avatar finished', res);
         this.form.avatar = res.data.avatar;
       }).catch(e => {
-        window.alert('上传失败。')
+        window.alert('上传失败。');
+      }).finally(() => {
+        this.$refs.avatar.value = null;
+        this.uploadProgress = false;
       });
 
       console.log(avatarFile, e);
