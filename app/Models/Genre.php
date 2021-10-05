@@ -8,23 +8,23 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * App\Models\Genre
+ * App\Models\Genre.
  *
- * @property int $id
- * @property string $name
- * @property array $name_lang
- * @property int $f_id
- * @property int|null $wikidata_id
- * @property array|null $describe_lang
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
- * @property-read int|null $activities_count
- * @property-read mixed $resource_url
- * @property-read array $translations
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Poem[] $poems
- * @property-read int|null $poems_count
+ * @property int                                                                $id
+ * @property string                                                             $name
+ * @property array                                                              $name_lang
+ * @property int                                                                $f_id
+ * @property int|null                                                           $wikidata_id
+ * @property array|null                                                         $describe_lang
+ * @property \Illuminate\Support\Carbon|null                                    $created_at
+ * @property \Illuminate\Support\Carbon|null                                    $updated_at
+ * @property \Illuminate\Support\Carbon|null                                    $deleted_at
+ * @property \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
+ * @property int|null                                                           $activities_count
+ * @property mixed                                                              $resource_url
+ * @property array                                                              $translations
+ * @property \Illuminate\Database\Eloquent\Collection|\App\Models\Poem[]        $poems
+ * @property int|null                                                           $poems_count
  * @method static \Illuminate\Database\Eloquent\Builder|Genre newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Genre newQuery()
  * @method static \Illuminate\Database\Query\Builder|Genre onlyTrashed()
@@ -47,8 +47,8 @@ class Genre extends Model {
     use HasTranslations;
     use LogsActivity;
 
-    protected static $logFillable = true;
-    protected static $logOnlyDirty = true;
+    protected static $logFillable             = true;
+    protected static $logOnlyDirty            = true;
     protected static $ignoreChangedAttributes = ['created_at'];
 
     public $table = 'genre';
@@ -59,15 +59,11 @@ class Genre extends Model {
         'name',
         'name_lang',
         'wikidata_id',
-
     ];
-
 
     protected $dates = [
         'created_at',
-        'deleted_at',
         'updated_at',
-
     ];
     // these attributes are translatable
     public $translatable = [
@@ -76,7 +72,6 @@ class Genre extends Model {
     ];
 
     protected $appends = ['resource_url'];
-
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

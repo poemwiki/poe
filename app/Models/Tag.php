@@ -2,28 +2,28 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasTranslations;
 
 /**
- * App\Models\Tag
+ * App\Models\Tag.
  *
- * @property int $id
- * @property string $name
- * @property array $name_lang
- * @property int|null $wikidata_id
- * @property array|null $describe_lang
- * @property int|null $category_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Campaign|null $campaign
- * @property-read mixed $is_campaign
- * @property-read mixed $resource_url
- * @property-read array $translations
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Poem[] $poems
- * @property-read int|null $poems_count
+ * @property int                                                         $id
+ * @property string                                                      $name
+ * @property array                                                       $name_lang
+ * @property int|null                                                    $wikidata_id
+ * @property array|null                                                  $describe_lang
+ * @property int|null                                                    $category_id
+ * @property \Illuminate\Support\Carbon|null                             $created_at
+ * @property \Illuminate\Support\Carbon|null                             $updated_at
+ * @property \Illuminate\Support\Carbon|null                             $deleted_at
+ * @property \App\Models\Campaign|null                                   $campaign
+ * @property mixed                                                       $is_campaign
+ * @property mixed                                                       $resource_url
+ * @property array                                                       $translations
+ * @property \Illuminate\Database\Eloquent\Collection|\App\Models\Poem[] $poems
+ * @property int|null                                                    $poems_count
  */
 class Tag extends Model {
     use SoftDeletes;
@@ -37,26 +37,21 @@ class Tag extends Model {
         'name',
         'name_lang',
         'wikidata_id',
-
     ];
 
-
     protected $casts = [
-        'id' => 'integer',
+        'id'          => 'integer',
         'wikidata_id' => 'integer',
     ];
 
     protected $dates = [
         'created_at',
-        'deleted_at',
-        'updated_at',
-
+        'updated_at'
     ];
     // these attributes are translatable
     public $translatable = [
         'describe_lang',
         'name_lang',
-
     ];
 
     protected $appends = ['resource_url'];

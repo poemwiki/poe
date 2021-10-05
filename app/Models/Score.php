@@ -8,22 +8,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * App\Models\Score
+ * App\Models\Score.
  *
- * @property int $id
- * @property int $poem_id
- * @property int $user_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property int $score
- * @property float $weight
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
- * @property-read int|null $activities_count
- * @property-read \App\Models\Content|null $content
- * @property-read mixed $resource_url
- * @property-read \App\Models\Poem $poem
- * @property-read \App\User $user
+ * @property int                                                                $id
+ * @property int                                                                $poem_id
+ * @property int                                                                $user_id
+ * @property \Illuminate\Support\Carbon|null                                    $created_at
+ * @property \Illuminate\Support\Carbon|null                                    $updated_at
+ * @property \Illuminate\Support\Carbon|null                                    $deleted_at
+ * @property int                                                                $score
+ * @property float                                                              $weight
+ * @property \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
+ * @property int|null                                                           $activities_count
+ * @property \App\Models\Content|null                                           $content
+ * @property mixed                                                              $resource_url
+ * @property \App\Models\Poem                                                   $poem
+ * @property \App\User                                                          $user
  */
 class Score extends Model {
     use SoftDeletes;
@@ -31,8 +31,8 @@ class Score extends Model {
 
     protected $table = 'score';
 
-    protected static $logFillable = true;
-    protected static $logOnlyDirty = true;
+    protected static $logFillable             = true;
+    protected static $logOnlyDirty            = true;
     protected static $ignoreChangedAttributes = ['created_at'];
     // public static $RATING = [1, 2, 3, 4, 5];
     public static $SCORE = [2, 4, 6, 8, 10];
@@ -47,10 +47,8 @@ class Score extends Model {
         'weight'
     ];
 
-
     protected $dates = [
         'created_at',
-        'deleted_at',
         'updated_at',
     ];
 
@@ -60,7 +58,6 @@ class Score extends Model {
     ];
 
     protected $appends = [];
-
 
     public static function boot() {
         parent::boot();
@@ -90,7 +87,6 @@ class Score extends Model {
         });
     }
 
-
     /* ************************ ACCESSOR ************************* */
 
     public function getResourceUrlAttribute() {
@@ -104,20 +100,19 @@ class Score extends Model {
     //        return route('score/show', ['id' => $this->id]);
     //    }
 
-
     /**
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo
      **/
     public function poem() {
         return $this->belongsTo(\App\Models\Poem::class, 'poem_id', 'id');
     }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo
      **/
     public function user() {
         return $this->belongsTo(\App\User::class, 'user_id', 'id');
     }
-
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasOne

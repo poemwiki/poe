@@ -2,23 +2,23 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasTranslations;
 
 /**
- * App\Models\Category
+ * App\Models\Category.
  *
- * @property int $id
- * @property string $name
- * @property array $name_lang
- * @property int|null $wikidata_id
- * @property array|null $describe_lang
+ * @property int                             $id
+ * @property string                          $name
+ * @property array                           $name_lang
+ * @property int|null                        $wikidata_id
+ * @property array|null                      $describe_lang
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read mixed $resource_url
- * @property-read array $translations
+ * @property mixed                           $resource_url
+ * @property array                           $translations
  * @method static \Illuminate\Database\Eloquent\Builder|Category newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Category newQuery()
  * @method static \Illuminate\Database\Query\Builder|Category onlyTrashed()
@@ -39,7 +39,7 @@ class Category extends Model {
     use SoftDeletes;
     use HasTranslations;
 
-    static $CATEGORY_ID = [
+    public static $CATEGORY_ID = [
         'campaign' => 2
     ];
 
@@ -50,21 +50,16 @@ class Category extends Model {
         'name',
         'name_lang',
         'wikidata_id',
-
     ];
-
 
     protected $dates = [
         'created_at',
-        'deleted_at',
         'updated_at',
-
     ];
     // these attributes are translatable
     public $translatable = [
         'describe_lang',
         'name_lang',
-
     ];
 
     protected $appends = ['resource_url'];

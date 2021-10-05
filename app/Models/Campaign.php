@@ -71,7 +71,6 @@ class Campaign extends Model {
 
     protected $dates = [
         'created_at',
-        'deleted_at',
         'updated_at',
         'start',
         'end'

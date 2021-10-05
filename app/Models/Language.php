@@ -8,27 +8,27 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * App\Models\Language
+ * App\Models\Language.
  *
- * @property int $id
- * @property string $name
- * @property string $name_cn
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property array $name_lang
- * @property string $locale
- * @property string|null $pic_url
- * @property int|null $wikidata_id
- * @property mixed|null $wikipedia_url
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
- * @property-read int|null $activities_count
- * @property-read mixed|string $label
- * @property-read mixed $label_cn
- * @property-read mixed $label_en
- * @property-read array $translations
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Poem[] $poems
- * @property-read int|null $poems_count
+ * @property int                                                                $id
+ * @property string                                                             $name
+ * @property string                                                             $name_cn
+ * @property \Illuminate\Support\Carbon|null                                    $created_at
+ * @property \Illuminate\Support\Carbon|null                                    $updated_at
+ * @property \Illuminate\Support\Carbon|null                                    $deleted_at
+ * @property array                                                              $name_lang
+ * @property string                                                             $locale
+ * @property string|null                                                        $pic_url
+ * @property int|null                                                           $wikidata_id
+ * @property mixed|null                                                         $wikipedia_url
+ * @property \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
+ * @property int|null                                                           $activities_count
+ * @property mixed|string                                                       $label
+ * @property mixed                                                              $label_cn
+ * @property mixed                                                              $label_en
+ * @property array                                                              $translations
+ * @property \Illuminate\Database\Eloquent\Collection|\App\Models\Poem[]        $poems
+ * @property int|null                                                           $poems_count
  * @method static \Illuminate\Database\Eloquent\Builder|Language newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Language newQuery()
  * @method static \Illuminate\Database\Query\Builder|Language onlyTrashed()
@@ -53,18 +53,16 @@ class Language extends Model {
     use HasTranslations;
     use LogsActivity;
 
-    protected static $logFillable = true;
-    protected static $logOnlyDirty = true;
+    protected static $logFillable             = true;
+    protected static $logOnlyDirty            = true;
     protected static $ignoreChangedAttributes = ['created_at'];
 
     public $table = 'language';
 
     protected $dates = [
         'created_at',
-        'updated_at',
-        'deleted_at'
+        'updated_at'
     ];
-
 
     public $fillable = [
         'name',
@@ -86,18 +84,17 @@ class Language extends Model {
      * @var array
      */
     protected $casts = [
-        'id' => 'integer',
-        'name' => 'string',
+        'id'      => 'integer',
+        'name'    => 'string',
         'name_cn' => 'string'
     ];
 
     /**
-     * Validation rules
+     * Validation rules.
      *
      * @var array
      */
     public static $rules = [
-
     ];
 
     /**
@@ -108,22 +105,24 @@ class Language extends Model {
     }
 
     /**
-     * TODO move these label methods to HasLabel Trait
+     * TODO move these label methods to HasLabel Trait.
      * @return mixed|string
      */
     public function getLabelAttribute() {
-        $default = $this->getTranslated('name_lang', config('app.locale'));
+        $default  = $this->getTranslated('name_lang', config('app.locale'));
         $fallback = $this->name;
         if ($default !== $fallback && $fallback) {
-            return  $default." ($fallback)";
+            return $default . " ($fallback)";
         }
+
         return $default ?: $fallback;
     }
+
     public function getLabelEnAttribute() {
         return $this->getTranslated('name_lang', 'en');
     }
+
     public function getLabelCnAttribute() {
         return $this->getTranslated('name_lang', 'zh-CN');
     }
-
 }

@@ -7,22 +7,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 /**
- * App\Models\Content
+ * App\Models\Content.
  *
- * @property int $id
- * @property int $type
- * @property int $entry_id
- * @property int $hash_crc32
- * @property int $full_hash_crc32
- * @property string $hash
- * @property string $hash_f current version's father's hash
- * @property string $full_hash
- * @property string $full_hash_f current version's father's full_hash
- * @property string $content
+ * @property int                             $id
+ * @property int                             $type
+ * @property int                             $entry_id
+ * @property int                             $hash_crc32
+ * @property int                             $full_hash_crc32
+ * @property string                          $hash
+ * @property string                          $hash_f          current version's father's hash
+ * @property string                          $full_hash
+ * @property string                          $full_hash_f     current version's father's full_hash
+ * @property string                          $content
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Poem $poem
+ * @property \App\Models\Poem                $poem
  * @method static \Illuminate\Database\Eloquent\Builder|Content newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Content newQuery()
  * @method static \Illuminate\Database\Query\Builder|Content onlyTrashed()
@@ -44,16 +44,15 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Query\Builder|Content withoutTrashed()
  * @mixin \Eloquent
  */
-class Content extends Model
-{
+class Content extends Model {
     use SoftDeletes;
 
     public $table = 'content';
 
-    const CREATED_AT = 'created_at';
-    const UPDATED_AT = 'updated_at';
+    public const CREATED_AT = 'created_at';
+    public const UPDATED_AT = 'updated_at';
 
-    protected $dates = ['deleted_at'];
+    protected $dates = ['created_at', 'updated_at'];
 
     public $fillable = [
         'hash',
@@ -71,33 +70,32 @@ class Content extends Model
      * @var array
      */
     protected $casts = [
-        'id' => 'integer',
-        'hash' => 'string',
-        'hash_f' => 'string',
-        'full_hash' => 'string',
+        'id'          => 'integer',
+        'hash'        => 'string',
+        'hash_f'      => 'string',
+        'full_hash'   => 'string',
         'full_hash_f' => 'string',
-        'type' => 'integer',
-        'entry_id' => 'integer',
-        'content' => 'string'
+        'type'        => 'integer',
+        'entry_id'    => 'integer',
+        'content'     => 'string'
     ];
 
     /**
-     * Validation rules
+     * Validation rules.
      *
      * @var array
      */
     public static $rules = [
-        'hash' => 'required',
-        'new_hash' => 'required',
+        'hash'      => 'required',
+        'new_hash'  => 'required',
         'full_hash' => 'required',
-        'type' => 'required',
-        'entry_id' => 'required',
-        'content' => 'required'
+        'type'      => 'required',
+        'entry_id'  => 'required',
+        'content'   => 'required'
     ];
 
-
     /**
-     * TODO this should be a morph relation
+     * TODO this should be a morph relation.
      * @return \Illuminate\Database\Eloquent\Relations\belongsTo
      **/
     public function poem() {
@@ -119,5 +117,4 @@ class Content extends Model
         // self::updating(function ($model) {
         // });
     }
-
 }

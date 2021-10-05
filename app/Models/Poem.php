@@ -6,11 +6,14 @@ use App\Repositories\ScoreRepository;
 use App\Traits\HasFakeId;
 use App\Traits\RelatableNode;
 use App\User;
+use Carbon\Traits\Date;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\JsonEncodingException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Searchable\Searchable;
@@ -39,6 +42,7 @@ use Spatie\Searchable\SearchResult;
  * @property bool                                $poet_is_v
  * @property array                               $scoreArray
  * @property string                              $firstLine
+ * @property Date                                $updated_at
  */
 class Poem extends Model implements Searchable {
     use SoftDeletes;
@@ -158,8 +162,7 @@ class Poem extends Model implements Searchable {
 
     protected $dates = [
         'updated_at',
-        'created_at',
-        'deleted_at'
+        'created_at'
     ];
 
     /**
@@ -267,6 +270,7 @@ class Poem extends Model implements Searchable {
         });
 
         // TODO delete related scores?
+        // TODO delete related relatable record
     }
 
     /**

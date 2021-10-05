@@ -2,27 +2,27 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasTranslations;
 
 /**
- * App\Models\Dynasty
+ * App\Models\Dynasty.
  *
- * @property int $id
- * @property string $name
- * @property array $name_lang
- * @property int $f_id
- * @property int|null $wikidata_id
- * @property array|null $describe_lang
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property string|null $import_id
- * @property-read \Illuminate\Database\Eloquent\Collection|Dynasty[] $children
- * @property-read int|null $children_count
- * @property-read mixed $resource_url
- * @property-read array $translations
+ * @property int                                                $id
+ * @property string                                             $name
+ * @property array                                              $name_lang
+ * @property int                                                $f_id
+ * @property int|null                                           $wikidata_id
+ * @property array|null                                         $describe_lang
+ * @property \Illuminate\Support\Carbon|null                    $created_at
+ * @property \Illuminate\Support\Carbon|null                    $updated_at
+ * @property \Illuminate\Support\Carbon|null                    $deleted_at
+ * @property string|null                                        $import_id
+ * @property \Illuminate\Database\Eloquent\Collection|Dynasty[] $children
+ * @property int|null                                           $children_count
+ * @property mixed                                              $resource_url
+ * @property array                                              $translations
  * @method static \Illuminate\Database\Eloquent\Builder|Dynasty newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Dynasty newQuery()
  * @method static \Illuminate\Database\Query\Builder|Dynasty onlyTrashed()
@@ -41,8 +41,7 @@ use App\Traits\HasTranslations;
  * @method static \Illuminate\Database\Query\Builder|Dynasty withoutTrashed()
  * @mixin \Eloquent
  */
-class Dynasty extends Model
-{
+class Dynasty extends Model {
     use SoftDeletes;
     use HasTranslations;
     protected $table = 'dynasty';
@@ -53,25 +52,19 @@ class Dynasty extends Model
         'name',
         'name_lang',
         'wikidata_id',
-
     ];
-
 
     protected $dates = [
         'created_at',
-        'deleted_at',
         'updated_at',
-
     ];
     // these attributes are translatable
     public $translatable = [
         'describe_lang',
         'name_lang',
-
     ];
 
     protected $appends = ['resource_url'];
-
 
     public function children() {
         return $this->hasMany(\App\Models\Dynasty::class, 'f_id', 'id');
@@ -79,8 +72,7 @@ class Dynasty extends Model
 
     /* ************************ ACCESSOR ************************* */
 
-    public function getResourceUrlAttribute()
-    {
-        return url('/admin/dynasties/'.$this->getKey());
+    public function getResourceUrlAttribute() {
+        return url('/admin/dynasties/' . $this->getKey());
     }
 }

@@ -113,9 +113,9 @@ class Author extends Model implements Searchable {
 
     protected $dates = [
         'created_at',
-        'deleted_at',
         'updated_at',
     ];
+
     // these attributes are translatable
     public $translatable = [
         'describe_lang',
@@ -129,13 +129,13 @@ class Author extends Model implements Searchable {
      * @var array
      */
     protected $casts = [
-        'id'             => 'integer',
-        'wikidata_id'    => 'integer',
-        'user_id'        => 'integer',
-        'pic_url'        => 'json',
-        'nation_id'      => 'integer',
-        'dynasty_id'     => 'integer',
-        'upload_user_id' => 'integer',
+        'id'                     => 'integer',
+        'wikidata_id'            => 'integer',
+        'user_id'                => 'integer',
+        'pic_url'                => 'json',
+        'nation_id'              => 'integer',
+        'dynasty_id'             => 'integer',
+        'upload_user_id'         => 'integer'
         // 'name_lang' => 'array',
         // 'describe_lang' => 'array'
     ];
