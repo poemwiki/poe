@@ -56,6 +56,7 @@ class PoemController extends Controller {
             }
         );
 
+        /** @var Poem $poem */
         foreach ($data as &$poem) {
             $poem['url']           = $poem->url;
             $poem['language_name'] = $poem->lang ? $poem->lang->label : '';
