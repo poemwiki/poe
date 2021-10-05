@@ -86,8 +86,8 @@
                                         <td>@{{ item.uploader_name }}</td>
                                         <td>@{{ item.user_id }}</td>
                                         <td>@{{ item.user_name }}</td>
-                                        <td>@{{ item.updated_at | datetime}}</td>
-                                        <td>@{{ item.created_at | date}}</td>
+                                      <td :title="item.updated_at">@{{ item.updated_at | niceDateTime }}</td>
+                                      <td :title="item.created_at">@{{ item.created_at | niceDateTime }}</td>
 
                                         <td>
                                             <div class="row no-gutters">

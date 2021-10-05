@@ -108,8 +108,8 @@
                   <td>@{{ item.uploader_name }}</td>
                   <td><a :href="item.poet_url" target="_blank" v-if="item.poet_url">@{{ item.poet_label }}</a><span v-else>@{{ item.poet_label }}</span></td>
                   <td><a :href="item.translator_url" target="_blank" v-if="item.translator_url">@{{ item.translator_label }}</a><span v-else>@{{ item.translator_label }}</span></td>
-                  <td>@{{ item.updated_at | datetime }}</td>
-                  <td>@{{ item.created_at | datetime }}</td>
+                  <td :title="item.updated_at">@{{ item.updated_at | niceDateTime }}</td>
+                  <td :title="item.created_at">@{{ item.created_at | niceDateTime }}</td>
                   <td>@{{ item.length }}[@{{ item.line_num }}行]</td>
 
                   <td>
