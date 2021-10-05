@@ -5,24 +5,18 @@ namespace App\Repositories;
 use App\Models\Campaign;
 use App\Models\Content;
 use App\Models\Poem;
-use App\Models\Review;
 use App\Models\Score;
 use App\Models\Tag;
-use App\Repositories\BaseRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Support\Collection;
 
 /**
- * Class PoemRepository
- * @package App\Repositories
+ * Class PoemRepository.
  * @version July 17, 2020, 12:24 pm UTC
-*/
-
-class PoemRepository extends BaseRepository
-{
+ */
+class PoemRepository extends BaseRepository {
     /**
      * @var array
      */
@@ -48,27 +42,25 @@ class PoemRepository extends BaseRepository
     ];
 
     /**
-     * Return searchable fields
+     * Return searchable fields.
      *
      * @return array
      */
-    public function getFieldsSearchable()
-    {
+    public function getFieldsSearchable() {
         return $this->fieldSearchable;
     }
 
     /**
-     * Configure the Model
+     * Configure the Model.
      **/
     public static function model() {
         return Poem::class;
     }
 
-
     /**
      * Paginate records for scaffold.
      *
-     * @param int $perPage
+     * @param int   $perPage
      * @param array $columns
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
@@ -83,32 +75,36 @@ class PoemRepository extends BaseRepository
      * @return \Illuminate\Database\Eloquent\Builder
      * @TODO optimize sql by :
      * SELECT r1.id
-    FROM poem AS r1
-    JOIN
-    (SELECT CEIL(RAND() *
-    (SELECT MAX(id)
-    FROM poem)) AS id)
-    AS r2
-    WHERE r1.id >= r2.id AND r1.deleted_at is NULL
-    ORDER BY r1.id ASC
-    LIMIT 1
+     * FROM poem AS r1
+     * JOIN
+     * (SELECT CEIL(RAND() *
+     * (SELECT MAX(id)
+     * FROM poem)) AS id)
+     * AS r2
+     * WHERE r1.id >= r2.id AND r1.deleted_at is NULL
+     * ORDER BY r1.id ASC
+     * LIMIT 1
      */
-    public static function random($num = 1, $with=[]) {
+    public static function random($num = 1, $with = []) {
         $builder = Poem::query();
-        if(!empty($with)) $builder->with($with);
+        if (!empty($with)) {
+            $builder->with($with);
+        }
 
         return $builder
             ->inRandomOrder()
             ->take($num);
     }
 
-    public function suggest($num = 1, $with=[]) {
+    public function suggest($num = 1, $with = []) {
         // TODO 选取策略： 1. 优先选取 poem.bedtime_post_id 不为空的 poem
         // 2. 评分和评论数
         // 3. poem.length
         // 4. 最近未推送给当前用户的
         $builder = Poem::query()->where('language_id', '=', '1');
-        if(!empty($with)) $builder->with($with);
+        if (!empty($with)) {
+            $builder->with($with);
+        }
 
         return $builder // TODO 1. 如果显示声明原创的诗歌，是否需要跟普通诗歌区分开？ 2. 对声明原创的诗歌，gate 中定义只允许上传用户编辑
         ->inRandomOrder(rand(0, 1000000))
@@ -116,21 +112,21 @@ class PoemRepository extends BaseRepository
     }
 
     /**
-     *
      * @param $name
      * @return array
      */
     public static function searchByName($name) {
         $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
+
         return Poem::query()->select(['title', 'poet_id', 'translator_id'])
             ->whereRaw("lower(`title`) LIKE $value ")
-            ->orWhereHas('poetAuthor', function($q) use ($value) {
-                $q->where(function($q) use ($value) {
+            ->orWhereHas('poetAuthor', function ($q) use ($value) {
+                $q->where(function ($q) use ($value) {
                     $q->whereRaw("JSON_SEARCH(lower(`name_lang`), 'all', $value)");
                 });
             })
-            ->orWhereHas('translatorAuthor', function($q) use ($value) {
-                $q->where(function($q) use ($value) {
+            ->orWhereHas('translatorAuthor', function ($q) use ($value) {
+                $q->where(function ($q) use ($value) {
                     $q->whereRaw("JSON_SEARCH(lower(`name_lang`), 'all', $value)");
                 });
             })->with('poetAuthor')->get()->toArray();
@@ -143,24 +139,30 @@ class PoemRepository extends BaseRepository
         return self::random(1)->first();
     }
 
-    public function getPoemFromFakeId($fakeId, $select = null){
+    public function getPoemFromFakeId($fakeId, $select = null) {
         $id = Poem::getIdFromFakeId($fakeId);
 
-        if($select)
+        if ($select) {
             return $this->newQuery()->select($select)->findOrFail($id);
+        }
 
         return $this->newQuery()->findOrFail($id);
     }
 
     private function _processTagPoems($poems, $orderBy, $poemScores, $startTime, $endTime) {
-        return $poems->with(['reviews', 'reviews.user', 'uploader'])->orderByDesc($orderBy)->get()->map(function (Poem $poem) use ($poemScores, $startTime, $endTime) {
+        // if ($poems->get()->count()) {
+        //     dump($poems->get());
+        // }
+
+        return $poems->with(['reviews', 'reviews.user', 'uploader'])->orderByDesc($orderBy)->get()->map(function (Poem $poem) use ($poemScores) {
+            // dd($poem->created_at);
             $item = $poem->only(self::$listColumns);
             $item['date_ago'] = date_ago($poem->created_at);
             $item['poet'] = $poem->poetLabel;
-            if(!(config('app.env') === 'production')) {
-                $item['poet'] = $item['poet'] . '-' .$poem->id;
+            if (!(config('app.env') === 'production')) {
+                $item['poet'] = $item['poet'] . '-' . $poem->id;
             }
-            $item['poet_is_v'] = $poem->is_owner_uploaded===Poem::$OWNER['uploader'] && $poem->uploader && $poem->uploader->is_v;
+            $item['poet_is_v'] = $poem->is_owner_uploaded === Poem::$OWNER['uploader'] && $poem->uploader && $poem->uploader->is_v;
             $item['reviews_count'] = $poem->reviews->count();
             $item['reviews'] = $poem->reviews->take(2)->map->only(self::$relatedReviewColumns);
 
@@ -176,10 +178,10 @@ class PoemRepository extends BaseRepository
     public function getByTagId($tagId, $orderBy, $startTime = null, $endTime = null) {
         // TODO Poem::where() tag_id=$tagId, with(['uploader', 'scores'])
         $poems = \App\Models\Tag::where('id', '=', $tagId)->with('poems')->first()->poems();
-        if($startTime) {
+        if ($startTime) {
             $poems->where('poem.created_at', '>=', $startTime);
         }
-        if($endTime) {
+        if ($endTime) {
             $poems->where('poem.created_at', '<=', $endTime);
         }
 
@@ -191,15 +193,15 @@ class PoemRepository extends BaseRepository
     }
 
     /**
-     * 选取最赞列表的诗歌
+     * 选取最赞列表的诗歌.
      * @param $tagId
      * @param null $startTime
      * @param null $endTime
-     * @param int $scoreMin
+     * @param int  $scoreMin
      * @return mixed
      */
     public function getTopByTagId($tagId, $startTime = null, $endTime = null, $scoreMin = 6) {
-        $poemIds = Poem::select('id')->whereHas('tags', function($q) use ($tagId) {
+        $poemIds = Poem::select('id')->whereHas('tags', function ($q) use ($tagId) {
             $q->where('tag.id', '=', $tagId);
         })->pluck('id');
 
@@ -211,10 +213,10 @@ class PoemRepository extends BaseRepository
             ->pluck('poem_id');
 
         $poems = Poem::whereIn('id', $poemIdsScored)->where('score', '>', $scoreMin);
-        if($startTime) {
+        if ($startTime) {
             $poems->where('poem.created_at', '>=', $startTime);
         }
-        if($endTime) {
+        if ($endTime) {
             $poems->where('poem.created_at', '<=', $endTime);
         }
 
@@ -227,7 +229,6 @@ class PoemRepository extends BaseRepository
 
     // TODO withReview in one method
     private function _withReviews($q) {
-
     }
 
     public function getByOwner($userId) {
@@ -239,6 +240,7 @@ class PoemRepository extends BaseRepository
             $item['poet'] = $item->poetLabel;
             $item['score_count'] = ScoreRepository::calcCount($item->id);
             $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
+
             return $item->only(self::$listColumns);
         });
     }
@@ -254,20 +256,20 @@ class PoemRepository extends BaseRepository
     /**
      * @param $userId
      * @param bool $isCampaignPoem
-     * @param bool $excludeSelf exclude poem that upload_user_id=userId. ONLY for $isCampaignPoem == true
+     * @param bool $excludeSelf    exclude poem that upload_user_id=userId. ONLY for $isCampaignPoem == true
      * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
      */
-    public function getRelated($userId, $limit=100, $isCampaignPoem=false, $excludeSelf=true) {
+    public function getRelated($userId, $limit = 100, $isCampaignPoem = false, $excludeSelf = true) {
         $q = self::newQuery();
 
-        if($isCampaignPoem) {
+        if ($isCampaignPoem) {
             $tagIds = Campaign::select('tag_id')->pluck('tag_id');
 
-            $q->whereHas('tags', function ($q) use($tagIds) {
+            $q->whereHas('tags', function ($q) use ($tagIds) {
                 $q->whereIn('tag.id', $tagIds);
             });
 
-            if($excludeSelf) {
+            if ($excludeSelf) {
                 $q->where([
                     // ['is_owner_uploaded', '=', '1'],
                     ['upload_user_id', '<>', $userId],
@@ -276,9 +278,9 @@ class PoemRepository extends BaseRepository
         }
 
         $q->where(function ($q) use ($userId) {
-            $q->whereHas('reviews', function($q) use ($userId) {
+            $q->whereHas('reviews', function ($q) use ($userId) {
                 $q->where(['user_id' => $userId]);
-            })->orWhereHas('scores', function($q) use ($userId) {
+            })->orWhereHas('scores', function ($q) use ($userId) {
                 $q->where(['user_id' => $userId]);
             });
         });
@@ -289,42 +291,42 @@ class PoemRepository extends BaseRepository
             $item['poet'] = $item->poet_label;
             $item['score_count'] = ScoreRepository::calcCount($item->id);
             $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
+
             return $item->only(self::$listColumns);
         });
     }
 
-
     public static function isDuplicated(string $poem) {
         // TODO poem soft deleted, but content not deleted???
         // TODO use simhash
-        if(mb_strlen($poem) <= 10) {
+        if (mb_strlen($poem) <= 10) {
             return false;
         }
         $contentHash = Str::contentHash($poem);
-        $existed = Content::where([
+        $existed     = Content::where([
             'hash_crc32' => Str::crc32($contentHash),
-            'hash' => $contentHash
+            'hash'       => $contentHash
         ])->whereHas('poem')->orderBy('created_at')->first();
 
-        if($existed) {
+        if ($existed) {
             return Poem::find($existed->entry_id);
         }
+
         return false;
     }
 
     public function getCampaignPoemsByTagId($tagId) {
-
-        if(!is_numeric($tagId)) {
+        if (!is_numeric($tagId)) {
             return $this->responseFail();
         }
 
         $campaign = Tag::find($tagId)->campaign;
-        if(!$campaign) {
+        if (!$campaign) {
             // campaign deleted
             return [];
         }
 
-        $dateInterval = Carbon::parse($campaign->end)->diff(now());
+        $dateInterval  = Carbon::parse($campaign->end)->diff(now());
         $campaignEnded = $dateInterval->invert === 0;
 
         // poem before endDate, scores before endDate
@@ -332,46 +334,49 @@ class PoemRepository extends BaseRepository
 
         $limit = $campaign->settings['rank_min_weight'] ?? 3;
 
-        $cacheKey = 'api-topPoemsByScore-' . $campaign->id;
+        $cacheKey     = 'api-topPoemsByScore-' . $campaign->id;
         $cachedResult = Cache::get($cacheKey);
-        if($campaignEnded && $cachedResult) {
+        if ($campaignEnded && $cachedResult) {
             $byScoreData = $cachedResult;
         } else {
             $byScoreData = $byScore->filter(function ($value) use ($limit) {
                 // 票数不足的不参与排名
                 // dump($value['score_count']);
                 return $value['score_count'] >= $limit;
-            })->map(function ($item) use ($campaign) {
+            })->map(function ($item) {
                 // TODO 独立以下后处理的过程，使得仅缓存 id, score 成为可能
                 $item['reviews'] = $item['reviews']->map(function ($review) {
                     $review['content'] = $review['pure_content'];
+
                     return $review;
                 });
+
                 return $item;
             })->sort(function ($a, $b) {
                 $scoreOrder = $b['score'] <=> $a['score'];
                 $countOrder = $b['score_count'] <=> $a['score_count'];
+
                 return $scoreOrder === 0
                     ? ($countOrder === 0 ? $b['score_weight'] <=> $a['score_weight'] : $countOrder)
                     : $scoreOrder;
             })->values()->map(function ($item, $index) {
                 $item['rank'] = $index + 1;
+
                 return $item;
             });
 
-            if($campaignEnded && !$cachedResult) {
+            if ($campaignEnded && !$cachedResult) {
                 // TODO cache id, score, score_count, poet, title, content_id only
                 // TODO 如果活动结束后，最赞列表中的诗歌被删除，则结果中也不应显示此诗
                 Cache::forever($cacheKey, $byScoreData);
             }
         }
 
-
         return [
             // TODO paginate $byScoreData
             'byScore' => $byScoreData,
             // TODO pagination instead of ugly splice
-            'byCreatedAt' => $this->getByTagId($tagId, 'created_at')->splice(0,150)
+            'byCreatedAt' => $this->getByTagId($tagId, 'created_at')->splice(0, 150)
         ];
     }
 
@@ -385,5 +390,4 @@ class PoemRepository extends BaseRepository
             }
         }
     }
-
 }
