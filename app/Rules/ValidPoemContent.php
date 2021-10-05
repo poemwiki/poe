@@ -44,7 +44,7 @@ class ValidPoemContent implements Rule {
         }
         $textLineCount  = $lineCount - $emptyLineCount;
 
-        if ($emptyLineCount >= ($lineCount - 1) / 2 && $this->noExtraEmptyLine) {
+        if ($lineCount > 1 && $emptyLineCount >= ($lineCount - 1) / 2 && $this->noExtraEmptyLine) {
             $this->reason = '请删除多余空行。';
 
             return false;
