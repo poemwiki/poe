@@ -144,6 +144,9 @@ class AuthorController extends Controller {
         $avatarImage = $result['Data']['ProcessResults']['Object'][0];
         if (isset($avatarImage['Location'])) {
             $objectUrlWithoutSign   = 'https://' . $avatarImage['Location'];
+
+            // Tencent cos client has set default timezone to PRC
+            date_default_timezone_set(config('app.timezone', 'UTC'));
             $author->avatar         = $objectUrlWithoutSign . '?v=' . now();
             $author->save();
 
