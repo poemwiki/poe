@@ -6,23 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Campaign;
 use App\Repositories\CampaignRepository;
 use App\Repositories\PoemRepository;
-use App\User;
 use Cache;
 use Illuminate\Http\Request;
 
 /**
- * Class LanguageController
- * @package App\Http\Controllers\API
+ * Class LanguageController.
  */
 class CampaignAPIController extends Controller {
-    /** @var  CampaignRepository */
+    /** @var CampaignRepository */
     private $campaignRepository;
-    /** @var  PoemRepository */
+    /** @var PoemRepository */
     private $poemRepository;
 
     public function __construct(CampaignRepository $campaignRepository, PoemRepository $poemRepository) {
         $this->campaignRepository = $campaignRepository;
-        $this->poemRepository = $poemRepository;
+        $this->poemRepository     = $poemRepository;
     }
 
     public function index(Request $request) {
@@ -33,6 +31,7 @@ class CampaignAPIController extends Controller {
                 $ret['settings'] = collect($campaign->settings)->except(['result']);
                 $ret['poem_count'] = $campaign->poem_count;
                 $ret['user_count'] = $campaign->user_count;
+
                 return $ret;
             });
         });
@@ -42,7 +41,7 @@ class CampaignAPIController extends Controller {
 
     public function show($id) {
         // todo Cache::forget('api-campaign-index') if new campaign poem uploaded
-        $ret = Cache::remember('api-campaign-show-'.$id, now()->addMinutes(config('app.env') === 'production' ? 1 : 0), function () use($id) {
+        $ret = Cache::remember('api-campaign-show-' . $id, now()->addMinutes(config('app.env') === 'production' ? 1 : 0), function () use ($id) {
             /** @var Campaign $campaign */
             $campaign = $this->campaignRepository->find($id);
 
@@ -50,11 +49,13 @@ class CampaignAPIController extends Controller {
                 return $this->responseFail([], '没有找到这个活动。', self::$CODE['no_entry']);
             }
             $ret = $campaign->toArray();
+
+            $poems = $this->poemRepository->getCampaignPoemsByTagId($campaign->tag_id);
+            $ret['poemData'] = $poems;
             $ret['settings'] = collect($campaign->settings)->except(['result']);
             $ret['poem_count'] = $campaign->poem_count;
             $ret['user_count'] = $campaign->user_count;
 
-            $ret['poemData'] = $this->poemRepository->getCampaignPoemsByTagId($campaign->tag_id);
             return $ret;
         });
 
