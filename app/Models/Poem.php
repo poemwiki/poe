@@ -38,6 +38,7 @@ use Spatie\Searchable\SearchResult;
  * @property Author|null                         $poetAuthor
  * @property User|null                           $poetUser
  * @property bool                                $poet_is_v
+ * @property int                                 $campaign_id
  * @property array                               $scoreArray
  * @property string                              $firstLine
  * @property Date                                $updated_at
