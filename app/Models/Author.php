@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Searchable\Searchable;
@@ -145,13 +146,21 @@ class Author extends Model implements Searchable {
     public function poemsAsPoet(): MorphToMany {
         return $this->morphedByMany(\App\Models\Poem::class, 'start', 'relatable', 'end_id')
             ->where('relation', '=', Relatable::RELATION['poet_is'])
-            ->where('end_type', '=', self::class);
+            ->where('end_type', '=', self::class)->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('relatable')
+                    ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
+            });
     }
 
     public function poemsAsTranslator(): MorphToMany {
         return $this->morphedByMany(\App\Models\Poem::class, 'start', 'relatable', 'end_id')
             ->where('relation', '=', Relatable::RELATION['translator_is'])
-            ->where('end_type', '=', self::class);
+            ->where('end_type', '=', self::class)->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('relatable')
+                    ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
+            });
     }
 
     public function poems() {

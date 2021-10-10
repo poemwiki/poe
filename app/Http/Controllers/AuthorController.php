@@ -8,6 +8,7 @@ use App\Models\Author;
 use App\Models\MediaFile;
 use App\Models\Nation;
 use App\Models\Poem;
+use App\Models\Relatable;
 use App\Models\Wikidata;
 use App\Repositories\AuthorRepository;
 use App\Repositories\DynastyRepository;
@@ -17,6 +18,7 @@ use App\Services\Tx;
 use Cache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AuthorController extends Controller {
     /** @var AuthorRepository */
@@ -35,13 +37,21 @@ class AuthorController extends Controller {
     public function show($fakeId) {
         $id                      = Author::getIdFromFakeId($fakeId);
         $author                  = Author::findOrFail($id);
-        $poemsAsPoet             = Poem::where(['poet_id' => $id])->get();
+        $poemsAsPoet             = Poem::where(['poet_id' => $id])->whereNotExists(function ($query) {
+            $query->select(DB::raw(1))
+                ->from('relatable')
+                ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
+        })->get();
         $authorUserOriginalWorks = $author->user ? $author->user->originalPoemsOwned : [];
 
         // TODO poem.translator_id should be deprecated
-        $poemsAsTranslatorAuthor  = Poem::where(['translator_id' => $id])->get();
+        $poemsAsTranslatorAuthor  = Poem::where(['translator_id' => $id])->whereNotExists(function ($query) {
+            $query->select(DB::raw(1))
+                ->from('relatable')
+                ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
+        })->get();
         $poemsAsRelatedTranslator = $author->poemsAsTranslator;
-        $poemsAsTranslator        = $poemsAsTranslatorAuthor->concat($poemsAsRelatedTranslator);
+        $poemsAsTranslator        = $poemsAsTranslatorAuthor->concat($poemsAsRelatedTranslator)->unique('id');
 
         $from         = request()->get('from');
         $fromPoetName = '';
