@@ -210,6 +210,14 @@ class PoemAPIController extends Controller {
             ];
         }
 
+        if ($poem->campaign_id === 26) {
+            $res['sell'] = [
+                'path'   => 'ws_micro_shop/pages/goods/goods?share_scene=4&ald_share_src=16292069421208593488&shopid=0&id=628332&tabbarindex=0',
+                'appId'  => 'wx219ab480d1c51bb3',
+                'picUrl' => 'https://poemwiki-1254719278.cos.ap-guangzhou.myqcloud.com/campaign/26/sell.jpg'
+            ];
+        }
+
         $liked_review_ids = [];
 
         $res['score'] = $poem->totalScore;
