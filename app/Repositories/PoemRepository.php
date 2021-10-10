@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Campaign;
 use App\Models\Content;
 use App\Models\Poem;
+use App\Models\Relatable;
 use App\Models\Score;
 use App\Models\Tag;
 use Illuminate\Support\Carbon;
@@ -86,7 +87,11 @@ class PoemRepository extends BaseRepository {
      * LIMIT 1
      */
     public static function random($num = 1, $with = []) {
-        $builder = Poem::query();
+        $builder = Poem::query()->whereNotExists(function ($query) {
+            $query->select(DB::raw(1))
+                ->from('relatable')
+                ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
+        });
         if (!empty($with)) {
             $builder->with($with);
         }
@@ -101,7 +106,11 @@ class PoemRepository extends BaseRepository {
         // 2. 评分和评论数
         // 3. poem.length
         // 4. 最近未推送给当前用户的
-        $builder = Poem::query()->where('language_id', '=', '1');
+        $builder = Poem::query()->whereNotExists(function ($query) {
+            $query->select(DB::raw(1))
+                ->from('relatable')
+                ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
+        })->where('language_id', '=', '1');
         if (!empty($with)) {
             $builder->with($with);
         }
