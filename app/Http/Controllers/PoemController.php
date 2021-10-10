@@ -289,19 +289,14 @@ class PoemController extends Controller {
             $sanitized['poet_cn'] = $poetAuthor->label_cn;
         }
         // TODO translator_wikidata_id and translator_id is deprecated
-        // if(is_numeric($sanitized['translator_wikidata_id']) && is_null($sanitized['translator_id'])) {
-        //     $translatorAuthor = $this->authorRepository->getExistedAuthor($sanitized['translator_wikidata_id']);
-        //     $sanitized['translator_id'] = $translatorAuthor->id;
-        //     $sanitized['translator'] = $translatorAuthor->label_cn;
-        // }
 
         if ($sanitized['translator_ids']) {
-            // TODO remove poem.translator_id
             if ($poem->translators->count()) {
                 $translatorsArr = collect($poem->translatorsLabelArr)->map(function ($label) {
                     return isset($label['id']) ? $label['id'] : $label['name'];
                 })->toArray();
 
+                // check if translators are not changed
                 if ($translatorsArr !== $sanitized['translator_ids']) {
                     // TODO update relatable records instead of delete and insert
                     // TODO add order property for "translator is" relation
