@@ -7,6 +7,7 @@ use App\Http\Requests\API\StoreOwnerUploaderPoem;
 use App\Models\Author;
 use App\Models\Entry;
 use App\Models\Poem;
+use App\Models\Relatable;
 use App\Models\Tag;
 use App\Query\AuthorAliasSearchAspect;
 use App\Repositories\PoemRepository;
@@ -18,6 +19,7 @@ use Exception;
 use File;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -544,6 +546,11 @@ class PoemAPIController extends Controller {
                     ->addSearchableAttribute('preface')
                     ->addSearchableAttribute('subtitle')
                     ->addSearchableAttribute('location')
+                    ->whereNotExists(function ($query) {
+                        $query->select(DB::raw(1))
+                            ->from('relatable')
+                            ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
+                    })
                     ->with('poetAuthor')->limit(50);
                 // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
             })

@@ -2,23 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Author;
-use App\Models\Nation;
 use App\Models\Poem;
+use App\Models\Relatable;
 use App\Query\AuthorAliasSearchAspect;
 use App\Repositories\AuthorRepository;
 use App\Repositories\NationRepository;
 use App\Repositories\PoemRepository;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Ramsey\Collection\Collection;
 use Spatie\Searchable\ModelSearchAspect;
 use Spatie\Searchable\Search;
 
 class QueryController extends Controller {
-
     // public function __construct() {
     // }
     public function index() {
@@ -29,7 +25,7 @@ class QueryController extends Controller {
         return $this->response(NationRepository::searchByName(Str::trimSpaces($keyword), $id));
     }
 
-    public function author($keyword, $id=null) {
+    public function author($keyword, $id = null) {
         // TODO do i need urldecode $id here?
         return $this->response(AuthorRepository::searchLabel(Str::trimSpaces($keyword), $id ? explode(',', $id) : null));
     }
@@ -42,7 +38,9 @@ class QueryController extends Controller {
     // TODO support multiple word search like bot search, order by relative
     public function search($keyword) {
         $keyword = Str::trimSpaces($keyword);
-        if ($keyword === '' || is_null($keyword)) return view('query.search');
+        if ($keyword === '' || is_null($keyword)) {
+            return view('query.search');
+        }
 
         $keyword4Query = Str::of($keyword)
             // ->replace('·', ' ')
@@ -54,7 +52,7 @@ class QueryController extends Controller {
         if ($keyword4Query->length < 1) {
             return view('query.search')->with([
                 'authors' => [],
-                'poems' => [],
+                'poems'   => [],
                 'keyword' => $keyword
             ]);
         }
@@ -72,6 +70,11 @@ class QueryController extends Controller {
                     ->addSearchableAttribute('preface')
                     ->addSearchableAttribute('subtitle')
                     ->addSearchableAttribute('location')
+                    ->whereNotExists(function ($query) {
+                        $query->select(DB::raw(1))
+                            ->from('relatable')
+                            ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
+                    })
                     ->with('poetAuthor')->limit(100);
                 // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
             })
@@ -81,7 +84,7 @@ class QueryController extends Controller {
         // dd(DB::getQueryLog());
         $results = $searchResults->groupByType();
         $authors = $results->get('authorAlias') ?: collect();
-        $authors = $authors->filter(function($author) {
+        $authors = $authors->filter(function ($author) {
             // TODO show wikidata poet on search result page: $author->searchable instanceof \App\Models\Wikidata
             return $author->searchable instanceof \App\Models\Author;
         });
@@ -95,7 +98,9 @@ class QueryController extends Controller {
         }
 
         foreach ($authors as $key => $author) {
-            if ($key >= 5) break;
+            if ($key >= 5) {
+                break;
+            }
 
             // in case of $author->searchable instanceof \App\Models\Wikidata
             // after show wikidata poet on search result page
@@ -112,13 +117,14 @@ class QueryController extends Controller {
         // dd($mergedPoems);
         return view('query.search')->with([
             'authors' => $authors,
-            'poems' => $mergedPoems,
+            'poems'   => $mergedPoems,
             'keyword' => $keyword
         ]);
     }
 
     public function query(Request $request) {
         $keyword = $request->input('keyword');
+
         return $this->search($keyword);
     }
 }
