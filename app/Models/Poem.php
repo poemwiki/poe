@@ -347,6 +347,12 @@ class Poem extends Model implements Searchable {
                 'end_id'     => $endID
             ]);
         }
+
+        // TODO don't need remove translator_id if they are removed from db
+        $this->translator_id          = null;
+        $this->translator_wikidata_id = null;
+        $this->save();
+
         // TODO log relatedTranslators change
         // TODO make translators change revertible
     }
