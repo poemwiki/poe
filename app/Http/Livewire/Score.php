@@ -6,15 +6,15 @@ use App\Http\Requests\CreateScoreRequest;
 use App\Models\Poem;
 use App\Models\Score as ScoreModel;
 use App\Repositories\ScoreRepository;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class Score extends Component {
     use AuthorizesRequests;
 
-    /** @var  ScoreRepository */
+    /** @var ScoreRepository */
     private $scoreRepository;
     public $poem;
     public $rating = null;
@@ -23,18 +23,18 @@ class Score extends Component {
     ];
 
     public function __construct() {
-        $this->scoreRepository = new ScoreRepository(app());
-        $allowedScores = collect(ScoreModel::$SCORE);
-        $this->sortedScores = $allowedScores->sort()->values()->all();
+        $this->scoreRepository  = new ScoreRepository(app());
+        $allowedScores          = collect(ScoreModel::$SCORE);
+        $this->sortedScores     = $allowedScores->sort()->values()->all();
         $this->descSortedScores = $allowedScores->sortDesc()->values()->all();
-        $this->rules = [
+        $this->rules            = [
             'rating' => Rule::in(ScoreModel::$SCORE)
         ];
         parent::__construct();
     }
 
     public function mount(Poem $poem) {
-        $this->poem = $poem;
+        $this->poem  = $poem;
         $this->score = $this->scoreRepository->calcScoreByPoem($this->poem);
         if (Auth::check()) {
             $record = \App\Models\Score::select('score')->where([
@@ -48,19 +48,19 @@ class Score extends Component {
     }
 
     public function updatedRating($value) {
-        if(!Auth::check()) {
+        if (!Auth::check()) {
             return redirect(route('login', ['ref' => route('p/show', $this->poem->fake_id)]));
         }
 
         $this->validateOnly('rating');
 
-        $user = Auth::user();
-        $weight = CreateScoreRequest::getScoreWeight($this->poem, $user);
+        $user   = Auth::user();
+        $weight = CreateScoreRequest::getScoreWeight($this->poem, $user, $value);
 
-        return  $this->scoreRepository->updateOrCreate(
+        return $this->scoreRepository->updateOrCreate(
             ['poem_id' => $this->poem->id, 'user_id' => $user->id],
             [
-                'score' => $this->rating,
+                'score'  => $this->rating,
                 'weight' => $weight
             ]
         );
@@ -77,8 +77,8 @@ class Score extends Component {
 
     public function render() {
         return view('livewire.score', [
-            'score' => $this->poem->scoreArray,
-            'sortedScores' => $this->sortedScores,
+            'score'            => $this->poem->scoreArray,
+            'sortedScores'     => $this->sortedScores,
             'descSortedScores' => $this->descSortedScores
         ]);
     }
