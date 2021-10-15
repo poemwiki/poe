@@ -51,7 +51,8 @@ class CreateScoreRequest extends FormRequest {
     }
 
     public static function getScoreWeight(Poem $poem, User $user, int $score) {
-        $lowScore = 4;
+        $lowScore         = 4;
+        $maxLowScoreCount = 5;
         // TODO weight should from user.weight
         if ($poem->is_owner_uploaded === Poem::$OWNER['uploader'] && $poem->uploader) {
             if ($poem->uploader->id === $user->id) {
@@ -79,7 +80,12 @@ class CreateScoreRequest extends FormRequest {
             ])->get();
             $count = $recentScore->count();
             if ($count >= 2 && $score <= $lowScore) {
-                logger()->info('Score frequency limit touched by user', ['id' => $user->id, 'name' => $user->name]);
+                logger()->info('Score frequency limit touched by user', ['id' => $user->id, 'name' => $user->name, $count]);
+                if ($count > $maxLowScoreCount) {
+                    logger()->info('Score frequency limit excelled: ', ['id' => $user->id, 'name' => $user->name]);
+                    // $user->weight = 0;
+                    // $user->save();
+                }
 
                 return 0;
             }
