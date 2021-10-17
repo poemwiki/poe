@@ -65,8 +65,6 @@ class ImportFromAuthor extends Command {
     private function _process(Collection $authors) {
         foreach ($authors as $poet) {
             $names = json_decode($poet->getAttributes()['name_lang']);
-            // 修改作者名时，删除原有作者名，否则会保留所有以往的作者名
-            // DB::table('alias')->where('author_id', $poet->id)->delete();
 
             collect($names)->each(function ($name, $locale) use ($poet) {
                 if (!is_string($name) or $name == '') {
