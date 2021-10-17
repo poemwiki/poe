@@ -4,14 +4,10 @@ namespace App\Console\Alias;
 
 use App\Models\Author;
 use App\Models\Language;
-use App\Models\Wikidata;
 use Illuminate\Console\Command;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-
 
 class ImportFromAuthor extends Command {
     /**
@@ -43,9 +39,8 @@ class ImportFromAuthor extends Command {
      * @return int
      */
     public function handle() {
-
         $fromId = $this->argument('fromId') ?: 101247956;
-        $toId = $this->argument('toId') ?: 101247956;
+        $toId   = $this->argument('toId') ?: 101247956;
 
         $authorId = $this->option('id');
         if (App::runningInConsole() && !$this->option('id')) {
@@ -57,10 +52,11 @@ class ImportFromAuthor extends Command {
         if (is_numeric($authorId)) {
             $author = Author::where('id', $authorId)->get();
             $this->_process($author);
+
             return 0;
         }
 
-        // add alias, if author exists, write alias.author_id
+        // add alias, if author exists, set alias.author_id to author id
         $this->importFromAuthor($fromId, $toId);
 
         return 0;
@@ -68,33 +64,34 @@ class ImportFromAuthor extends Command {
 
     private function _process(Collection $authors) {
         foreach ($authors as $poet) {
-
             $names = json_decode($poet->getAttributes()['name_lang']);
+            // 修改作者名时，删除原有作者名，否则会保留所有以往的作者名
+            // DB::table('alias')->where('author_id', $poet->id)->delete();
 
-            DB::table('alias')->where('author_id', $poet->id)->delete();
+            collect($names)->each(function ($name, $locale) use ($poet) {
+                if (!is_string($name) or $name == '') {
+                    return;
+                }
 
-            collect($names)->each(function ($name, $locale) use($poet) {
-                if(!is_string($name) or $name=="") return;
-
+                // TODO select language that has name(enabled)
                 $language = Language::where('locale', '=', $locale)->first();
                 // insert alias data into alias
                 $insert = [
-                    'locale' => $locale,
+                    'locale'      => $locale,
                     'language_id' => $language ? $language->id : null,
-                    'name' => $name,
+                    'name'        => $name,
                     'wikidata_id' => $poet->wikidata_id ?? null,
-                    'author_id' => $poet->id,
-                    "created_at" => now(),
-                    "updated_at" => now(),
+                    'author_id'   => $poet->id,
+                    'created_at'  => now(),
+                    'updated_at'  => now(),
                 ];
                 DB::table('alias')->updateOrInsert([
                     'author_id' => $poet->id,
-                    'name' => $name
+                    'name'      => $name
                 ], $insert);
 
                 $this->info("Label added to alias: author.id: $poet->id \t $name");
             });
-
         }
     }
 
@@ -102,10 +99,8 @@ class ImportFromAuthor extends Command {
         Author::where([
             ['id', '>=', $fromId],
             ['id', '<=', $toId],
-        ])->orderBy('id')->chunk(400, function($authors) {
+        ])->orderBy('id')->chunk(400, function ($authors) {
             $this->_process($authors);
         });
     }
-
 }
-
