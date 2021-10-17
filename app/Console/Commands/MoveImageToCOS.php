@@ -106,7 +106,8 @@ class MoveImageToCOS extends Command {
         logger()->info('processing started:[author->id=' . $author->id . ']');
 
         $picUrls = collect($author->pic_url)->filter(function ($url) {
-            return isValidPicUrl($url) && isWikimediaUrl($url);
+            return isValidPicUrl($url) && (isWikimediaUrl($url)
+                || !str_starts_with($url, 'https://poemwiki-1254719278.cos.ap-guangzhou.myqcloud.com'));
         })
             ->values();
 
