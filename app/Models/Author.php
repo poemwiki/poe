@@ -237,7 +237,7 @@ class Author extends Model implements Searchable {
             $original = self::find($model->id);
 
             // TODO 如果前端可编辑别名列表，此处不应再有处理别名相关逻辑，应在controller处理
-            if (isset($changes['name_lang'])) {
+            if (isset($changes['name_lang']) && $original) {
                 // if author name changed, delete old name from alias
                 $names = json_decode($changes['name_lang']);
                 foreach ($names as $locale => $name) {
