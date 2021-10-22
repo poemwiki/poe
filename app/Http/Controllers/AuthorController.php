@@ -157,7 +157,7 @@ class AuthorController extends Controller {
 
             // Tencent cos client has set default timezone to PRC
             date_default_timezone_set(config('app.timezone', 'UTC'));
-            $author->avatar         = $objectUrlWithoutSign . '?v=' . now();
+            $author->avatar         = $objectUrlWithoutSign;
             $author->save();
 
             $this->authorRepository->saveAuthorMediaFile($author, MediaFile::TYPE['avatar'], $avatarImage['Key'], $md5, $format, $avatarImage['Size']);
