@@ -54,27 +54,27 @@ class PoemAPIController extends Controller {
             'reviews', 'reviews_count', 'date_ago', 'poet_avatar', 'translator_avatar',
             'score', 'score_count', 'score_weight'
         ];
-        $reviewColumn = [
-            'avatar', 'content', 'created_at', 'id', 'user_id', 'name', 'poem_id'//, 'title'
-        ];
+
+        $poems = collect([]);
+        if ($id) {
+            $poemById = Poem::find($id);
+
+            if ($poemById) {
+                $poems = $poems->concat([$poemById->mergedToPoem ? $poemById->mergedToPoem : $poemById]);
+            }
+        }
 
         $noScoreNum = 2;
-        $poems      = $this->poemRepository->suggest($num - $noScoreNum, ['reviews'])
+        $scorePoems = $this->poemRepository->suggest($num - $noScoreNum, ['reviews'])
             ->whereNull('campaign_id')
             ->where('score', '>=', 7)
             ->get();
+        $poems        = $poems->concat($scorePoems);
         $noScorePoems = $this->poemRepository->suggest($noScoreNum, ['reviews'])
             ->whereNull('campaign_id')
             ->whereNull('score')
             ->get();
         $poems = $poems->concat($noScorePoems);
-
-        if ($id) {
-            $poemById = $this->poemRepository->findMany([$id]);
-            if ($poemById) {
-                $poems = $poemById->concat($poems);
-            }
-        }
 
         $res = [];
         foreach ($poems as $poem) {
@@ -110,13 +110,6 @@ class PoemAPIController extends Controller {
             });
 
             $item['translator_label'] = count($translatorLabels) ? join(', ', $translatorLabels) : $poem->translator_label;
-
-            $item['reviews_count'] = $poem->reviews->count();
-            $item['reviews']       = $poem->reviews->take(1)->map(function ($review) use ($reviewColumn) {
-                $review->content = $review->pureContent;
-
-                return $review->makeHidden('user')->only($reviewColumn);
-            });
 
             $res[] = $item;
         }
@@ -551,7 +544,7 @@ class PoemAPIController extends Controller {
                             ->from('relatable')
                             ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
                     })
-                    ->with('poetAuthor')->limit(50);
+                    ->with('poetAuthor')->limit(150);
                 // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
             })
             // ->registerModel(Poem::class, 'title', 'poem', 'poet', 'poet_cn', 'translator')//, 'poet')
