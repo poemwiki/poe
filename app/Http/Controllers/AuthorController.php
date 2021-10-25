@@ -136,14 +136,14 @@ class AuthorController extends Controller {
         [$width, $height] = getimagesize($file);
         $corpSize         = min($width, $height, 600);
 
-        $client     = new Tx();
-        $format     = TX::SUPPORTED_FORMAT['webp'];
-        $md5        = md5($file->getContent());
-        $toFileName = config('app.avatar.author_path') . '/' . $author->fakeId . '.' . $format;
-        $fileID     = config('app.cos_tmp_path') . '/' . $md5;
+        $client        = new Tx();
+        $format        = TX::SUPPORTED_FORMAT['webp'];
+        $md5           = md5($file->getContent());
+        $toFileName    = config('app.avatar.author_path') . '/' . $author->fakeId . '.' . $format;
+        $tmpFileID     = config('app.cos_tmp_path') . '/' . $md5;
 
         try {
-            $result = $client->scropAndUpload($fileID, $toFileName, $file->getContent(), $format, $corpSize, $corpSize);
+            $result = $client->scropAndUpload($tmpFileID, $toFileName, $file->getContent(), $format, $corpSize, $corpSize);
             logger()->info('scropAndUpload finished:', $result);
         } catch (\Exception $e) {
             logger()->error('scropAndUpload Error:' . $e->getMessage());
@@ -157,12 +157,12 @@ class AuthorController extends Controller {
 
             // Tencent cos client has set default timezone to PRC
             date_default_timezone_set(config('app.timezone', 'UTC'));
-            $author->avatar         = $objectUrlWithoutSign;
+            $author->avatar         = $objectUrlWithoutSign . '?v=' . now()->timestamp;
             $author->save();
 
             $this->authorRepository->saveAuthorMediaFile($author, MediaFile::TYPE['avatar'], $avatarImage['Key'], $md5, $format, $avatarImage['Size']);
 
-            $client->deleteObject($fileID);
+            $client->deleteObject($tmpFileID);
 
             return $this->responseSuccess(['avatar' => $objectUrlWithoutSign . '?v=' . now()->timestamp]);
         }
