@@ -164,7 +164,12 @@ class Author extends Model implements Searchable {
     }
 
     public function poems() {
-        return $this->hasMany(\App\Models\Poem::class, 'poet_id', 'id');
+        return $this->hasMany(\App\Models\Poem::class, 'poet_id', 'id')
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('relatable')
+                    ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
+            });
     }
 
     // TODO poem.translator_id should be deprecated
