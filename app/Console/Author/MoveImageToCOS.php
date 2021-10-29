@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Author;
 
 use App\Models\Author;
 use App\Models\MediaFile;
@@ -14,7 +14,7 @@ class MoveImageToCOS extends Command {
      *
      * @var string
      */
-    protected $signature = 'MoveImageToCOS {fromId?} {toId?}';
+    protected $signature = 'author:moveImageToCOS {fromId?} {toId?}';
 
     /**
      * The console command description.
