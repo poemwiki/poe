@@ -7,7 +7,6 @@ use App\Models\MediaFile;
 use App\Repositories\AuthorRepository;
 use App\Services\Tx;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
 
 class MoveImageToCOS extends Command {
     /**
@@ -23,14 +22,6 @@ class MoveImageToCOS extends Command {
      * @var string
      */
     protected $description = 'move wikidata\'s author images to COS';
-    /**
-     * @var \Illuminate\Contracts\Filesystem\Filesystem|\Illuminate\Filesystem\FilesystemAdapter
-     */
-    private $disk;
-    /**
-     * @var \Qcloud\Cos\Client
-     */
-    private $cosClient;
     /**
      * @var AuthorRepository
      */
@@ -49,19 +40,8 @@ class MoveImageToCOS extends Command {
         parent::__construct();
 
         $this->authorRepo = $authorRepo;
-        $this->disk       = Storage::disk('cosv5');
 
         $this->client   = new Tx();
-
-        $region    = config('filesystems.disks.cosv5.region');
-
-        $this->cosClient = new \Qcloud\Cos\Client([
-            'region'      => $region,
-            'credentials' => [
-                'secretId'  => config('filesystems.disks.cosv5.credentials.secretId'),
-                'secretKey' => config('filesystems.disks.cosv5.credentials.secretKey')
-            ]
-        ]);
     }
 
     /**
