@@ -32,7 +32,7 @@ use Spatie\Searchable\SearchResult;
  * @property \Illuminate\Support\Carbon|null                                    $deleted_at
  * @property int|null                                                           $nation_id
  * @property int|null                                                           $dynasty_id
- * @property string|null                                                        $short_url
+ * @property string|null                                                        $short_url              weapp code image url
  * @property int|null                                                           $upload_user_id
  * @property array|null                                                         $wiki_desc_lang
  * @property \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
