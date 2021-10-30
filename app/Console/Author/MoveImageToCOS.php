@@ -53,14 +53,6 @@ class MoveImageToCOS extends Command {
         $fromId = $this->argument('fromId') ?: 0;
         $toId   = $this->argument('toId') ?: 0;
 
-        // create a file
-        $path           = 'avatar/';
-        $fileName       = 'Elizabeth_Acevedo.jpg';
-        $publicFile     = public_path('images/Elizabeth_Acevedo.jpg');
-        if (!file_exists($publicFile)) {
-            return -1;
-        }
-
         $authors = Author::query()->where([
             ['id', '>=', $fromId],
             ['id', '<=', $toId]
