@@ -66,6 +66,8 @@ class UserAPIController extends Controller {
 
         try {
             $result = $client->scropAndUpload($fileID, $toFileName, $file->getContent(), $format, $corpSize, $corpSize);
+            // Tencent cos client has set default timezone to PRC
+            date_default_timezone_set(config('app.timezone', 'UTC'));
             logger()->info('scropAndUpload finished:', $result);
         } catch (\Exception $e) {
             logger()->error('scropAndUpload Error:' . $e->getMessage());
