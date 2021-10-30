@@ -21,11 +21,12 @@ class MediaFile extends Model {
     protected $table     = 'file';
 
     public const TYPE = [
-        'image'  => 0,
-        'thumb'  => 1,
-        'avatar' => 2,
-        'audio'  => 3,
-        'video'  => 4
+        'image'      => 0,
+        'thumb'      => 1,
+        'avatar'     => 2,
+        'audio'      => 3,
+        'video'      => 4,
+        'weapp_code' => 5
     ];
     public const CONVERSION = [
         '300x300'        => 1,

@@ -122,7 +122,7 @@ class AuthorController extends Controller {
             return $this->responseFail([], '图片上传失败。请稍后再试。');
         }
 
-        $ext      = $file->getClientOriginalExtension();
+        $ext      = strtolower($file->getClientOriginalExtension());
         $allow    = ['jpg', 'webp', 'png', 'jpeg', 'bmp']; // 支持的类型
         if (!in_array($ext, $allow)) {
             return $this->responseFail([], '不支持的图片类型，请上传 jpg/jpeg/png/webp/bmp 格式图片。', Controller::$CODE['img_format_invalid']);

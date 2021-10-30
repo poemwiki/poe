@@ -9,6 +9,9 @@ use Qcloud\Cos\ImageParamTemplate\ImageMogrTemplate;
 use Qcloud\Cos\ImageParamTemplate\PicOperationsTransformation;
 use function Qcloud\Cos\region_map;
 
+/**
+ * Tencent cloud service.
+ */
 class Tx {
     public $bucket    = '';
     public $secretKey = '';
@@ -148,6 +151,25 @@ class Tx {
         ]);
 
         logger()->info('scropAndUpload:', $result->toArray());
+
+        return $result->toArray();
+    }
+
+    public function upload($fileID, $content, string $format = self::SUPPORTED_FORMAT['webp']) {
+        $imageMogrTemplate = new \Qcloud\Cos\ImageParamTemplate\ImageMogrTemplate();
+        $imageMogrTemplate->format($format);
+        $picOperationsTemplate = new \Qcloud\Cos\ImageParamTemplate\PicOperationsTransformation();
+        $picOperationsTemplate->setIsPicInfo(1);
+        $picOperationsTemplate->addRule($imageMogrTemplate, '/' . $fileID);
+
+        $result = $this->cosClient->putObject([
+            'Bucket'         => $this->bucket,
+            'Key'            => $fileID,
+            'Body'           => $content,
+            'PicOperations'  => $picOperationsTemplate->queryString(),
+        ]);
+
+        logger()->info('uploaded:', $result->toArray());
 
         return $result->toArray();
     }

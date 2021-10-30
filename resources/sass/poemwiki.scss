@@ -6,7 +6,7 @@
   //line-height: 2.4em;
   background-color: transparent;
 }
-.wikidata-link, .wikipedia-link{
+.wikidata-link, .wikipedia-link, .weapp-link, .weapp-code{
   vertical-align: text-bottom;
   line-height: 1em;
   width: 1em;
@@ -17,7 +17,7 @@
     background-color: transparent;
   }
 }
-.wikidata-link:before, .wikipedia-link:before {
+.wikidata-link:before, .wikipedia-link:before, .weapp-link:before {
   content: '';
   display: inline-block;
   width: 1em;
@@ -31,6 +31,9 @@
 }
 .wikipedia-link:before {
   background-image: url("/images/wikipedia.svg");
+}
+.weapp-link:before {
+  background-image: url("/images/weapp.svg");
 }
 
 .nested-tree {

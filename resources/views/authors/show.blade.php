@@ -20,6 +20,7 @@ $aliasMaxLength = 4;
 @section('content')
     <article class="poet page">
       <h1 class="text-xl font-bold">{{$author->label}}
+        @if($author->short_url)<a class="weapp-code" href="{{$author->short_url}}" target="_blank"><img src="{{$author->short_url}}" alt="微信小程序码"></a>@endif
         @if($author->wikiData)
           <a class="wikidata-link" href="{{$author->wikiData->wikidata_url}}" target="_blank"></a>
         @endif
@@ -78,7 +79,10 @@ $aliasMaxLength = 4;
           @endif
         </p>
       @endif
-      <p class="poet-brief" style="white-space: pre-line;"><span class="poet-label">@lang('Introduction')：</span>{{$author->describe_lang}}</p>
+
+      <p class="poet-brief" style="white-space: pre-line;"><span class="poet-label">@lang('Introduction')：</span>{{$author->describe_lang}}
+        @if($author->short_url)<a class="weapp-code" href="{{$author->short_url}}" target="_blank"><img src="{{$author->short_url}}" alt="微信小程序码"></a>@endif
+      </p>
 
         @if($poemsAsPoet->isNotEmpty())
         <h2>@lang("Author's Poem", ['author' => $author->label])</h2>
