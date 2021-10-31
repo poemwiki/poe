@@ -62,7 +62,7 @@ class WeappCode extends Command {
         ]);
 
         if (!$force) {
-            $query->whereNotNull('short_url');
+            $query->whereNull('short_url');
         }
 
         $authors = $query
