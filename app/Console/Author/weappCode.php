@@ -8,6 +8,7 @@ use App\Repositories\AuthorRepository;
 use App\Services\Tx;
 use App\Services\Weapp;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class WeappCode extends Command {
     /**
@@ -15,7 +16,7 @@ class WeappCode extends Command {
      *
      * @var string
      */
-    protected $signature = 'author:weapp {fromId?} {toId?}';
+    protected $signature = 'author:weapp {fromId?} {toId?} {--force}';
 
     /**
      * The console command description.
@@ -52,11 +53,19 @@ class WeappCode extends Command {
     public function handle() {
         $fromId = $this->argument('fromId') ?: 0;
         $toId   = $this->argument('toId') ?: 0;
+        $force  = $this->option('force');
 
-        $authors = Author::query()->where([
+        DB::enableQueryLog();
+        $query = Author::query()->where([
             ['id', '>=', $fromId],
             ['id', '<=', $toId]
-        ])
+        ]);
+
+        if (!$force) {
+            $query->whereNotNull('short_url');
+        }
+
+        $authors = $query
          ->orderBy('id')->get();
 
         try {
