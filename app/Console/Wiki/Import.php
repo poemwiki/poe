@@ -2,17 +2,15 @@
 
 namespace App\Console\Wiki;
 
-use App\Models\Poem;
 use App\Models\Wikidata;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class Import extends Command {
-    const CHUNK_SIZE = 46;
+    public const CHUNK_SIZE = 46;
 
     /**
      * The name and signature of the console command.
@@ -26,9 +24,9 @@ class Import extends Command {
      *
      * @var string
      */
-    protected $description = 'Retrieve newest poet data from wikidata entity API, and update wikidata table.';
+    protected $description  = 'Retrieve newest poet data from wikidata entity API, and update wikidata table.';
     protected $entityApiUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=';
-    protected $picUrlBase = 'https://upload.wikimedia.org/wikipedia/commons/';
+    protected $picUrlBase   = 'https://upload.wikimedia.org/wikipedia/commons/';
 
     /**
      * Create a new command instance.
@@ -80,9 +78,11 @@ class Import extends Command {
             $continue = $this->_process($ids);
             if ($continue) {
                 $bar->advance(self::CHUNK_SIZE);
+
                 return true;
             }
             $bar->finish();
+
             return false;
         });
 
@@ -98,30 +98,31 @@ class Import extends Command {
             return 'Q' . $id;
         })->implode('|');
         $options = config('app.env') === 'production' ? [] : [
-            'http' => 'tcp://localhost:1087',
+            'http'  => 'tcp://localhost:1087',
             'https' => 'tcp://localhost:1087',
         ];
 
-
         $this->info('Fetching: ' . $this->entityApiUrl . $qIds);
         $response = Http::withOptions($options)->timeout(30)->retry(5, 10)->get($this->entityApiUrl . $qIds);
-        $body = (string)$response->getBody();
-        $data = json_decode($body);
+        $body     = (string) $response->getBody();
+        $data     = json_decode($body);
 
-        if (!$data->success) return false;
+        if (!$data->success) {
+            return false;
+        }
 
         foreach ($ids as $id) {
             $entityId = 'Q' . $id;
-            $entity = $data->entities->$entityId;
-            $insert = [
-                'id' => $id,
+            $entity   = $data->entities->$entityId;
+            $insert   = [
+                'id'   => $id,
                 'type' => Wikidata::TYPE['poet'],
                 'data' => json_encode($entity)
             ];
             DB::table('wikidata')->updateOrInsert(['id' => $id], $insert);
         }
+
         return true;
     }
-
 }
 
