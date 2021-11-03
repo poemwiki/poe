@@ -71,6 +71,7 @@ class WeappCode extends Command {
         try {
             $authors->each(function ($author) {
                 $this->process($author);
+                sleep(3);
             });
         } catch (\Exception $e) {
             $this->error('error while put file to COS ' . $e->getMessage());
