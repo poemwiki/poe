@@ -165,9 +165,19 @@ class AuthorRepository extends BaseRepository {
         foreach ($entity->labels as $locale => $label) {
             $authorNameLang[$locale] = $label->value;
         }
+
         $descriptionLang = [];
-        foreach ($entity->descriptions as $locale => $description) {
-            $descriptionLang[$locale] = $description->value;
+        $titleLocale     = $wiki->getSiteTitle(config('app.locale-wikipedia'));
+        if (!empty($titleLocale)) {
+            $summary = get_wikipedia_summary($titleLocale);
+
+            if ($summary) {
+                $descriptionLang[$titleLocale['locale']] = $summary;
+            } else {
+                foreach ($entity->descriptions as $locale => $description) {
+                    $descriptionLang[$locale] = $description->value;
+                }
+            }
         }
 
         $picUrl = [];
