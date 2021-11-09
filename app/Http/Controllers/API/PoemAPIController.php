@@ -502,6 +502,7 @@ class PoemAPIController extends Controller {
 
     public function query(Request $request) {
         $keyword = Str::trimSpaces($request->json('keyword', ''));
+        $mode    = $request->json('mode', '');
 
         if ($keyword === '' || is_null($keyword)) {
             return $this->responseSuccess([
@@ -527,9 +528,14 @@ class PoemAPIController extends Controller {
         }
 
         // DB::enableQueryLog();
-        $searchResults = (new Search())
-            ->registerAspect(AuthorAliasSearchAspect::class)
-            ->registerModel(Poem::class, function (ModelSearchAspect $modelSearchAspect) {
+        $search = new Search();
+
+        if ($mode !== 'poem-select') {
+            $search = $search->registerAspect(AuthorAliasSearchAspect::class);
+        }
+
+        if ($mode !== 'author-select' && $mode !== 'translator-select') {
+            $search = $search->registerModel(Poem::class, function (ModelSearchAspect $modelSearchAspect) {
                 $modelSearchAspect
                     ->addSearchableAttribute('title') // return results for partial matches
                     ->addSearchableAttribute('poem')
@@ -546,9 +552,11 @@ class PoemAPIController extends Controller {
                     })
                     ->with('poetAuthor')->limit(150);
                 // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
-            })
-            // ->registerModel(Poem::class, 'title', 'poem', 'poet', 'poet_cn', 'translator')//, 'poet')
-            ->search($keyword4Query);
+            });
+        }
+        // ->registerModel(Poem::class, 'title', 'poem', 'poet', 'poet_cn', 'translator')//, 'poet')
+
+        $searchResults = $search->search($keyword4Query);
 
         // dd(DB::getQueryLog());
         $results   = $searchResults->groupByType();
@@ -556,7 +564,12 @@ class PoemAPIController extends Controller {
 
         $shiftPoems = collect();
 
-        $authors = $authorRes->map(function (SearchResult $authorSearchRes, $index) use ($shiftPoems) {
+        $poems = $results->get('poem') ?: [];
+        foreach ($poems as $p) {
+            $shiftPoems->push($p->searchable);
+        }
+
+        $authors = $authorRes->map(function (SearchResult $authorSearchRes, $index) use ($mode, $shiftPoems) {
             // TODO replace this ugly filter
             if ($index >= 5) {
                 return null;
@@ -565,14 +578,17 @@ class PoemAPIController extends Controller {
             if ($authorSearchRes->searchable instanceof \App\Models\Author) {
                 $author = $authorSearchRes->searchable;
                 $author['#label'] = $author->label === $authorSearchRes->title ? $author->label : $author->label . ' ( ' . $authorSearchRes->title . ' )';
-                foreach ($author->poems as $poem) {
-                    $item = $poem;
-                    $item['poet_contains_keyword'] = true;
-                    // $item['#from_author'] = true;
-                    $item['#poet_label'] = $poem->poet_label === $authorSearchRes->title
-                        ? $authorSearchRes->title
-                        : ($poem->poet_label . ' ( ' . $authorSearchRes->title . ' )');
-                    $shiftPoems->push($item);
+
+                if ($mode !== 'author-select') {
+                    foreach ($author->poems as $poem) {
+                        $item = $poem;
+                        $item['poet_contains_keyword'] = true;
+                        // $item['#from_author'] = true;
+                        $item['#poet_label'] = $poem->poet_label === $authorSearchRes->title
+                            ? $authorSearchRes->title
+                            : ($poem->poet_label . ' ( ' . $authorSearchRes->title . ' )');
+                        $shiftPoems->push($item);
+                    }
                 }
             }
 
@@ -582,17 +598,11 @@ class PoemAPIController extends Controller {
             return $author;
         });
 
-        $poems = $results->get('poem') ?: [];
-
-        foreach ($poems as $p) {
-            $shiftPoems->push($p->searchable);
-        }
-
         $keywordArr = $keyword4Query->split('#\s+#');
 
         // TODO append translated poems
         $mergedPoems = $shiftPoems->unique('id')->map(function ($poem) use ($keywordArr) {
-            $columns = ['poet_label', '#poet_label', 'poet_is_v', 'translator', 'id', 'title', 'poet_contains_keyword', 'poem'];
+            $columns = ['poet_label', '#poet_label', 'poet_id', 'poet_is_v', 'translator', 'id', 'title', 'url', 'poet_contains_keyword', 'poem'];
 
             $item = $poem->only($columns);
 
