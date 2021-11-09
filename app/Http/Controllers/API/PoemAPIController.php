@@ -14,6 +14,7 @@ use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
 use App\Rules\ValidPoemContent;
+use App\Services\Weapp;
 use EasyWeChat\Factory;
 use Exception;
 use File;
@@ -292,7 +293,7 @@ class PoemAPIController extends Controller {
     public function store(StoreOwnerUploaderPoem $request) {
         $sanitized = $request->getSanitized();
 
-        $tag  = Tag::find($sanitized['tag_id']);
+        $tag = Tag::find($sanitized['tag_id']);
         if ($tag) {
             if ($tag->campaign && isset($tag->campaign->settings['gameType'])) {
                 $validator = Validator::make($sanitized, [
@@ -388,7 +389,7 @@ class PoemAPIController extends Controller {
 
             $scene          = $poem->is_campaign ? ($poem->campaign_id . '-' . $poem->id) : $poem->id;
             $page           = $poem->is_campaign ? 'pages/campaign/campaign' : 'pages/poems/index';
-            $appCodeImgPath = $this->fetchAppCodeImg($scene, $dir, $page, $force);
+            $appCodeImgPath = (new Weapp())->fetchAppCodeImg($scene, $dir, $page, $force);
 
             if (!$this->composite($poemImgPath, $appCodeImgPath, $posterPath)) {
                 return $this->responseFail();
@@ -436,37 +437,6 @@ class PoemAPIController extends Controller {
         }
 
         throw new Exception('图片写入失败，请稍后再试。');
-    }
-
-    /**
-     * @param string $scene
-     * @param string $page
-     * @param string $appCodeImgDir
-     * @param bool   $force
-     * @param string $appCodeFileName
-     * @return string|false
-     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
-     * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
-     * @noinspection PhpFullyQualifiedNameUsageInspection
-     */
-    private function fetchAppCodeImg(string $scene, string $appCodeImgDir, string $page = 'pages/detail/detail', bool $force = false, string $appCodeFileName = 'app-code.jpg') {
-        $app = Factory::miniProgram([
-            'app_id' => config('wechat.mini_program.default.app_id'),
-            'secret' => config('wechat.mini_program.default.secret')
-        ]);
-        // 注意微信对此接口调用频率有限制
-        $response = $app->app_code->getUnlimit($scene, [
-            'page'       => $page,
-            'width'      => 280,
-            'is_hyaline' => false
-        ]);
-        if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
-            $response->saveAs($appCodeImgDir, $appCodeFileName);
-
-            return $appCodeImgDir . '/' . $appCodeFileName;
-        }
-
-        return false;
     }
 
     /**
@@ -570,7 +540,8 @@ class PoemAPIController extends Controller {
         }
 
         $authors = $authorRes->map(function (SearchResult $authorSearchRes, $index) use ($mode, $shiftPoems) {
-            // TODO replace this ugly filter
+            // TODO 返回结果中应包含尽量多的作者条目，由前端选择显示多少条目
+            // TODO use a better way to filter
             if ($index >= 5) {
                 return null;
             }
