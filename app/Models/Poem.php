@@ -200,8 +200,10 @@ class Poem extends Model implements Searchable {
 
         self::created(function ($model) {
             if ($model->is_original) {
+                // TODO 删除 is_original 字段后，此处需要删除
                 $model->original_id = $model->id;
             }
+
             $content = Content::create([
                 'entry_id'    => $model->id,
                 'type'        => 0,
@@ -653,7 +655,7 @@ class Poem extends Model implements Searchable {
         // TODO if is_owner_uploaded==Poem::OWNER['poetAuthor'] && $this->uploader
         // TODO use poetAuthor->label if poem.poet and poem.poet_cn is used for SEO
         if ($this->is_owner_uploaded === static::$OWNER['uploader'] && $this->uploader) {
-            return $this->uploader->name === $this->poet ? $this->poet : $this->uploader->name . '（' . $this->poet . '）';
+            return $this->poet ?? $this->uploader->name; // . '（' . $this->poet . '）';
         } elseif ($this->poetAuthor) {
             return $this->poetAuthor->label;
         }
