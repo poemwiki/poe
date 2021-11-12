@@ -217,7 +217,7 @@ class PoemController extends Controller {
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId, [
             'id', 'title', 'language_id', 'is_original', 'original_id', 'poet', 'poet_cn', 'bedtime_post_id', 'bedtime_post_title',
             'poem', 'translator', 'from', 'year', 'month', 'date', 'preface', 'subtitle', 'genre_id',
-            'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded'
+            'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded', 'upload_user_id'
         ]);
 
         $poem['original_link'] = $poem->originalLink;
