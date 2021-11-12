@@ -48,6 +48,7 @@ Route::middleware(['auth:api', 'api'])->group(static function () {
         Route::prefix('poem')->name('poem/')->group(static function () {
             Route::post('/detail/{id}', '\App\Http\Controllers\API\PoemAPIController@detail')->name('detail');
             Route::post('/store', [\App\Http\Controllers\API\PoemAPIController::class, 'store'])->name('store');
+            Route::post('/create', [\App\Http\Controllers\API\PoemAPIController::class, 'create'])->name('create');
             Route::get('/mine', [\App\Http\Controllers\API\PoemAPIController::class, 'mine'])->name('mine');
             Route::get('/delete/{poemId}', [\App\Http\Controllers\API\PoemAPIController::class, 'delete'])->name('delete');
             Route::get('/related', [\App\Http\Controllers\API\PoemAPIController::class, 'related'])->name('related');
