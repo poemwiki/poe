@@ -42,8 +42,8 @@ class UserAPIController extends Controller {
             return $this->responseFail([], '图片上传失败。请稍后再试。');
         }
 
-        $ext      = $file->getClientOriginalExtension();
-        $allow    = ['jpg', 'webp', 'png', 'jpeg', 'bmp']; // 支持的类型
+        $ext   = $file->getClientOriginalExtension();
+        $allow = ['jpg', 'webp', 'png', 'jpeg', 'bmp']; // 支持的类型
         if (!in_array($ext, $allow)) {
             return $this->responseFail([], '不支持的图片类型，请上传 jpg/jpeg/png/webp/bmp 格式图片。', Controller::$CODE['img_format_invalid']);
         }
@@ -125,6 +125,7 @@ class UserAPIController extends Controller {
         $campaign = Campaign::whereRaw('JSON_EXTRACT(settings, "$.resultUrl")')
             ->orderBy('end', 'desc')->limit(1)->first();
 
+        // TODO $user->settings
         $user->notify             = 1;
         $user->notify_url         = $campaign->settings ? $campaign->settings['resultUrl'] : null;
         $user->notify_title       = "赛诗会 #$campaign->name_lang 结果公布";

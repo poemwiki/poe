@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\StoreOwnerUploaderPoem;
+use App\Http\Requests\API\StorePoem;
 use App\Models\Author;
 use App\Models\Entry;
 use App\Models\Poem;
@@ -288,6 +289,24 @@ class PoemAPIController extends Controller {
             ->toArray();
 
         return $this->responseSuccess($res);
+    }
+
+    public function create(StorePoem $request) {
+        $sanitized = $request->getSanitized();
+
+        $wechatApp = Factory::miniProgram([
+            'app_id'        => config('wechat.mini_program.default.app_id'),
+            'secret'        => config('wechat.mini_program.default.secret'),
+            'response_type' => 'object',
+        ]);
+        $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['poem']);
+        if ($result->errcode) {
+            return $this->responseFail([], '请检查是否含有敏感词', Controller::$CODE['content_security_failed']);
+        }
+
+        $poem = Poem::create($sanitized);
+
+        return $this->responseSuccess(['id' => $poem->id, 'fid' => $poem->fakeId]);
     }
 
     public function store(StoreOwnerUploaderPoem $request) {
