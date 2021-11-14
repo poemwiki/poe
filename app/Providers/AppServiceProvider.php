@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
-use \Illuminate\Support\Str;
-use Illuminate\Support\Stringable;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
+use Illuminate\Support\Stringable;
+use Normalizer;
 
 class AppServiceProvider extends ServiceProvider {
     /**
@@ -23,11 +24,13 @@ class AppServiceProvider extends ServiceProvider {
     public function boot() {
         Stringable::macro('surround', function ($tagName = 'span', $attrFn = null) {
             $i = 0;
+
             return array_reduce(mb_str_split($this->value), function ($carry, $char) use ($tagName, &$i, $attrFn) {
                 $content = preg_replace('@\s@', '&nbsp;', $char);
 
                 $attr = is_callable($attrFn) ? call_user_func($attrFn, $i) : '';
                 $i = $i + 1;
+
                 return new static($carry . "<$tagName $attr>$content</$tagName>");
             });
         });
@@ -42,6 +45,7 @@ class AppServiceProvider extends ServiceProvider {
 
         Stringable::macro('isTranslatableJson', function () {
             json_decode($this->value);
+
             return Str::startsWith($this->value, '{') && Str::endsWith($this->value, '}') && (json_last_error() == JSON_ERROR_NONE);
         });
 
@@ -61,10 +65,10 @@ class AppServiceProvider extends ServiceProvider {
 
         // CRC32的修正方法，修正php x86模式下出现的负值情况
         Stringable::macro('crc32', function () {
-            return sprintf("%u", crc32($this->value));
+            return sprintf('%u', crc32($this->value));
         });
         Str::macro('crc32', function ($str) {
-            return sprintf("%u", crc32($str));
+            return sprintf('%u', crc32($str));
         });
 
         Str::macro('trimSpaces', function ($str) {
@@ -80,10 +84,13 @@ class AppServiceProvider extends ServiceProvider {
             return preg_replace("#\s+#u", '', $str);
         });
         Str::macro('noPunct', function ($str) {
-            return preg_replace("#[[:punct:]┄┅┉┈─━⦁₋∙●◎▪︎▶︎▼´¨˛¸°˝˙ª˚º­¯¦ˉˆ˘ˇ❜❛︎︎❝❞❢❣❡⎧⎫⎡⎤⎛⎞⎨⎬⎜⎟⎢⎥⎪⎪⎣⎦⎝⎠⎩⎭−∘∗∖∕∴∵∶∷⊙⋄⋅⋆⋮⋯⨾⁻⧫℃℉®©℗™℠❤⭐★☆➤➣➢▲▵▴▿▾▽△▸▹►▻◁◀▷❖◇◆◘◼□☐☑☒▫◻■⦿◉◦○❗️❕❓❔️️]+#u", '', $str);
+            return preg_replace('#[[:punct:]┄┅┉┈─━⦁₋∙●◎▪︎▶︎▼´¨˛¸°˝˙ª˚º­¯¦ˉˆ˘ˇ❜❛︎︎❝❞❢❣❡⎧⎫⎡⎤⎛⎞⎨⎬⎜⎟⎢⎥⎪⎪⎣⎦⎝⎠⎩⎭−∘∗∖∕∴∵∶∷⊙⋄⋅⋆⋮⋯⨾⁻⧫℃℉®©℗™℠❤⭐★☆➤➣➢▲▵▴▿▾▽△▸▹►▻◁◀▷❖◇◆◘◼□☐☑☒▫◻■⦿◉◦○❗️❕❓❔️️]+#u', '', $str);
         });
         Str::macro('pureStr', function ($str) {
             return Str::noPunct(Str::noSpace($str));
+        });
+        Str::macro('normalize', function ($str) {
+            return Normalizer::normalize($str, Normalizer::FORM_KC);
         });
 
         Str::macro('firstLine', function ($str, $lengthLimit = 20) {
@@ -92,6 +99,7 @@ class AppServiceProvider extends ServiceProvider {
             $firstLine = Str::of(Str::noPunct($arr[0]))
                 ->replaceMatches('@^\s+@u', '')
                 ->replaceMatches('@\s+@u', ' ');
+
             return mb_strlen($firstLine) > $lengthLimit
                 ? mb_substr($firstLine->split('@[,，.。:：;；]@u', 2)->first(), 0, $lengthLimit)
                 : $firstLine->__toString();
@@ -99,10 +107,10 @@ class AppServiceProvider extends ServiceProvider {
 
         // TODO 考虑大小写，简繁体
         Str::macro('contentHash', function ($str) {
-            return hash('sha256', Str::pureStr($str));
+            return hash('sha256', Str::pureStr(Str::normalize($str)));
         });
         Str::macro('contentFullHash', function ($str) {
-            return hash('sha256', $str);
+            return hash('sha256', Str::normalize($str));
         });
 
         // TODO Str::macro('simHash')
