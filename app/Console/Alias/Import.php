@@ -6,17 +6,13 @@ use App\Models\Author;
 use App\Models\Language;
 use App\Models\Wikidata;
 use Illuminate\Console\Command;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-
 
 class Import extends Command {
     /**
      * The name and signature of the console command.
-     *
      * @var string
      */
     protected $signature = 'alias:import {fromId?} {toId?} {--id=}';
@@ -46,7 +42,7 @@ class Import extends Command {
         // YOU NEED TO execute php artisan wiki:import to import wikidata.org's poet data to wikidata table
 
         $fromId = $this->argument('fromId') ?: 101247956;
-        $toId = $this->argument('toId') ?: 101247956;
+        $toId   = $this->argument('toId') ?: 101247956;
 
         $wikidataId = $this->option('id');
         if (App::runningInConsole() && !$this->option('id')) {
@@ -58,6 +54,7 @@ class Import extends Command {
         if (is_numeric($wikidataId)) {
             $poet = Wikidata::where('id', $wikidataId)->get();
             $this->_process($poet);
+
             return 0;
         }
 
@@ -80,26 +77,25 @@ class Import extends Command {
                 $all = $all->concat(collect($entity->aliases)->flatten());
             }
 
-            $all->unique('value')->each(function ($item) use($poet, $author) {
+            $all->unique('value')->each(function ($item) use ($poet, $author) {
                 $language = Language::where('locale', '=', $item->language)->first();
                 // insert alias data into alias
                 $insert = [
-                    'locale' => $item->language,
+                    'locale'      => $item->language,
                     'language_id' => $language ? $language->id : null,
-                    'name' => $item->value,
+                    'name'        => $item->value,
                     'wikidata_id' => $poet->id,
-                    'author_id' => $author ? $author->id : null,
-                    "created_at" => now(),
-                    "updated_at" => now(),
+                    'author_id'   => $author ? $author->id : null,
+                    'created_at'  => now(),
+                    'updated_at'  => now(),
                 ];
                 DB::table('alias')->updateOrInsert([
                     'wikidata_id' => $poet->id,
-                    'name' => $item->value
+                    'name'        => $item->value
                 ], $insert);
 
                 $this->info("Label added to alias: wikidata_id: $poet->id \t $item->value");
             });
-
         }
     }
 
@@ -108,10 +104,9 @@ class Import extends Command {
             ['type', '=', Wikidata::TYPE['poet']],
             ['id', '>=', $fromId],
             ['id', '<=', $toId],
-        ])->orderBy('id')->chunk(400, function($poets) {
+        ])->orderBy('id')->chunk(400, function ($poets) {
             $this->_process($poets);
         });
     }
-
 }
 
