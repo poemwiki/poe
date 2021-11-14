@@ -110,7 +110,7 @@ class AppServiceProvider extends ServiceProvider {
             return hash('sha256', Str::pureStr(Str::normalize($str)));
         });
         Str::macro('contentFullHash', function ($str) {
-            return hash('sha256', Str::normalize($str));
+            return hash('sha256', $str);
         });
 
         // TODO Str::macro('simHash')
