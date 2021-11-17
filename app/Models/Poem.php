@@ -199,9 +199,12 @@ class Poem extends Model implements Searchable {
         });
 
         self::created(function ($model) {
-            if ($model->is_original) {
-                // TODO 删除 is_original 字段后，此处需要删除
+            if ($model->is_owner_uploaded === self::$OWNER['uploader']) {
                 $model->original_id = $model->id;
+            }
+
+            if ($model->is_owner_uploaded === self::$OWNER['translatorUploader'] && !$model->original_id) {
+                $model->original_id = 0;
             }
 
             $content = Content::create([
@@ -263,9 +266,13 @@ class Poem extends Model implements Searchable {
 
         self::updated(function ($model) {
             Poem::withoutEvents(function () use ($model) {
-                if ($model->is_original) {
+                if ($model->is_owner_uploaded === self::$OWNER['uploader']) {
                     $model->original_id = $model->id;
                     $model->save();
+                }
+
+                if ($model->is_owner_uploaded === self::$OWNER['translatorUploader'] && !$model->original_id) {
+                    $model->original_id = 0;
                 }
             });
         });
