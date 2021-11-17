@@ -35,7 +35,17 @@
 .weapp-link:before {
   background-image: url("/images/weapp.svg");
 }
-
+.author-avatar {
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 50%;
+  margin-right: 0.4em;
+  display: inline-block;
+  vertical-align: middle;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 .nested-tree {
   position: relative;
   line-height: 1.5;
