@@ -70,7 +70,7 @@ class CreatePoemRequest extends FormRequest {
             'poet_id'            => ['nullable', new ValidPoetId($original_id)],
             'poet_wikidata_id'   => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
             'translator_ids'     => ['nullable', 'array', new ValidTranslatorId()],
-            // 'translator_ids' = [],
+            // 'translators' = [],
             'translator_wikidata_id' => ['nullable', 'exists:' . \App\Models\Wikidata::class . ',id'],
             'upload_user_id'         => ['nullable', 'exists:' . \App\User::class . ',id'],
             'is_owner_uploaded'      => ['required', Rule::in([Poem::$OWNER['none'], Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])],
@@ -124,7 +124,9 @@ class CreatePoemRequest extends FormRequest {
                 }
             }
             // WARNING for poems have related translator(relatable record), poem.translator is just for indicating translator order
-            $sanitized['translator'] = json_encode($translatorsOrder, JSON_UNESCAPED_UNICODE);
+            if (!empty($translatorsOrder)) {
+                $sanitized['translator'] = json_encode($translatorsOrder, JSON_UNESCAPED_UNICODE);
+            }
         }
 
         $user = Auth::user();

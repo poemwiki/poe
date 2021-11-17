@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CreatePoemRequest;
 use App\Repositories\AuthorRepository;
 use App\Rules\NoDuplicatedPoem;
+use App\Rules\ValidTranslatorId;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
@@ -75,8 +76,31 @@ class StorePoem extends CreatePoemRequest {
 
         $sanitized['upload_user_id'] = Auth::user()->id;
 
-        if (!isset($sanitized['original_id'])) {
+        if (is_null($sanitized['original_id'])) {
             $sanitized['original_id'] = 0;
+        }
+
+        if (isset($sanitized['translator_ids'])) {
+            $sanitized['translator'] = '';
+
+            $translatorsOrder = [];
+            foreach ($sanitized['translator_ids'] as $key => $id) {
+                if (ValidTranslatorId::isWikidataQID($id)) {
+                    $translatorAuthor                  = $this->authorRepository->getExistedAuthor(ltrim($id, 'Q'));
+                    $sanitized['translator_ids'][$key] = $translatorAuthor->id;
+                    $translatorsOrder[]                = $translatorAuthor->id;
+                } elseif (ValidTranslatorId::isNew($id)) {
+                    $sanitized['translator_ids'][$key] = mb_substr($id, strlen('new_'));
+                    $translatorsOrder[]                = substr($id, 4, strlen($id));
+                } else {
+                    $sanitized['translator_ids'][$key] = (int) $id;
+                    $translatorsOrder[]                = $id;
+                }
+            }
+            // WARNING for poems have related translator(relatable record), poem.translator is just for indicating translator order
+            if (!empty($translatorsOrder)) {
+                $sanitized['translator'] = json_encode($translatorsOrder, JSON_UNESCAPED_UNICODE);
+            }
         }
 
         return $sanitized;
