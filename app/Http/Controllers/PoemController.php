@@ -166,7 +166,7 @@ class PoemController extends Controller {
 
         $sanitized['upload_user_id'] = $request->user()->id;
 
-        if (!isset($sanitized['original_id'])) {
+        if (!$sanitized['original_id']) {
             $sanitized['original_id'] = 0;
         }
 
