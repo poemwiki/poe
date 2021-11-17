@@ -783,7 +783,8 @@ class Poem extends Model implements Searchable {
         return new SearchResult(
             $this,
             $this->title,
-            $this->url
+            $this->url,
+            $this->poet_label
         );
     }
 }
