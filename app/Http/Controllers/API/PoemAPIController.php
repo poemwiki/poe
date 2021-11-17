@@ -306,6 +306,10 @@ class PoemAPIController extends Controller {
 
         $poem = Poem::create($sanitized);
 
+        if ($sanitized['translator_ids']) {
+            $poem->relateToTranslators($sanitized['translator_ids']);
+        }
+
         return $this->responseSuccess(['id' => $poem->id, 'fid' => $poem->fakeId]);
     }
 
@@ -313,16 +317,14 @@ class PoemAPIController extends Controller {
         $sanitized = $request->getSanitized();
 
         $tag = Tag::find($sanitized['tag_id']);
-        if ($tag) {
-            if ($tag->campaign && isset($tag->campaign->settings['gameType'])) {
-                $validator = Validator::make($sanitized, [
-                    'poem' => [new ValidPoemContent(3)],
-                ]);
-                if ($validator->fails()) {
-                    $error = join(' ', $validator->getMessageBag()->get('poem'));
+        if ($tag && $tag->campaign && isset($tag->campaign->settings['gameType'])) {
+            $validator = Validator::make($sanitized, [
+                'poem' => [new ValidPoemContent(3)],
+            ]);
+            if ($validator->fails()) {
+                $error = join(' ', $validator->getMessageBag()->get('poem'));
 
-                    return $this->responseFail([], $error, Controller::$CODE['poem_content_invalid']);
-                }
+                return $this->responseFail([], $error, Controller::$CODE['poem_content_invalid']);
             }
         }
 
@@ -575,7 +577,7 @@ class PoemAPIController extends Controller {
                         $item['poet_contains_keyword'] = true;
                         // $item['#from_author'] = true;
                         $item['#poet_label'] = $poem->poet_label === $authorSearchRes->title
-                            ? $authorSearchRes->title
+                            ? $poem->poet_label
                             : ($poem->poet_label . ' ( ' . $authorSearchRes->title . ' )');
                         $shiftPoems->push($item);
                     }
