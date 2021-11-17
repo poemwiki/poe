@@ -24,7 +24,6 @@ class PoemRepository extends BaseRepository {
     protected $fieldSearchable = [
         'title',
         'language',
-        'is_original',
         'poet',
         'poet_cn',
         'bedtime_post_id',
@@ -241,17 +240,17 @@ class PoemRepository extends BaseRepository {
     }
 
     public function getByOwner($userId) {
-        return self::newQuery()->where([
-            ['is_owner_uploaded', '=', '1'],
-            ['upload_user_id', '=', $userId],
-        ])->with('reviews')->orderByDesc('created_at')->get()->map(function ($item) {
-            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
-            $item['poet'] = $item->poetLabel;
-            $item['score_count'] = ScoreRepository::calcCount($item->id);
-            $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
+        return self::newQuery()->where('upload_user_id', $userId)
+            ->whereIn('is_owner_uploaded', [Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])
+            ->with('reviews')->orderByDesc('created_at')
+            ->get()->map(function ($item) {
+                $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
+                $item['poet'] = $item->poetLabel;
+                $item['score_count'] = ScoreRepository::calcCount($item->id);
+                $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
 
-            return $item->only(self::$listColumns);
-        });
+                return $item->only(self::$listColumns);
+            });
     }
 
     public static $listColumns = [
