@@ -118,9 +118,16 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                         class="poem-nation">{{$nation}}</span>@endif
                         <address itemprop="name" class="poem-writer">
                             @if($poem->poetAuthor)
-                              <a href="{{route('author/show',  ['fakeId' => $poem->poetAuthor->fakeId, 'from' => $poem->id])}}" class="poemwiki-link">{{$poem->poetLabel}}</a>
+                              <a href="{{route('author/show',  ['fakeId' => $poem->poetAuthor->fakeId, 'from' => $poem->id])}}" class="poemwiki-link">
+                                {{$poem->poetLabel}}
+                              </a>
                             @else
-                              <a href="{{route('search', $poem->poet_label)}}" class="search-link">{{$poem->poet_label}}</a>
+                              <a href="{{route('search', $poem->poet_label)}}" class="search-link">
+                                @if($poem->is_owner_uploaded===1)
+                                  <img class="author-avatar" src="{{$poem->uploader->avatarUrl}}" alt="{{$poem->poetLabel}}">
+                                @endif
+                                {{$poem->poet_label}}
+                              </a>
                             @endif
                         </address>
                     </dd><br>
@@ -156,26 +163,23 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
                 </dl>
 
                 @auth
-                  @if($poem->is_owner_uploaded)
-                    <dl class="poem-ugc"><dt>原创诗歌</dt></dl>
-                  @endif
-
                   @if(!$poem->is_owner_uploaded
                         or ($poem->is_owner_uploaded===App\Models\Poem::$OWNER['uploader'] && Auth::user()->id === $poem->upload_user_id)
                   )
                     <a class="edit btn"
                       href="{{ route('poems/edit', $fakeId) }}">@lang('poem.correct errors or edit')</a>
                   @endif
-                @endauth
-
-                @guest
+                  {{--TODO 原创译作修改--}}
+                @else
                   @if(!$poem->is_owner_uploaded)
                     <a class="edit btn"
                        href="{{ route('login', ['ref' => route('poems/edit', $fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
-                  @else
-                  <dl class="poem-ugc"><dt>原创诗歌</dt></dl>
                   @endif
-                @endguest
+                @endauth
+
+                @if(in_array($poem->is_owner_uploaded, [\APP\Models\Poem::$OWNER['uploader'], \APP\Models\Poem::$OWNER['translatorUploader']]))
+                  <dl class="poem-ugc"><dt title="本作品由{{$poem->is_owner_uploaded === 1 ? '作者' : '译者'}}上传">原创</dt></dl>
+                @endif
 
                 <ol class="contribution">
                   @php
