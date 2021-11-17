@@ -46,7 +46,11 @@ return (new PhpCsFixer\Config())
             ]
         ], // 空行换行必须在任何已配置的语句之前
         'binary_operator_spaces'                     => [
-            'default' => 'align_single_space'
+            'default'   => 'align_single_space',
+            'operators' => [
+                '=' => 'align_single_space_minimal', // at least one
+                // '=>' => 'single_space_minimal', // at least one
+            ]
         ], //等号对齐、数字箭头符号对齐
         'align_multiline_comment'                    => [
             'comment_type' => 'phpdocs_only'
