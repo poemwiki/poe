@@ -199,6 +199,10 @@ class Poem extends Model implements Searchable {
         });
 
         self::created(function ($model) {
+            if ($model->is_owner_uploaded === self::$OWNER['none'] && $model->original_id === 0) {
+                $model->original_id = $model->id;
+            }
+
             if ($model->is_owner_uploaded === self::$OWNER['uploader']) {
                 $model->original_id = $model->id;
             }
@@ -266,6 +270,10 @@ class Poem extends Model implements Searchable {
 
         self::updated(function ($model) {
             Poem::withoutEvents(function () use ($model) {
+                if ($model->is_owner_uploaded === self::$OWNER['none'] && $model->original_id === 0) {
+                    $model->original_id = $model->id;
+                }
+
                 if ($model->is_owner_uploaded === self::$OWNER['uploader']) {
                     $model->original_id = $model->id;
                     $model->save();
@@ -398,7 +406,8 @@ class Poem extends Model implements Searchable {
          *      只用 original_id 来表示，original_id 为0的为原作，不为0的为译作。
          * 因为还有一种译作没有 original_id，只能将其 original_id 字段置空。
          * 2021.6.10 更改 original_id 为非空(方便使用索引) unsigned int（此类型与 poem.id 相同） 字段，
-         *      TODO 删除 is_original 字段（用 dynamic attribute 代替：original_id为$this->id表示原作，为0表示无原作的译作）
+         * TODO 删除 is_original 字段（由于 original_id 已经隐含了原作/译作信息，
+         *  可以用 dynamic attribute 代替：original_id 为 $this->id 表示原作，为 0 表示无原作的译作）
          */
         return $this->belongsTo(\App\Models\Poem::class, 'original_id', 'id');
     }

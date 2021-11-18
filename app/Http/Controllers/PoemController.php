@@ -166,10 +166,6 @@ class PoemController extends Controller {
 
         $sanitized['upload_user_id'] = $request->user()->id;
 
-        if (!$sanitized['original_id']) {
-            $sanitized['original_id'] = 0;
-        }
-
         // Store the Poem
         $poem = Poem::create($sanitized);
         if ($sanitized['translator_ids']) {

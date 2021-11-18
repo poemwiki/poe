@@ -106,6 +106,10 @@ class CreatePoemRequest extends FormRequest {
             $sanitized['poet_wikidata_id'] = null;
         }
 
+        if (!isset($sanitized['original_id'])) {
+            $sanitized['original_id'] = 0;
+        }
+
         if (isset($sanitized['translator_ids'])) {
             $sanitized['translator'] = '';
 
