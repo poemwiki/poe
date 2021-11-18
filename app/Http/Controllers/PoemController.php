@@ -304,12 +304,20 @@ class PoemController extends Controller {
             }
         }
 
+        $topOriginalPoem = $poem->topOriginalPoem;
+
+        // TODO test this
+        // if ($topOriginalPoem->is_owner_uploaded === Poem::$OWNER['uploader']) {
+        //     $poem->poet    = $topOriginalPoem->poet;
+        //     $poem->poet_id = $topOriginalPoem->poet_id;
+        // }
+
         // Update changed values Poem
         $poem   = $this->poemRepository->update($sanitized, $id);
-        $poetId = $poem->topOriginalPoem->poet_id ?: $poem->poet_id;
-        // 修改原作作者时，同步修改所有译作作者(仅当顶层原作 poet_id 或当前作品 poet_id 不为空)
-        if ($poetId) {
-            $this->poemRepository->updateAllTranslatedPoemPoetId($poem->topOriginalPoem, $poetId);
+        $poetId = $topOriginalPoem->poet_id ?: $poem->poet_id;
+        // 修改原作作者时，同步修改所有译作作者(仅当顶层原作 poet_id 或当前作品 poet_id 不为空，且 is_owner_uploaded=0)
+        if ($poetId && $topOriginalPoem->is_owner_uploaded === Poem::$OWNER['none']) {
+            $this->poemRepository->updateAllTranslatedPoemPoetId($topOriginalPoem, $poetId);
         }
 
         return $this->responseSuccess(route('p/show', Poem::getFakeId($poem->id)));
