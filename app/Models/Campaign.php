@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon      $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property array|null                      $settings
+ * @property array|null                      $settings          $settings['gameType']: 1: 三行诗 2：限定最长行数为$settings['maxLineNum']
  * @property mixed|null                      $weapp_url
  * @property mixed                           $image_url
  * @property mixed                           $master_i_ds
