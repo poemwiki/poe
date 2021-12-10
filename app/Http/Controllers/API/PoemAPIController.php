@@ -291,6 +291,13 @@ class PoemAPIController extends Controller {
         return $this->responseSuccess($res);
     }
 
+    /**
+     * store poem.
+     * @param StorePoem $request
+     * @return array
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function create(StorePoem $request) {
         $sanitized = $request->getSanitized();
 
@@ -300,7 +307,7 @@ class PoemAPIController extends Controller {
             'response_type' => 'object',
         ]);
         $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['poem']);
-        if ($result->errcode) {
+        if ($result->errcode !== 0 && $result->errcode !== -1) {
             return $this->responseFail([], '请检查是否含有敏感词', Controller::$CODE['content_security_failed']);
         }
 
@@ -313,6 +320,13 @@ class PoemAPIController extends Controller {
         return $this->responseSuccess(['id' => $poem->id, 'fid' => $poem->fakeId]);
     }
 
+    /**
+     * store campaign poem.
+     * @param StoreOwnerUploaderPoem $request
+     * @return array
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function store(StoreOwnerUploaderPoem $request) {
         $sanitized = $request->getSanitized();
 

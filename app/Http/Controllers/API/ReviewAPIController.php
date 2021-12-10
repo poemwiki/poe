@@ -52,7 +52,7 @@ class ReviewAPIController extends Controller {
             ]);
             $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['content']);
 
-            if ($result->errcode) {
+            if ($result->errcode !== 0 && $result->errcode !== -1) {
                 return $this->responseFail([], '请检查是否含有敏感词', Controller::$CODE['content_security_failed']);
             }
         }
