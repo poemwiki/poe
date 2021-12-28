@@ -56,7 +56,7 @@ class importAllPoetry extends Command {
             $exportFields = $poetCrawl->export_setting['fields'];
             $author       = ['upload_user_id' => self::$causerID];
             foreach ($exportFields as $from => $to) {
-                $author[$to] = ['en' => textClean($poetCrawl->result[$from])];
+                $author[$to] = ['en' => textClean($poetCrawl->result[$from], 0)];
             }
 
             $insertedAuthor         = Author::create($author);
@@ -74,6 +74,7 @@ class importAllPoetry extends Command {
                     'upload_user_id'              => self::$causerID,
                     'poet_id'                     => $insertedAuthor->id,
                     'original_id'                 => $poemCrawl->id,
+                    'language_id'                 => 2,
                     'from'                        => strlen($poemCrawl->url) > 255 ? self::$source : $poemCrawl->url,
                     'is_owner_uploaded'           => Poem::$OWNER['none'],
                     'poet'                        => $insertedAuthor->name_lang,
@@ -83,7 +84,7 @@ class importAllPoetry extends Command {
 
                 $exportFields = $poemCrawl->export_setting['fields'];
                 foreach ($exportFields as $from => $to) {
-                    $poem[$to] = textClean($poemCrawl->result[$from], 0);
+                    $poem[$to] = textClean($poemCrawl->result[$from]);
                 }
 
                 // dd($poem);

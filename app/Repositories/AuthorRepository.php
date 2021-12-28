@@ -58,10 +58,20 @@ class AuthorRepository extends BaseRepository {
         $res = $query->groupBy(['wikidata_id', 'author_id'])->orderBy('author_id', 'desc')
             ->limit(self::SEARCH_LIMIT)->get()
             ->map->only(['QID', 'label_en', 'label_cn', 'label', 'url', 'author_id', 'wikidata_id'])->map(function ($item) {
-                $item['id'] = $item['author_id'] ?? $item['QID']; // don't replace this with select concat('Q', wikidata_id) as id, because it will be casted into integer
+                // don't replace this with select concat('Q', wikidata_id) as id, because it will be casted into integer
+                $item['id'] = $item['author_id'] ?? $item['QID'];
                 $item['source'] = $item['author_id'] ? 'PoemWiki' : 'Wikidata';
-                $item['avatar_url'] = $item['author_id'] ? Author::find($item['author_id'])->avatarUrl : Wikidata::find($item['wikidata_id'])->first_pic_url;
-                $item['desc'] = $item['author_id'] ? Author::find($item['author_id'])->describe_lang : Wikidata::find(str_replace('Q', '', $item['QID']))->getDescription(config('app.locale'));
+
+                $author = Author::find($item['author_id']);
+                $wikidata = Wikidata::find($item['wikidata_id']);
+
+                $item['avatar_url'] = $item['author_id'] && $author
+                    ? $author->avatarUrl
+                    : ($wikidata ? $wikidata->first_pic_url : config('app.avatar.default'));
+
+                $item['desc'] = $item['author_id'] && $author
+                    ? $author->describe_lang
+                    : ($wikidata ? $wikidata->getDescription(config('app.locale')) : '');
 
                 return $item;
             });
