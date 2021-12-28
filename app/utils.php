@@ -148,7 +148,15 @@ if (!function_exists('img_overlay')) {
 }
 
 if (!function_exists('date_ago')) {
+    /**
+     * @param \Illuminate\Support\Carbon|string $time
+     * @return string
+     */
     function date_ago($time) {
+        if ($time instanceof \Illuminate\Support\Carbon) {
+            return $time->diffForHumans(now());
+        }
+
         return \Illuminate\Support\Carbon::parse($time)->diffForHumans(now());
     }
 }
@@ -297,8 +305,8 @@ function getWxUrlLink(array $param = []) {
 }
 
 /**
- * 获取小程序scheme码
- *
+ * 获取小程序 urllink.
+ * @see https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/url-link/urllink.generate.html
  * @param string $query
  * @param string $path
  * @return array|Illuminate\Support\Collection|object|Psr\Http\Message\ResponseInterface|string
@@ -355,4 +363,67 @@ function str_pos_one_of($str, $needles, $insensitive = false) {
     }
 
     return false;
+}
+
+function startSpaceNum($str) {
+    return strlen($str) - strlen(ltrim($str));
+}
+
+function getLineStat($str): array {
+    $lineCount           = 0;
+    $lengthSum           = 0;
+    $emptyLineCount      = 0;
+    $minStartSpace       = 0;
+    $spaceStartLineCount = 0;
+
+    $lines = explode("\n", $str);
+    foreach ($lines as $line) {
+        ++$lineCount;
+        $trimmedLine = trim($line);
+        $lengthSum += strlen($trimmedLine);
+
+        if ($trimmedLine === '') {
+            ++$emptyLineCount;
+        }
+
+        if (preg_match("@^\s@", $line)) {
+            ++$spaceStartLineCount;
+        }
+
+        $startSpace    = startSpaceNum($line);
+        $minStartSpace = min($minStartSpace, $startSpace);
+    }
+    $textLineCount = $lineCount - $emptyLineCount;
+    $avgTextLength = $lengthSum / $textLineCount;
+
+    return [$textLineCount, $avgTextLength, $emptyLineCount, $spaceStartLineCount];
+}
+
+/**
+ * @param $str
+ * @param int $longTextLineLength you should set it to 0 if you don't want to remove redundant empty lines
+ * @return string
+ */
+function textClean($str, int $longTextLineLength = 70): string {
+    if (gettype($str) !== 'string') {
+        return $str;
+    }
+
+    $str = preg_replace('~\xc2\xa0~', ' ', $str);
+    $str = str_replace("\r\n", "\n", $str);
+    $str = preg_replace('/\n\n\n+/', "\n\n", $str);
+
+    list($textLineCount, $avgTextLength, $emptyLineCount, $spaceStartLineCount) = getLineStat($str);
+
+    // remove redundant empty lines
+    if ($emptyLineCount >= ($textLineCount - 1) && $avgTextLength < $longTextLineLength) {
+        $str = preg_replace('/(?<=[^\n])\n\n(?=[^\n])/', "\n", $str);
+    }
+
+    // remove redundant leading space
+    if ($spaceStartLineCount >= $textLineCount - 1) {
+        $str = preg_replace('/^\s+/m', '', $str);
+    }
+
+    return trim($str);
 }
