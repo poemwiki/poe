@@ -5,22 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Crawl
+ * Class Crawl.
  *
- * @package App\Models
- * @property int $id
- * @property int $f_crawl_id
- * @property int $admin_user_id
- * @property string $url
- * @property string $model
- * @property string $name
- * @property mixed|null $export_setting
- * @property int|null $exported_id
- * @property mixed|null $result
- * @property string|null $html
+ * @property int                        $id
+ * @property int                        $f_crawl_id
+ * @property int                        $admin_user_id
+ * @property string                     $url
+ * @property string                     $model
+ * @property string                     $name
+ * @property mixed|null                 $export_setting
+ * @property int|null                   $exported_id
+ * @property mixed|null                 $result
+ * @property string|null                $html
+ * @property string                     $source
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
- * @property-read mixed $exported_entry
+ * @property mixed                      $exported_entry
  * @method static \Illuminate\Database\Eloquent\Builder|Crawl newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Crawl newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Crawl query()
@@ -50,9 +50,9 @@ class Crawl extends Model {
         'export_setting',
         'exported_id',
         'f_crawl_id',
-        'admin_user_id'
+        'admin_user_id',
+        'source'
     ];
-
 
     protected $dates = [
         'created_at',
@@ -60,8 +60,8 @@ class Crawl extends Model {
     ];
 
     public $casts = [
-       // 'result' => 'json',
-       // 'export_setting' => 'json'
+        'result'         => 'json',
+        'export_setting' => 'json'
     ];
 
     protected $appends = [];
@@ -70,6 +70,7 @@ class Crawl extends Model {
         $modelName = $this->export_setting['model'];
         /** @var Author|Poem $model */
         $model = new $$modelName();
+
         return $model->find($this->exported['id']);
     }
 }

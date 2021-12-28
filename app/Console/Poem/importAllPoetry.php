@@ -10,14 +10,18 @@ use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class importAllPoetry extends Command {
     protected $signature = 'poem:importAllPoetry';
 
     /**
-     * The console command description.
-     *
+     * 导入要求：
+     * 1. 每首诗的 poet_id 对应到相关 author 的 id
+     * 2. 保持 activity_log 完整
+     * 3. 将来源 URL 填入 poem.from 字段
+     * 4. 保证导入条目的 created_at 和 updated_at 为导入时的时间，避开时区 bug.
      * @var string
      */
     protected $description = 'craw author & poem from allpoetry';
@@ -38,7 +42,7 @@ class importAllPoetry extends Command {
      * Execute the console command.
      * @return int
      */
-    public function handle() {
+    public function handle(): int {
         // dd(date_default_timezone_get()); // @TODO Why the timezone changed to PRC?
         $poetCrawls = Crawl::select(['id', 'name', 'export_setting', 'result'])->where([
             'source' => self::$source,
@@ -52,7 +56,7 @@ class importAllPoetry extends Command {
             $exportFields = $poetCrawl->export_setting['fields'];
             $author       = ['upload_user_id' => self::$causerID];
             foreach ($exportFields as $from => $to) {
-                $author[$to] = ['en' => self::clean($poetCrawl->result[$from])];
+                $author[$to] = ['en' => textClean($poetCrawl->result[$from])];
             }
 
             $insertedAuthor         = Author::create($author);
@@ -67,26 +71,31 @@ class importAllPoetry extends Command {
 
             foreach ($poemCrawls as $poemCrawl) {
                 $poem = [
-                    'upload_user_id' => self::$causerID,
-                    'poet_id'        => $insertedAuthor->id,
-                    'original_id'    => $poemCrawl->id,
-                    'from'           => strlen($poemCrawl->url) > 255 ? self::$source : $poemCrawl->url,
+                    'upload_user_id'              => self::$causerID,
+                    'poet_id'                     => $insertedAuthor->id,
+                    'original_id'                 => $poemCrawl->id,
+                    'from'                        => strlen($poemCrawl->url) > 255 ? self::$source : $poemCrawl->url,
+                    'is_owner_uploaded'           => Poem::$OWNER['none'],
+                    'poet'                        => $insertedAuthor->name_lang,
                     // 'created_at'     => now(),
                     // 'updated_at'     => now(),
                 ];
 
                 $exportFields = $poemCrawl->export_setting['fields'];
                 foreach ($exportFields as $from => $to) {
-                    $poem[$to] = self::clean($poemCrawl->result[$from]);
+                    $poem[$to] = textClean($poemCrawl->result[$from], 0);
                 }
 
                 // dd($poem);
                 try {
+                    // TODO move this to a public custom validator
                     $validator = Validator::make($poem, [
-                        'title'   => 'required|string|max:255',
-                        'poem'    => [new NoDuplicatedPoem(null), 'required', 'string', 'min:10', 'max:65500'],
-                        'poet_id' => 'integer|exists:' . \App\Models\Author::class . ',id',
-                        'from'    => 'required|string|max:255',
+                        'title'                  => 'required|string|max:255',
+                        'poet'                   => 'required|string|max:255',
+                        'poem'                   => [new NoDuplicatedPoem(null), 'required', 'string', 'min:10', 'max:65500'],
+                        'poet_id'                => 'integer|exists:' . \App\Models\Author::class . ',id',
+                        'is_owner_uploaded'      => ['required', Rule::in([Poem::$OWNER['none'], Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])],
+                        'from'                   => 'nullable|string|max:255',
                     ]);
                     $validator->validate();
                 } catch (ValidationException $e) {
@@ -113,18 +122,5 @@ class importAllPoetry extends Command {
         logger()->info('failedPoemCrawl: ', $failedPoemCrawl);
 
         return 0;
-    }
-
-    public static function clean($str) {
-        if (gettype($str) !== 'string') {
-            return $str;
-        }
-
-        $str = preg_replace('~\xc2\xa0~', ' ', $str);
-        $str = str_replace("\r\n", "\n", $str);
-        $str = preg_replace('/(?<=[^\n])\n\n(?=[^\n])/', "\n", $str);
-        $str = preg_replace('/\n\n\n+/', "\n\n", $str);
-
-        return trim($str);
     }
 }

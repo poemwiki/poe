@@ -422,7 +422,7 @@ function textClean($str, int $longTextLineLength = 70): string {
 
     // remove redundant leading space
     if ($spaceStartLineCount >= $textLineCount - 1) {
-        $str = preg_replace('/^\s+/m', '', $str);
+        $str = preg_replace('/^[^\S\r\n]+/m', '', $str);
     }
 
     return trim($str);

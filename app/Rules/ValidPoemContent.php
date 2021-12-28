@@ -20,10 +20,10 @@ class ValidPoemContent implements Rule {
      * @param int  $maxTextLine
      * @param bool $noExtraEmptyLine
      */
-    public function __construct($strictLineNum = 0, $noExtraEmptyLine = true, $maxTextLine = 400) {
+    public function __construct(int $strictLineNum = 0, bool $noExtraEmptyLine = true, int $maxTextLine = 400) {
         $this->strictLineNum    = $strictLineNum;
         $this->noExtraEmptyLine = $noExtraEmptyLine;
-        $this->maxTextLine      = $maxTextLine;
+        $this->maxTextLine      = $maxTextLine ?: 400;
     }
 
     /**
@@ -42,7 +42,7 @@ class ValidPoemContent implements Rule {
                 ++$emptyLineCount;
             }
         }
-        $textLineCount  = $lineCount - $emptyLineCount;
+        $textLineCount = $lineCount - $emptyLineCount;
 
         if ($lineCount > 1 && $emptyLineCount >= ($lineCount - 1) / 2 && $this->noExtraEmptyLine) {
             $this->reason = '请删除多余空行。';
