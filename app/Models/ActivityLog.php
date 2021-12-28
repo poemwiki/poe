@@ -12,23 +12,23 @@ use Spatie\Activitylog\Models\Activity;
  */
 
 /**
- * App\Models\ActivityLog
+ * App\Models\ActivityLog.
  *
- * @property int $id
- * @property string|null $log_name
- * @property string $description
- * @property string|null $subject_type
- * @property int|null $subject_id
- * @property string|null $causer_type
- * @property int|null $causer_id
- * @property Collection|null $properties
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $causer
- * @property-read Collection $change
- * @property-read Collection $changes
- * @property-read array|bool $diffs
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $subject
+ * @property int                                           $id
+ * @property string|null                                   $log_name
+ * @property string                                        $description
+ * @property string|null                                   $subject_type
+ * @property int|null                                      $subject_id
+ * @property string|null                                   $causer_type
+ * @property int|null                                      $causer_id
+ * @property Collection|null                               $properties
+ * @property \Illuminate\Support\Carbon|null               $created_at
+ * @property \Illuminate\Support\Carbon|null               $updated_at
+ * @property \Illuminate\Database\Eloquent\Model|\Eloquent $causer
+ * @property Collection                                    $change
+ * @property Collection                                    $changes
+ * @property array|bool                                    $diffs
+ * @property \Illuminate\Database\Eloquent\Model|\Eloquent $subject
  * @method static Builder|Activity causedBy(\Illuminate\Database\Eloquent\Model $causer)
  * @method static Builder|Activity forSubject(\Illuminate\Database\Eloquent\Model $subject)
  * @method static Builder|Activity inLog($logNames)
@@ -48,10 +48,10 @@ use Spatie\Activitylog\Models\Activity;
  * @mixin \Eloquent
  */
 class ActivityLog extends Activity {
-    const SUBJECT = [
-        'poem' => 'App\\Models\\Poem',
-        'score' => 'App\\Models\\Score',
-        'review' => 'App\\Models\\Review',
+    public const SUBJECT = [
+        'poem'     => 'App\\Models\\Poem',
+        'score'    => 'App\\Models\\Score',
+        'review'   => 'App\\Models\\Review',
         'userBind' => 'App\\Models\\UserBind',
     ];
 
@@ -63,18 +63,18 @@ class ActivityLog extends Activity {
      * eg: [
      *   'poem' => ['old' => 'xx', 'new' => 'xxx'],
      *   'title' => ['old' => 'a', 'new' => 'aa']
-     * ]
+     * ].
      * @return array|bool
      */
     public function getDiffsAttribute() {
         $oldVal = $this->change->get('old');
-        $diff = [];
+        $diff   = [];
 
         if ($this->description === 'updated') {
-            $keys = array_keys($oldVal);
+            $keys   = array_keys($oldVal);
             $newVal = $this->properties->get('attributes');
             foreach ($keys as $key) {
-                if(isset($newVal[$key])) {
+                if (isset($newVal[$key])) {
                     $diff[$key] = [
                         'old' => $oldVal[$key],
                         'new' => $newVal[$key]
@@ -89,5 +89,4 @@ class ActivityLog extends Activity {
     public function getChangeAttribute(): Collection {
         return $this->changes();
     }
-
 }
