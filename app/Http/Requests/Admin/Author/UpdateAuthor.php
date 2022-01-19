@@ -27,10 +27,12 @@ class UpdateAuthor extends TranslatableFormRequest {
     public function untranslatableRules(): array {
         return [
             // 'pic_url' => ['sometimes', 'string'],
-            'user_id' => ['nullable', 'integer'],
+            'user_id'     => ['nullable', 'integer'],
             'wikidata_id' => ['nullable', 'integer'],
-            'nation_id' => ['nullable', Rule::in(NationRepository::ids())],
-            'dynasty_id' => ['nullable', Rule::in(DynastyRepository::ids())],
+            'nation_id'   => ['nullable', Rule::in(NationRepository::ids())],
+            'dynasty_id'  => ['nullable', Rule::in(DynastyRepository::ids())],
+            'birth'       => ['nullable', 'date'],
+            'death'       => ['nullable', 'date'],
         ];
     }
 
@@ -42,18 +44,17 @@ class UpdateAuthor extends TranslatableFormRequest {
     public function translatableRules($locale): array {
         return [
             'describe_lang' => ['nullable', 'string'],
-            'name_lang' => ['nullable', 'string'],
+            'name_lang'     => ['nullable', 'string'],
         ];
     }
 
     /**
-     * Modify input data
+     * Modify input data.
      *
      * @return array
      */
     public function getSanitized(): array {
         $sanitized = $this->validated();
-
 
         //Add your code for manipulation with request data here
 
