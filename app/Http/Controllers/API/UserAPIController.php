@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Author;
 use App\Models\Campaign;
 use App\Models\MediaFile;
+use App\Models\Poem;
+use App\Models\Review;
 use App\Services\Tx;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use League\MimeTypeDetection\GeneratedExtensionToMimeTypeMap;
 
 class UserAPIController extends Controller {
@@ -92,6 +96,61 @@ class UserAPIController extends Controller {
     }
 
     /**
+     * TODO pagination.
+     * @param int $id
+     * @return array
+     */
+    public function timeline(int $id, int $page = 1, int $pageSize = 10) {
+        $user = User::find($id);
+        if (!$user) {
+            return $this->responseFail([], '用户不存在', Controller::$CODE['not_found']);
+        }
+
+        $poemLogs = ActivityLog::where([
+            'causer_id'    => $user->id,
+            'causer_type'  => User::class,
+            'subject_type' => Poem::class,
+            'description'  => 'created'
+        ])->select(['id', 'subject_type', 'subject_id', 'created_at'])->whereHas('poem')->orderByDesc('created_at');
+
+        $reviewLogs = ActivityLog::where([
+            'causer_id'    => $user->id,
+            'causer_type'  => User::class,
+            'subject_type' => Review::class,
+            'description'  => 'created'
+        ])->select(['id', 'subject_type', 'subject_id', 'created_at'])->whereHas('review')->orderByDesc('created_at');
+
+        $data = DB::query()->select()
+            ->fromSub($poemLogs->union($reviewLogs)->orderByDesc('created_at'), 'sub_query')
+            ->paginate($pageSize, null, '', $page)->toArray();
+
+        $data['data'] = array_map(function ($item) {
+            $ret = [];
+            $ret['type'] = array_search($item->subject_type, ActivityLog::SUBJECT);
+            $ret['id'] = $item->subject_id;
+            $log = ActivityLog::find($item->id);
+
+            switch ($ret['type']) {
+                case 'poem':
+                    $ret['subject'] = $log->poem ? $log->poem->only(['id', 'title', 'first_line']) : null;
+
+                    break;
+                case 'review':
+                    $ret['subject'] = $log->review ? $log->review->only(['id', 'title', 'content']) : null;
+
+                    break;
+            }
+
+            return $ret;
+        }, $data['data']);
+
+        return $this->responseSuccess([
+            'user'     => $user->toArray(),
+            'timeline' => $data
+        ]);
+    }
+
+    /**
      * @param Author $author
      * @param string $type
      * @param string $path
@@ -121,12 +180,13 @@ class UserAPIController extends Controller {
     }
 
     public function data(Request $request) {
+        /** @var User $user */
         $user     = $request->user();
         $campaign = Campaign::whereRaw('JSON_EXTRACT(settings, "$.resultUrl")')
             ->orderBy('end', 'desc')->limit(1)->first();
 
         // TODO $user->settings
-        $user->notify             = 1;
+        $user->notify             = $user->created_at->diffInMinutes(now()) > 3;
         $user->notify_url         = $campaign->settings ? $campaign->settings['resultUrl'] : null;
         $user->notify_title       = "赛诗会 #$campaign->name_lang 结果公布";
         $user->notify_campaign_id = $campaign->id;

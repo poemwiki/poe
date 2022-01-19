@@ -30,6 +30,7 @@ Route::middleware(['api'])->group(static function () {
         });
         Route::prefix('user')->name('user/')->group(static function () {
             Route::get('/weapp-login', [\App\Http\Controllers\API\LoginWeAppController::class, 'login'])->name('weapp-login');
+            Route::get('/timeline/{id}/{page}/{pageSize}', [\App\Http\Controllers\API\UserAPIController::class, 'timeline'])->name('timeline');
         });
         Route::prefix('author')->name('author/')->group(static function () {
             Route::get('/detail/{id}', [\App\Http\Controllers\API\AuthorAPIController::class, 'detail'])->name('detail');
