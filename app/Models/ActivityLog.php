@@ -57,6 +57,14 @@ class ActivityLog extends Activity {
 
     // protected $appends = ['changes', 'logs'];
 
+    public function poem() {
+        return $this->hasOne(\App\Models\Poem::class, 'id', 'subject_id');
+    }
+
+    public function review() {
+        return $this->hasOne(\App\Models\Review::class, 'id', 'subject_id');
+    }
+
     /**
      * diff array for each updated attribute.
      * if $this->description !== 'updated' , the diff array will be []
