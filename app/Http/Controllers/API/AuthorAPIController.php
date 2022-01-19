@@ -12,6 +12,7 @@ use Illuminate\Support\Collection;
 class AuthorAPIController extends Controller {
     public function detail($id) {
         $author = Author::find($id);
+        $user   = null;
 
         if (!$author) {
             return $this->responseFail();
@@ -19,6 +20,7 @@ class AuthorAPIController extends Controller {
 
         if ($author->user && $author->user->is_v) {
             $author->is_v = true;
+            $user         = $author->user;
         }
 
         $originalWorks           = $this->_prepare($author->poems, ['noAvatar' => true, 'noPoet' => true]);
@@ -31,6 +33,7 @@ class AuthorAPIController extends Controller {
 
         return $this->responseSuccess([
             'author'            => $author->only(['id', 'avatar_url', 'name_lang', 'describe_lang', 'is_v']),
+            'user'              => $user->only(['id', 'avatar', 'name', 'is_v']),
             'original_works'    => $originalWorks->concat($authorUserOriginalWorks),
             'translation_works' => $translationWorks
         ]);
