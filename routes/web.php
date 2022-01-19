@@ -316,6 +316,8 @@ Route::prefix('campaign')->name('campaign/')->group(static function () {
     Route::get('reward/{campaignId}/{fakeUID}', [\App\Http\Controllers\CampaignController::class, 'reward'])->name('reward');
 });
 
+Route::any('/contribution', 'PoemController@user')->name('contribution');
+
 Route::get('/page/{page}', function ($page) {
     $view = 'page/' . $page;
     if (view()->exists($view)) {
