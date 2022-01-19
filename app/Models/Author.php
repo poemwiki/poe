@@ -109,7 +109,9 @@ class Author extends Model implements Searchable {
         'dynasty_id',
         'upload_user_id',
         'wiki_desc_lang',
-        'avatar'
+        'avatar',
+        'birth',
+        'death'
     ];
 
     protected $dates = [

@@ -19,7 +19,9 @@ Vue.component('author-form', {
         name_lang: this.getLocalizedFormDefaults(),
         describe_lang: this.getLocalizedFormDefaults(),
         nation_id: null,
-        dynasty_id: null
+        dynasty_id: null,
+        birth: null,
+        death: null
       },
       nationList: this.defaultNation,
       avatarFile: null,

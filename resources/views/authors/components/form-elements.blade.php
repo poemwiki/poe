@@ -41,6 +41,7 @@
                     'form-control-success': fields['name_lang_' + locale] && fields['name_lang_' + locale].valid
                  }"
                  :id="'name_lang_' + locale" :name="'name_lang_' + locale"
+                 name="{{ trans('admin.author.columns.name_lang') }}"
                  placeholder="{{ trans('admin.author.columns.name_lang') }}">
 
             <div v-visible="errors.has('name_lang_' + locale)" class="form-control-feedback form-text" v-cloak>{{'{{'}}
@@ -82,6 +83,60 @@
 
 </div>
 
+
+<div class="row">
+
+  <div class="form-group row align-items-center"
+       :class="{'has-danger': errors.has('birth'), 'has-success': fields['birth'] && fields['birth'].valid }">
+    <label for="birth"
+           class="col-md-2 col-form-label text-md-right">{{ trans('admin.author.columns.birth') }}</label>
+    <div>
+      <input type="date"
+             v-model="form.birth"
+             v-validate="'date_format:yyyy-MM-dd'"
+             @input="validate($event)"
+             :class="{
+                    'form-control-danger': errors.has('birth'),
+                    'form-control-success': fields['birth'] && fields['birth'].valid
+                 }"
+             :id="birth" name="{{ trans('admin.author.columns.birth') }}"
+             placeholder="yyyy-MM-dd">
+
+      <div v-visible="errors.has('birth')" class="form-control-feedback form-text" v-cloak>{{'{{'}}
+        errors.first('birth') }}
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="row">
+
+  <div class="form-group row align-items-center"
+       :class="{'has-danger': errors.has('death'), 'has-success': fields['death'] && fields['death'].valid }">
+    <label for="death"
+           class="col-md-2 col-form-label text-md-right">{{ trans('admin.author.columns.death') }}</label>
+    <div>
+      <input type="date"
+             v-model="form.death"
+             v-validate="'date_format:yyyy-MM-dd'"
+             @input="validate($event)"
+             :class="{
+                    'form-control-danger': errors.has('death'),
+                    'form-control-success': fields['death'] && fields['death'].valid
+                 }"
+             :id="death" name="{{ trans('admin.author.columns.birth') }}"
+             placeholder="yyyy-MM-dd">
+
+      <div v-visible="errors.has('death')" class="form-control-feedback form-text" v-cloak>{{'{{'}}
+        errors.first('birth') }}
+      </div>
+
+    </div>
+  </div>
+
+</div>
 
 <div class="form-group row"
      :class="{'has-danger': errors.has('nation_id'), 'has-success': fields.nation_id && fields.nation_id.valid }">

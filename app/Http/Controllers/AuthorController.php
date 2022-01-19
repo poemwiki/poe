@@ -35,9 +35,9 @@ class AuthorController extends Controller {
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function show($fakeId) {
-        $id                      = Author::getIdFromFakeId($fakeId);
-        $author                  = Author::findOrFail($id);
-        $poemsAsPoet             = Poem::where(['poet_id' => $id])->whereNotExists(function ($query) {
+        $id          = Author::getIdFromFakeId($fakeId);
+        $author      = Author::findOrFail($id);
+        $poemsAsPoet = Poem::where(['poet_id' => $id])->whereNotExists(function ($query) {
             $query->select(DB::raw(1))
                 ->from('relatable')
                 ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
@@ -45,7 +45,7 @@ class AuthorController extends Controller {
         $authorUserOriginalWorks = $author->user ? $author->user->originalPoemsOwned : [];
 
         // TODO poem.translator_id should be deprecated
-        $poemsAsTranslatorAuthor  = Poem::where(['translator_id' => $id])->whereNotExists(function ($query) {
+        $poemsAsTranslatorAuthor = Poem::where(['translator_id' => $id])->whereNotExists(function ($query) {
             $query->select(DB::raw(1))
                 ->from('relatable')
                 ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
@@ -92,7 +92,8 @@ class AuthorController extends Controller {
      */
     public function edit($fakeId) {
         $id     = Author::getIdFromFakeId($fakeId);
-        $author = Author::select(['id', 'name_lang', 'describe_lang', 'dynasty_id', 'nation_id', 'avatar'])->findOrFail($id);
+        $author = Author::select(['id', 'name_lang', 'describe_lang', 'dynasty_id', 'nation_id', 'avatar',
+            'birth', 'death'])->findOrFail($id);
 
         $author->name_lang     = $author->name_lang ?: $author->getTranslated('name_lang', 'zh-CN');
         $author->describe_lang = $author->describe_lang ?: $author->getTranslated('describe_lang', 'zh-CN');
@@ -122,8 +123,8 @@ class AuthorController extends Controller {
             return $this->responseFail([], '图片上传失败。请稍后再试。');
         }
 
-        $ext      = strtolower($file->getClientOriginalExtension());
-        $allow    = ['jpg', 'webp', 'png', 'jpeg', 'bmp']; // 支持的类型
+        $ext   = strtolower($file->getClientOriginalExtension());
+        $allow = ['jpg', 'webp', 'png', 'jpeg', 'bmp']; // 支持的类型
         if (!in_array($ext, $allow)) {
             return $this->responseFail([], '不支持的图片类型，请上传 jpg/jpeg/png/webp/bmp 格式图片。', Controller::$CODE['img_format_invalid']);
         }
@@ -136,11 +137,11 @@ class AuthorController extends Controller {
         [$width, $height] = getimagesize($file);
         $corpSize         = min($width, $height, 600);
 
-        $client        = new Tx();
-        $format        = TX::SUPPORTED_FORMAT['webp'];
-        $md5           = md5($file->getContent());
-        $toFileName    = config('app.avatar.author_path') . '/' . $author->fakeId . '.' . $format;
-        $tmpFileID     = config('app.cos_tmp_path') . '/' . $md5;
+        $client     = new Tx();
+        $format     = TX::SUPPORTED_FORMAT['webp'];
+        $md5        = md5($file->getContent());
+        $toFileName = config('app.avatar.author_path') . '/' . $author->fakeId . '.' . $format;
+        $tmpFileID  = config('app.cos_tmp_path') . '/' . $md5;
 
         try {
             $result = $client->scropAndUpload($tmpFileID, $toFileName, $file->getContent(), $format, $corpSize, $corpSize);
@@ -153,11 +154,11 @@ class AuthorController extends Controller {
 
         $avatarImage = $result['Data']['ProcessResults']['Object'][0];
         if (isset($avatarImage['Location'])) {
-            $objectUrlWithoutSign   = 'https://' . $avatarImage['Location'];
+            $objectUrlWithoutSign = 'https://' . $avatarImage['Location'];
 
             // Tencent cos client has set default timezone to PRC
             date_default_timezone_set(config('app.timezone', 'UTC'));
-            $author->avatar         = $objectUrlWithoutSign . '?v=' . now()->timestamp;
+            $author->avatar = $objectUrlWithoutSign . '?v=' . now()->timestamp;
             $author->save();
 
             $this->authorRepository->saveAuthorMediaFile($author, MediaFile::TYPE['avatar'], $avatarImage['Key'], $md5, $format, $avatarImage['Size']);

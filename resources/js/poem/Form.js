@@ -326,7 +326,9 @@ Vue.component('poem-form', {
         const avgLength = lenthSum / (lineCount - emptyLineCount);
 
         console.log({emptyLineCount, lineCount, textLineCount: lineCount-emptyLineCount, avgLength})
+
         // TODO write a same function for server side empty line clean and detect
+        // remove redundant empty lines
         if(emptyLineCount >= (lineCount - emptyLineCount -1) && avgLength<70) {
           const delMark = '##_@DELETE@_##';
           let newText = change.text.map((line, index) => {
