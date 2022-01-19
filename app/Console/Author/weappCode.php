@@ -94,7 +94,7 @@ class WeappCode extends Command {
 
         $image = $result['Data']['ProcessResults']['Object'][0];
         if (isset($image['Location'])) {
-            $objectUrlWithoutSign   = 'https://' . $image['Location'];
+            $objectUrlWithoutSign = 'https://' . $image['Location'];
 
             // Tencent cos client has set default timezone to PRC
             date_default_timezone_set(config('app.timezone', 'UTC'));
