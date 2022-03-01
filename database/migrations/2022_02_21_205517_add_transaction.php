@@ -14,6 +14,7 @@ class AddTransaction extends Migration {
             $table->dateTime('created_at')->useCurrent()->nullable(false);
             $table->dateTime('updated_at')->useCurrent()->nullable(false);
             $table->string('hash')->nullable(false);
+            $table->string('name')->nullable(false);           // poem title
             $table->json('poemwiki')->nullable(false);
             // metadata
             // @see https://docs.opensea.io/docs/metadata-standards
@@ -23,14 +24,13 @@ class AddTransaction extends Migration {
             $table->string('image')->nullable(true);          // URL of nft image
             $table->longText('image_data')->nullable(true);   // Raw SVG image data, if you want to generate images on the fly (not recommended). Only use this if you're not including the image parameter.
             $table->char('background_color', 6)->nullable(true);  // Background color of the item on OpenSea. Must be a six-character hexadecimal without a pre-pended #.
-            $table->string('name')->nullable(true);           // poem title
             $table->json('attributes')->nullable(true);       // attributes for the item, which will show up on the OpenSea page for the item.
             $table->index(['poem_id']);
         });
 
         Schema::create('transaction', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned();
-            $table->unsignedTinyInteger('nft_id')->default(0)->nullable(false); // 0: poem gold, other: nft id
+            $table->unsignedBigInteger('nft_id')->default(0)->nullable(false); // 0: poem gold, other: nft id
             $table->unsignedTinyInteger('action')->default(0)->nullable(false);
             $table->unsignedBigInteger('from_user_id')->nullable(false);
             $table->unsignedBigInteger('to_user_id')->nullable(false);
@@ -43,7 +43,7 @@ class AddTransaction extends Migration {
         Schema::create('balance', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned();
             $table->unsignedBigInteger('user_id')->nullable(false);
-            $table->unsignedTinyInteger('nft_id')->default(0)->nullable(false); // 0: poem gold, other: nft id
+            $table->unsignedBigInteger('nft_id')->default(0)->nullable(false); // 0: poem gold, other: nft id
             $table->decimal('amount', 27, 18)->nullable(false);
             $table->dateTime('created_at')->useCurrent()->nullable(false);
             $table->dateTime('updated_at')->useCurrent()->nullable(false);
