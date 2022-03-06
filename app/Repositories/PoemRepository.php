@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Campaign;
 use App\Models\Content;
+use App\Models\NFT;
 use App\Models\Poem;
 use App\Models\Relatable;
 use App\Models\Score;
@@ -239,15 +240,18 @@ class PoemRepository extends BaseRepository {
     private function _withReviews($q) {
     }
 
-    public function getByOwner($userId) {
-        return self::newQuery()->where('upload_user_id', $userId)
+    public function getByOwner($userID) {
+        return self::newQuery()->where('upload_user_id', $userID)
             ->whereIn('is_owner_uploaded', [Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])
             ->with('reviews')->orderByDesc('created_at')
-            ->get()->map(function ($item) {
+            ->get()->map(function (Poem $item) use ($userID) {
                 $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
                 $item['poet'] = $item->poetLabel;
                 $item['score_count'] = ScoreRepository::calcCount($item->id);
                 $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
+                $item['listable'] = (!$item->nft && NFT::isMintable($item, $userID))
+                    || ($item->nft && $item->nft->isListableByUser($userID));
+                $item['unlistable'] = $item->nft && $item->nft->isUnlistableByUser($userID);
 
                 return $item->only(self::$listColumns);
             });
@@ -257,7 +261,7 @@ class PoemRepository extends BaseRepository {
         'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
         'poem', 'poet', 'poet_id', 'poet_avatar', 'poet_cn',
         'score', 'score_count', 'score_weight', 'rank',
-        'reviews', 'reviews_count', 'poet_is_v'
+        'reviews', 'reviews_count', 'poet_is_v', 'listable', 'unlistable'
     ];
     public static $relatedReviewColumns = ['id', 'avatar', 'content', 'pure_content', 'created_at', 'name', 'user_id'];
 
