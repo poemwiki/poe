@@ -39,6 +39,9 @@ class CampaignAPIController extends Controller {
         return $this->responseSuccess($campaigns);
     }
 
+    // TODO get campaign app code image from cache or generate it
+    // (new Weapp())->fetchAppCodeImg('campaign-35', storage_path('app/public/campaign/'.'35'), 'pages/index/index', 0)
+
     public function show($id) {
         // TODO Cache::forget('api-campaign-show-') if new campaign poem uploaded
         $ttl = now()->addMinutes(config('app.env') === 'production' ? 1 : 0);
