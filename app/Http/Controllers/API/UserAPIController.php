@@ -128,15 +128,21 @@ class UserAPIController extends Controller {
             $ret = [];
             $ret['type'] = array_search($item->subject_type, ActivityLog::SUBJECT);
             $ret['id'] = $item->subject_id;
+            $ret['time'] = date_ago($item->created_at);
             $log = ActivityLog::find($item->id);
 
             switch ($ret['type']) {
                 case 'poem':
-                    $ret['subject'] = $log->poem ? $log->poem->only(['id', 'title', 'first_line']) : null;
+                    $ret['subject'] = $log->poem ? $log->poem->only(['id', 'poet', 'title', 'first_line', 'is_owner_uploaded']) : null;
 
                     break;
                 case 'review':
-                    $ret['subject'] = $log->review ? $log->review->only(['id', 'title', 'content']) : null;
+                    if ($log->review) {
+                        $ret['subject'] = $log->review->only(['id', 'title', 'content', 'poem_id']);
+                        $ret['subject']['poem'] = $log->review->poem ? $log->review->poem->only(['id', 'poet', 'title', 'first_line', 'is_owner_uploaded']) : null;
+                    } else {
+                        $ret['subject'] = null;
+                    }
 
                     break;
             }
