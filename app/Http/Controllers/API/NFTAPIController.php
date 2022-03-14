@@ -9,7 +9,6 @@ use App\Models\Poem;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Throwable;
 
 /**
@@ -19,26 +18,94 @@ class NFTAPIController extends Controller {
     public function __construct() {
     }
 
-    public function listing(Request $request) {
+    public function listing(Request $request): array {
         $poemID = $request->input('id');
         $price  = $request->input('price');
+        $userID = $request->user()->id;
 
         $poem = Poem::findOrFail($poemID);
         if ($poem->nft) {
             $nft = $poem->nft;
+            // check nft owner
+            if ($nft->owner && ($nft->owner->id !== $userID)) {
+                return $this->responseFail([], 'Can not list an NFT not owned by you.');
+            }
         } else {
             try {
-                $nft = $this->mint($poem, $request->user()->id);
+                $nft = $this->mint($poem, $userID);
             } catch (Throwable $e) {
                 Log::error($e->getMessage());
 
-                return $this->responseFail([], 'Failed to mint NFT');
+                return $this->responseFail([], 'Failed to mint NFT.');
             }
         }
 
         $this->addListing($nft, $price);
 
         return $this->responseSuccess(['id' => $nft->id]);
+    }
+
+    public function unlisting(Request $request): array {
+        $nftID  = $request->input('id');
+        $userID = $request->user()->id;
+        $nft    = NFT::findOrFail($nftID);
+
+        if (!$nft->isUnlistableByUser($userID)) {
+            return $this->responseFail([], 'Can not unlisting an NFT not owned by you.');
+        }
+
+        try {
+            Listing::unlist($nft);
+        } catch (\Exception $e) {
+            Log::error('unlisting error', $e->getMessage());
+
+            return $this->responseFail([], 'Failed to unlisting NFT.');
+        }
+
+        return $this->responseSuccess(['id' => $nftID]);
+    }
+
+    public function buy(Request $request): array {
+        $nftID  = $request->input('id');
+        $userID = $request->user()->id;
+        $nft    = NFT::findOrFail($nftID);
+
+        \DB::beginTransaction();
+
+        try {
+            $nft->listing->status = Listing::STATUS['sold'];
+            $nft->listing->save();
+
+            Transaction::create([
+                'nft_id'       => $nft->id,
+                'from_user_id' => $nft->balance->user_id,
+                'to_user_id'   => $userID,
+                'amount'       => 1,
+                'action'       => Transaction::ACTION['sell'],
+            ]);
+            $nft->balance->user_id = $userID;
+            $nft->balance->save();
+
+            // gold transfer
+            Transaction::create([
+                'nft_id'         => 0,
+                'from_user_id'   => $userID,
+                'to_user_id'     => $nft->balance->user_id,
+                'amount'         => $nft->listing->price,
+                'action'         => Transaction::ACTION['transfer'],
+            ]);
+            // TODO gold balance
+
+            \DB::commit();
+
+            return $this->responseSuccess(['id' => $nftID]);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+
+            Log::error('buy error', $e->getMessage());
+
+            return $this->responseFail([], 'Failed to buy NFT.');
+        }
     }
 
     protected function addListing(NFT $nft, $price) {
@@ -52,7 +119,9 @@ class NFTAPIController extends Controller {
 
     /**
      * @param $poem
+     * @param $userID
      * @return NFT|\Illuminate\Database\Eloquent\Model
+     * @throws \Exception
      */
     protected function mint($poem, $userID) {
         // TODO check if poem is already minted to NFT
@@ -61,47 +130,13 @@ class NFTAPIController extends Controller {
             throw new \Exception('Can not mint a translated poem currently.');
         }
         // check ownership of poem
-        if ($poem->isOwned) {
-            throw new \Exception('Can not mint this poem.');
-        }
+        // if (!$poem->isOwned) {
+        //     throw new \Exception('Can not mint this poem.');
+        // }
         if ($poem->owner->id !== $userID) {
-            throw new \Exception('Can not mint a poem that is not owned by you.');
+            throw new \Exception('Can not mint a poem not owned by you.');
         }
 
-        \DB::beginTransaction();
-
-        try {
-            $nft = NFT::create([
-                'poem_id'      => $poem->id,
-                'content_id'   => $poem->content_id,
-                'type'         => NFT::TYPE['ERC721'],
-                'name'         => $poem->title,
-                'external_url' => $poem->url,
-                // todo: poet and translator page url
-                'poemwiki' => json_encode($poem->only(['title', 'subtitle', 'preface', 'poem', 'year', 'month', 'date', 'location', 'poet', 'poet'])),
-                'hash'     => Str::digest([
-                    'author_user_id' => $poem['user_id'],
-                    'title'          => $poem['title'],
-                    'subtitle'       => $poem['subtitle'],
-                    'preface'        => $poem['preface'],
-                    'content'        => $poem['poem'],
-                    'poet'           => $poem['poet'],
-                ])
-            ]);
-            Transaction::create([
-                'nft_id'       => $nft->id,
-                'from_user_id' => 0,
-                'to_user_id'   => $userID,
-                'amount'       => 1,
-                'action'       => Transaction::ACTION['mint'],
-            ]);
-            \DB::commit();
-        } catch (Throwable $e) {
-            \DB::rollback();
-
-            throw new \Exception('Minting error occurred.');
-        }
-
-        return $nft;
+        return NFT::mint($poem, $userID);
     }
 }

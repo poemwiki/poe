@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -11,6 +13,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int   $id
  * @property array $attributes
  * @mixin \Eloquent
+ * @property \App\User|null           $owner
+ * @property \App\Models\Listing|null $listing
  */
 class NFT extends Model {
     use LogsActivity;
@@ -61,5 +65,119 @@ class NFT extends Model {
 
     public function listing() {
         return $this->hasOne(\App\Models\Listing::class, 'nft_id');
+    }
+
+    public function balance() {
+        return $this->hasOne(\App\Models\Balance::class, 'nft_id');
+    }
+
+    public function getOwnerAttribute() {
+        return $this->balance ? $this->balance->user : null;
+    }
+
+    public static function mint(Poem $poem, int $userID) {
+        \DB::beginTransaction();
+
+        try {
+            $nft = self::create([
+                'poem_id'      => $poem->id,
+                'content_id'   => $poem->content_id,
+                'type'         => NFT::TYPE['ERC721'],
+                'name'         => $poem->title,
+                'external_url' => $poem->url,
+                // todo: poet and translator page url
+                'poemwiki' => json_encode($poem->only(['title', 'subtitle', 'preface', 'poem', 'year', 'month', 'date', 'location', 'poet', 'poet'])),
+                'hash'     => Str::digest([
+                    'author_user_id' => $poem['user_id'],
+                    'title'          => $poem['title'],
+                    'subtitle'       => $poem['subtitle'],
+                    'preface'        => $poem['preface'],
+                    'content'        => $poem['poem'],
+                    'poet'           => $poem['poet'],
+                ])
+            ]);
+
+            Transaction::create([
+                'nft_id'       => $nft->id,
+                'from_user_id' => 0,
+                'to_user_id'   => $userID,
+                'amount'       => 1,
+                'action'       => Transaction::ACTION['mint'],
+            ]);
+
+            Balance::create([
+                'nft_id'  => $nft->id,
+                'user_id' => $userID,
+                'amount'  => 1,
+            ]);
+
+            \DB::commit();
+
+            return $nft;
+        } catch (\Throwable $e) {
+            \DB::rollback();
+
+            Log::error($e->getMessage());
+
+            throw new \Exception('Minting error occurred.');
+        }
+    }
+
+    public static function transfer(int $nftID, int $fromUserID, int $toUserID, int $amount) {
+        \DB::beginTransaction();
+
+        try {
+            Transaction::create([
+                'nft_id'       => $nftID,
+                'from_user_id' => $fromUserID,
+                'to_user_id'   => $toUserID,
+                'amount'       => $amount,
+                'action'       => Transaction::ACTION['transfer'],
+            ]);
+            $criteria = [
+                'nft_id'  => $nftID,
+                'user_id' => $fromUserID,
+            ];
+            $balance = Balance::where($criteria);
+
+            if (!$balance) {
+                Log::error('Balance not found.', $criteria);
+
+                throw new \Exception('Nft is not owned by user.');
+            }
+            $balance->update([
+                'user_id' => $toUserID,
+            ]);
+
+            \DB::commit();
+
+            return true;
+        } catch (\Throwable $e) {
+            \DB::rollback();
+
+            Log::error($e->getMessage());
+
+            throw new \Exception('Transferring error occurred.');
+        }
+    }
+
+    public function isListableByUser($userID) {
+        if ($this->owner && $this->owner->id === $userID) {
+            return !$this->listing || $this->listing->isRelistable;
+        }
+
+        return false;
+    }
+
+    public function isUnlistableByUser($userID) {
+        if ($this->owner && $this->owner->id === $userID) {
+            return $this->listing && $this->listing->isUnlistable;
+        }
+
+        return false;
+    }
+
+    public static function isMintable(Poem $poem, int $userID) {
+        return !$poem->isTranslated && $poem->owner && $poem->owner->id === $userID;
     }
 }

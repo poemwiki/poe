@@ -13,7 +13,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Transaction extends Model {
     use LogsActivity;
-    protected $table = 'transaction';
+    protected $table        = 'transaction';
+    public const UPDATED_AT = null;
 
     public const TYPE = [
         'gold' => 0,
