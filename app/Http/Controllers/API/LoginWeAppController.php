@@ -55,7 +55,7 @@ class LoginWeAppController extends Controller {
         // 找到 openid 对应的用户
         // TODO 考虑同一unionid下不同openid的虚拟身份（欢乐马、神经蛙等）
         // TODO 考虑解绑情况
-        $userBind = $this->getUserBindInfoByUnionID($data['unionid'], UserBind::BIND_REF['weapp'], 1);
+        $userBind = isset($data['unionid']) && !empty($data['unionid']) ? $this->getUserBindInfoByUnionID($data['unionid'], UserBind::BIND_REF['weapp'], 1) : null;
         // 待解决的问题：微信服务端返回的 $data 中是否会包含 unionid？在何种情况下包含？
 
         if ($userBind) {
@@ -78,7 +78,7 @@ class LoginWeAppController extends Controller {
             // 注册过网站，但还未用微信登录过，没有任何微信相关的 userBind
             // 用微信登录过web版，还未登录过小程序，有相同 unionid 的 BIND_REF['wechat'] 的 userBind, 无 BIND_REF['weapp'] 的 userBind
 
-            $wechatBind = $this->getUserBindInfoByUnionID($data['unionid'], UserBind::BIND_REF['wechat'], 1);
+            $wechatBind = isset($data['unionid']) && !empty($data['unionid']) ? $this->getUserBindInfoByUnionID($data['unionid'], UserBind::BIND_REF['wechat'], 1) : null;
 
             if ($wechatBind) {
                 $newUser = $wechatBind->user;
