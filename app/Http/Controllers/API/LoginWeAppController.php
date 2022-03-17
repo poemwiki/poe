@@ -122,7 +122,7 @@ class LoginWeAppController extends Controller {
             'access_token' => $token,
             'token_type'   => 'Bearer',
             'expires_in'   => $createToken->token->expires_at,
-            'data'         => $userBind->user,
+            'data'         => UserAPIController::appendMiscInfo($userBind->user),
         ]);
     }
 

@@ -12,11 +12,11 @@ use App\Models\Review;
 use App\Services\Tx;
 use App\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use League\MimeTypeDetection\GeneratedExtensionToMimeTypeMap;
 
 class UserAPIController extends Controller {
-    public function update(Request $request) {
+    public function update(Request $request): array {
         $user = $request->user();
         if ($request->nickName) {
             $wechatApp = \EasyWeChat\Factory::miniProgram([
@@ -37,7 +37,7 @@ class UserAPIController extends Controller {
         return $this->responseSuccess($user);
     }
 
-    public function avatar(Request $request) {
+    public function avatar(Request $request): array {
         $file = $request->file('avatar');
 
         if (!$file->isValid()) {
@@ -100,7 +100,7 @@ class UserAPIController extends Controller {
      * @param int $id
      * @return array
      */
-    public function timeline(int $id, int $page = 1, int $pageSize = 10) {
+    public function timeline(int $id, int $page = 1, int $pageSize = 10): array {
         $user = User::find($id);
         if (!$user) {
             return $this->responseFail([], '用户不存在', Controller::$CODE['not_found']);
@@ -185,18 +185,27 @@ class UserAPIController extends Controller {
         return $mediaFile;
     }
 
-    public function data(Request $request) {
-        /** @var User $user */
-        $user     = $request->user();
+    public static function appendMiscInfo(User $user): array {
+        $res      = $user->toArray();
         $campaign = Campaign::whereRaw('JSON_EXTRACT(settings, "$.resultUrl")')
             ->orderBy('end', 'desc')->limit(1)->first();
 
         // TODO $user->settings
-        $user->notify             = $user->created_at->diffInMinutes(now()) > 3;
-        $user->notify_url         = $campaign->settings ? $campaign->settings['resultUrl'] : null;
-        $user->notify_title       = "赛诗会 #$campaign->name_lang 结果公布";
-        $user->notify_campaign_id = $campaign->id;
+        $res['notify']             = $user->created_at->diffInMinutes(now()) > 3;
+        $res['notify_url']         = $campaign->settings ? $campaign->settings['resultUrl'] : null;
+        $res['notify_title']       = "赛诗会 #$campaign->name_lang 结果公布";
+        $res['notify_campaign_id'] = $campaign->id;
+        $res['wallet_activated']   = $user->walletActivated;
+        $res['gold_balance']       = $user->getGoldBalance();
 
-        return $this->responseSuccess($user);
+        return $res;
+    }
+
+    public function data(Request $request) {
+        /** @var User $user */
+        $user = $request->user();
+        $res  = self::appendMiscInfo($user);
+
+        return $this->responseSuccess($res);
     }
 }
