@@ -8,7 +8,9 @@ use App\Models\Poem;
 use App\Rules\NoDuplicatedPoem;
 use App\User;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -27,10 +29,16 @@ class importAllPoetry extends Command {
     protected $description = 'craw author & poem from allpoetry';
 
     public static $source   = 'allpoetry';
-    public static $causerID = 2;
+    public static $causerID = 2; // official poemwiki user id
 
     public function __construct() {
         parent::__construct();
+
+        if (!App::runningInConsole()) {
+            Log::error('This command can only be used in console mode.');
+
+            return;
+        }
 
         // activity log need a causer, so we have to log in as self::$causerID first
         $causer = User::find(self::$causerID);
@@ -73,7 +81,7 @@ class importAllPoetry extends Command {
                 $poem = [
                     'upload_user_id'              => self::$causerID,
                     'poet_id'                     => $insertedAuthor->id,
-                    'original_id'                 => $poemCrawl->id,
+                    'original_id'                 => null,
                     'language_id'                 => 2,
                     'from'                        => strlen($poemCrawl->url) > 255 ? self::$source : $poemCrawl->url,
                     'is_owner_uploaded'           => Poem::$OWNER['none'],
