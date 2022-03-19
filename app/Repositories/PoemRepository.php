@@ -252,6 +252,7 @@ class PoemRepository extends BaseRepository {
                 $item['listable'] = (!$item->nft && NFT::isMintable($item, $userID))
                     || ($item->nft && $item->nft->isListableByUser($userID));
                 $item['unlistable'] = $item->nft && $item->nft->isUnlistableByUser($userID);
+                $item['nft_id'] = $item->nft ? $item->nft->id : null;
 
                 return $item->only(self::$listColumns);
             });
@@ -261,7 +262,7 @@ class PoemRepository extends BaseRepository {
         'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
         'poem', 'poet', 'poet_id', 'poet_avatar', 'poet_cn',
         'score', 'score_count', 'score_weight', 'rank',
-        'reviews', 'reviews_count', 'poet_is_v', 'listable', 'unlistable'
+        'reviews', 'reviews_count', 'poet_is_v', 'listable', 'unlistable', 'nft_id'
     ];
     public static $relatedReviewColumns = ['id', 'avatar', 'content', 'pure_content', 'created_at', 'name', 'user_id'];
 
