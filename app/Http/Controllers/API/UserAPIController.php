@@ -5,10 +5,12 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Author;
+use App\Models\Balance;
 use App\Models\Campaign;
 use App\Models\MediaFile;
 use App\Models\Poem;
 use App\Models\Review;
+use App\Models\Transaction;
 use App\Services\Tx;
 use App\User;
 use Illuminate\Http\Request;
@@ -207,5 +209,47 @@ class UserAPIController extends Controller {
         $res  = self::appendMiscInfo($user);
 
         return $this->responseSuccess($res);
+    }
+
+    public function activateWallet(Request $request): array {
+        /** @var User $user */
+        $user = $request->user();
+        if ($user->getGoldBalance() !== null) {
+            return $this->responseSuccess(['balance' => $user->getGoldBalance()], '已激活');
+        }
+
+        try {
+            \DB::beginTransaction();
+            // todo prevent duplicate gold balance
+            $balance = Balance::create([
+                'nft_id'  => 0,
+                'amount'  => 0,
+                'user_id' => $user->id
+            ]);
+            Transaction::transferGold(2, $user->id, 500);
+            \DB::commit();
+        } catch (\Throwable $e) {
+            \DB::rollBack();
+            Log::error('activate wallet error:' . $e->getMessage(), $e->getTrace());
+
+            return $this->responseFail([], 'activate wallet error');
+        }
+
+        return $this->responseSuccess(['balance' => $user->getGoldBalance()]);
+    }
+
+    public function txs(Request $request) {
+        $user = $request->user();
+        $txs  = $user->getTransactions(); // TODO paginate
+
+        return $this->responseSuccess([
+            'balance' => $user->getGoldBalance(),
+            'txs'     => $txs->map(function (Transaction $tx) use ($user) {
+                $res = $tx->toArray();
+                $res['amount'] = $tx->from_user_id === $user->id ? '-' . $res['amount'] : '+' . $res['amount'];
+
+                return $res;
+            })
+        ]);
     }
 }
