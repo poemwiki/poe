@@ -6,16 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\API\StoreOwnerUploaderPoem;
 use App\Http\Requests\API\StorePoem;
 use App\Models\Author;
+use App\Models\Balance;
 use App\Models\Entry;
+use App\Models\NFT;
 use App\Models\Poem;
 use App\Models\Relatable;
 use App\Models\Tag;
+use App\Models\Transaction;
 use App\Query\AuthorAliasSearchAspect;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
 use App\Rules\ValidPoemContent;
 use App\Services\Weapp;
+use App\User;
 use EasyWeChat\Factory;
 use Exception;
 use File;
@@ -119,8 +123,85 @@ class PoemAPIController extends Controller {
         return $this->responseSuccess($res);
     }
 
+    public function randomNft($num = 5, $id = null) {
+        $num = min(10, $num);
+
+        $columns = [
+            'id', 'created_at', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
+            'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
+            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded',
+            'reviews', 'reviews_count', 'date_ago', 'poet_avatar', 'translator_avatar',
+            'score', 'score_count', 'score_weight'
+        ];
+
+        $ids = NFT::query()->with(['poem:id,title', 'content:id,content'])->get(['nft.id', 'nft.poem_id', 'nft.content_id'])->map(function ($item) {
+            return $item->poem->id;
+        })->toArray();
+
+        $poems = Poem::whereIn('id', $ids)->get();
+
+        $res = [];
+        foreach ($poems as $poem) {
+            $item = $poem->only($columns);
+
+            $score                          = $poem->scoreArray;
+            $item['score']                  = $score['score'];
+            $item['score_count']            = $score['count'];
+            $item['date_ago']               = date_ago($poem->created_at);
+            $item['poet']                   = $poem->poet_label;
+            $item['poet_cn']                = $poem->poet_label_cn;
+            $item['poet_avatar_true']       = $poem->poet_avatar       !== config('app.avatar.default');
+            $item['translator_avatar_true'] = $poem->translator_avatar !== config('app.avatar.default');
+            $item['poet_is_v']              = $poem->poet_is_v;
+            $item['nft_id']                 = $poem->nft->id;
+
+            $item['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
+            $translatorLabels        = [];
+            $item['translators']     = $poem->translators->map(function ($translator) use (&$translatorLabels) {
+                if ($translator instanceof Author) {
+                    $translatorLabels[] = $translator->label;
+
+                    return [
+                        'name'        => $translator->label,
+                        'id'          => $translator->id,
+                        'avatar'      => $translator->avatar_url,
+                        'avatar_true' => $translator->avatar_url !== config('app.avatar.default')
+                    ];
+                } elseif ($translator instanceof Entry) {
+                    $translatorLabels[] = $translator->name;
+
+                    return ['name' => $translator->name];
+                }
+            });
+
+            $item['translator_label'] = count($translatorLabels) ? join(', ', $translatorLabels) : $poem->translator_label;
+
+            $res[] = $item;
+        }
+
+        return $this->responseSuccess($res);
+    }
+
     public function mine(Request $request) {
-        return $this->responseSuccess($this->poemRepository->getByOwner($request->user()->id));
+        $userId = $request->user()->id;
+
+        // $nft = Balance::query()->with('nft:id,poem_id,content_id')->where('user_id', 1)->get();
+        $nfts = NFT::query()->with(['poem:id,title', 'content:id,content'])->join('balance', function ($join) use ($userId) {
+            $join->on('nft.id', '=', 'balance.nft_id')
+                ->where('balance.user_id', '=', $userId);
+            // ->where('balance.user_id', '=', 1);
+        })->get(['nft.id', 'nft.poem_id', 'nft.content_id'])->map(function ($item) {
+            $res = $item->only('id');
+            $res['title'] = $item->poem->title;
+            $res['poem'] = $item->content->content;
+
+            return $res;
+        });
+
+        return $this->responseSuccess([
+            'nfts'    => $nfts,
+            'author'  => $this->poemRepository->getByOwner($userId)
+        ]);
     }
 
     public function relatedAll(Request $request) {
@@ -134,6 +215,101 @@ class PoemAPIController extends Controller {
      */
     public function related(Request $request) {
         return $this->responseSuccess($this->poemRepository->getRelated($request->user()->id, 100, true));
+    }
+
+    // TODO nft poem detail should pull from nft.poemwiki instead of poem table.
+    public function nftDetail($id): array {
+        $nft     = NFT::findOrFail($id);
+        $balance = Balance::query()->where('amount', '>=', 1)->where('nft_id', $id)->first();
+
+        $columns = [
+            'id', 'created_at', 'title', 'subtitle', 'preface', 'poem',
+            'poet', 'poet_cn', 'poet_id', 'poet_avatar', 'translator_avatar',
+            'subtitle', 'preface', 'date', 'month', 'year', 'location',
+            'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
+            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'share_pics',
+            'campaign_id', 'first_line'
+        ];
+        /** @var Poem $poem */
+        $poem = Poem::where('id', '=', $nft['poem_id'])->first();
+        if (!$poem) {
+            abort(404);
+
+            return $this->responseFail([], 'not found', Controller::$CODE['no_entry']);
+        }
+        $res = $poem->only($columns);
+
+        $res['poet']                   = $poem->poet_label;
+        $res['poet_avatar_true']       = $poem->poet_avatar       !== config('app.avatar.default');
+        $res['translator_avatar_true'] = $poem->translator_avatar !== config('app.avatar.default');
+        $res['poet_is_v']              = $poem->poet_is_v;
+
+        $res['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
+
+        $translatorLabels   = [];
+        $res['translators'] = $poem->translators->map(function ($translator) use (&$translatorLabels) {
+            if ($translator instanceof Author) {
+                $translatorLabels[] = $translator->label;
+
+                return [
+                    'name'        => $translator->label,
+                    'id'          => $translator->id,
+                    'avatar'      => $translator->avatar_url,
+                    'avatar_true' => $translator->avatar_url !== config('app.avatar.default')
+                ];
+            } elseif ($translator instanceof Entry) {
+                $translatorLabels[] = $translator->name;
+
+                return ['name' => $translator->name];
+            }
+        });
+
+        $res['translator_label'] = count($translatorLabels) ? join(', ', $translatorLabels) : $poem->translator_label;
+
+        $res['date_ago'] = date_ago($poem->created_at);
+
+        // TODO poet_id should be set after poem created (if is_owner_uploaded===Poem::$OWNER['uploader'])
+        if (!$res['poet_id'] && $poem->is_owner_uploaded === Poem::$OWNER['uploader'] && $poem->uploader) {
+            if ($poem->uploader->author) {
+                $res['poet_id'] = $poem->uploader->author->id;
+            }
+        }
+
+        // TODO use NFT pic
+        if ($poem->share_pics && isset($poem->share_pics['pure'])) {
+            if (File::exists(storage_path($poem->share_pics['pure']))) {
+                $res['share_image'] = route('poem-card', [
+                    'id'            => $poem->id,
+                    'compositionId' => 'pure'
+                ]);
+            }
+        }
+
+        if ($nft->listing) {
+            $res['price'] = number_format($nft->listing['price'], 2);
+        }
+        $res['nft_id']         = $nft->id;
+        $res['mint_time']      = $nft->created_at->format('Y-m-d H:i:s');
+        $res['hash']           = $nft->hash;
+        $res['nft_owner']      = $nft->owner->only(['id', 'name', 'avatar_url']);
+        $res['listing_status'] = $nft->listing ? $nft->listing->status : null;
+
+        $res['txs'] = $nft->txs->map(function ($tx) {
+            $res = $tx->only(['id', 'tx_hash', 'created_at', 'amount', 'from_user_id', 'to_user_id', 'action']);
+            $res['created_at'] = date_ago($tx->created_at);
+            $res['from_user_name'] = $tx->fromUser ? $tx->fromUser->name : "[$tx->from_user_id]";
+            $res['to_user_name'] = $tx->toUser ? $tx->toUser->name : "[$tx->to_user_id]";
+            $res['amount'] = number_format($tx->amount, 2);
+            if ($tx->action === Transaction::ACTION['listing']) {
+                $res['price'] = number_format($tx->memo, 2);
+            } elseif ($tx->action === Transaction::ACTION['sell'] && $tx->nft_id) {
+                $res['price'] = number_format($tx->childGoldPrice()->sum('amount'), 2);
+            }
+
+            return $res;
+        })->reverse()->values();
+
+        return $this->responseSuccess($res);
     }
 
     public function detail($id) {
@@ -288,6 +464,10 @@ class PoemAPIController extends Controller {
             })
             ->toArray();
 
+        $res['nft_unlistable'] = $poem->nft && $poem->nft->listing && $poem->nft->listing->isUnlistable;
+        $res['nft_id']         = $poem->nft ? $poem->nft->id : null;
+        $res['nft_price']      = ($poem->nft && $poem->nft->listing) ? $poem->nft->listing->price : null;
+
         return $this->responseSuccess($res);
     }
 
@@ -332,8 +512,11 @@ class PoemAPIController extends Controller {
 
         $tag = Tag::find($sanitized['tag_id']);
         if ($tag && $tag->campaign && isset($tag->campaign->settings['gameType'])) {
-            $validator = Validator::make($sanitized, [
-                'poem' => [new ValidPoemContent(3)],
+            $gameType      = $tag->campaign->settings['gameType'];
+            $strictLineNum = $gameType === 1 ? 3 : 0;
+            $maxLineNum    = $tag->campaign->settings['maxLineNum'] ?? 3;
+            $validator     = Validator::make($sanitized, [
+                'poem' => [new ValidPoemContent($strictLineNum, true, $maxLineNum)],
             ]);
             if ($validator->fails()) {
                 $error = join(' ', $validator->getMessageBag()->get('poem'));
@@ -577,7 +760,7 @@ class PoemAPIController extends Controller {
         $authors = $authorRes->map(function (SearchResult $authorSearchRes, $index) use ($mode, $shiftPoems) {
             // TODO 返回结果中应包含尽量多的作者条目，由前端选择显示多少条目
             // TODO use a better way to filter
-            if ($index >= 5) {
+            if ($mode !== 'author-select' && $index >= 5) {
                 return null;
             }
 

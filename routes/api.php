@@ -23,6 +23,7 @@ Route::middleware(['api'])->group(static function () {
         Route::prefix('poem')->name('poem/')->group(static function () {
             // Route::get('/campaign', '\App\Http\Controllers\API\PoemAPIController@campaignIndex')->name('index');
             Route::get('/random/{num?}/{id?}', '\App\Http\Controllers\API\PoemAPIController@random')->name('random');
+            Route::get('/random-nft/{num?}/{id?}', '\App\Http\Controllers\API\PoemAPIController@randomNft')->name('randomNft');
 
             Route::get('/detail/{id}', '\App\Http\Controllers\API\PoemAPIController@detail')->name('detail');
             Route::get('/nft-detail/{id}', '\App\Http\Controllers\API\PoemAPIController@nftDetail')->name('detail');
