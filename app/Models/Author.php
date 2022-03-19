@@ -57,6 +57,14 @@ use Spatie\Searchable\SearchResult;
  * @property \App\User|null                                                     $uploader
  * @property \App\User|null                                                     $user
  * @property \App\Models\Wikidata|null                                          $wikiData
+ * @property string                                                             $birth_year
+ * @property string                                                             $birth_month
+ * @property string                                                             $birth_day
+ * @property string                                                             $death_year
+ * @property string                                                             $death_month
+ * @property string                                                             $death_day
+ * @property string|null                                                        $birthFields
+ * @property string|null                                                        $deathFields
  * @method static \Illuminate\Database\Eloquent\Builder|Author newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Author newQuery()
  * @method static \Illuminate\Database\Query\Builder|Author onlyTrashed()
@@ -110,8 +118,12 @@ class Author extends Model implements Searchable {
         'upload_user_id',
         'wiki_desc_lang',
         'avatar',
-        'birth',
-        'death'
+        'birth_year',
+        'birth_month',
+        'birth_day',
+        'death_year',
+        'death_month',
+        'death_day'
     ];
 
     protected $dates = [
@@ -261,7 +273,7 @@ class Author extends Model implements Searchable {
             $changes = $model->getDirty();
 
             // TODO 如果前端可编辑别名列表，此处不应再有处理别名相关逻辑，应在controller处理
-            // only do importFromAuthor if name_lang changed
+            // do importFromAuthor if name_lang changed
             if (isset($changes['name_lang'])) {
                 Artisan::call('alias:importFromAuthor', ['--id' => $model->id]);
             }
@@ -343,6 +355,46 @@ class Author extends Model implements Searchable {
         }
 
         return $url;
+    }
+
+    public function getBirthFieldsAttribute(): ?string {
+        return $this->birth_year && $this->birth_month && $this->birth_day ? 'day'
+            : ($this->birth_year  && $this->birth_month ? 'month'
+                : ($this->birth_year ? 'year'
+                    : null));
+    }
+
+    public function getBirthAttribute(): string {
+        switch ($this->birthFields) {
+            case 'day':
+                return $this->birth_year . '-' . $this->birth_month . '-' . $this->birth_day;
+            case 'month':
+                return $this->birth_year . '-' . $this->birth_month;
+            case 'year':
+                return $this->birth_year;
+            default:
+                return '';
+        }
+    }
+
+    public function getDeathFieldsAttribute(): ?string {
+        return $this->death_year && $this->death_month && $this->death_day ? 'day'
+            : ($this->death_year  && $this->death_month ? 'month'
+                : ($this->death_year ? 'year'
+                    : null));
+    }
+
+    public function getDeathAttribute(): string {
+        switch ($this->deathFields) {
+            case 'day':
+                return $this->death_year . '-' . $this->death_month . '-' . $this->death_day;
+            case 'month':
+                return $this->death_year . '-' . $this->death_month;
+            case 'year':
+                return $this->death_year;
+            default:
+                return '';
+        }
     }
 
     public function fetchWikiDesc($force = false) {

@@ -36,6 +36,7 @@ Route::middleware(['api'])->group(static function () {
         });
         Route::prefix('author')->name('author/')->group(static function () {
             Route::get('/detail/{id}', [\App\Http\Controllers\API\AuthorAPIController::class, 'detail'])->name('detail');
+            Route::get('/info/{id}', [\App\Http\Controllers\API\AuthorAPIController::class, 'info'])->name('info');
         });
     });
 });
@@ -71,6 +72,10 @@ Route::middleware(['auth:api', 'api'])->group(static function () {
         });
         Route::prefix('notice')->name('notice/')->group(static function () {
             Route::post('/recent', [\App\Http\Controllers\API\NoticeAPIController::class, 'recent'])->name('recent');
+        });
+        Route::prefix('author')->name('author/')->group(static function () {
+            Route::post('/create', [\App\Http\Controllers\API\AuthorAPIController::class, 'create'])->name('create');
+            Route::post('/update/{id}', [\App\Http\Controllers\API\AuthorAPIController::class, 'update'])->name('update');
         });
     });
 });

@@ -93,7 +93,8 @@ class AuthorController extends Controller {
     public function edit($fakeId) {
         $id     = Author::getIdFromFakeId($fakeId);
         $author = Author::select(['id', 'name_lang', 'describe_lang', 'dynasty_id', 'nation_id', 'avatar',
-            'birth', 'death'])->findOrFail($id);
+            'birth_year', 'birth_month', 'birth_day',
+            'death_year', 'death_month', 'death_day'])->findOrFail($id);
 
         $author->name_lang     = $author->name_lang ?: $author->getTranslated('name_lang', 'zh-CN');
         $author->describe_lang = $author->describe_lang ?: $author->getTranslated('describe_lang', 'zh-CN');

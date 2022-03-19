@@ -7,10 +7,13 @@ use App\Models\Author;
 use App\Models\Poem;
 use App\Models\Score;
 use App\Repositories\ScoreRepository;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 class AuthorAPIController extends Controller {
-    public function detail($id) {
+    private $_authorInfoFields = ['id', 'avatar_url', 'name_lang', 'describe_lang', 'is_v', 'birth', 'birth_fields', 'death', 'death_fields'];
+
+    public function detail($id): array {
         $author = Author::find($id);
         $user   = null;
 
@@ -32,11 +35,67 @@ class AuthorAPIController extends Controller {
         $translationWorks  = $this->_prepare($poemsAsTranslator);
 
         return $this->responseSuccess([
-            'author'            => $author->only(['id', 'avatar_url', 'name_lang', 'describe_lang', 'is_v']),
-            'user'              => $user->only(['id', 'avatar', 'name', 'is_v']),
+            'author'            => $author->only($this->_authorInfoFields),
+            'user'              => $user ? $user->only(['id', 'avatar', 'name', 'is_v']) : null,
             'original_works'    => $originalWorks->concat($authorUserOriginalWorks),
             'translation_works' => $translationWorks
         ]);
+    }
+
+    public function info($id): array {
+        $author = Author::find($id);
+
+        if (!$author) {
+            return $this->responseFail();
+        }
+
+        return $this->responseSuccess($author->only($this->_authorInfoFields));
+    }
+
+    public function create(Request $request): array {
+        $author = Author::create([
+            'name_lang'     => $request->input('name'),
+            'describe_lang' => $request->input('desc'),
+        ]);
+
+        return $this->responseSuccess(['id' => $author->id]);
+    }
+
+    public function update(Request $request, $id): array {
+        $author      = Author::find($id);
+        $birth       = $request->input('birth');
+        $birthFields = $request->input('birth_fields'); //'year' | 'month' | 'day' | null,
+        if (!$author) {
+            return $this->responseFail();
+        }
+
+        switch ($birthFields) {
+            case 'year':
+                $author->birth_year = $birth;
+
+                break;
+            case 'month':
+                $peaces              = explode('-', $birth);
+                $author->birth_year  = $peaces[0];
+                $author->birth_month = $peaces[1];
+
+                break;
+            case 'day':
+                $peaces              = explode('-', $birth);
+                $author->birth_year  = $peaces[0];
+                $author->birth_month = $peaces[1];
+                $author->birth_day   = $peaces[2];
+
+                break;
+            default:
+                break;
+        }
+
+        $author->name_lang     = $request->input('name');
+        $author->describe_lang = $request->input('desc');
+        $author->save();
+
+        return $this->responseSuccess(['id' => $author->id]);
     }
 
     private function _prepare(Collection $result, $opt = ['noAvatar' => false, 'noPoet' => false]) {
