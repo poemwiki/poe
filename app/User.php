@@ -2,15 +2,18 @@
 
 namespace App;
 
+use App\Models\Balance;
 use App\Models\MediaFile;
 use App\Models\Poem;
 use App\Models\Relatable;
+use App\Models\Transaction;
 use App\Traits\HasFakeId;
 use App\Traits\Liker;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Redis;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Activitylog\ActivitylogServiceProvider;
@@ -20,6 +23,8 @@ use Spatie\Activitylog\ActivitylogServiceProvider;
  * @property string|null avatar
  * @property int is_v
  * @property string avatarUrl
+ * @property Carbon created_at
+ * @property bool $walletActivated
  */
 class User extends Authenticatable implements MustVerifyEmail {
     use HasApiTokens;
@@ -103,6 +108,21 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->morphMany(ActivitylogServiceProvider::determineActivityModel(), 'causer');
     }
 
+    public function balance(): \Illuminate\Database\Eloquent\Relations\HasMany {
+        return $this->hasMany(\App\Models\Balance::class, 'user_id', 'id');
+    }
+
+    public function getTransactions() {
+        return Transaction::where('from_user_id', $this->id)->orWhere('to_user_id', $this->id)
+            ->orderBy('created_at', 'desc')->get();
+    }
+
+    public function getGoldBalance() {
+        $balance = Balance::where('user_id', $this->id)->where('nft_id', 0)->first();
+
+        return $balance ? $balance->amount : null;
+    }
+
     public function relateToImage($ID) {
         return Relatable::updateOrCreate([
             'relation'   => Relatable::RELATION['user_has_image'],
@@ -138,6 +158,10 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public function getNameAttribute() {
         return preg_replace('@\[from-.+\]$@', '', $this->attributes['name']);
+    }
+
+    public function getWalletActivatedAttribute(): bool {
+        return Balance::where(['user_id' => $this->id, 'nft_id' => 0])->exists();
     }
 
     public static function inviteFromStr($inviteCode) {
