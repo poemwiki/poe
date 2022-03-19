@@ -48,6 +48,8 @@ Route::middleware(['auth:api', 'api'])->group(static function () {
             Route::get('/data', [\App\Http\Controllers\API\UserAPIController::class, 'data'])->name('data');
             Route::post('/decrypt', [\App\Http\Controllers\API\LoginWeAppController::class, 'decrypt'])->name('weapp-decrypt');
             Route::post('/avatar', [\App\Http\Controllers\API\UserAPIController::class, 'avatar'])->name('avatar');
+            Route::post('/activate-wallet', [\App\Http\Controllers\API\UserAPIController::class, 'activateWallet'])->name('activate-wallet');
+            Route::post('/txs', [\App\Http\Controllers\API\UserAPIController::class, 'txs'])->name('txs');
         });
         Route::prefix('poem')->name('poem/')->group(static function () {
             Route::post('/detail/{id}', '\App\Http\Controllers\API\PoemAPIController@detail')->name('detail');
