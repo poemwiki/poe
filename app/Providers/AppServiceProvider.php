@@ -109,8 +109,15 @@ class AppServiceProvider extends ServiceProvider {
         Str::macro('contentHash', function ($str) {
             return hash('sha256', Str::pureStr(Str::normalize($str)));
         });
+
         Str::macro('contentFullHash', function ($str) {
             return hash('sha256', $str);
+        });
+
+        Str::macro('digest', function (array $metadata) {
+            ksort($metadata);
+
+            return hash('sha256', json_encode($metadata));
         });
 
         // TODO Str::macro('simHash')
