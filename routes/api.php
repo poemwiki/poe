@@ -61,6 +61,8 @@ Route::middleware(['auth:api', 'api'])->group(static function () {
         });
         Route::prefix('nft')->name('nft/')->group(static function () {
             Route::post('/listing', [\App\Http\Controllers\API\NFTAPIController::class, 'listing'])->name('listing');
+            Route::post('/unlisting', [\App\Http\Controllers\API\NFTAPIController::class, 'unlisting'])->name('unlisting');
+            Route::post('/buy', [\App\Http\Controllers\API\NFTAPIController::class, 'buy'])->name('buy');
         });
         Route::prefix('review')->name('review/')->group(static function () {
             Route::post('/store', [\App\Http\Controllers\API\ReviewAPIController::class, 'store'])->name('store');
