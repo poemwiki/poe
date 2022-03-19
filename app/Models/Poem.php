@@ -42,6 +42,8 @@ use Spatie\Searchable\SearchResult;
  * @property array                               $scoreArray
  * @property string                              $firstLine
  * @property Date                                $updated_at
+ * @property mixed                               $activityLogs
+ * @property NFT                                 $nft
  */
 class Poem extends Model implements Searchable {
     use SoftDeletes;
@@ -568,6 +570,10 @@ class Poem extends Model implements Searchable {
 
     public function campaign() {
         return $this->belongsTo(\App\Models\Campaign::class, 'campaign_id', 'id');
+    }
+
+    public function nft() {
+        return $this->hasOne(\App\Models\Nft::class, 'poem_id', 'id');
     }
 
     // TODO public function getCampaginsAttribute() {}

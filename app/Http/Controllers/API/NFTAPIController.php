@@ -7,6 +7,7 @@ use App\Models\Listing;
 use App\Models\NFT;
 use App\Models\Poem;
 use App\Models\Transaction;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -40,7 +41,16 @@ class NFTAPIController extends Controller {
             }
         }
 
-        $this->addListing($nft, $price);
+        $listing = $this->createOrUpdateListing($nft, $price);
+
+        Transaction::create([
+            'nft_id'       => $nft->id,
+            'from_user_id' => $userID,
+            'to_user_id'   => $userID,
+            'amount'       => 1,
+            'action'       => Transaction::ACTION['listing'],
+            'memo'         => $price,
+        ]);
 
         return $this->responseSuccess(['id' => $nft->id]);
     }
@@ -55,9 +65,9 @@ class NFTAPIController extends Controller {
         }
 
         try {
-            Listing::unlist($nft);
-        } catch (\Exception $e) {
-            Log::error('unlisting error', $e->getMessage());
+            Listing::unlisting($nft, $userID);
+        } catch (Throwable $e) {
+            Log::error($e->getMessage());
 
             return $this->responseFail([], 'Failed to unlisting NFT.');
         }
@@ -70,51 +80,76 @@ class NFTAPIController extends Controller {
         $userID = $request->user()->id;
         $nft    = NFT::findOrFail($nftID);
 
+        $buyerUser = User::findOrFail($userID);
+        if (!$nft->owner) {
+            return $this->responseFail([], 'NFT owner not found.');
+        }
+        $sellerUserID = $nft->owner->id;
+
         \DB::beginTransaction();
 
         try {
-            $nft->listing->status = Listing::STATUS['sold'];
-            $nft->listing->save();
-
-            Transaction::create([
+            $mainTx = Transaction::create([
                 'nft_id'       => $nft->id,
                 'from_user_id' => $nft->balance->user_id,
                 'to_user_id'   => $userID,
                 'amount'       => 1,
                 'action'       => Transaction::ACTION['sell'],
             ]);
+
+            // A NFT sell tx has 2 sub txs: NFT transfer and gold transfer
+            Transaction::create([
+                'nft_id'       => $nft->id,
+                'from_user_id' => $nft->balance->user_id,
+                'to_user_id'   => $userID,
+                'amount'       => 1,
+                'action'       => Transaction::ACTION['transfer'],
+                'f_id'         => $mainTx->id,
+            ]);
+
+            $nft->listing->status = Listing::STATUS['sold'];
+            $nft->listing->save();
+
             $nft->balance->user_id = $userID;
             $nft->balance->save();
 
             // gold transfer
-            Transaction::create([
-                'nft_id'         => 0,
-                'from_user_id'   => $userID,
-                'to_user_id'     => $nft->balance->user_id,
-                'amount'         => $nft->listing->price,
-                'action'         => Transaction::ACTION['transfer'],
-            ]);
-            // TODO gold balance
+            $price = $nft->listing->price;
+
+            // TODO move it to Transaction::transferGold()
+            Transaction::transferGold($buyerUser->id, $sellerUserID, $price, $mainTx->id);
 
             \DB::commit();
 
             return $this->responseSuccess(['id' => $nftID]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \DB::rollBack();
 
-            Log::error('buy error', $e->getMessage());
+            Log::error('buy error' . $e->getMessage(), $e->getTrace());
 
             return $this->responseFail([], 'Failed to buy NFT.');
         }
     }
 
-    protected function addListing(NFT $nft, $price) {
-        // TODO check if nft is already listed
-        return Listing::create([
-            'nft_id' => $nft->id,
-            'price'  => $price,
-            'status' => Listing::STATUS['active'],
-        ]);
+    /**
+     * @param NFT $nft
+     * @param $price
+     * @return Listing|\Illuminate\Database\Eloquent\Model|null
+     */
+    protected function createOrUpdateListing(NFT $nft, $price) {
+        $listing = $nft->listing;
+        if ($listing) {
+            $listing->price  = $price;
+            $listing->status = Listing::STATUS['active'];
+            $listing->save();
+        } else {
+            $listing = Listing::create([
+                'nft_id' => $nft->id,
+                'price'  => $price,
+            ]);
+        }
+
+        return $listing;
     }
 
     /**

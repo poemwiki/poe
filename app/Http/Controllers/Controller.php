@@ -21,7 +21,8 @@ class Controller extends BaseController {
         'invalid_poem_length'     => -5,
         'poem_content_invalid'    => -6,
         'img_format_invalid'      => -7,
-        'upload_img_size_limit'   => -8
+        'upload_img_size_limit'   => -8,
+        'not_found'               => -9,
     ];
 
     public function response($data, string $message = '', int $code = 0) {

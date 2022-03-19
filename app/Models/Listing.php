@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -13,6 +14,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int   $status
  * @property bool  $isRelistable
  * @property bool  $isUnlistable
+ * @property int   $tx_id
  * @mixin \Eloquent
  */
 class Listing extends Model {
@@ -51,7 +53,10 @@ class Listing extends Model {
         return $this->belongsTo(\App\Models\NFT::class, 'nft_id');
     }
 
-    public static function unlist(NFT $nft) {
+    /**
+     * @throws \Throwable
+     */
+    public static function unlisting(NFT $nft, $userID): ?NFT {
         $listing = $nft->listing;
         if (!$listing) {
             throw new \Exception('NFT is not listed.');
@@ -59,8 +64,27 @@ class Listing extends Model {
         if (!$listing->isUnlistable) {
             throw new \Exception('Listing status error.');
         }
-        $nft->listing->status = Listing::STATUS['inactive'];
 
-        return $nft->listing->save();
+        \DB::beginTransaction();
+
+        try {
+            Transaction::create([
+                'nft_id'       => $nft->id,
+                'from_user_id' => $userID,
+                'to_user_id'   => $userID,
+                'amount'       => 1,
+                'action'       => Transaction::ACTION['unlisting'],
+            ]);
+            $nft->listing->status = Listing::STATUS['inactive'];
+            $nft->listing->save();
+            \DB::commit();
+
+            return $nft;
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            Log::error('unlisting error' . $e->getMessage());
+
+            throw $e;
+        }
     }
 }
