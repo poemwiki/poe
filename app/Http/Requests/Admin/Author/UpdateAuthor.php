@@ -31,8 +31,12 @@ class UpdateAuthor extends TranslatableFormRequest {
             'wikidata_id' => ['nullable', 'integer'],
             'nation_id'   => ['nullable', Rule::in(NationRepository::ids())],
             'dynasty_id'  => ['nullable', Rule::in(DynastyRepository::ids())],
-            'birth'       => ['nullable', 'date'],
-            'death'       => ['nullable', 'date'],
+            'birth_year'  => ['nullable', 'integer'],
+            'birth_month' => ['nullable', Rule::in(range(1, 12))],
+            'birth_day'   => ['nullable', Rule::in(range(1, 31))],
+            'death_year'  => ['nullable', 'integer'],
+            'death_month' => ['nullable', Rule::in(range(1, 12))],
+            'death_day'   => ['nullable', range(1, 31)]
         ];
     }
 
