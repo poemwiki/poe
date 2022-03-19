@@ -12,6 +12,16 @@ class Weapp {
         ]);
     }
 
+    /**
+     * @param string $scene
+     * @param string $appCodeImgDir
+     * @param string $page
+     * @param bool   $force           TODO add cache for this
+     * @param string $appCodeFileName
+     * @return false|string
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
+     * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
+     */
     public function fetchAppCodeImg(string $scene, string $appCodeImgDir, string $page = 'pages/detail/detail', bool $force = false, string $appCodeFileName = 'app-code.jpg') {
         // 注意微信对此接口调用频率有限制
         $response = $this->app->app_code->getUnlimit($scene, [
