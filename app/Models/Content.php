@@ -19,6 +19,7 @@ use Illuminate\Support\Str;
  * @property string                          $full_hash
  * @property string                          $full_hash_f     current version's father's full_hash
  * @property string                          $content
+ * @property string                          $ar_tx_id        arweave transaction id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -61,7 +62,8 @@ class Content extends Model {
         'full_hash_f',
         'type',
         'entry_id',
-        'content'
+        'content',
+        'ar_tx_id'
     ];
 
     /**
