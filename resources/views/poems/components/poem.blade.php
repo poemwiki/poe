@@ -147,27 +147,25 @@ $firstLine = $poem->firstLine;
           <dl><dt>此条目被标记为：有争议的原创内容。</dt></dl>
         @endif
 
-        @if(isset($renderPoemOnly) && $renderPoemOnly)
-          @auth
-            @if(!$poem->is_owner_uploaded
-                  or ($poem->is_owner_uploaded===App\Models\Poem::$OWNER['uploader'] && Auth::user()->id === $poem->upload_user_id)
-            )
-              <a class="edit btn"
-                 href="{{ route('poems/edit', $poem->fake_id) }}">@lang('poem.correct errors or edit')</a>
-            @endif
-            {{--TODO 原创译作修改--}}
-          @else
-            @if(!$poem->is_owner_uploaded)
-              <a class="edit btn"
-                 href="{{ route('login', ['ref' => route('poems/edit', $poem->fake_id, false)]) }}">@lang('poem.correct errors or edit')</a>
-            @endif
-          @endauth
-
-          <a class="edit btn" href="#">@lang('反馈')</a>
-
-          @if(in_array($poem->is_owner_uploaded, [\APP\Models\Poem::$OWNER['uploader'], \APP\Models\Poem::$OWNER['translatorUploader']]))
-            <dl class="poem-ugc"><dt title="本作品由{{$poem->is_owner_uploaded === 1 ? '作者' : '译者'}}上传">原创</dt></dl>
+        @auth
+          @if(!$poem->is_owner_uploaded
+                or ($poem->is_owner_uploaded===App\Models\Poem::$OWNER['uploader'] && Auth::user()->id === $poem->upload_user_id)
+          )
+            <a class="edit btn"
+               href="{{ route('poems/edit', $poem->fake_id) }}">@lang('poem.correct errors or edit')</a>
           @endif
+          {{--TODO 原创译作修改--}}
+        @else
+          @if(!$poem->is_owner_uploaded)
+            <a class="edit btn"
+               href="{{ route('login', ['ref' => route('poems/edit', $poem->fake_id, false)]) }}">@lang('poem.correct errors or edit')</a>
+          @endif
+        @endauth
+
+{{--    <a class="edit btn" href="#">@lang('反馈')</a>--}}
+
+        @if(in_array($poem->is_owner_uploaded, [\APP\Models\Poem::$OWNER['uploader'], \APP\Models\Poem::$OWNER['translatorUploader']]))
+          <dl class="poem-ugc"><dt title="本作品由{{$poem->is_owner_uploaded === 1 ? '作者' : '译者'}}上传">原创</dt></dl>
         @endif
 
         <ol class="contribution">
