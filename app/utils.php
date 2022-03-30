@@ -141,7 +141,7 @@ if (!function_exists('img_overlay')) {
         list($frontWidth, $frontHeight) = getimagesize($front);
         $out                            = imagecreatetruecolor($width, $height);
         imagecopyresampled($out, $bgImg, 0, 0, 0, 0, $width, $height, $width, $height);
-        imagecopyresampled($out, $frontImg, $width - 220, $height - 160, 0, 0, $dist_w, $dist_h, $frontWidth, $frontHeight);
+        imagecopyresampled($out, $frontImg, $width - $dist_x, $height - $dist_y, 0, 0, $dist_w, $dist_h, $frontWidth, $frontHeight);
 
         return $out;
     }

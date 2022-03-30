@@ -532,8 +532,8 @@ class PoemAPIController extends Controller {
                 'response_type' => 'object',
             ]);
             $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['poem']);
-            if ($result->errcode) {
-                return $this->responseFail([], '请检查是否含有敏感词', Controller::$CODE['content_security_failed']);
+            if ($result->errcode !== 0 && $result->errcode !== -1) {
+                return $this->responseFail([], '请检查是否含有敏感词' . print_r($result, 1), Controller::$CODE['content_security_failed']);
             }
         }
 
@@ -568,24 +568,42 @@ class PoemAPIController extends Controller {
 
     // TODO poster image generation process should be a command, and invoke after poem created
     // TODO regenerate poster when related poem fields updated
-    public function share(int $poemId) {
-        $poem  = Poem::find($poemId);
-        $force = isset($_GET['force']); // || config('app.env') === 'local';
 
-        $compositionId = 'pure';
-        $posterUrl     = route('poem-card', [
-            'id'            => $poemId,
-            'compositionId' => $compositionId
+    /**
+     * @param int    $poemID
+     * @param string $compositionID the template composition id
+     * @return array
+     */
+    public function share(int $poemID, string $compositionID = 'pure'): array {
+        $poem  = Poem::find($poemID);
+        $force = isset($_GET['force']) || config('app.env') === 'local';
+
+        $posterUrl = route('poem-card', [
+            'id'            => $poemID,
+            'compositionId' => $compositionID
         ]);
 
-        $postData = ['compositionId' => $compositionId, 'id' => $poem->id, 'poem' => $poem->poem, 'poet' => $poem->poetLabel, 'title' => $poem->title];
-        $hash     = crc32(json_encode($postData));
-        if (!$force && $poem->share_pics && isset($poem->share_pics[$compositionId])
-            && file_exists(storage_path($poem->share_pics[$compositionId]))) {
-            if (str_contains($poem->share_pics[$compositionId], $hash)) {
+        $postData = [
+            'compositionId' => $compositionID,
+            'id'            => $poem->id,
+            'poem'          => $poem->poem,
+            'poet'          => $poem->poetLabel,
+            'title'         => $poem->title
+        ];
+        if ($compositionID === 'nft') {
+            $postData['hash']      = $poem->nft->hash;
+            $postData['time']      = $poem->nft->created_at->format('Y-m-d H:i:s');
+            $postData['collector'] = $poem->nft->owner->name;
+            $postData['pfp']       = $poem->nft->owner->avatarUrl;
+        }
+
+        $hash = crc32(json_encode($postData));
+        if (!$force && $poem->share_pics && isset($poem->share_pics[$compositionID])
+            && file_exists(storage_path($poem->share_pics[$compositionID]))) {
+            if (str_contains($poem->share_pics[$compositionID], $hash)) {
                 return $this->responseSuccess(['url' => $posterUrl . '?t=' . time()]);
             }
-            unlink(storage_path($poem->share_pics[$compositionId]));
+            unlink(storage_path($poem->share_pics[$compositionID]));
             // TODO if posterUrl not contain $hash, remove old poemImg file
         }
 
@@ -596,9 +614,9 @@ class PoemAPIController extends Controller {
         }
 
         // img file name will change if postData change
-        $posterStorePath = "{$relativeStoreDir}/poster_{$compositionId}_{$hash}.png";
+        $posterStorePath = "{$relativeStoreDir}/poster_{$compositionID}_{$hash}.png";
         $posterPath      = storage_path($posterStorePath); // posterImg = poemImg + appCodeImg
-        $poemImgFileName = "poem_{$compositionId}_{$hash}.png"; // main part of poster
+        $poemImgFileName = "poem_{$compositionID}_{$hash}.png"; // main part of poster
 
         $postData['force'] = $force;
 
@@ -609,12 +627,12 @@ class PoemAPIController extends Controller {
             $page           = $poem->is_campaign ? 'pages/campaign/campaign' : 'pages/poems/index';
             $appCodeImgPath = (new Weapp())->fetchAppCodeImg($scene, $dir, $page, $force);
 
-            if (!$this->composite($poemImgPath, $appCodeImgPath, $posterPath)) {
+            if (!$this->composite($poemImgPath, $appCodeImgPath, $posterPath, $compositionID)) {
                 return $this->responseFail();
             }
 
             $sharePics                 = $poem->share_pics ?? [];
-            $sharePics[$compositionId] = $posterStorePath;
+            $sharePics[$compositionID] = $posterStorePath;
             Poem::withoutEvents(function () use ($poem, $sharePics) {
                 $poem->timestamps = false;
                 $poem->share_pics = $sharePics;
@@ -666,10 +684,25 @@ class PoemAPIController extends Controller {
      * @return bool
      * @throws Exception
      */
-    private function composite(string $poemImgPath, string $appCodeImgPath, string $posterPath, int $quality = 100): bool {
+    private function composite(string $poemImgPath, string $appCodeImgPath, string $posterPath, string $compositionID = 'pure', int $quality = 100): bool {
         // 绘制小程序码
         // 覆盖海报右下角小程序码区域
-        $posterImg = img_overlay($poemImgPath, $appCodeImgPath, 0, 0, 120, 120);
+        $params = [
+            'pure' => [
+                'x'      => 220,
+                'y'      => 160,
+                'width'  => 120,
+                'height' => 120,
+            ],
+            'nft' => [
+                'x'      => 220,
+                'y'      => 250,
+                'width'  => 166,
+                'height' => 166,
+            ],
+        ];
+        $param     = $params[$compositionID];
+        $posterImg = img_overlay($poemImgPath, $appCodeImgPath, $param['x'], $param['y'], $param['width'], $param['height']);
 
         $imgType = exif_imagetype($poemImgPath);
         if ($imgType === IMAGETYPE_JPEG) {
