@@ -10,8 +10,12 @@ use Spatie\Activitylog\Traits\LogsActivity;
 /**
  * App\NFT.
  *
- * @property int   $id
- * @property array $attributes
+ * @property int       $id
+ * @property int       $content_id
+ * @property NFT::TYPE $type
+ * @property string    $hash
+ * @property string    $external_url
+ * @property array     $poemwiki
  * @mixin \Eloquent
  * @property \App\User|null           $owner
  * @property \App\Models\Listing|null $listing

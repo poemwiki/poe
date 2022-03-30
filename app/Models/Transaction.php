@@ -9,7 +9,14 @@ use Spatie\Activitylog\Traits\LogsActivity;
 /**
  * App\Transaction.
  *
- * @property int $id
+ * @property int       $id
+ * @property string    $namespace
+ * @property string    $group
+ * @property string    $key
+ * @property \App\User $fromUser
+ * @property string    $fromUserName
+ * @property \App\User $toUser
+ * @property string    $toUserName
  * @mixin \Eloquent
  */
 class Transaction extends Model {
@@ -60,6 +67,14 @@ class Transaction extends Model {
 
     public function children() {
         return $this->hasMany(\App\Models\Transaction::class, 'f_id');
+    }
+
+    public function getFromUserNameAttribute() {
+        return $this->fromUser->name;
+    }
+
+    public function getToUserNameAttribute() {
+        return $this->toUser->name;
     }
 
     public function childGoldPrice() {
