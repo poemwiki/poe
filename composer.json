@@ -9,15 +9,19 @@
   "repositories": [
     {
       "type": "vcs",
-      "url": "https://github.com/ray7551/craftable.git"
+      "url": "https://github.com/star8ks/craftable.git"
     },
     {
       "type": "vcs",
-      "url": "https://github.com/ray7551/admin-translations.git"
+      "url": "https://github.com/star8ks/admin-translations.git"
     },
     {
       "type": "vcs",
-      "url": "https://github.com/ray7551/admin-generator.git"
+      "url": "https://github.com/star8ks/admin-generator.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/star8ks/arweave-php.git"
     }
   ],
   "license": "MIT",
@@ -28,6 +32,7 @@
     "ext-gd": "*",
     "ext-gmp": "*",
     "ext-json": "*",
+    "arweave/arweave-sdk": "dev-master",
     "bordercloud/sparql": "^2.0",
     "brackets/admin-translations": "dev-fix-dash-locale",
     "brackets/craftable": "dev-dev-fix-private-admin-translations-depend",
