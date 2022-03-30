@@ -46,7 +46,6 @@ class PoemController extends Controller {
             'randomPoemUrl'       => $randomPoem->url,
             'randomPoemTitle'     => $randomPoem->title,
             'randomPoemFirstLine' => $randomPoem->firstLine,
-            'fakeId'              => $poem->fake_id,
             'logs'                => $logs
         ]);
     }
@@ -64,7 +63,7 @@ class PoemController extends Controller {
         return $this->_poem($poem);
     }
 
-    // route('poem');
+    // route('poem'); for poemwiki.org/poem.id
     // public function showPoem($id){
     //     $poem = Poem::findOrFail($id);
     //     return $this->_poem($poem);
@@ -321,5 +320,21 @@ class PoemController extends Controller {
         }
 
         return $this->responseSuccess(route('p/show', Poem::getFakeId($poem->id)));
+    }
+
+    public function user() {
+        $user = Auth::user();
+
+        /** @var \Illuminate\Support\Collection $activityLogs */
+        $activityLogs = $user->activityLogs->take(10);
+
+        return view('user.contribution', [
+            'user'         => $user,
+            'activityLogs' => $activityLogs->take(10),
+            // 'poem'          => $poems,
+            'languageList'  => LanguageRepository::allInUse()->keyBy('id'),
+            'genreList'     => GenreRepository::allInUse()->keyBy('id'),
+            'randomPoemUrl' => '/'
+        ]);
     }
 }
