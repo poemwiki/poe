@@ -74,8 +74,8 @@ Route::middleware(['auth:api', 'api'])->group(static function () {
             Route::post('/store', [\App\Http\Controllers\API\ScoreAPIController::class, 'store'])->name('store');
             Route::get('/mine', [\App\Http\Controllers\API\ScoreAPIController::class, 'mine'])->name('mine');
         });
-        Route::prefix('notice')->name('notice/')->group(static function () {
-            Route::post('/recent', [\App\Http\Controllers\API\NoticeAPIController::class, 'recent'])->name('recent');
+        Route::prefix('message')->name('message/')->group(static function () {
+            Route::get('/recent', [\App\Http\Controllers\API\MessageAPIController::class, 'recent'])->name('recent');
         });
         Route::prefix('author')->name('author/')->group(static function () {
             Route::post('/create', [\App\Http\Controllers\API\AuthorAPIController::class, 'create'])->name('create');
