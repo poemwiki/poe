@@ -245,8 +245,9 @@ class UserAPIController extends Controller {
         return $this->responseSuccess([
             'balance' => $user->getGoldBalance(),
             'txs'     => $txs->map(function (Transaction $tx) use ($user) {
-                $res = $tx->toArray();
+                $res = $tx->only(['action', 'amount', 'created_at', 'f_id', 'from_user_id', 'from_user_name', 'id', 'memo', 'nft_id', 'to_user_id', 'to_user_name']);
                 $res['amount'] = $tx->from_user_id === $user->id ? '-' . $res['amount'] : '+' . $res['amount'];
+                $res['date_ago'] = date_ago($tx->created_at);
 
                 return $res;
             })
