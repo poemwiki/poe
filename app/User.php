@@ -19,18 +19,28 @@ use Laravel\Passport\HasApiTokens;
 use Spatie\Activitylog\ActivitylogServiceProvider;
 
 /**
+ * @mixin \Eloquent
  * @property int id
  * @property string|null avatar
  * @property int is_v
  * @property string avatarUrl
  * @property Carbon created_at
- * @property bool $walletActivated
+ * @property bool   $walletActivated
+ * @property string $name
+ * @property string $email
+ * @property string $password
+ * @property string $invite_code
+ * @property int    $invited_by
+ * @property float  $weight
  */
 class User extends Authenticatable implements MustVerifyEmail {
     use HasApiTokens;
     use Notifiable;
     use Liker;
     use HasFakeId;
+
+    public $table = 'users';
+
     public static $FAKEID_KEY    = 'user'; // Symmetric-key for xor
     public static $FAKEID_SPARSE = 66773;
     /**
