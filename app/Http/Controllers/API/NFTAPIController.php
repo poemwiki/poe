@@ -12,9 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-/**
- * Class LanguageController.
- */
 class NFTAPIController extends Controller {
     public function __construct() {
     }
