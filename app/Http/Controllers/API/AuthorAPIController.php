@@ -71,20 +71,26 @@ class AuthorAPIController extends Controller {
 
         switch ($birthFields) {
             case 'year':
-                $author->birth_year = $birth;
+                if (is_numeric($birth)) {
+                    $author->birth_year = $birth;
+                }
 
                 break;
             case 'month':
-                $peaces              = explode('-', $birth);
-                $author->birth_year  = $peaces[0];
-                $author->birth_month = $peaces[1];
+                $peaces = explode('-', $birth);
+                if (count($peaces) == 2) {
+                    $author->birth_year  = $peaces[0];
+                    $author->birth_month = $peaces[1];
+                }
 
                 break;
             case 'day':
-                $peaces              = explode('-', $birth);
-                $author->birth_year  = $peaces[0];
-                $author->birth_month = $peaces[1];
-                $author->birth_day   = $peaces[2];
+                $peaces = explode('-', $birth);
+                if (count($peaces) == 3) {
+                    $author->birth_year  = $peaces[0];
+                    $author->birth_month = $peaces[1];
+                    $author->birth_day   = $peaces[2];
+                }
 
                 break;
             default:
