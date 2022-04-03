@@ -69,6 +69,20 @@ class Poem extends Model implements Searchable {
         'multiTranslatorAuthor'   => 6,   // 上传时未标注原创译作，后来被译者中的任何一个认领且标注原创，upload_user_id 不代表译者 owner，只代表上传人，此时应以 related translator 为共有译者 owner
     ];
 
+    // 标记流程：标记、修改、复审、去标记
+    // 编辑流程：标记、编辑、去标记
+    // TODO “我是作者”：触发关联认证流程
+    public static $FLAG = [
+        'none'                   => 0,
+        'hideByAuthor'           => 1 << 1,  // 原作者要求不显示他的诗歌或作者条目：触发标记流程
+        'infoNeedConfirm'        => 1 << 2,  // 诗作信息有误（作者、译者错误，正文有错别字等）：触发标记流程
+        'originalNeedConfirm'    => 1 << 3,  // 原创标注有争议
+        'botContentNeedConfirm'  => 1 << 4,  // 由机器人导入的内容，待人工审核确认
+        'hideByModerator1'       => 1 << 10, // 涉政敏感内容：触发标记流程
+        'hideByModerator2'       => 1 << 11, // 涉黄内容：触发标记流程
+        'hideByModerator3'       => 1 << 12, // 涉暴内容：触发标记流程
+    ];
+
     protected $table = 'poem';
 
     public const CREATED_AT = 'created_at';
@@ -179,7 +193,7 @@ class Poem extends Model implements Searchable {
         //        'is_lock' => 'required'
     ];
 
-    protected $appends = ['resource_url'];
+    // protected $appends = ['resource_url'];
 
     /* ************************ ACCESSOR ************************* */
 
