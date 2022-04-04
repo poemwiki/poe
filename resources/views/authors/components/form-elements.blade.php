@@ -83,7 +83,7 @@
 
 </div>
 
-
+<!--
 <div class="row">
 
   <div class="form-group row align-items-center"
@@ -126,17 +126,17 @@
                     'form-control-danger': errors.has('death'),
                     'form-control-success': fields['death'] && fields['death'].valid
                  }"
-             :id="death" name="{{ trans('admin.author.columns.birth') }}"
+             :id="death" name="{{ trans('admin.author.columns.death') }}"
              placeholder="yyyy-MM-dd">
 
       <div v-visible="errors.has('death')" class="form-control-feedback form-text" v-cloak>{{'{{'}}
-        errors.first('birth') }}
+        errors.first('death') }}
       </div>
 
     </div>
   </div>
 
-</div>
+</div>-->
 
 <div class="form-group row"
      :class="{'has-danger': errors.has('nation_id'), 'has-success': fields.nation_id && fields.nation_id.valid }">
