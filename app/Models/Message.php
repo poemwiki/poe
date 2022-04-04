@@ -83,4 +83,14 @@ class Message extends Model {
 
         return $translation ? trans($translation->namespace . '::' . $translation->group . '.' . $translation->key, $this->params) : '';
     }
+
+    public static function createReminder($userID, $translationID, $params) {
+        return self::create([
+            'sender_id'      => 2,
+            'receiver_id'    => $userID,
+            'translation_id' => $translationID,
+            'type'           => self::TYPE['reminder'],
+            'params'         => $params,
+        ]);
+    }
 }

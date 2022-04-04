@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
+use App\Models\Message;
 use App\Models\NFT;
 use App\Models\Poem;
 use App\Models\Transaction;
@@ -49,6 +50,11 @@ class NFTAPIController extends Controller {
             'memo'         => $price,
         ]);
 
+        Message::createReminder($userID, 196, [
+            'title'  => $poem->title,
+            'nav_to' => '/pages/nft/detail?nft_id=' . $nft->id,
+        ]);
+
         return $this->responseSuccess(['id' => $nft->id]);
     }
 
@@ -69,6 +75,11 @@ class NFTAPIController extends Controller {
             return $this->responseFail([], 'Failed to unlisting NFT.');
         }
 
+        Message::createReminder($userID, 197, [
+            'title'  => $nft->poem->title,
+            'nav_to' => '/pages/nft/detail?nft_id=' . $nft->id,
+        ]);
+
         return $this->responseSuccess(['id' => $nftID]);
     }
 
@@ -83,12 +94,16 @@ class NFTAPIController extends Controller {
         }
         $sellerUserID = $nft->owner->id;
 
+        if ($sellerUserID === $userID) {
+            return $this->responseFail([], 'Can not buy your own NFT.');
+        }
+
         \DB::beginTransaction();
 
         try {
             $mainTx = Transaction::create([
                 'nft_id'       => $nft->id,
-                'from_user_id' => $nft->balance->user_id,
+                'from_user_id' => $sellerUserID,
                 'to_user_id'   => $userID,
                 'amount'       => 1,
                 'action'       => Transaction::ACTION['sell'],
@@ -97,7 +112,7 @@ class NFTAPIController extends Controller {
             // A NFT sell tx has 2 sub txs: NFT transfer and gold transfer
             Transaction::create([
                 'nft_id'       => $nft->id,
-                'from_user_id' => $nft->balance->user_id,
+                'from_user_id' => $sellerUserID,
                 'to_user_id'   => $userID,
                 'amount'       => 1,
                 'action'       => Transaction::ACTION['transfer'],
@@ -118,6 +133,15 @@ class NFTAPIController extends Controller {
 
             \DB::commit();
 
+            Message::createReminder($sellerUserID, 195, [
+                'title'  => $nft->poem->title,
+                'nav_to' => '/pages/nft/detail?nft_id=' . $nft->id,
+            ]);
+            Message::createReminder($userID, 198, [
+                'title'  => $nft->poem->title,
+                'nav_to' => '/pages/nft/detail?nft_id=' . $nft->id,
+            ]);
+
             return $this->responseSuccess(['id' => $nftID]);
         } catch (\Throwable $e) {
             \DB::rollBack();
@@ -131,7 +155,7 @@ class NFTAPIController extends Controller {
     /**
      * @param NFT $nft
      * @param $price
-     * @return Listing|\Illuminate\Database\Eloquent\Model|null
+     * @return Listing|null
      */
     protected function createOrUpdateListing(NFT $nft, $price) {
         $listing = $nft->listing;
@@ -143,6 +167,7 @@ class NFTAPIController extends Controller {
             $listing = Listing::create([
                 'nft_id' => $nft->id,
                 'price'  => $price,
+                'status' => Listing::STATUS['active']
             ]);
         }
 
