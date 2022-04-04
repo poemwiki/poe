@@ -91,6 +91,7 @@ class WeappCode extends Command {
         $fileID      = config('app.avatar.author_path') . '/' . $author->fakeId . '-weapp.' . $format;
         $fileContent = file_get_contents($tmpFilePath);
         $result      = $TXCloud->upload($fileID, $fileContent, $format);
+        // TODO remove temp file after uploaded to cloud
 
         $image = $result['Data']['ProcessResults']['Object'][0];
         if (isset($image['Location'])) {
