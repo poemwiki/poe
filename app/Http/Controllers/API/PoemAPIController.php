@@ -198,10 +198,14 @@ class PoemAPIController extends Controller {
             return $res;
         });
 
-        return $this->responseSuccess([
-            'nfts'    => $nfts,
-            'author'  => $this->poemRepository->getByOwner($userId)
-        ]);
+        if ($request->input('nft')) {
+            return $this->responseSuccess([
+                'nfts'    => $nfts,
+                'author'  => $this->poemRepository->getByOwner($userId)
+            ]);
+        }
+
+        return $this->responseSuccess($this->poemRepository->getByOwner($userId));
     }
 
     public function relatedAll(Request $request) {
