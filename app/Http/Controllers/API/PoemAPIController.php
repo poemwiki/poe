@@ -201,7 +201,7 @@ class PoemAPIController extends Controller {
         if ($request->input('nft')) {
             return $this->responseSuccess([
                 'nfts'    => $nfts,
-                'author'  => $this->poemRepository->getByOwner($userId)
+                'author'  => $userId === 2 ? $this->poemRepository->getTobeMint($userId) : $this->poemRepository->getByOwner($userId)
             ]);
         }
 

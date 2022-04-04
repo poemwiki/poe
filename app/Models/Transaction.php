@@ -70,11 +70,11 @@ class Transaction extends Model {
     }
 
     public function getFromUserNameAttribute() {
-        return $this->fromUser->name;
+        return $this->fromUser ? $this->fromUser->name : '';
     }
 
     public function getToUserNameAttribute() {
-        return $this->toUser->name;
+        return $this->toUser ? $this->toUser->name : '';
     }
 
     public function childGoldPrice() {

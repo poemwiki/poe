@@ -30,7 +30,7 @@ use Spatie\Searchable\SearchResult;
  * @property int                                 $is_owner_uploaded
  * @property User                                $uploader
  * @property Illuminate\Support\Collection|Tag[] $tags
- * @property User                                $owner
+ * @property User|null                           $owner
  * @property mixed                               $translator_label_cn
  * @property Poem                                $originalPoem
  * @property bool                                $is_translated

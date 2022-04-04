@@ -186,6 +186,7 @@ class NFT extends Model {
     }
 
     public static function isMintable(Poem $poem, int $userID) {
-        return !$poem->isTranslated && $poem->owner && $poem->owner->id === $userID;
+        return false; // user poemwiki is the only one able to mint poem for now
+        // return !$poem->isTranslated && $poem->owner && $poem->owner->id === $userID;
     }
 }

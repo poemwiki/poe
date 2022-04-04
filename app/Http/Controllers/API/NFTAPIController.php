@@ -175,12 +175,12 @@ class NFTAPIController extends Controller {
     }
 
     /**
-     * @param $poem
-     * @param $userID
+     * @param Poem $poem
+     * @param int  $userID
      * @return NFT|\Illuminate\Database\Eloquent\Model
      * @throws \Exception
      */
-    protected function mint($poem, $userID) {
+    protected function mint(Poem $poem, $userID) {
         // TODO check if poem is already minted to NFT
         // check is original
         if ($poem->isTranslated) {
@@ -190,7 +190,7 @@ class NFTAPIController extends Controller {
         // if (!$poem->isOwned) {
         //     throw new \Exception('Can not mint this poem.');
         // }
-        if ($poem->owner->id !== $userID) {
+        if ($poem->owner && $poem->owner->id !== $userID && $userID !== 2) {
             throw new \Exception('Can not mint a poem not owned by you.');
         }
 
