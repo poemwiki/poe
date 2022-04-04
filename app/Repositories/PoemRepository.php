@@ -240,6 +240,24 @@ class PoemRepository extends BaseRepository {
     private function _withReviews($q) {
     }
 
+    public function getTobeMint($userID) {
+        return self::newQuery()->whereNull('upload_user_id')
+            ->whereIn('is_owner_uploaded', [Poem::$OWNER['none']])
+            ->whereIn('genre_id', [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+            ->with('reviews')->orderByDesc('created_at')
+            ->get()->map(function (Poem $item) use ($userID) {
+                $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
+                $item['poet'] = $item->poetLabel;
+                $item['score_count'] = ScoreRepository::calcCount($item->id);
+                $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
+                $item['listable'] = 1;
+                $item['unlistable'] = $item->nft && $item->nft->isUnlistableByUser($userID);
+                $item['nft_id'] = $item->nft ? $item->nft->id : null;
+
+                return $item->only(self::$listColumns);
+            });
+    }
+
     public function getByOwner($userID) {
         return self::newQuery()->where('upload_user_id', $userID)
             ->whereIn('is_owner_uploaded', [Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])
