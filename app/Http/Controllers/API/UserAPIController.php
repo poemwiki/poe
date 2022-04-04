@@ -244,10 +244,17 @@ class UserAPIController extends Controller {
 
         return $this->responseSuccess([
             'balance' => $user->getGoldBalance(),
-            'txs'     => $txs->map(function (Transaction $tx) use ($user) {
+            'txs'     => $txs->map(function (Transaction $tx) {
                 $res = $tx->only(['action', 'amount', 'created_at', 'f_id', 'from_user_id', 'from_user_name', 'id', 'memo', 'nft_id', 'to_user_id', 'to_user_name']);
-                $res['amount'] = $tx->from_user_id === $user->id ? '-' . $res['amount'] : '+' . $res['amount'];
                 $res['date_ago'] = date_ago($tx->created_at);
+
+                if (in_array($tx->action, [Transaction::ACTION['sell'], Transaction::ACTION['listing'], Transaction::ACTION['unlisting']]) || ($tx->action === Transaction::ACTION['mint'] && $tx->nft_id)) {
+                    $res['memo'] = $tx->nft->name;
+                }
+
+                if ($tx->nft_id && $tx->action === Transaction::ACTION['sell']) {
+                    $res['amount'] = $tx->children ? $tx->children->where('nft_id', '=', 0)->sum('amount') : '';
+                }
 
                 return $res;
             })

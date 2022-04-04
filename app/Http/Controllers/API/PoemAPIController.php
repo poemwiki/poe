@@ -298,12 +298,16 @@ class PoemAPIController extends Controller {
         $res['nft_owner']      = $nft->owner->only(['id', 'name', 'avatar_url']);
         $res['listing_status'] = $nft->listing ? $nft->listing->status : null;
 
-        $res['txs'] = $nft->txs->map(function ($tx) {
-            $res = $tx->only(['id', 'tx_hash', 'created_at', 'amount', 'from_user_id', 'to_user_id', 'action']);
-            $res['created_at'] = date_ago($tx->created_at);
+        $res['txs'] = $nft->txs->where('f_id', '=', 0)->map(function ($tx) {
+            $res = $tx->only(['id', 'tx_hash', 'amount', 'from_user_id', 'to_user_id', 'action']);
+            $res['date_ago'] = date_ago($tx->created_at);
             $res['from_user_name'] = $tx->fromUser ? $tx->fromUser->name : "[$tx->from_user_id]";
             $res['to_user_name'] = $tx->toUser ? $tx->toUser->name : "[$tx->to_user_id]";
-            $res['amount'] = number_format($tx->amount, 2);
+
+            if ($tx->nft_id) {
+                $res['amount'] = $tx->children ? $tx->children->where('nft_id', '=', 0)->sum('amount') : '';
+            }
+
             if ($tx->action === Transaction::ACTION['listing']) {
                 $res['price'] = number_format($tx->memo, 2);
             } elseif ($tx->action === Transaction::ACTION['sell'] && $tx->nft_id) {
