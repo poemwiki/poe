@@ -123,7 +123,9 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public function getTransactions() {
-        return Transaction::where('from_user_id', $this->id)->orWhere('to_user_id', $this->id)
+        return Transaction::where('f_id', '=', 0)->where(function ($query) {
+            $query->where('from_user_id', $this->id)->orWhere('to_user_id', $this->id);
+        })
             ->orderBy('created_at', 'desc')->get();
     }
 
