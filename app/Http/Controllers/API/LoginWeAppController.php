@@ -178,11 +178,11 @@ class LoginWeAppController extends Controller {
 
     /**
      * @param $unionID
-     * @param int $bindRef
-     * @param int $bindStatus
+     * @param int      $bindRef
+     * @param int|null $bindStatus
      * @return UserBind|null
      */
-    public function getUserBindInfoByUnionID($unionID, $bindRef = UserBind::BIND_REF['weapp'], $bindStatus = null) {
+    public function getUserBindInfoByUnionID($unionID, int $bindRef = UserBind::BIND_REF['weapp'], int $bindStatus = null) {
         try {
             $q = UserBind::where([
                 'union_id_crc32' => Str::crc32($unionID),
