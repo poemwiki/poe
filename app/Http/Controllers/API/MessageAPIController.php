@@ -12,7 +12,7 @@ class MessageAPIController extends Controller {
 
     public function recent(Request $request): array {
         $user     = $request->user();
-        $messages = Message::toUser($user->id)->get(); // TODO paginate
+        $messages = Message::toUser($user->id)->orderBy('id', 'desc')->get(); // TODO paginate
 
         $ret = $messages->map(function (Message $message) {
             $ret = $message->only(['id', 'sender_id', 'text']);
