@@ -60,13 +60,13 @@ class Poem extends Model implements Searchable {
     protected static $logOnlyDirty         = true;
     public static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id'];
     public static $OWNER                   = [
-        'none'                    => 0,                // 上传时未标注原创，此时应以 poetAuthor 为作者 owner，以 translatorAuthor 为译者 owner
-        'uploader'                => 1,            // 作者用户上传原创原作，此时以 upload_user_id 代表作者 owner
-        'translatorUploader'      => 2,  // 译者用户上传原创译作，且为单译者情况，此时以 upload_user_id 代表译者 owner
-        'poetAuthor'              => 3,          // 上传时未标注原创，后来被作者认领且标注原创，upload_user_id 不代表作者 owner，只代表上传人，此时应以 poetAuthor 为作者 owner
-        'translatorAuthor'        => 4,     // 上传时未标注原创译作，后来被译者认领且标注原创，upload_user_id 不代表译者 owner，只代表上传人，此时应以 translatorAuthor或唯一的related translator 为译者 owner
+        'none'                    => 0, // 上传时未标注原创，此时应以 poetAuthor 为作者 owner，以 translatorAuthor 为译者 owner
+        'uploader'                => 1, // 作者用户上传原创原作，此时以 upload_user_id 代表作者 owner
+        'translatorUploader'      => 2, // 译者用户上传原创译作，且为单译者情况，此时以 upload_user_id 代表译者 owner
+        'poetAuthor'              => 3, // 上传时未标注原创，后来被作者认领且标注原创，upload_user_id 不代表作者 owner，只代表上传人，此时应以 poetAuthor 为作者 owner
+        'translatorAuthor'        => 4, // 上传时未标注原创译作，后来被译者认领且标注原创，upload_user_id 不代表译者 owner，只代表上传人，此时应以 translatorAuthor或唯一的related translator 为译者 owner
         'multiTranslatorUploader' => 5, // 译者之一的用户上传，且为多译者情况，此时以 related translator 为共有译者 owner
-        'multiTranslatorAuthor'   => 6,   // 上传时未标注原创译作，后来被译者中的任何一个认领且标注原创，upload_user_id 不代表译者 owner，只代表上传人，此时应以 related translator 为共有译者 owner
+        'multiTranslatorAuthor'   => 6, // 上传时未标注原创译作，后来被译者中的任何一个认领且标注原创，upload_user_id 不代表译者 owner，只代表上传人，此时应以 related translator 为共有译者 owner
     ];
 
     // 标记流程：标记、修改、复审、去标记
@@ -580,8 +580,8 @@ class Poem extends Model implements Searchable {
         return $this->belongsTo(\App\Models\Campaign::class, 'campaign_id', 'id');
     }
 
-    public function nft() {
-        return $this->hasOne(\App\Models\Nft::class, 'poem_id', 'id');
+    public function nft(): \Illuminate\Database\Eloquent\Relations\HasOne {
+        return $this->hasOne(\App\Models\NFT::class, 'poem_id', 'id');
     }
 
     // TODO public function getCampaginsAttribute() {}
@@ -764,7 +764,6 @@ class Poem extends Model implements Searchable {
             // TODO: it's an ugly way to filter the redundant update log after create,
             // it should not be written to db at the poem creation
             if ($oldVal && array_key_exists('poem', $oldVal) && is_null($oldVal['poem'])
-                && array_key_exists('poet', $oldVal) && is_null($oldVal['poet'])
                 && array_key_exists('title', $oldVal) && is_null($oldVal['title'])) {
                 return false;
             }
