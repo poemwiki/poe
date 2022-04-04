@@ -294,7 +294,7 @@ class PoemAPIController extends Controller {
         }
         $res['nft_id']         = $nft->id;
         $res['mint_time']      = $nft->created_at->format('Y-m-d H:i:s');
-        $res['hash']           = $nft->hash;
+        $res['hash']           = $nft->shortedHash;
         $res['nft_owner']      = $nft->owner->only(['id', 'name', 'avatar_url']);
         $res['listing_status'] = $nft->listing ? $nft->listing->status : null;
 
@@ -595,7 +595,7 @@ class PoemAPIController extends Controller {
             'title'         => $poem->title
         ];
         if ($compositionID === 'nft') {
-            $postData['hash']      = $poem->nft->hash;
+            $postData['hash']      = $poem->nft->shortedHash;
             $postData['time']      = $poem->nft->created_at->format('Y-m-d H:i:s');
             $postData['collector'] = $poem->nft->owner->name;
             $postData['pfp']       = $poem->nft->owner->avatarUrl;

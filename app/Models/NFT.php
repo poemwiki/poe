@@ -79,6 +79,10 @@ class NFT extends Model {
         return $this->balance ? $this->balance->user : null;
     }
 
+    public function getShortedHashAttribute() {
+        return '0x' . substr($this->hash, 0, 4) . '...' . substr($this->hash, -4);
+    }
+
     public static function mint(Poem $poem, int $userID) {
         \DB::beginTransaction();
 
