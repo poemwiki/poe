@@ -200,6 +200,8 @@ class UserAPIController extends Controller {
         $res['wallet_activated']   = $user->walletActivated;
         $res['gold_balance']       = $user->getGoldBalance();
 
+        $res['new_messages_count'] = $user->newMessagesCount;
+
         return $res;
     }
 
