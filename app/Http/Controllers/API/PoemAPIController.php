@@ -309,9 +309,9 @@ class PoemAPIController extends Controller {
             }
 
             if ($tx->action === Transaction::ACTION['listing']) {
-                $res['price'] = number_format($tx->memo, 2);
+                $res['price'] = number_format($tx->memo, 2, '.', '');
             } elseif ($tx->action === Transaction::ACTION['sell'] && $tx->nft_id) {
-                $res['price'] = number_format($tx->childGoldPrice()->sum('amount'), 2);
+                $res['price'] = number_format($tx->childGoldPrice()->sum('amount'), 2, '.', '');
             }
 
             return $res;
