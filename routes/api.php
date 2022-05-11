@@ -76,6 +76,7 @@ Route::middleware(['auth:api', 'api'])->group(static function () {
         });
         Route::prefix('message')->name('message/')->group(static function () {
             Route::get('/recent', [\App\Http\Controllers\API\MessageAPIController::class, 'recent'])->name('recent');
+            Route::post('/read/{id}', [\App\Http\Controllers\API\MessageAPIController::class, 'read'])->name('read');
         });
         Route::prefix('author')->name('author/')->group(static function () {
             Route::post('/create', [\App\Http\Controllers\API\AuthorAPIController::class, 'create'])->name('create');
