@@ -513,7 +513,7 @@ SQL;
                 }
 
                 // links & score
-                $url      = $this->getWeappUrl($post);
+                $url      = $this->getUrl($post);
                 $wikiLink = ($isSubstr ? '查看全文：' : '诗歌维基：') . $url;
 
                 $scoreRepo = new ScoreRepository(app());
