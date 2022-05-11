@@ -20,7 +20,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property \Illuminate\Support\Carbon $created_at
  * @property \App\User|null             $sender
  * @property \App\User|null             $receiver
- * @method static toUser(User $user)
+ * @property MessageStatus|null         $userStatus
+ * @method static toUser(int $user)
  */
 class Message extends Model {
     use LogsActivity;
@@ -65,6 +66,10 @@ class Message extends Model {
         return $this->hasMany(\App\Models\MessageStatus::class);
     }
 
+    public function userStatus(): \Illuminate\Database\Eloquent\Relations\HasOne {
+        return $this->hasOne(\App\Models\MessageStatus::class);
+    }
+
     public function isReadBy(User $user): bool {
         return $this->status()->where('user_id', $user->id)->where('status', MessageStatus::STATUS['read'])->exists();
     }
@@ -91,6 +96,15 @@ class Message extends Model {
             'translation_id' => $translationID,
             'type'           => self::TYPE['reminder'],
             'params'         => $params,
+        ]);
+    }
+
+    public function updateOrCreateStatus($userID, $status) {
+        return MessageStatus::updateOrCreate([
+            'message_id' => $this->id,
+            'user_id'    => $userID,
+        ], [
+            'status'    => $status,
         ]);
     }
 }
