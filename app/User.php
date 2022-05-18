@@ -4,6 +4,8 @@ namespace App;
 
 use App\Models\Balance;
 use App\Models\MediaFile;
+use App\Models\Message;
+use App\Models\MessageStatus;
 use App\Models\Poem;
 use App\Models\Relatable;
 use App\Models\Transaction;
@@ -32,6 +34,7 @@ use Spatie\Activitylog\ActivitylogServiceProvider;
  * @property string $invite_code
  * @property int    $invited_by
  * @property float  $weight
+ * @property int    $newMessagesCount
  */
 class User extends Authenticatable implements MustVerifyEmail {
     use HasApiTokens;
@@ -120,6 +123,10 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public function balance(): \Illuminate\Database\Eloquent\Relations\HasMany {
         return $this->hasMany(\App\Models\Balance::class, 'user_id', 'id');
+    }
+
+    public function specificMessages(): \Illuminate\Database\Eloquent\Relations\HasMany {
+        return $this->hasMany(\App\Models\Message::class, 'user_id', 'id');
     }
 
     public function getTransactions() {
@@ -303,5 +310,17 @@ HTML;
         $redis = Redis::connection();
 
         return $redis->get('online_' . $this->id);
+    }
+
+    public function getNewMessagesCountAttribute() {
+        $ID = $this->id;
+
+        return Message::toUser($ID)->with(['userStatus' => function ($q) use ($ID) {
+            $q->where('user_id', '=', $ID);
+        }])->get()->map(function (Message $message) {
+            return $message->userStatus ? $message->userStatus->status : MessageStatus::STATUS['unread'];
+        })->filter(function ($status) {
+            return $status === MessageStatus::STATUS['unread'];
+        })->count();
     }
 }
