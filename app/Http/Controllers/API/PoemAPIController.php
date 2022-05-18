@@ -732,6 +732,7 @@ class PoemAPIController extends Controller {
     public function query(Request $request) {
         $keyword = Str::trimSpaces($request->json('keyword', ''));
         $mode    = $request->json('mode', '');
+        $nft     = $request->json('nft', false);
 
         if ($keyword === '' || is_null($keyword)) {
             return $this->responseSuccess([
@@ -764,7 +765,7 @@ class PoemAPIController extends Controller {
         }
 
         if ($mode !== 'author-select' && $mode !== 'translator-select') {
-            $search = $search->registerModel(Poem::class, function (ModelSearchAspect $modelSearchAspect) {
+            $search = $search->registerModel(Poem::class, function (ModelSearchAspect $modelSearchAspect) use ($nft) {
                 $modelSearchAspect
                     ->addSearchableAttribute('title') // return results for partial matches
                     ->addSearchableAttribute('poem')
@@ -778,8 +779,16 @@ class PoemAPIController extends Controller {
                         $query->select(DB::raw(1))
                             ->from('relatable')
                             ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
-                    })
-                    ->with('poetAuthor')->limit(150);
+                    });
+                if ($nft) {
+                    $modelSearchAspect->whereExists(function ($query) {
+                        $query->select(DB::raw(1))
+                            ->from('nft')
+                            ->whereRaw('nft.poem_id = poem.id');
+                    });
+                }
+
+                $modelSearchAspect->with('poetAuthor')->limit(150);
                 // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
             });
         }
@@ -800,7 +809,8 @@ class PoemAPIController extends Controller {
 
         $authors = $authorRes->map(function (SearchResult $authorSearchRes, $index) use ($mode, $shiftPoems) {
             // TODO 返回结果中应包含尽量多的作者条目，由前端选择显示多少条目
-            // TODO use a better way to filter
+            // TODO a better way to handle different mode
+            // TODO trigger correspond query when switch to a tab
             if ($mode !== 'author-select' && $index >= 5) {
                 return null;
             }
@@ -831,7 +841,7 @@ class PoemAPIController extends Controller {
         $keywordArr = $keyword4Query->split('#\s+#');
 
         // TODO append translated poems
-        $mergedPoems = $shiftPoems->unique('id')->map(function ($poem) use ($keywordArr) {
+        $mergedPoems = $shiftPoems->unique('id')->map(function ($poem) use ($keywordArr, $nft) {
             $columns = ['poet_label', '#poet_label', 'poet_id', 'poet_is_v', 'translator', 'id', 'title', 'url', 'poet_contains_keyword', 'poem'];
 
             $item = $poem->only($columns);
@@ -859,10 +869,14 @@ class PoemAPIController extends Controller {
                 $item['translator_contains_keyword'] = true;
             }
 
+            if ($nft) {
+                $item['nft_id'] = $poem->nft ? $poem->nft->id : null;
+            }
+
             return $item;
         })->values();
 
-        return $this->responseSuccess([
+        $data = [
             'authors' => $authors->map->only(['id', 'avatar_url', 'label', '#label', 'describe_lang', 'user'])->map(function ($author) {
                 if ($author['user']) {
                     $author['user'] = $author['user']->only(['id', 'avatar_url', 'name']);
@@ -872,8 +886,14 @@ class PoemAPIController extends Controller {
 
                 return $author;
             }),
-            'poems'   => $mergedPoems,
             'keyword' => $keyword
-        ]);
+        ];
+        if ($nft) {
+            $data['nfts'] = $mergedPoems;
+        } else {
+            $data['poems'] = $mergedPoems;
+        }
+
+        return $this->responseSuccess($data);
     }
 }
