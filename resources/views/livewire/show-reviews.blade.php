@@ -95,49 +95,47 @@
         </form>
     </section>
 
-</section>
-
-@push('scripts')
-{{--<script src="/js/lib/zepto.min.js"></script>--}}
-<script src="/js/review.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
+  @push('scripts')
+    {{--<script src="/js/lib/zepto.min.js"></script>--}}
+    <script src="/js/review.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
 
         window.editor = new MediumEditor('#review-content', {
-            toolbar: {
-                buttons: ['anchor'],
-                // relativeContainer: $('#content-warpper').get('0'),
-                // relativeContainer: $('#review-modal').get('0'),
-                diffLeft: -90,
-                diffTop: -70,
-            },
-            anchor: {
-                linkValidation: true,
-                placeholderText: '请粘贴或输入链接',
-            },
-            paste: {
-                cleanPastedHTML: false,
-                forcePlainText: true,
-                cleanReplacements: [],
-                cleanAttrs: ['class', 'style', 'dir'],
-                unwrapTags: []
-            },
-            autoLink: true,
-            targetBlank: true,
-            // elementsContainer: $('#content-warpper').get('0'),
-            placeholder: {
-                /* This example includes the default options for placeholder,
-                   if nothing is passed this is what it used */
-                text: '@lang('Review')',//$('#review-content').attr('placeholder'),
-                hideOnClick: true
-            },
-            // static: true,
-            // autoLink: true,
+          toolbar: {
+            buttons: ['anchor'],
+            // relativeContainer: $('#content-warpper').get('0'),
+            // relativeContainer: $('#review-modal').get('0'),
+            diffLeft: -90,
+            diffTop: -70,
+          },
+          anchor: {
+            linkValidation: true,
+            placeholderText: '请粘贴或输入链接',
+          },
+          paste: {
+            cleanPastedHTML: false,
+            forcePlainText: true,
+            cleanReplacements: [],
+            cleanAttrs: ['class', 'style', 'dir'],
+            unwrapTags: []
+          },
+          autoLink: true,
+          targetBlank: true,
+          // elementsContainer: $('#content-warpper').get('0'),
+          placeholder: {
+            /* This example includes the default options for placeholder,
+               if nothing is passed this is what it used */
+            text: '@lang('Review')',//$('#review-content').attr('placeholder'),
+            hideOnClick: true
+          },
+          // static: true,
+          // autoLink: true,
 
-            imageDragging: false
+          imageDragging: false
         });
         editor.subscribe('blur', function () {
-            Livewire.emit('contentUpdated', editor.getContent());
+          Livewire.emit('contentUpdated', editor.getContent());
         });
 
         var $open = document.getElementById('open-review');
@@ -146,39 +144,40 @@
 
         var $reviews = document.getElementsByClassName('reviews')[0];
         if($open && 'IntersectionObserver' in window) {
-            var options = {root: null, rootMargin: '0px', threshold: [0.01, 1]};
-            var observer = new IntersectionObserver(function (entries) {
-                entries.forEach(function (entry) {
-                    if (entry.isIntersecting) {
-                        $open.classList.remove('hidden');
-                    } else {
-                        $open.classList.add('hidden');
-                    }
-                });
-            }, options);
-            observer.observe($reviews);
+          var options = {root: null, rootMargin: '0px', threshold: [0.01, 1]};
+          var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                $open.classList.remove('hidden');
+              } else {
+                $open.classList.add('hidden');
+              }
+            });
+          }, options);
+          observer.observe($reviews);
         }
         $reviews.addEventListener('click', function (e) {
-            for (var target = e.target; target && target !== this; target = target.parentNode) {
-                if (target.matches('.add-review')) {
-                    $modal.classList.remove('hidden');
-                    e.preventDefault();
-                    break;
-                }
-                if(target.matches('.close-review')) {
-                    $modal.classList.add('hidden');
-                    e.preventDefault();
-                    if($open) $open.classList.remove('hidden');
-                    break;
-                }
+          for (var target = e.target; target && target !== this; target = target.parentNode) {
+            if (target.matches('.add-review')) {
+              $modal.classList.remove('hidden');
+              e.preventDefault();
+              break;
             }
+            if(target.matches('.close-review')) {
+              $modal.classList.add('hidden');
+              e.preventDefault();
+              if($open) $open.classList.remove('hidden');
+              break;
+            }
+          }
         });
 
-    });
+      });
 
 
-    // document.addEventListener('DOMContentLoaded', function() {
-    // });
+      // document.addEventListener('DOMContentLoaded', function() {
+      // });
 
-</script>
-@endpush
+    </script>
+  @endpush
+</section>

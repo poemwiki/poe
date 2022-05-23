@@ -1,3 +1,7 @@
+<?php
+/** @var \App\Models\Poem $poem */
+$score = $poem->scoreArray;
+?>
 <div class="comments-wrapper">
     <section class="score full-row">
         <section class="rating-card">
@@ -75,9 +79,11 @@
     </section>
 
 
-    @livewire('show-reviews', [
-        'poem' => $poem
-    ])
+    <div>
+      @livewire('show-reviews', [
+          'poem' => $poem
+      ])
+    </div>
 
     <svg class="hidden" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
         <symbol id="star" width="16" height="16" viewBox="0 0 1024 1024" preserveAspectRatio="xMinYMid meet">

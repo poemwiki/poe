@@ -19,8 +19,7 @@ class Score extends Component {
     public $poem;
     public $rating = null;
 
-    protected $rules = [
-    ];
+    protected $rules = [];
 
     public function __construct() {
         $this->scoreRepository  = new ScoreRepository(app());
@@ -34,8 +33,8 @@ class Score extends Component {
     }
 
     public function mount(Poem $poem) {
-        $this->poem  = $poem;
-        $this->score = $this->scoreRepository->calcScoreByPoem($this->poem);
+        $this->poem = $poem;
+
         if (Auth::check()) {
             $record = \App\Models\Score::select('score')->where([
                 'poem_id' => $this->poem->id,
@@ -57,7 +56,7 @@ class Score extends Component {
         $user   = Auth::user();
         $weight = CreateScoreRequest::getScoreWeight($this->poem, $user, $value);
 
-        return $this->scoreRepository->updateOrCreate(
+        $this->scoreRepository->updateOrCreate(
             ['poem_id' => $this->poem->id, 'user_id' => $user->id],
             [
                 'score'  => $this->rating,
@@ -76,10 +75,6 @@ class Score extends Component {
     }
 
     public function render() {
-        return view('livewire.score', [
-            'score'            => $this->poem->scoreArray,
-            'sortedScores'     => $this->sortedScores,
-            'descSortedScores' => $this->descSortedScores
-        ]);
+        return view('livewire.score', []);
     }
 }
