@@ -145,7 +145,7 @@ Vue.component('poem-form', {
       });
     }
 
-    this.form.agree = false;
+    this.form.agree = true;
   },
 
   methods: {
