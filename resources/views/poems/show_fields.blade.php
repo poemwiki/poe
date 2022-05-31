@@ -28,10 +28,11 @@ $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.or
 
   @include('poems.components.poem', ['poem' => $poem])
 
+<div>
     @livewire('score', [
     'poem' => $poem
     ])
-
+</div>
     <nav class="next">
         <span>@lang('Next Poem')</span>
         <p>
