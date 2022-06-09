@@ -54,7 +54,7 @@ class PoemAPIController extends Controller {
         $num = min(10, $num);
 
         $columns = [
-            'id', 'created_at', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
+            'id', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
             'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
             'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded',
             'reviews', 'reviews_count', 'date_ago', 'poet_avatar', 'translator_avatar',
@@ -127,11 +127,8 @@ class PoemAPIController extends Controller {
         $num = min(10, $num);
 
         $columns = [
-            'id', 'created_at', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
-            'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
-            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded',
-            'reviews', 'reviews_count', 'date_ago', 'poet_avatar', 'translator_avatar',
-            'score', 'score_count', 'score_weight'
+            'id', 'created_at', 'title', 'poem', 'poet', 'language_id', 'is_original',
+            'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'
         ];
 
         $ids = NFT::query()->with(['poem:id,title', 'content:id,content'])->get(['nft.id', 'nft.poem_id', 'nft.content_id'])->map(function ($item) {
@@ -144,16 +141,16 @@ class PoemAPIController extends Controller {
         foreach ($poems as $poem) {
             $item = $poem->only($columns);
 
-            $score                          = $poem->scoreArray;
-            $item['score']                  = $score['score'];
-            $item['score_count']            = $score['count'];
-            $item['date_ago']               = date_ago($poem->created_at);
-            $item['poet']                   = $poem->poet_label;
-            $item['poet_cn']                = $poem->poet_label_cn;
-            $item['poet_avatar_true']       = $poem->poet_avatar       !== config('app.avatar.default');
-            $item['translator_avatar_true'] = $poem->translator_avatar !== config('app.avatar.default');
-            $item['poet_is_v']              = $poem->poet_is_v;
-            $item['nft_id']                 = $poem->nft->id;
+            $score                    = $poem->scoreArray;
+            $item['score']            = $score['score'];
+            $item['score_count']      = $score['count'];
+            $item['date_ago']         = date_ago($poem->created_at);
+            $item['poet']             = $poem->poet_label;
+            $item['poet_cn']          = $poem->poet_label_cn;
+            $item['poet_avatar_true'] = $poem->poet_avatar       !== config('app.avatar.default');
+            $item['poet_is_v']        = $poem->poet_is_v;
+            $item['nft_id']           = $poem->nft->id;
+            $item['price']            = number_format($poem->nft->listing->price, 2, '.', '');
 
             $item['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
             $translatorLabels        = [];
