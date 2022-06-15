@@ -59,6 +59,7 @@ class PoemController extends Controller {
         /** @var Poem $poem */
         foreach ($data as &$poem) {
             $poem['url']           = $poem->url;
+            $poem['resource_url']  = $poem->resource_url;
             $poem['language_name'] = $poem->lang ? $poem->lang->label : '';
             $poem['campaign_name'] = $poem->campaign ? $poem->campaign->name_lang : '';
             $poem['poet_label']    = $poem->poetLabel;
