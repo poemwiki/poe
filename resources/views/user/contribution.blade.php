@@ -21,7 +21,7 @@
         @endphp
         <span title="{{$log->created_at}} UTC">{{date_ago($log->created_at)}}</span>&nbsp;&nbsp;&nbsp;
 {{--        <b>{{get_causer_name($log)}}</b>&nbsp;&nbsp;--}}
-        <span>{{trans('poem.change type '.$log->description)}} <a href="{{$subject->url}}">{{$subject->title}}</a>&nbsp;&nbsp;<b>获得 1 个诗贝</b></span>
+        <span>{{trans('poem.change type '.$log->description)}} <a href="{{$subject->url}}">{{$subject->title}}</a></span>
 
 
         @if($log->description === 'updated')

@@ -330,7 +330,7 @@ class PoemController extends Controller {
 
         return view('user.contribution', [
             'user'         => $user,
-            'activityLogs' => $activityLogs->take(10),
+            'activityLogs' => $activityLogs->take(100),
             // 'poem'          => $poems,
             'languageList'  => LanguageRepository::allInUse()->keyBy('id'),
             'genreList'     => GenreRepository::allInUse()->keyBy('id'),

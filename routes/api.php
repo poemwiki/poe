@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['api'])->group(static function () {
-    Route::prefix('v1')->name('api')->group(static function () {
+    Route::prefix('v1')->name('api/')->group(static function () {
         Route::prefix('campaign')->name('campaign/')->group(static function () {
             Route::get('/', '\App\Http\Controllers\API\CampaignAPIController@index')->name('index');
             // TODO
@@ -33,6 +33,7 @@ Route::middleware(['api'])->group(static function () {
         Route::prefix('user')->name('user/')->group(static function () {
             Route::get('/weapp-login', [\App\Http\Controllers\API\LoginWeAppController::class, 'login'])->name('weapp-login');
             Route::get('/timeline/{id}/{page}/{pageSize}', [\App\Http\Controllers\API\UserAPIController::class, 'timeline'])->name('timeline');
+            Route::post('/login', [\App\Http\Controllers\API\LoginController::class, 'login'])->name('login');
         });
         Route::prefix('author')->name('author/')->group(static function () {
             Route::get('/detail/{id}', [\App\Http\Controllers\API\AuthorAPIController::class, 'detail'])->name('detail');
@@ -42,7 +43,7 @@ Route::middleware(['api'])->group(static function () {
 });
 
 Route::middleware(['auth:api', 'api'])->group(static function () {
-    Route::prefix('v1')->name('api')->group(static function () {
+    Route::prefix('v1')->name('api/')->group(static function () {
         Route::prefix('user')->name('user/')->group(static function () {
             Route::post('/profile', [\App\Http\Controllers\API\UserAPIController::class, 'update'])->name('profile');
             Route::get('/data', [\App\Http\Controllers\API\UserAPIController::class, 'data'])->name('data');
@@ -58,6 +59,7 @@ Route::middleware(['auth:api', 'api'])->group(static function () {
             Route::get('/mine', [\App\Http\Controllers\API\PoemAPIController::class, 'mine'])->name('mine');
             Route::get('/delete/{poemId}', [\App\Http\Controllers\API\PoemAPIController::class, 'delete'])->name('delete');
             Route::get('/related', [\App\Http\Controllers\API\PoemAPIController::class, 'related'])->name('related');
+            Route::any('/import', [\App\Http\Controllers\API\PoemAPIController::class, 'import'])->name('import');
         });
         Route::prefix('nft')->name('nft/')->group(static function () {
             Route::post('/listing', [\App\Http\Controllers\API\NFTAPIController::class, 'listing'])->name('listing');

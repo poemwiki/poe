@@ -893,4 +893,19 @@ class PoemAPIController extends Controller {
 
         return $this->responseSuccess($data);
     }
+
+    public function import(Request $request): array {
+        $poems = $request->input('poems');
+        if ($request->getContentType() !== 'json') {
+            return $this->responseFail([], 'Request content type must be application/json');
+        }
+
+        if (!is_array($poems)) {
+            return $this->responseFail([], 'Poems must be an array.');
+        } elseif (count($poems) > 200) {
+            return $this->responseFail([], 'Limit 200 poems per request');
+        }
+
+        return $this->responseSuccess([], 'Thanks for your contribution!');
+    }
 }
