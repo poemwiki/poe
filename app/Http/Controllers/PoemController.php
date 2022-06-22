@@ -69,6 +69,17 @@ class PoemController extends Controller {
     //     return $this->_poem($poem);
     // }
 
+    public function showContributions($fakeId) {
+        $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
+
+        return view('poems.contribution')->with([
+            'poem'          => $poem,
+            'languageList'  => LanguageRepository::allInUse()->keyBy('id'),
+            'genreList'     => GenreRepository::allInUse()->keyBy('id'),
+            'randomPoemUrl' => '/'
+        ]);
+    }
+
     public function random() {
         $randomPoems = $this->poemRepository->randomOne();
 
