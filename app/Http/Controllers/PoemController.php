@@ -69,69 +69,6 @@ class PoemController extends Controller {
     //     return $this->_poem($poem);
     // }
 
-    /**
-     * TODO move this to a service.
-     * @param Poem $poem
-     * @param $protocol
-     * @param $host
-     * @param $port
-     * @return mixed|null
-     * @throws \Throwable
-     */
-    public function upload2AR(Poem $poem, $protocol, $host, $port) {
-        $renderedPoem = view('poems.components.poem', [
-            'poem' => $poem,
-            'mode' => 'no-buttons'
-        ])->render();
-
-        try {
-            $arweave = new \Arweave\SDK\Arweave($protocol, $host, $port);
-
-            $jwk = json_decode(file_get_contents(storage_path('arweave-key.json')), true);
-
-            $wallet = new \Arweave\SDK\Support\Wallet($jwk);
-
-            $transaction = $arweave->createTransaction($wallet, [
-                'data' => $renderedPoem,
-                'tags' => [
-                    'Content-Type' => 'text/html'
-                ]
-            ]);
-            $arweave->api()->commit($transaction);
-
-            $txID = $transaction->getAttribute('id');
-        } catch (\Exception $e) {
-            $txID = null;
-        }
-
-        return $txID;
-    }
-
-    public function showContributions($fakeId) {
-        $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
-
-        $protocol = 'https';
-        $host     = 'arweave.net';
-        $port     = 443;
-        if ($poem->content->ar_tx_id) {
-            $ar_tx_id = $poem->content->ar_tx_id;
-        } else {
-            $ar_tx_id                = $this->upload2AR($poem, $protocol, $host, $port);
-            $poem->content->ar_tx_id = $ar_tx_id;
-            $poem->content->save();
-        }
-        // get transaction status
-
-        return view('poems.contribution')->with([
-            'poem'          => $poem,
-            'txID'          => $ar_tx_id,
-            'arUrl'         => 'https://arweave.net/' . $ar_tx_id,
-            'languageList'  => LanguageRepository::allInUse()->keyBy('id'),
-            'genreList'     => GenreRepository::allInUse()->keyBy('id'),
-            'randomPoemUrl' => '/'
-        ]);
-    }
-
     public function random() {
         $randomPoems = $this->poemRepository->randomOne();
 
