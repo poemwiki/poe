@@ -10,15 +10,18 @@
   <ol class="contribution">
 
     @foreach($activityLogs as $key=>$log)
-      <li class="log-group {{($key!==0 && $key!==count($activityLogs)-1) ? 'log-middle' : ''}}">
+      <li class="log-group {{$key!==0 && $key!==count($activityLogs)-1 ? 'log-middle' : ''}}">
         @php
           $newVal = $log->properties->get('attributes');
           $oldVal = $log->properties->get('old');
           $props = array_keys($newVal ?? []);
 
-          $subject = $log->subject::find($log->subject_id);
-          //dd($log);
+          $subject = $log->subject;
         @endphp
+
+        @if(!$subject)
+          @continue
+        @endif
         <span title="{{$log->created_at}} UTC">{{date_ago($log->created_at)}}</span>&nbsp;&nbsp;&nbsp;
 {{--        <b>{{get_causer_name($log)}}</b>&nbsp;&nbsp;--}}
         <span>{{trans('poem.change type '.$log->description)}} <a href="{{$subject->url}}">{{$subject->title}}</a></span>

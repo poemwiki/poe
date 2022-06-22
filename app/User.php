@@ -323,4 +323,36 @@ HTML;
             return $status === MessageStatus::STATUS['unread'];
         })->count();
     }
+
+    public function getPoemActivityLogsAttribute() {
+        // it's right to order by id desc instead of by created_at!
+        // TODO including relatable record logs: mergeTo, translator...
+        return $this->activityLogs()->orderBy('id', 'desc')->where('subject_type', '=', 'App\Models\Poem')->get()->map(function ($activity) {
+            $oldVal = $activity->properties->get('old');
+
+            // TODO: it's an ugly way to filter the redundant update log after create,
+            // it should not be written to db at the poem creation
+            if ($oldVal && array_key_exists('poem', $oldVal) && is_null($oldVal['poem'])
+                && array_key_exists('title', $oldVal) && is_null($oldVal['title'])) {
+                return false;
+            }
+
+            if ($activity->description === 'updated') {
+                $diffs = $activity->diffs;
+                $diffKeys = array_keys($activity->diffs);
+                foreach ($diffKeys as $key) {
+                    if (in_array($key, Poem::$ignoreChangedAttributes)) {
+                        unset($diffs[$key]);
+                    }
+                }
+                if (empty($diffs)) {
+                    return false;
+                }
+            }
+
+            return $activity;
+        })->filter(function ($val) {
+            return $val !== false;
+        })->values(); // values() makes result keys a continuously increased integer sequence
+    }
 }
