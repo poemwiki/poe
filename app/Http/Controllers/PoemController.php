@@ -327,11 +327,11 @@ class PoemController extends Controller {
         $user = Auth::user();
 
         /** @var \Illuminate\Support\Collection $activityLogs */
-        $activityLogs = $user->activityLogs->take(10);
+        $activityLogs = $user->poemActivityLogs->take(81);
 
         return view('user.contribution', [
             'user'         => $user,
-            'activityLogs' => $activityLogs->take(10),
+            'activityLogs' => $activityLogs,
             // 'poem'          => $poems,
             'languageList'  => LanguageRepository::allInUse()->keyBy('id'),
             'genreList'     => GenreRepository::allInUse()->keyBy('id'),

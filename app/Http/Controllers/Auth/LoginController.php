@@ -40,7 +40,6 @@ class LoginController extends Controller {
         }
     }
 
-
     /**
      * Validate the user login request.
      *
@@ -52,8 +51,8 @@ class LoginController extends Controller {
     protected function validateLogin(Request $request) {
         $request->validate([
             $this->username() => 'required|string',
-            'password' => 'required|string',
-            'captcha' => 'required|captcha'
+            'password'        => 'required|string',
+            'captcha'         => 'required|captcha'
         ]);
     }
 }

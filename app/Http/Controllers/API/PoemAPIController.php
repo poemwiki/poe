@@ -17,6 +17,7 @@ use App\Query\AuthorAliasSearchAspect;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
+use App\Rules\NoDuplicatedPoem;
 use App\Rules\ValidPoemContent;
 use App\Services\Weapp;
 use App\User;
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Spatie\Searchable\ModelSearchAspect;
 use Spatie\Searchable\Search;
 use Spatie\Searchable\SearchResult;
@@ -892,5 +894,54 @@ class PoemAPIController extends Controller {
         }
 
         return $this->responseSuccess($data);
+    }
+
+    public function import(Request $request): array {
+        $poems = $request->input('poems');
+        if ($request->getContentType() !== 'json') {
+            return $this->responseFail([], 'Request content type must be application/json');
+        }
+
+        if (!is_array($poems)) {
+            return $this->responseFail([], 'Poems must be an array.');
+        } elseif (count($poems) > 200) {
+            return $this->responseFail([], 'Limit 200 poems per request');
+        }
+
+        $result = [];
+
+        foreach ($poems as $poem) {
+            try {
+                $poem['original_id']       = 0;
+                $poem['is_owner_uploaded'] = Poem::$OWNER['none'];
+
+                $validator = Validator::make($poem, [
+                    'title'                  => 'required|string|max:255',
+                    'poet'                   => 'required|string|max:255',
+                    'poem'                   => [new NoDuplicatedPoem(null), 'required', 'string', 'min:10', 'max:65500'],
+                    // 'poet_id'                => 'integer|exists:' . \App\Models\Author::class . ',id',
+                    // 'is_owner_uploaded'      => ['required', Rule::in([Poem::$OWNER['none'], Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])],
+                    'from'                   => 'nullable|string|max:255',
+                ]);
+                $validator->validate();
+
+                $inserted = Poem::create($poem);
+                $result[] = $inserted->url;
+            } catch (ValidationException $e) {
+                $failedRules = $e->validator->failed();
+                $errors      = $e->errors();
+                if (isset($failedRules['poem']['App\Rules\NoDuplicatedPoem'])) {
+                    logger()->info('duplicated with existed poem: ', $errors);
+                } else {
+                    logger()->info('failed to validate: ', $errors);
+                }
+
+                $result[] = ['errors' => $errors];
+
+                continue;
+            }
+        }
+
+        return $this->responseSuccess($result, 'Thanks for your contribution!');
     }
 }

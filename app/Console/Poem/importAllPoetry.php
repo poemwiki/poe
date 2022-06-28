@@ -20,16 +20,16 @@ class importAllPoetry extends Command {
 
     /**
      * 导入要求：
-     * 1. 每首诗的 poet_id 对应到相关 author 的 id
+     * 1. 通过 NoDuplicatedPoem 等 validator 验证
      * 2. 保持 activity_log 完整
-     * 3. 将来源 URL 填入 poem.from 字段
-     * 4. 保证导入条目的 created_at 和 updated_at 为导入时的时间，避开时区 bug.
-     * @var string
+     * 3. 保证导入条目的 created_at 和 updated_at 为导入时的时间，避开时区 bug.
+     * 4. 每首诗的 poet_id 对应到相关 author 的 id
+     * 5. 将来源 URL 填入 poem.from 字段.
      */
     protected $description = 'craw author & poem from allpoetry';
 
     public static $source   = 'allpoetry';
-    public static $causerID = 2; // official poemwiki user id
+    public static $causerID = 2; // uploader user id
 
     public function __construct() {
         parent::__construct();
