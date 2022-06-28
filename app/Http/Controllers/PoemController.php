@@ -130,6 +130,7 @@ class PoemController extends Controller {
             // 此处给出翻译自的 id 作为表单默认 original_id 即可
         }
         $poem['#user_name'] = Auth::user()->name;
+        $poem['poem']       = "\n\n\n\n\n\n";
 
         $deftaultAuthors = ($preset && $preset->poetLabel) ? AuthorRepository::searchLabel($preset->poetLabel, [$preset->poet_id]) : [];
 
