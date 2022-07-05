@@ -12,7 +12,7 @@ class Authenticate extends Middleware {
      * @return string|null
      */
     protected function redirectTo($request) {
-        if (!$request->expectsJson() && !starts_with($request->path(), 'api')) {
+        if (!$request->expectsJson() && !str_starts_with($request->path(), 'api')) {
             return route('login'); //, ['ref' => \URL::current()]);
         }
 
