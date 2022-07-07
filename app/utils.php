@@ -427,7 +427,16 @@ function textClean($str, int $longTextLineLength = 70): string {
 
     return trim($str);
 }
+function textTypo ($str): string {
+    if (gettype($str) !== 'string') {
+        return $str;
+    }
+    $str = preg_replace('/。”/' ,'。”\n', $str);
+    $str = preg_replace('/。(?!”)/' ,'。\n', $str);
+    
+    return $str;
 
+}
 function isValidUrl($url) {
     return preg_match('/((ftp|http|https):\/\/)([a-z]+:{0,1}[a-z]*@)?(\S+)(:[0-9]+)?(\/|\/([[a-z]#!:.?+=&%@!\-\/]))?/i', $url);
 }

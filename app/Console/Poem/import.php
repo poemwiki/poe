@@ -91,6 +91,7 @@ class import extends Command {
                     'url'            => self::$url
                 ]);
                 //migrate poem data using Crawl model
+                
             } catch (\Exception $e) {
                 $failedItem[] = $item;
                 continue;
@@ -142,8 +143,8 @@ class import extends Command {
                     'from'                        => strlen(self::$url) > 255 ? self::$source : self::$url,
                     'is_owner_uploaded'           => Poem::$OWNER['none'],
                     'poet'                        => $insertedAuthor->name_lang,
-                    // 'created_at'     => now(),
-                    // 'updated_at'     => now(),
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
                 ];
 
                 $exportFields = $poemCrawl->export_setting['fields'];
@@ -153,10 +154,9 @@ class import extends Command {
                         $poem[$to] = textClean(implode('\n' , $poemCrawl->result[$from]));
                     }
                     else
-                        $poem[$to] = textClean($poemCrawl->result[$from]);
+                        $poem[$to] = textClean(textTypo($poemCrawl->result[$from]));
                 }
 
-               
                 try {
                     // TODO move this to a public custom validator
                     $validator = Validator::make($poem, [
@@ -181,14 +181,12 @@ class import extends Command {
 
                     continue;
                 }
-                // dd($poem);
-                $insertedPoem = Poem::create($poem);
                 
+                $insertedPoem = Poem::create($poem);
                 $poemCrawl->exported_id = $insertedPoem->id;
                 $poemCrawl->save();
             }
         }
-        // dd($poem);
         logger()->info('failedPoemCrawl: ', $failedPoemCrawl);
         
         return 0;
