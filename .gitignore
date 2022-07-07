@@ -16,7 +16,12 @@ yarn-error.log
 .env
 .env.production
 .env.backup
+<<<<<<< HEAD
 .phpunit.result.cache
+=======
+.php-cs-fixer.cache
+tools/php-cs-fixer/vendor
+>>>>>>> f884ab14d6e0257bedeca0c123586f0c33072320
 fields_sample.json
 #/public/css
 #/public/js
