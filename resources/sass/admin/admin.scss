@@ -1,0 +1,83 @@
+// Variables
+@import "variables";
+
+// Vendor
+@import "vendor/index";
+
+// Your own, project specific styles
+@import "styles/index";
+@import "../css/MajorMonoDisplayFont.css";
+@import "../_variables";
+
+.card-header{
+  color: $ui-text-color;
+  font-weight: normal;
+}
+
+.logo {
+  font-family: "Major Mono Display", monospace, sans-serif;
+  color: #000;
+  white-space: pre-line;
+  display: inline-block;
+  vertical-align: middle;
+  height: 2.9em;
+  line-height: 1em;
+}
+.navbar-brand img{
+  width: 3em;
+  display: inline-block;
+  vertical-align: text-bottom;
+  zoom: 1.6;
+}
+#app.container-fluid{
+  @media all and (max-width: 767px) {
+    padding: 0;
+  }
+}
+
+.col-form-label{
+  color: $mutedText;
+  font-weight: bold;
+  &.required:after{
+    content: '*';
+    position: absolute;
+    vertical-align: middle;
+    padding-right: .2em;
+    color: $red;
+  }
+}
+.form-control {
+  background-position: right center;
+  background-position-x: calc(100% - 1.1em);
+  color: #111;
+}
+select.form-control{
+  padding-left: 6px;
+}
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto!important;
+  .CodeMirror-linenumber {
+    line-height: 2.5;
+    font-size: 0.8rem;
+    color: #cecece;
+  }
+}
+
+
+#poem {
+  border: 1px solid #b9c8de;
+  pre{
+    font-size: .8rem;
+    line-height: 2;
+    font-family: $font-family-serif;
+  }
+}
+.card-footer{
+  >button{
+    display: block;
+    position: absolute;
+    right: 11%;
+    bottom: 2em;
+  }
+}

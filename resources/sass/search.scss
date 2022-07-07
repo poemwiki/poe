@@ -1,0 +1,163 @@
+@import "form-common";
+
+
+.title-list-item{
+  position: relative;
+  width: 100%;
+  >a.title{
+    padding: 1em 0 0 0;
+    width: 100%;
+    display: inline-block;
+    color: $blue;
+    line-height: 1.2em;
+    overflow-y: hidden;
+
+    &>span{
+      //vertical-align: bottom;
+      display: inline-block;
+      //transform: translateY(100%);
+      //animation: appear .75s ease-out forwards;
+    }
+
+    &:before{
+      opacity: 0;
+      animation: none;
+      transition: opacity 1.2s ease-out;
+      color: var(--title-color); // attr(data-color color);
+    }
+    &:hover{
+      cursor: pointer;
+      &:before{
+        opacity: 1;
+      }
+    }
+  }
+
+  .first-line{
+    padding-left: $font-size-larger-in-px;
+    color: $gray;
+    position: relative;
+  }
+}
+
+// search page
+.search {
+  padding: 1rem 1.6rem 2rem;
+
+  .search-box{
+    margin: 2rem 0;
+    input{
+      display: inline;
+      width: 50%;
+      margin-right: 1em;
+    }
+  }
+
+  >h1 {
+    font-size: $font-size-larger;
+    font-weight: bolder;
+    margin: 2rem 0 0;
+  }
+  .search-count {
+    color: $gray-lighter;
+    font-size: $font-size-sm;
+  }
+  .search-group {
+    h2{
+      font-size: $font-size-h2;
+      font-weight: bolder;
+      margin: 2rem 0 1rem;
+    }
+    ol{
+      padding-left: 0;
+      list-style: none;
+      .item{
+        margin-bottom: 1rem;
+        display: flex;
+        .title{
+          line-height: 1.6em;
+          margin-top: -.3em;
+        }
+        &:first-child .title {
+          padding-top: 0;
+        }
+
+        .item-left {}
+        .item-right {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+        }
+        .item-pic {
+          width: 8rem;
+          object-fit: cover;
+          margin-right: 1rem;
+        }
+
+        .item-poem-author {
+          z-index: 1;
+          display: inline-block;
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          background: #fff;
+          padding: 0 .5em;
+          height: 1.2em;
+        }
+
+        &.item-author{
+          height: 10rem;
+          .title{
+            padding-top: 0;
+            line-height: 1.2em;
+          }
+          .item-desc{
+            .item-link:hover {
+              color: unset;
+            }
+            &.block-with-text {
+              /* hide text if it more than N lines  */
+              overflow: hidden;
+              /* for set '...' in absolute position */
+              position: relative;
+              /* use this value to count block height */
+              line-height: 1.2em;
+              /* max-height = line-height (1.2) * lines max number (3) */
+              max-height: 3.6em;
+              /* fix problem when last visible word doesn't adjoin right side  */
+              text-align: justify;
+              /* place for '...' */
+              margin-right: -1em;
+              padding-right: 1em;
+            }
+            /* create the ... */
+            &.block-with-text:before {
+              /* points in the end */
+              content: '...';
+              /* absolute position */
+              position: absolute;
+              /* set position to right bottom corner of block */
+              right: 0;
+              bottom: 0;
+            }
+            /* hide ... if we have text, which is less than or equal to max lines */
+            &.block-with-text:after {
+              /* points in the end */
+              content: '';
+              /* absolute position */
+              position: absolute;
+              /* set position to right bottom corner of text */
+              right: 0;
+              /* set width and height */
+              width: 1em;
+              height: 1em;
+              margin-top: 0.2em;
+              /* bg color = bg color under block */
+              background: white;
+            }
+          }
+        }
+      }
+    }
+  }
+}

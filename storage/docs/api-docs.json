@@ -1,0 +1,64 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Laravel Generator APIs",
+        "version": "1.0.0"
+    },
+    "basePath": "/api/v1",
+    "paths": {},
+    "definitions": {
+        "Content": {
+            "required": [
+                "hash",
+                "new_hash",
+                "type",
+                "entry_id",
+                "content"
+            ],
+            "properties": {
+                "id": {
+                    "description": "id",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "hash": {
+                    "description": "hash",
+                    "type": "string"
+                },
+                "new_hash": {
+                    "description": "new_hash",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "type",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "entry_id": {
+                    "description": "entry_id",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "content": {
+                    "description": "content",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "created_at",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "updated_at": {
+                    "description": "updated_at",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "deleted_at": {
+                    "description": "deleted_at",
+                    "type": "string",
+                    "format": "date-time"
+                }
+            }
+        }
+    }
+}

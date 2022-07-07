@@ -1,0 +1,238 @@
+.title {
+  font-size: $font-size-larger;
+  font-weight: bolder;
+  vertical-align: unset;
+  margin: 0;
+
+  &.title-bar:before {
+    content: '▍';
+    vertical-align: unset;
+    animation: fadein 5s ease;
+    color: rgba(255, 255, 255, 0);
+    color: var(--main-color);
+  }
+}
+
+section.poem {
+  min-width: 90%;
+  height: 100%;
+  overflow: auto;
+  padding: 2rem 1.6rem;
+
+  article {
+
+    .title {
+      margin-bottom: 1.6rem;
+    }
+
+    .subtitle {
+      font-size: 1.1em;
+      font-weight: bolder;
+      white-space: pre-wrap;
+      display: block;
+    }
+
+    .preface {
+      color: $gray;
+      padding-left: 2em;
+      font-size: $font-size-sm;
+      white-space: pre-wrap;
+      display: inline-block;
+    }
+
+    .poem-content {
+      margin-left: -.4em;
+      font-size: $font-size;
+      //letter-spacing: 0.08em;
+      line-height: 2;
+      animation: fadein 2s ease-out;
+      white-space: pre-wrap;
+      word-break: normal;
+      @include media-breakpoint-down(xs) {
+        font-size: 3.8vw;
+        //white-space: nowrap;
+        overflow: auto;
+      }
+      @media (max-width: 375px) {
+        font-size: 4vw;
+      }
+
+      &.text-justify > .poem-line {
+        //line-height: 2;
+      }
+
+      & > .poem-line {
+        padding: .27em;
+        display: block;
+        line-height: 1.6em;
+        border: transparent 0;
+        border-radius: .2em;
+        white-space: pre-wrap;
+
+        &.poem-line-empty {
+          height: 1.4em;
+          line-height: 1.4em;
+        }
+
+        &.no-height {
+          height: 0;
+          padding: 0;
+          margin: 0;
+        }
+
+        &::selection, & > br::selection {
+          color: var(--main-color);
+          background-color: transparent;
+        }
+
+        &:hover {
+          // TODO this is for share function
+          background-color: lighten($gray-lighter, 10);
+        }
+      }
+    }
+
+    dl.poem-info,dl.poem-ugc {
+      line-height: 1em;
+      margin: 3.2rem 0 0;
+      font-size: $font-size-sm;
+
+      dt, dd {
+        display: inline;
+        line-height: 2;
+      }
+
+      dt {
+        color: $gray;
+        font-weight: normal;
+
+        &:before {
+          content: "";
+          display: block;
+        }
+      }
+
+      dd {
+        &:before {
+          content: "";
+          display: inline-block;
+          width: 1em;
+        }
+
+        > * {
+          display: inline;
+        }
+      }
+      .poem-time:before{content: initial;}
+
+      .poem-nation {
+        margin-right: .4em;
+      }
+
+      a.search-link:hover {
+        background: transparent;
+        color: $blue;
+      }
+      a.search-link:hover:after {
+        content: '\1F50D';
+        font-size: 10px;
+        display: inline-block;
+        width: 1.8em;
+        line-height: 2.4em;
+        text-indent: .4em;
+      }
+
+      &.poem-versions {
+        a:hover > dt {
+          color: $white;
+        }
+      }
+      .poemwiki-link:before{
+        line-height: 2.5em;
+      }
+
+      .author-label+.author-label{
+        margin-left: .8em;
+      }
+    }
+    dl.poem-ugc {
+      margin: 0
+    }
+
+    .btn.edit {
+      //font-weight: lighter;
+    }
+
+    ol.contribution {
+      list-style: none;
+      padding-left: 0;
+      font-size: $font-size-sm;
+      color: $gray;
+
+      > #folder {
+        display: none;
+      }
+
+      &.collapsed {
+        .log-middle {
+          display: none;
+        }
+
+        > #folder {
+          display: inline-block;
+        }
+      }
+
+      a {
+        color: unset;
+
+        &:hover {
+          background-color: unset;
+        }
+      }
+    }
+
+    a.create {
+      //background-color: darken($blue, 7);
+      //color: #fff;
+      padding: .5em 1em;
+      border: 1px solid $blue;
+      border-radius: .618em;
+      transition: .4s ease-in-out;
+      transition-property: border-radius, background-color, box-shadow;
+
+      &:hover {
+        border-radius: 1em;
+        background-color: $blue;
+        background: linear-gradient(315deg, $blue, darken($blue, 8));
+        box-shadow: -.2em -.2em 1em #d8d8d8, .5em .5em 1em $white;
+      }
+    }
+  }
+
+}
+
+nav.next {
+  margin: 3rem 0 3rem 0;
+  padding: 2rem 1.6rem;
+
+  > span {
+    display: block;
+    color: $gray;
+    font-size: $font-size-sm;
+  }
+
+  > p {
+    > a.title {
+      display: inline-block;
+      width: 100%;
+      height: 2.2em;
+      color: $blue;
+
+      &:before {
+        color: var(--main-color-next);
+      }
+    }
+  }
+}
+

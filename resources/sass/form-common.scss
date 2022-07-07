@@ -1,0 +1,152 @@
+/* purgecss start ignore */
+@tailwind  base;
+@tailwind  components;
+/* purgecss end ignore */
+
+@tailwind utilities;
+
+@import 'variables';
+@import "vue-select/src/scss/vue-select.scss";
+//@import '~bootstrap/scss/bootstrap-reboot';
+//@import 'css/MajorMonoDisplayFont.css';
+//@import 'css/starability-slot.css';
+
+input[type],select {
+  @apply text-base;
+}
+
+.wiki-form{
+  @apply text-base;
+  label {
+    @apply mt-4 block w-full text-base font-bold px-0.5;
+    &.required:after {
+      content: '*';
+      vertical-align: middle;
+      margin-left: .5em;
+      @apply text-red-500;
+    }
+  }
+  input[type=text],select {
+    @apply mt-0 block w-full px-0.5 border-0 border-b border-gray-200 focus:ring-0 focus:border-black text-base placeholder-gray-300;
+  }
+  input[type=radio], input[type=checkbox]{
+    width: .8em;
+    height: .8em;
+    vertical-align: middle;
+    line-height: 2.4em;
+    margin-right: .3em;
+  }
+  input[type=checkbox] {
+    width: 1em;
+    height: 1em;
+    box-shadow: none;
+  }
+  textarea{
+    @apply mt-0 block w-full px-0.5 border border-b border-gray-200 rounded-md focus:ring-0 focus:border-black text-base placeholder-gray-300;
+  }
+  .radio_group {
+    @apply mt-0 block w-full px-0.5 py-2 rounded-md focus:ring-0 text-base;
+    legend {
+      @apply mt-4 block w-full text-base font-bold px-0.5;
+    }
+    label {
+      font-weight: normal;
+    }
+  }
+
+  .form-control-feedback {
+    @apply px-0.5 text-red-500;
+    min-height: 2.4rem;
+    transition: opacity 1s;
+  }
+
+  .vs__dropdown-menu {
+    overflow-x: hidden;
+  }
+
+  .author-option {
+
+  }
+  .author-option-source {
+    padding: 0 4px;
+    line-height: 5em;
+    height: 5em;
+  }
+  .author-option-label {
+    position: absolute;
+    display: block;
+    top: 6px;
+    left: 4.1em;
+    line-height: 1.2em;
+    &:before{
+      line-height: 1.0em;
+    }
+  }
+  .author-option-desc {
+    position: absolute;
+    display: block;
+    bottom: 6px;
+    left: 5.4em;
+    line-height: 1em;
+    font-size: 12px;
+    color: gray;
+  }
+  .vs__dropdown-option{
+    position: relative;
+    line-height: 4em;
+    height: 4em;
+    padding-left: 4.2em;
+  }
+  .vs__dropdown-option--highlight {
+    .author-option-source,
+    .author-option-desc {
+      background-color: $vs-state-active-bg;
+      color: $white;
+    }
+  }
+
+  .author-option-avatar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4em;
+    height: 4em;
+    padding: 6px;
+    object-fit: cover;
+    color: $gray;
+    //font-size: 10px; //for alt text
+    //text-overflow: clip;
+  }
+
+  .wiki-avatar{
+    position: relative;
+    width: 300px;
+    &-img{
+      width: 100%;
+      height: auto;
+    }
+    &-mask {
+      display: block;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    >input[type=file]{
+      opacity: 0;
+      cursor: pointer;
+    }
+    &-btn{
+      background: rgb(0 0 0 / 26%);
+      color: #fff;
+      text-align: center;
+      line-height: 300px;
+    }
+    &:hover .wiki-avatar-btn{
+      background: rgb(0 0 0 / 50%);
+    }
+  }
+}
+
+@import 'common.scss';

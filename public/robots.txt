@@ -1,0 +1,41 @@
+User-agent: Baiduspider
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: 360Spider
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: BingPreview
+Allow: /
+
+User-agent: Sogou spider
+Allow: /
+
+User-agent: Sogou web spider
+Allow: /
+
+User-agent: Yisouspider
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+User-agent: YandexMobileBot
+Allow: /
+
+User-agent: *
+Disallow: /login
+
+User-agent: *
+Disallow: /new
+
+User-agent: *
+Disallow: /poems/create
+
+User-agent: *
+Disallow: /

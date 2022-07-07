@@ -1,0 +1,51 @@
+// Body
+$body-bg: #f8fafc;
+
+// Typography
+$font-family-sans-serif: -apple-system, "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", "Wenquanyi Micro Hei", "WenQuanYi Zen Hei", "ST Heiti", SimHei, "WenQuanYi Zen Hei Sharp", "Noto Sans", "Helvetica Neue", Helvetica, "Nimbus Sans L", Arial, "Liberation Sans", sans-serif;
+$font-family-serif: "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "Source Han Serif CN", STSong, "AR PL New Sung", "AR PL SungtiL GB", NSimSun, "SimSun", "\5B8B\4F53", "TW\-Sung", "WenQuanYi Bitmap Song", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", PMingLiU, MingLiU, Georgia, "Nimbus Roman No9 L", serif;
+$body-font-size-in-px: 16px;
+$font-size: 1em;
+$font-size-sm: .875em;
+$font-size-sm-in-px: .875 * 16px;
+$font-size-larger: 1.6em;
+$font-size-larger-in-px: 1.6 * 16px;
+$font-size-extra-large: 2.4em;
+$font-size-h2: 1.1em;
+
+$line-height-base: 1.6;
+.font-hei {font-family: $font-family-sans-serif}
+.font-kai {font-family: Baskerville, Georgia, "Liberation Serif", "Kaiti SC", STKaiti, "AR PL UKai CN", "AR PL UKai HK", "AR PL UKai TW", "AR PL UKai TW MBE", "AR PL KaitiM GB", KaiTi, KaiTi_GB2312, DFKai-SB, "TW\-Kai", serif;}
+.font-song {font-family: Georgia, "Nimbus Roman No9 L", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "Source Han Serif CN", STSong, "AR PL New Sung", "AR PL SungtiL GB", NSimSun, "SimSun", "\5B8B\4F53", "TW\-Sung", "WenQuanYi Bitmap Song", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", PMingLiU, MingLiU, serif;}
+.font-fang-song {font-family: Baskerville, "Times New Roman", "Liberation Serif", STFangsong, FangSong, FangSong_GB2312, "CWTEX\-F", serif;}
+
+
+// Colors
+$blue: #004afe;
+$indigo: #6574cd;
+$purple: #9561e2;
+$pink: #f66d9b;
+$red: #e3342f;
+$orange: #f6993f;
+$yellow: #ffed4a;
+$green: #38c172;
+$teal: #4dc0b5;
+$cyan: #6cb2eb;
+$gray: #9d9d9d;
+$gray-lighter: #d8d8d8;
+$black: #010101;
+$white: #ffffff;
+
+$default-text-color: #111;
+$border-color: #ddd;
+$ui-text-color: #23282c;
+$text-muted: #6c757d;
+$ui-star-color: #666;
+$ui-star-light-color: hsl(45, 97%, 50%);
+$bg-color: #ffffff;
+$darker-content-bg-color: #f7f7f7;
+$transparent-black: rgb(0 0 0 / 30%);
+$modal-black: rgb(0 0 0 / 60%);
+$link-visited: darken($blue, 40%);
+
+$soft-enter-bezier: cubic-bezier(.1,0,.1,1);

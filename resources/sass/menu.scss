@@ -1,0 +1,138 @@
+nav.header-fixed {
+  width: 100%;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -100%);
+  z-index: 10;
+  background-color: $bg-color;
+  border-bottom: 1px solid $gray-lighter;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,.1);
+  overflow: hidden;
+  user-select: none;
+  //@include media-breakpoint-down(md) {
+  //  background-color: rgba(0, 0, 0, 0.93);
+  //}
+  &>ul{
+    height: 6rem;
+    padding: 0 1.6rem;
+    margin: 0;
+    &>li{
+      list-style: none;
+      display: flex;
+      height: 5rem;
+      min-width: 5rem;
+      &:hover>.logout{
+        display: flex;
+      }
+
+      &.search-logo {
+        position: absolute;
+        top: 6rem;
+        right: 1.6rem;
+        >a {
+          background: url(/images/search.png) no-repeat;
+          background-size: 3rem;
+          background-position: center;
+          display: block;
+          width: 6rem;
+          height: 6rem;
+        }
+      }
+    }
+  }
+
+  a {
+    display: block;
+    text-decoration: none;
+    height: 5rem;
+    white-space: nowrap;
+    overflow: visible;
+    color: $black;
+  }
+  .title{
+    height: 100%;
+    max-width: 70%;
+    overflow: hidden;
+    position: absolute;
+    top: 6rem;
+    left: 1.6rem;
+    line-height: 6rem;
+    transition: top .8s ease-in;
+
+    //@include media-breakpoint-only(xs) {
+    //  font-size: $font-size * 1.2;
+    //}
+  }
+  &.show-title{
+    .title{
+      display: flex;
+      top: 0;
+      transition: top .8s $soft-enter-bezier;
+    }
+    .site-logo{
+      //display: none;
+      opacity: 0;
+      transition: opacity .4s ease-in;
+    }
+    .user-logo{
+      opacity: 0;
+      transition: opacity .1s ease-in;
+    }
+    .search-logo{
+      top: 0;
+      right: 0;
+      opacity: 1;
+      display: block;
+      height: 6rem;
+      width: 6rem;
+      transition: opacity 2s ease-in;
+    }
+  }
+  .search-logo{
+    opacity: 0;
+    transition: opacity .2s ease-in;
+  }
+  .user-logo{
+    opacity: 1;
+    transition: opacity .2s ease-in;
+  }
+  .site-logo {
+    opacity: 1;
+    transition: opacity 2s ease-in;
+
+    a{
+      width: 5rem;
+      height: 5rem;
+      white-space: pre-line;
+      background: url("/images/poemwiki.svg") no-repeat 0 0;
+      background-size: 5rem 5rem;
+    }
+    &a:hover {
+      text-decoration: none;
+      //color: $blue;
+      //transition: color .4s $soft-enter-bezier;
+    }
+  }
+  .menu-button{
+    right: 0;
+    top: 0;
+    width: 5rem;
+    line-height: 5rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    img{
+      width: 4rem;
+    }
+    &.logout{
+      display: none;
+    }
+  }
+
+}
+@media (min-width: theme('screens.md.min')) {
+  nav.header-fixed {
+    width: theme('screens.md.min');
+  }
+}

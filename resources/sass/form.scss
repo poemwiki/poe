@@ -1,0 +1,47 @@
+
+
+@import "form-common";
+
+
+
+main {
+  flex: 1;
+}
+.card {
+  border: none;
+  .card-header {
+    @apply text-xl font-bold;
+    a {
+      padding: 0;
+    }
+  }
+
+  .form-control{
+
+  }
+}
+
+
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto!important;
+  .CodeMirror-gutter {
+    width: 22px!important;
+  }
+  .CodeMirror-linenumber {
+    width: 20px!important;
+    padding: 0;
+    line-height: 3.2rem;
+    font-size: 1.0rem;
+    color: #cecece;
+  }
+}
+
+/* for poem edit/create form, poem field */
+#poem {
+  pre{
+    @apply text-base;
+    line-height: 2em;
+    font-family: $font-family-serif;
+  }
+}

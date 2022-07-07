@@ -1,0 +1,97 @@
+.poemwiki-link:before{
+  content: '🔗';
+  font-size: 10px;
+  display: inline-block;
+  width: 1.6em;
+  //line-height: 2.4em;
+  background-color: transparent;
+}
+.wikidata-link, .wikipedia-link, .weapp-link, .weapp-code{
+  vertical-align: text-bottom;
+  line-height: 1em;
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  padding: 0;
+  &:hover{
+    background-color: transparent;
+  }
+}
+.wikidata-link:before, .wikipedia-link:before, .weapp-link:before {
+  content: '';
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background-size: 1em auto;
+  background-repeat: no-repeat;
+  background-position-y: center;
+}
+.wikidata-link:before {
+  background-image: url("/images/wikidata.svg");
+}
+.wikipedia-link:before {
+  background-image: url("/images/wikipedia.svg");
+}
+.weapp-link:before {
+  background-image: url("/images/weapp.svg");
+}
+.author-avatar {
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 50%;
+  margin-right: 0.4em;
+  display: inline-block;
+  vertical-align: middle;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.nested-tree {
+  position: relative;
+  line-height: 1.5;
+
+  .parent {
+    margin: 0 0 0 20px;
+    .child {
+      position: relative;
+      &:before {
+        position: absolute;
+        left: -15px;
+        top: 0;
+        content: '';
+        display: block;
+        border-left: 1px solid $border-color;
+        height: 1em;
+        border-bottom: 1px solid $border-color;
+        width: 10px;
+      }
+
+      &:after {
+        position: absolute;
+        left: -15px;
+        bottom: -7px;
+        content: '';
+        display: block;
+        border-left: 1px solid $border-color;
+        height: 100%;
+      }
+
+      &.root {
+        margin: 0 0 0 -20px;
+        &:before {
+          display: none;
+        }
+
+        &:after {
+          display: none;
+        }
+      }
+
+      &:last-child {
+        &:after {
+          display: none;
+        }
+      }
+    }
+  }
+}
