@@ -427,6 +427,26 @@ function textClean($str, int $longTextLineLength = 70): string {
 
     return trim($str);
 }
+function splitPairedLines($str): string{
+    if (gettype($str) !== 'string') {
+        return $str;
+    }
+    if(mb_strlen($str) <= 1)
+    {
+        return $str;
+    }
+    $text = $str; 
+    $middle = floor(mb_strlen($text) / 2) ;
+    $string1 = mb_substr($text, 0, $middle);  
+    $string2 = mb_substr($text, $middle); 
+    if((mb_substr($string1 , -1) == '。' or mb_substr($string1 , -1) == '？' or mb_substr($string1 , -1) == '！' ) && (mb_substr($string2 , -1) == '。' or mb_substr($string2 , -1) == '？' or mb_substr($string2 , -1) == '！' ))
+    {
+        return splitPairedLines($string1) . '\n' . splitPairedLines($string2);
+    }
+    return $string1 . $string2;
+}
+
+
 function textTypo ($str): string {
     if (gettype($str) !== 'string') {
         return $str;

@@ -27,7 +27,7 @@ class import extends Command {
      * 5. 将来源 URL 填入 poem.from 字段.
      */
     protected $description = 'import poetry data from modern-poetry';
-    public static $local = '0-49.json';
+    public static $local = '0-499.json';
     public static $source   = 'github:modern-poetry';
     public static $causerID = 2; // uploader user id
     public static $url = 'https://github.com/qyxtim/modern-poetry';
@@ -154,8 +154,11 @@ class import extends Command {
                         $poem[$to] = textClean(implode('\n' , $poemCrawl->result[$from]));
                     }
                     else
-                        $poem[$to] = textClean(textTypo($poemCrawl->result[$from]));
-                }
+                    {
+                        $poem[$to] = splitPairedLines(textClean(textTypo($poemCrawl->result[$from])));
+                    }
+                        
+                }   
 
                 try {
                     // TODO move this to a public custom validator

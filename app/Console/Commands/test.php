@@ -36,9 +36,8 @@ class test extends Command
      */
     public function handle()
     {
-        $para = "铁板铜琵歌曲子。曲曲新声，删尽凄凉意。飘泊东南羁旅际。灵襟更写湖光翠。海上看羊寻远计。剩水残山，总是伤心地。谁把唾壶今击碎。仰天长啸云飞起。";
-
-        $this->info(textTypo($para));
+        $para = "杨柳无情，丝丝化作愁千缕。惺忪如许，萦起心头绪。谁道销魂，心意无凭据。离亭外，一帆风雨，只有人归去。";
+        $this->info(splitPairedLines($para));
         return 0;
     }
 }
