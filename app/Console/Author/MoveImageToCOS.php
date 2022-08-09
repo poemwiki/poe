@@ -41,7 +41,7 @@ class MoveImageToCOS extends Command {
 
         $this->authorRepo = $authorRepo;
 
-        $this->client   = new Tx();
+        $this->client = new Tx();
     }
 
     /**
@@ -79,7 +79,7 @@ class MoveImageToCOS extends Command {
 
         $picUrls = collect($author->pic_url)->filter(function ($url) {
             return isValidPicUrl($url) && (isWikimediaUrl($url)
-                || !str_starts_with($url, 'https://poemwiki-1254719278.cos.ap-guangzhou.myqcloud.com'));
+                || !str_starts_with($url, cosUrl()));
         })
             ->values();
 

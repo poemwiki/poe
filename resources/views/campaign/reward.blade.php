@@ -9,14 +9,14 @@
   @if(isset($error) && $error!=='')
     <h1>赛诗会奖励领取</h1>
     <p class="error">{{$error}}</p>
-    <p class="error"><img class="code" src="https://poemwiki-1254719278.cos.ap-guangzhou.myqcloud.com/campaign/dushuijun.jpg" alt="读睡君"></p>
+    <p class="error"><img class="code" src="<?=cosUrl('/campaign/dushuijun.jpg')?>" alt="读睡君"></p>
   @elseif($campaignId === 20)
     @if($results->count() === 1)
-      <img class="full-vw" src="https://poemwiki-1254719278.cos.ap-guangzhou.myqcloud.com/campaign/xmly.jpg" alt="领取说明">
+      <img class="full-vw" src="<?=cosUrl('/campaign/xmly.jpg') ?>" alt="领取说明">
       <input class="reward" value="{{$results->first()->reward->reward}}" disabled />
     @endif
     @if($results->count() >= 2)
-      <img class="full-vw" src="https://poemwiki-1254719278.cos.ap-guangzhou.myqcloud.com/campaign/xmly3.jpg" alt="领取说明">
+      <img class="full-vw" src="<?=cosUrl('/campaign/xmly3.jpg') ?>" alt="领取说明">
       @foreach($results as $key => $result)
       <input class="reward reward-{{$key}}" value="{{$result->reward->reward}}" disabled />
       @endforeach

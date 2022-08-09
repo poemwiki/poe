@@ -56,7 +56,7 @@ return [
         // Tencent Cloud Object Storage
         'cosv5' => [
             'driver'          => 'cosv5',
-            'region'          => env('COSV5_REGION', 'ap-guangzhou'),
+            'region'          => env('COSV5_REGION', 'ap-hongkong'),
             'credentials'     => [
                 'appId'     => env('COSV5_APP_ID'),
                 'secretId'  => env('COSV5_SECRET_ID'),

@@ -386,7 +386,7 @@ class PoemAPIController extends Controller {
             $res['sell'] = [
                 'path'   => 'pages/proxy/union/union?spreadUrl=https://u.jd.com/6D7JluJ',
                 'appId'  => 'wx1edf489cb248852c',
-                'picUrl' => 'https://poemwiki-1254719278.cos.ap-guangzhou.myqcloud.com/campaign/9/sell.jpg'
+                'picUrl' => cosUrl('/campaign/9/sell.jpg')
             ];
         }
 
@@ -394,7 +394,7 @@ class PoemAPIController extends Controller {
             $res['sell'] = [
                 'path'   => 'ws_micro_shop/pages/goods/goods?share_scene=4&ald_share_src=16292069421208593488&shopid=0&id=628332&tabbarindex=0',
                 'appId'  => 'wx219ab480d1c51bb3',
-                'picUrl' => 'https://poemwiki-1254719278.cos.ap-guangzhou.myqcloud.com/campaign/26/sell.jpg'
+                'picUrl' => cosUrl('/campaign/26/sell.jpg')
             ];
         }
 
