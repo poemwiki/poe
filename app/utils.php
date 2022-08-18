@@ -432,6 +432,6 @@ function isValidUrl($url) {
     return preg_match('/((ftp|http|https):\/\/)([a-z]+:{0,1}[a-z]*@)?(\S+)(:[0-9]+)?(\/|\/([[a-z]#!:.?+=&%@!\-\/]))?/i', $url);
 }
 
-function cosUrl($key='', $cosConfig = []) {
+function cosUrl($key = '', $cosConfig = []) {
     return (new \App\Services\Tx($cosConfig))->getUrl($key);
 }
