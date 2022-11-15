@@ -22,6 +22,7 @@ use App\Rules\ValidPoemContent;
 use App\Services\Weapp;
 use App\User;
 use EasyWeChat\Factory;
+use Error;
 use Exception;
 use File;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -918,7 +919,7 @@ class PoemAPIController extends Controller {
                 $validator = Validator::make($poem, [
                     'title'                  => 'required|string|max:255',
                     'poet'                   => 'required|string|max:255',
-                    'poem'                   => [new NoDuplicatedPoem(null), 'required', 'string', 'min:10', 'max:65500'],
+                    'poem'                   => ['required', new NoDuplicatedPoem(null), 'string', 'min:10', 'max:65500'],
                     // 'poet_id'                => 'integer|exists:' . \App\Models\Author::class . ',id',
                     // 'is_owner_uploaded'      => ['required', Rule::in([Poem::$OWNER['none'], Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])],
                     'from'                   => 'nullable|string|max:255',
@@ -937,6 +938,11 @@ class PoemAPIController extends Controller {
                 }
 
                 $result[] = ['errors' => $errors];
+
+                continue;
+            } catch (Error $e) {
+                logger()->error('Undefined error while import poem: ', $e->getTrace());
+                $result[] = ['errors' => 'Undefined error'];
 
                 continue;
             }
