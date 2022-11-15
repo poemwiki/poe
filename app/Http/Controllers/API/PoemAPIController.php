@@ -917,6 +917,8 @@ class PoemAPIController extends Controller {
             try {
                 $poem['original_id']       = 0;
                 $poem['is_owner_uploaded'] = Poem::$OWNER['none'];
+                $poem['upload_user_id']    = $request->user()->id;
+                $poem['flag']              = Poem::$FLAG['botContentNeedConfirm'];
 
                 $validator = Validator::make($poem, [
                     'title'                  => 'required|string|max:255',

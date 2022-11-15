@@ -130,6 +130,7 @@ class Poem extends Model implements Searchable {
         'share_pics',
         'campaign_id',
         'weapp_url',
+        'flag',
     ];
 
     /**
