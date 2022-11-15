@@ -14,6 +14,7 @@ use App\Models\Relatable;
 use App\Models\Tag;
 use App\Models\Transaction;
 use App\Query\AuthorAliasSearchAspect;
+use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
@@ -31,6 +32,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Spatie\Searchable\ModelSearchAspect;
 use Spatie\Searchable\Search;
@@ -923,7 +925,9 @@ class PoemAPIController extends Controller {
                     // 'poet_id'                => 'integer|exists:' . \App\Models\Author::class . ',id',
                     // 'is_owner_uploaded'      => ['required', Rule::in([Poem::$OWNER['none'], Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])],
                     'from'                   => 'nullable|string|max:255',
+                    'language_id'            => ['required', Rule::in(LanguageRepository::idsInUse())],
                 ]);
+
                 $validator->validate();
 
                 $inserted = Poem::create($poem);
@@ -941,7 +945,7 @@ class PoemAPIController extends Controller {
 
                 continue;
             } catch (Error $e) {
-                logger()->error('Undefined error while import poem: ', $e->getTrace());
+                logger()->error('Undefined error while import poem: ' . $e->getMessage() . $e->getTraceAsString());
                 $result[] = ['errors' => 'Undefined error'];
 
                 continue;
