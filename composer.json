@@ -32,6 +32,7 @@
     "ext-gd": "*",
     "ext-gmp": "*",
     "ext-json": "*",
+    "alibabacloud/alimt-20181012": "1.0.2",
     "arweave/arweave-sdk": "dev-master",
     "bordercloud/sparql": "^2.0",
     "brackets/admin-translations": "dev-fix-dash-locale",

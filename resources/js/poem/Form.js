@@ -118,6 +118,18 @@ Vue.component('poem-form', {
       }
     },
 
+    'form.poem': async function (newVal, old) {
+      console.log({old}, !old.trim());
+      // TODO debounce detect
+      // detect language when pasting to empty textarea
+      if(!newVal.trim() || old.trim()) return;
+
+      this.detectLanguage(newVal).then(lang => {
+        console.log('detect language', lang, newVal);
+        this.form.language_id = lang;
+      });
+    }
+
     // 'form.translator_ids': function (newVal) {
     //   if(newVal === null) {
     //     this.form.translator = '';
@@ -296,16 +308,16 @@ Vue.component('poem-form', {
       this.submiting = false;
     },
 
-    onCmInput(newContent) {
+    async onCmInput(newContent) {
       this.form.poem = newContent;
     },
 
-    onCmCodeChange() {
+    onCmCodeBlur() {
       console.log('content: ', this.form.poem);
       this.$validator.validate('poem', this.form.poem);
     },
 
-    onCmBeforechange(cm, change) {
+    onCmBeforeChange(cm, change) {
       // console.log('beforeChange', cm, change.text.join("\n"))
 
       // clean unnecessary empty lines
@@ -357,7 +369,7 @@ Vue.component('poem-form', {
         }
 
         // remove space before each line
-        var newText = change.text.map((line, index) => {
+        const newText = change.text.map((line, index) => {
           if (spaceStartLineCount >= lineCount-emptyLineCount-2) {
             return line.trim();
           }
@@ -395,6 +407,21 @@ Vue.component('poem-form', {
         source: id ? 'PoemWiki' : '',
         avatar_url: '/images/avatar-default.png'
       }
+    },
+
+    detectLanguage(poem) {
+      const topLines = poem.split('\n').slice(0, 3).reduce((accumulator, line) => {
+        return accumulator + '\n' + line;
+      }, '')
+      return axios(
+        `/api/v1/poem/detect`,
+        {
+          method: 'POST',
+          data: {
+            text: topLines
+          }
+        }
+      );
     }
   },
   computed: {

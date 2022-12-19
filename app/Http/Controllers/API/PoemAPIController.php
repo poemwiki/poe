@@ -20,6 +20,7 @@ use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
 use App\Rules\NoDuplicatedPoem;
 use App\Rules\ValidPoemContent;
+use App\Services\AliTranslate;
 use App\Services\Weapp;
 use App\User;
 use EasyWeChat\Factory;
@@ -955,5 +956,11 @@ class PoemAPIController extends Controller {
         }
 
         return $this->responseSuccess($result, 'Thanks for your contribution!');
+    }
+
+    public function detectLanguage(Request $request) {
+        $text = $request->input('text');
+
+        return AliTranslate::detectLanguage($text);
     }
 }

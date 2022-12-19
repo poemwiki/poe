@@ -20,7 +20,7 @@
     <legend>@lang('Claim Authorship')</legend>
 
     <label for="owner_type_none"><input type="radio" id="owner_type_none"
-       v-model="form.is_owner_uploaded" name="is_owner_uploaded_fake_element" :value="0" />@choice('Authorship', 0)</label>
+       v-model="form.is_owner_uploaded" name="is_owner_uploaded_fake_element" :value="0" />@choice('Authorship', 0)&nbsp;&nbsp;(仅管理员可删除)</label>
 
     @if(empty($originalPoem))
       <label for="owner_type_uploader"><input type="radio" id="owner_type_uploader"
@@ -96,9 +96,9 @@
             :options="cmOptions"
             :class="{'form-control-danger': errors.has('poem'), 'form-control-success': fields.poem && fields.poem.valid}"
             @input="onCmInput"
-            v-on:before-change="onCmBeforechange"
-            @blur="onCmCodeChange"
-        />
+            v-on:before-change="onCmBeforeChange"
+            @blur="onCmCodeBlur"
+        ></codemirror>
     </div>
     <div v-if="errors.has('poem')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('poem') }}</div>
 </div>
@@ -281,105 +281,78 @@
   </div>
 @endif
 
-
-{{--genre_id--}}
-<div :class="{'hidden' : form.is_original==0, 'has-danger': errors.has('genre_id'), 'has-success': fields.genre_id && fields.genre_id.valid }">
-<label for="genre_id" class="col-form-label text-md-right">{{ trans('admin.poem.columns.genre_id') }}</label>
-
-<div>
-    <select class="form-control"
-            :class="{'form-control-danger': errors.has('genre_id'), 'form-control-success': fields.genre_id && fields.genre_id.valid}"
-            id="genre_id" v-model="form.genre_id"
-            v-validate="''"
-            data-vv-as="{{ trans('admin.poem.columns.genre_id') }}" data-vv-name="genre_id"
-            name="genre_id_fake_element">
-        <option value="" :selected="form.genre_id==''">  </option>
-        @foreach($genreList as $genre)
-            <option value="{{$genre->id}}" :selected="form.genre_id=={{$genre->id}}">{{ $genre->name_lang }}</option>
-        @endforeach
-    </select>
-    <input type="hidden" name="genre_id" :value="form.genre_id">
-    <div v-if="errors.has('genre_id')" class="form-control-feedback form-text" v-cloak>@{{
-        errors.first('genre_id') }}
-    </div>
-</div>
-</div>
-
 {{--translator_id--}}
 <div :class="{'hidden' : form.is_original==1,'has-danger': errors.has('translator_id')}">
-<label for="translator_id" class="col-form-label text-md-right" :class="{'required': form.is_original==0}">{{ trans('admin.poem.columns.translator_id') }}</label>
-<div>
+  <label for="translator_id" class="col-form-label text-md-right" :class="{'required': form.is_original==0}">{{ trans('admin.poem.columns.translator_id') }}</label>
+  <div>
+    <input type="hidden" name="translator" :value="form.translator">
+    <v-select :options="translatorList" label="label" :reduce="label => label.id"
+              taggable :create-option="label => ({
+                label: label,
+                id: 'new_' + label,
+                label_en: label,
+                label_cn: label,
+                url: '',
+                avatar_url: '/images/avatar-default.png'
+               })"
+              :multiple="true"
+              :push-tags="true"
+              @option:selected="onSelectTranslator"
+              @option:deselected="onDeselectTranslator"
+              @search="onSearchTranslator"
+              @search:focus="onSearchTranslatorFocus"
+              ref="translator"
+              id="translator_ids"
+              v-model="form.translator_ids"
+              :class="{'form-control-danger': errors.has('translator_ids'), 'form-control-success': fields.translator_ids && fields.translator_ids.valid}"
+              class="relative"
+              v-validate="form.is_original==0 ? 'required' : ''"
+              data-vv-as="{{ trans('admin.poem.columns.translator_ids') }}" data-vv-name="translator_ids"
+              name="translator_ids_fake_element"
+    >
 
+      <template slot="option" slot-scope="option">
+        <div :title="option.source ? '链接到作者页' : 'PoemWiki 暂无该作者，将链接到搜索页'" class="author-option">
+          <span class="author-option-label" :class="option.source ? 'poemwiki-link' : ''">@{{ option.label }}</span>
+          <span class="author-option-desc">@{{ option.desc }}</span>
+          <img class="author-option-avatar" :src="option.avatar_url" :alt="option.label">
+          <span :class="'author-option-source ' + option.source" class="absolute text-xs leading-loose right-0 bg-white inline-block text-right text-gray-400">@{{option.source || '仅录入名字，暂不关联作者'}}</span>
+        </div>
+      </template>
 
-<input type="hidden" name="translator" :value="form.translator">
-<v-select :options="translatorList" label="label" :reduce="label => label.id"
-          taggable :create-option="label => ({
-            label: label,
-            id: 'new_' + label,
-            label_en: label,
-            label_cn: label,
-            url: '',
-            avatar_url: '/images/avatar-default.png'
-           })"
-          :multiple="true"
-          :push-tags="true"
-          @option:selected="onSelectTranslator"
-          @option:deselected="onDeselectTranslator"
-          @search="onSearchTranslator"
-          @search:focus="onSearchTranslatorFocus"
-          ref="translator"
-          id="translator_ids"
-          v-model="form.translator_ids"
-          :class="{'form-control-danger': errors.has('translator_ids'), 'form-control-success': fields.translator_ids && fields.translator_ids.valid}"
-          class="relative"
-          v-validate="form.is_original==0 ? 'required' : ''"
-          data-vv-as="{{ trans('admin.poem.columns.translator_ids') }}" data-vv-name="translator_ids"
-          name="translator_ids_fake_element"
->
+      <template slot="selected-option" slot-scope="option">
+        {{--    <a href="author/new or author page url" target="_blank"></a>--}}
+        <span :class="option.source ? 'poemwiki-link' : ''">@{{option.label}}</span>
+      </template>
+    </v-select>
 
-  <template slot="option" slot-scope="option">
-    <div :title="option.source ? '链接到作者页' : 'PoemWiki 暂无该作者，将链接到搜索页'" class="author-option">
-      <span class="author-option-label" :class="option.source ? 'poemwiki-link' : ''">@{{ option.label }}</span>
-      <span class="author-option-desc">@{{ option.desc }}</span>
-      <img class="author-option-avatar" :src="option.avatar_url" :alt="option.label">
-      <span :class="'author-option-source ' + option.source" class="absolute text-xs leading-loose right-0 bg-white inline-block text-right text-gray-400">@{{option.source || '仅录入名字，暂不关联作者'}}</span>
+    <input type="hidden" name="translator_ids" :value="form.translator_ids">
+
+    <div v-if="errors.has('translator_ids')" class="form-control-feedback form-text" v-cloak>@{{
+      errors.first('translator_ids') }}
     </div>
-  </template>
-
-
-  <template slot="selected-option" slot-scope="option">
-    {{--    <a href="author/new or author page url" target="_blank"></a>--}}
-    <span :class="option.source ? 'poemwiki-link' : ''">@{{option.label}}</span>
-  </template>
-</v-select>
-
-<input type="hidden" name="translator_ids" :value="form.translator_ids">
-
-<div v-if="errors.has('translator_ids')" class="form-control-feedback form-text" v-cloak>@{{
-  errors.first('translator_ids') }}
-</div>
-</div>
+  </div>
 </div>
 
 <div :class="{'has-danger': errors.has('language_id'), 'has-success': fields.language_id && fields.language_id.valid }">
-<label for="language_id" class="col-form-label text-md-right required">{{ trans('admin.poem.columns.language_id') }}</label>
+  <label for="language_id" class="col-form-label text-md-right required">{{ trans('admin.poem.columns.language_id') }}</label>
 
-<div>
-    <select class="form-control"
-            :class="{'form-control-danger': errors.has('language_id'), 'form-control-success': fields.language_id && fields.language_id.valid}"
-            id="language_id" v-model="form.language_id"
-            v-validate="'required'"
-            data-vv-as="{{ trans('admin.poem.columns.language_id') }}" data-vv-name="language_id"
-            name="language_id_fake_element">
-        @foreach($languageList as $lang)
-            <option :value="{{$lang->id}}" :selected="form.language_id=={{$lang->id}}">{{ $lang->name_lang }} ({{ $lang->name }})</option>
-        @endforeach
-    </select>
-    <input type="hidden" name="language_id" :value="form.language_id">
-    <div v-if="errors.has('language_id')" class="form-control-feedback form-text" v-cloak>@{{
-        errors.first('language_id') }}
-    </div>
-</div>
+  <div>
+      <select class="form-control"
+              :class="{'form-control-danger': errors.has('language_id'), 'form-control-success': fields.language_id && fields.language_id.valid}"
+              id="language_id" v-model="form.language_id"
+              v-validate="'required'"
+              data-vv-as="{{ trans('admin.poem.columns.language_id') }}" data-vv-name="language_id"
+              name="language_id_fake_element">
+          @foreach($languageList as $lang)
+              <option :value="{{$lang->id}}" :selected="form.language_id=={{$lang->id}}">{{ $lang->name_lang }} ({{ $lang->name }})</option>
+          @endforeach
+      </select>
+      <input type="hidden" name="language_id" :value="form.language_id">
+      <div v-if="errors.has('language_id')" class="form-control-feedback form-text" v-cloak>@{{
+          errors.first('language_id') }}
+      </div>
+  </div>
 </div>
 
 <div :class="{'has-danger': errors.has('from') }">
@@ -396,11 +369,33 @@
 </div>
 </div>
 
+{{--genre_id--}}
+<div :class="{'hidden' : form.is_original==0, 'has-danger': errors.has('genre_id'), 'has-success': fields.genre_id && fields.genre_id.valid }">
+  <label for="genre_id" class="col-form-label text-md-right">{{ trans('admin.poem.columns.genre_id') }}</label>
+
+  <div>
+    <select class="form-control"
+            :class="{'form-control-danger': errors.has('genre_id'), 'form-control-success': fields.genre_id && fields.genre_id.valid}"
+            id="genre_id" v-model="form.genre_id"
+            v-validate="''"
+            data-vv-as="{{ trans('admin.poem.columns.genre_id') }}" data-vv-name="genre_id"
+            name="genre_id_fake_element">
+      <option value="" :selected="form.genre_id==''">  </option>
+      @foreach($genreList as $genre)
+        <option value="{{$genre->id}}" :selected="form.genre_id=={{$genre->id}}">{{ $genre->name_lang }}</option>
+      @endforeach
+    </select>
+    <input type="hidden" name="genre_id" :value="form.genre_id">
+    <div v-if="errors.has('genre_id')" class="form-control-feedback form-text" v-cloak>@{{
+      errors.first('genre_id') }}
+    </div>
+  </div>
+</div>
 
 @if(Auth::user()->is_admin)
 <div :class="{'has-danger': errors.has('bedtime_post_id') }">
-<label for="bedtime_post_id" class="col-form-label text-md-right">{{ trans('admin.poem.columns.bedtime_post_id') }}</label>
-<div>
+  <label for="bedtime_post_id" class="col-form-label text-md-right">{{ trans('admin.poem.columns.bedtime_post_id') }}</label>
+  <div>
     <input type="text" v-model="form.bedtime_post_id"
            v-validate="''"
            value="{{$originalPoem->bedtime_post_id ?? $translatedPoem->bedtime_post_id ?? ''}}"
@@ -411,12 +406,12 @@
     <div v-if="errors.has('bedtime_post_id')" class="form-control-feedback form-text" v-cloak>@{{
         errors.first('bedtime_post_id') }}
     </div>
-</div>
+  </div>
 </div>
 
 <div :class="{'has-danger': errors.has('bedtime_post_title')}">
-<label for="bedtime_post_title" class="col-form-label text-md-right">{{ trans('admin.poem.columns.bedtime_post_title') }}</label>
-<div>
+  <label for="bedtime_post_title" class="col-form-label text-md-right">{{ trans('admin.poem.columns.bedtime_post_title') }}</label>
+  <div>
     <input type="text" v-model="form.bedtime_post_title"
            v-validate="''"
            value="{{$originalPoem->bedtime_post_title ?? $translatedPoem->bedtime_post_title ?? ''}}"
@@ -428,14 +423,14 @@
     <div v-if="errors.has('bedtime_post_title')" class="form-control-feedback form-text" v-cloak>@{{
         errors.first('bedtime_post_title') }}
     </div>
-</div>
+  </div>
 </div>
 @endif
 
 <div class="hidden"
  :class="{'has-danger': errors.has('length'), 'has-success': fields.length && fields.length.valid }">
-<label for="length" class="col-form-label text-md-right">{{ trans('admin.poem.columns.length') }}</label>
-<div>
+  <label for="length" class="col-form-label text-md-right">{{ trans('admin.poem.columns.length') }}</label>
+  <div>
     <input type="text" v-model="form.length"
            v-validate="''"
            data-vv-as="{{ trans('admin.poem.columns.length') }}"
@@ -444,7 +439,7 @@
            id="length" name="length" placeholder="">
     <div v-if="errors.has('length')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('length') }}
     </div>
-</div>
+  </div>
 </div>
 
 
@@ -468,12 +463,11 @@
       <input class="form-check-input" id="agree" type="checkbox"
              v-model="form.agree"
              v-validate="'required:true'"
-             data-vv-as="@lang('同意《公约》')"
+             data-vv-as="@lang('Agree Convention')"
              data-vv-name="agree" name="agree_fake_element">
       @lang('Agree')
     </label>
     <div v-if="errors.has('agree')" class="form-control-feedback form-text" v-cloak>@{{ errors.first('agree') }}
     </div>
-    <input type="hidden" name="agree" :value="0">
   </div>
 </div>

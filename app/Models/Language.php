@@ -33,6 +33,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @method static \Illuminate\Database\Eloquent\Builder|Language newQuery()
  * @method static \Illuminate\Database\Query\Builder|Language onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Language query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Language where()
  * @method static \Illuminate\Database\Eloquent\Builder|Language whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Language whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Language whereId($value)
@@ -46,6 +47,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @method static \Illuminate\Database\Eloquent\Builder|Language whereWikipediaUrl($value)
  * @method static \Illuminate\Database\Query\Builder|Language withTrashed()
  * @method static \Illuminate\Database\Query\Builder|Language withoutTrashed()
+ * @method Language inUse()
  * @mixin \Eloquent
  */
 class Language extends Model {
@@ -124,5 +126,9 @@ class Language extends Model {
 
     public function getLabelCnAttribute() {
         return $this->getTranslated('name_lang', 'zh-CN');
+    }
+
+    public function scopeInUse($query) {
+        return $query->where('name', '<>', '');
     }
 }

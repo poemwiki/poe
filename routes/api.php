@@ -29,6 +29,7 @@ Route::middleware(['api'])->group(static function () {
             Route::get('/nft-detail/{id}', '\App\Http\Controllers\API\PoemAPIController@nftDetail')->name('detail');
             Route::get('/share/{id}/{compositionID?}', '\App\Http\Controllers\API\PoemAPIController@share')->name('share');
             Route::post('/q', [\App\Http\Controllers\API\PoemAPIController::class, 'query'])->name('query');
+            Route::post('/detect', [\App\Http\Controllers\API\PoemAPIController::class, 'detectLanguage'])->name('detect');
         });
         Route::prefix('user')->name('user/')->group(static function () {
             Route::get('/weapp-login', [\App\Http\Controllers\API\LoginWeAppController::class, 'login'])->name('weapp-login');

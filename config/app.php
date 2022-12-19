@@ -249,7 +249,12 @@ $config = [
     'cos_author_path'  => env('AUTHOR_IMAGE_PATH', 'a'), // for author images
     'cos_page_path'    => env('COS_PAGE_PATH', 'page'),
     'cos_poster'       => env('COS_POSTER_PATH', 'poster'), // for poem poster
-    'cos_tmp_path'     => env('COS_TMP_PATH', 'tmp')
+    'cos_tmp_path'     => env('COS_TMP_PATH', 'tmp'),
+
+    'ali' => [
+        'id'         => env('ALI_ACCESS_ID'),
+        'secret'     => env('ALI_ACCESS_SECRET'),
+    ],
 ];
 
 return $config;
