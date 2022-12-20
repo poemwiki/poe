@@ -6,7 +6,7 @@
 <div class="child">
 
   @php
-    $children = $poem->translatedPoems->filter(function($item) use ($currentPageId) {
+    $children = $poem->translatedPoems()->orderBy('language_id')->get()->filter(function($item) use ($currentPageId) {
         return $item->id !== $item->original_id;
     });
 
