@@ -72,52 +72,52 @@ class PoemRepository extends BaseRepository {
     }
 
     /**
-     * @param int $num
+     * @param array         $with
+     * @param \Closure|null $callback
+     * @param string[]      $select
      * @return \Illuminate\Database\Eloquent\Builder
-     * @TODO optimize sql by :
-     * SELECT r1.id
-     * FROM poem AS r1
-     * JOIN
-     * (SELECT CEIL(RAND() *
-     * (SELECT MAX(id)
-     * FROM poem)) AS id)
-     * AS r2
-     * WHERE r1.id >= r2.id AND r1.deleted_at is NULL
-     * ORDER BY r1.id ASC
-     * LIMIT 1
      */
-    public static function random($num = 1, $with = []) {
-        $builder = Poem::query()->whereNotExists(function ($query) {
-            $query->select(DB::raw(1))
-                ->from('relatable')
-                ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
-        });
+    public static function random(array $with = [], \Closure $callback = null, array $select = ['*']): \Illuminate\Database\Eloquent\Builder {
+        $builder = Poem::query()
+            ->select($select)
+            ->join(DB::raw('(SELECT CEIL( RAND() * ( SELECT MAX( id ) FROM `poem` )) AS id) AS rand'), 'poem.id', '>=', 'rand.id')
+            ->orderBy('poem.id', 'ASC')
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('relatable')
+                    ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
+            });
+
+        if (is_callable($callback)) {
+            call_user_func($callback, $builder);
+        }
         if (!empty($with)) {
             $builder->with($with);
         }
 
-        return $builder
-            ->inRandomOrder()
-            ->take($num);
+        return $builder->take(1);
     }
 
-    public function suggest($num = 1, $with = []) {
+    public function suggest($num = 1, $with = [], \Closure $callback = null, $select = ['*']) {
         // TODO 选取策略： 1. 优先选取 poem.bedtime_post_id 不为空的 poem
         // 2. 评分和评论数
         // 3. poem.length
         // 4. 最近未推送给当前用户的
-        $builder = Poem::query()->whereNotExists(function ($query) {
-            $query->select(DB::raw(1))
-                ->from('relatable')
-                ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
-        })->where('language_id', '=', '1');
-        if (!empty($with)) {
-            $builder->with($with);
+        // $builder = Poem::query()->whereNotExists(function ($query) {
+        //     $query->select(DB::raw(1))
+        //         ->from('relatable')
+        //         ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
+        // })->where('language_id', '=', '1');
+        // if (!empty($with)) {
+        //     $builder->with($with);
+        // }
+
+        $builder = self::random($with, $callback, $select);
+        for ($i = 1; $i < $num; ++$i) {
+            $builder->union(self::random($with, $callback, $select));
         }
 
-        return $builder // TODO 1. 如果显示声明原创的诗歌，是否需要跟普通诗歌区分开？ 2. 对声明原创的诗歌，gate 中定义只允许上传用户编辑
-        ->inRandomOrder(rand(0, 1000000))
-            ->take($num);
+        return $builder; // TODO 1. 如果显示声明原创的诗歌，是否需要跟普通诗歌区分开？ 2. 对声明原创的诗歌，gate 中定义只允许上传用户编辑
     }
 
     /**
@@ -145,7 +145,7 @@ class PoemRepository extends BaseRepository {
      * @return mixed
      */
     public static function randomOne() {
-        return self::random(1)->first();
+        return self::random()->first();
     }
 
     public function getPoemFromFakeId($fakeId, $select = null) {
