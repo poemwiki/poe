@@ -386,22 +386,6 @@ class PoemAPIController extends Controller {
             }
         }
 
-        if ($res['poet_id'] === 1033 or ($poem->is_owner_uploaded === 1 && $poem->upload_user_id === 4806)) {
-            $res['sell'] = [
-                'path'   => 'pages/proxy/union/union?spreadUrl=https://u.jd.com/6D7JluJ',
-                'appId'  => 'wx1edf489cb248852c',
-                'picUrl' => cosUrl('/campaign/9/sell.jpg')
-            ];
-        }
-
-        if ($poem->campaign_id === 26) {
-            $res['sell'] = [
-                'path'   => 'ws_micro_shop/pages/goods/goods?share_scene=4&ald_share_src=16292069421208593488&shopid=0&id=628332&tabbarindex=0',
-                'appId'  => 'wx219ab480d1c51bb3',
-                'picUrl' => cosUrl('/campaign/26/sell.jpg')
-            ];
-        }
-
         $liked_review_ids = [];
 
         $res['score'] = $poem->totalScore;
@@ -435,9 +419,6 @@ class PoemAPIController extends Controller {
             });
         $res['liked_review_ids'] = $liked_review_ids;
 
-        $relatedQuery = $this->poemRepository->suggest(2)
-            ->where('id', '<>', $id);
-
         $res['is_campaign'] = $poem->is_campaign;
         if ($poem->campaign) {
             $res['campaign_reward'] = $poem->campaign->settings ? ($poem->campaign->settings['reward'] ?? 0) : null;
@@ -445,15 +426,6 @@ class PoemAPIController extends Controller {
 
         if ($poem->tags->count()) {
             $res['tags'] = $poem->tags->map->only(['id', 'name', 'category_id']);
-
-            if ($poem->is_campaign) {
-                $relatedQuery->whereHas('tags', function ($query) use ($poem) {
-                    // TODO use campaign tag here
-                    $query->where('tag_id', '=', $poem->tags[0]->id);
-                });
-            } else {
-                $relatedQuery->where('score', '>=', 7);
-            }
         }
         if ($poem->share_pics && isset($poem->share_pics['pure'])) {
             if (File::exists(storage_path($poem->share_pics['pure']))) {
@@ -464,9 +436,33 @@ class PoemAPIController extends Controller {
             }
         }
 
-        $res['related'] = $relatedQuery->get([
-            'id', 'poem', 'poet', 'poet_cn', 'poet_id', 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'
-        ])
+        $res['related'] = $this->_relatedPoems($poem);
+
+        $res['nft_unlistable'] = $poem->nft && $poem->nft->listing && $poem->nft->listing->isUnlistable;
+        $res['nft_id']         = $poem->nft ? $poem->nft->id : null;
+        $res['nft_price']      = ($poem->nft && $poem->nft->listing) ? $poem->nft->listing->price : null;
+
+        return $this->responseSuccess($res);
+    }
+
+    private function _relatedPoems($poem, $num = 2) {
+        $select = [
+            'poem.id', 'poem', 'poet', 'poet_cn', 'poet_id', 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'
+        ];
+
+        if ($poem->is_campaign) {
+            $relatedQuery = Poem::query()->select($select)
+                ->whereHas('tags', function ($query) use ($poem) {
+                    // TODO use campaign tag here
+                    $query->where('tag_id', '=', $poem->tags[0]->id);
+                })->inRandomOrder()->take($num);
+        } else {
+            $relatedQuery = $this->poemRepository->suggest($num, [], function ($query) use ($poem) {
+                $query->where('poem.id', '!=', $poem->id)->where('score', '>=', 7);
+            }, $select);
+        }
+
+        return $relatedQuery->get()
             ->map(function ($item) {
                 $arr = $item->toArray();
                 $arr['poet'] = $item->poet_label;
@@ -474,12 +470,6 @@ class PoemAPIController extends Controller {
                 return $arr;
             })
             ->toArray();
-
-        $res['nft_unlistable'] = $poem->nft && $poem->nft->listing && $poem->nft->listing->isUnlistable;
-        $res['nft_id']         = $poem->nft ? $poem->nft->id : null;
-        $res['nft_price']      = ($poem->nft && $poem->nft->listing) ? $poem->nft->listing->price : null;
-
-        return $this->responseSuccess($res);
     }
 
     /**
