@@ -80,7 +80,7 @@ class PoemRepository extends BaseRepository {
     public static function random(array $with = [], \Closure $callback = null, array $select = ['*']): \Illuminate\Database\Eloquent\Builder {
         $builder = Poem::query()
             ->select($select)
-            ->join(DB::raw('(SELECT CEIL( RAND() * ( SELECT MAX( id ) FROM `poem` )) AS id) AS rand'), 'poem.id', '>=', 'rand.id')
+            ->join(DB::raw('(SELECT CEIL( RAND() * ( SELECT MAX( id ) FROM `poem` WHERE poem.deleted_at is NOT NULL)) AS rand_id) AS rand'), 'poem.id', '>=', 'rand.rand_id')
             ->orderBy('poem.id', 'ASC')
             ->whereNotExists(function ($query) {
                 $query->select(DB::raw(1))
