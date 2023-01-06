@@ -1,12 +1,15 @@
 <!-- poem {{$poem->id}} url and it's translated poems list -->
 @php
-/** @var \App\Models\Poem $poem */
+$isComparePage = request()->route()->getName() == 'compare';
 @endphp
 
 <div class="child">
 
   @php
-    $children = $poem->translatedPoems()->orderBy('language_id')->get()->filter(function($item) use ($currentPageId) {
+    /** @var \App\Models\Poem $poem */
+    /** @var int $currentPageId */
+    /** @var int[] $idArr */
+    $children = $poem->translatedPoems()->orderBy('language_id')->get()->filter(function($item) {
         return $item->id !== $item->original_id;
     });
 
@@ -16,7 +19,7 @@
     $isTranslatedFrom = $poem->id === $currentPageOriginalId;
   @endphp
 
-  @if(($poem->id !== $currentPageId) or $childrenCount)
+  @if(($poem->id !== $currentPageId or $isComparePage or $childrenCount))
   <a href="{{$poem->url}}" @if($isTranslatedFrom) title="@lang('Translated from this version')" @endif>
     <dt>
       @if($isTranslatedFrom)
@@ -42,16 +45,38 @@
           {{$poem->translator_label ?: trans('No Name')}}
         @endif
       @endif
-      {{$poem->is_original ? $poem->title : ''}}
+      {{$poem->is_original && !$isComparePage ? $poem->title : ''}}
     </dd>
+
+    @if(!$isComparePage)
+      @if($poem->id !== $currentPageId)
+        <a class="btn" style="margin-left: 1em" href="{{route('compare', implode(',', [$currentPageId, $poem->id]))}}">+对照</a>
+      @endif
+    @else
+      @if(array_search($poem->id, $idArr) === false)
+        <?php
+        $added = array_merge($idArr, [$poem->id]);
+        ?>
+        <a class="btn" style="margin-left: 1em" href="{{route('compare', implode(',', $added))}}">+对照</a>
+      @elseif(count($idArr) > 2)
+        <?php
+        $filtered = array_filter($idArr, function($id) use ($poem) {
+          return $id !== $poem->id;
+        });
+        ?>
+        <a class="btn" style="margin-left: 1em" href="{{route('compare', implode(',', $filtered))}}">-对照</a>
+      @endif
+    @endif
   </a>
   @endif
 
   @if($childrenCount)
     <div class="parent">
       @foreach($children as $translatedPoem)
-        @if($translatedPoem->id !== $currentPageId)
-        @include('poems.components.translated', [
+        {{$translatedPoem->id .' '. $currentPageId}}
+        {{--show all children if it is compare page--}}
+        @if($translatedPoem->id !== $currentPageId or $isComparePage)
+          @include('poems.components.translated', [
               'poem' => $translatedPoem,
               'currentPageId' => $currentPageId
           ])
