@@ -352,7 +352,8 @@ class PoemController extends Controller {
             abort(400, 'compare only support 4 poems');
         }
 
-        // get poem in for loop and union them all
+        // Get poem in for loop and union them all
+        // to keep the same order as $ids
         $query = Poem::where('id', $idArr[0]);
         for ($i = 1; $i < $idCount; ++$i) {
             $query->union(Poem::where('id', $idArr[$i]));
