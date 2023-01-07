@@ -323,6 +323,10 @@ class PoemController extends Controller {
         return $this->responseSuccess(route('p/show', Poem::getFakeId($poem->id)));
     }
 
+    /**
+     * User center. Show user's poem and contribution, rank list.
+     * @return \Illuminate\Contracts\Foundation\Application|Factory|View
+     */
     public function user() {
         $user = Auth::user();
 
@@ -336,6 +340,57 @@ class PoemController extends Controller {
             'languageList'  => LanguageRepository::allInUse()->keyBy('id'),
             'genreList'     => GenreRepository::allInUse()->keyBy('id'),
             'randomPoemUrl' => '/'
+        ]);
+    }
+
+    public function compare($ids) {
+        $idArr = array_map(function ($id) {
+            return intval($id);
+        }, explode(',', $ids));
+        $idCount = count($idArr);
+        if ($idCount > config('app.max_compare_poem_count')) {
+            abort(400, 'compare only support 4 poems');
+        }
+
+        // get poem in for loop and union them all
+        $query = Poem::where('id', $idArr[0]);
+        for ($i = 1; $i < $idCount; ++$i) {
+            $query->union(Poem::where('id', $idArr[$i]));
+        }
+        $poems = $query->get();
+
+        $maxLineCount = $poems->max(function (Poem $poem) {
+            return Str::of($poem->poem)->toLines()->count();
+        });
+
+        $poemsLines = $poems->map(function (Poem $poem) {
+            return Str::of($poem->poem)->toLines();
+        });
+
+        $compareLines = [];
+        for ($i = 0; $i < $maxLineCount; ++$i) {
+            $compareLine = [];
+            $compareLine = $poemsLines->map(function ($lines) use ($i) {
+                return $lines[$i] ?? null;
+            });
+            $compareLines[] = $compareLine;
+        }
+
+        $randomPoem = $this->poemRepository->randomOne();
+
+        return view('poems.compare', [
+            'poems'          => $poems,
+            'compareLines'   => $compareLines,
+            'ids'            => $ids,
+            'idArr'          => $idArr,
+            'url'            => route('compare', $ids),
+            // todo add translators to authors string
+            'authors' => implode(',', $poems->map(function (Poem $poem) {
+                return $poem->poetLabel;
+            })->toArray()),
+            'randomPoemUrl'       => $randomPoem->url,
+            'randomPoemTitle'     => $randomPoem->title,
+            'randomPoemFirstLine' => $randomPoem->firstLine,
         ]);
     }
 }

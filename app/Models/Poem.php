@@ -350,6 +350,14 @@ class Poem extends Model implements Searchable {
         })->toArray();
     }
 
+    public function getTranslatorsStrAttribute() {
+        $translators = implode(', ', array_map(function ($translator) {
+            return $translator['name'];
+        }, $this->translatorsLabelArr));
+
+        return strlen($translators) ? $translators : $this->translator;
+    }
+
     /**
      * add translator_is relation to author.
      * @param array $ids
