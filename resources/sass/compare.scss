@@ -1,8 +1,9 @@
 @import 'variables';
 
-$compare-color-3: #f5f5f5;
-$compare-color-2: #d6e4ff;
-$compare-color-1: #e7f5e0;
+$compare-color-0: #e7f5e0;
+$compare-color-1: #d6e4ff;
+$compare-color-2: #f5f5f5;
+$compare-color-3: #f4ede1;
 //$border-color: $gray;
 
 .compare{
@@ -44,13 +45,19 @@ $compare-color-1: #e7f5e0;
   margin-right: 0.5em;
   color: $gray;
   font-size: .6em;
+  z-index: 1;
 }
 .poem-line {
   position: relative;
   padding: 0 .3em;
+  display: inline;
 }
 .poem-line-wrapper{
   position: relative;
+  padding: 0 0.3em;
+  pre {
+    padding: 0;
+  }
 }
 .compare-line:hover>.poem-line-wrapper::before {
   content: attr(data-translators);
@@ -66,17 +73,20 @@ $compare-color-1: #e7f5e0;
 .line-num {
   display: inline-block;
 }
-.compare-bg-0 {
-
+.compare-font-0 {
+  color: darken($compare-color-0, 50%) !important;
 }
 .compare-font-1 {
-  color: darken($compare-color-1, 50%);
+  color: darken($compare-color-1, 50%) !important;
 }
 .compare-font-2 {
-  color: darken($compare-color-2, 50%);
+  color: darken($compare-color-2, 50%) !important;
 }
 .compare-font-3 {
-  color: darken($compare-color-3, 50%);
+  color: darken($compare-color-3, 50%) !important;
+}
+.compare-bg-0 {
+  background: $compare-color-0;
 }
 .compare-bg-1 {
   background: $compare-color-1;

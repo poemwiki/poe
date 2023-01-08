@@ -59,7 +59,10 @@ $firstLine = $poem->firstLine;
 
     <section class="poem-meta">
       <dl class="poem-info">
-        @include('poems.fields.date', ['poem' => $poem])
+        @include('poems.fields.date', [
+          'poem' => $poem,
+          'class' => 'poem-time'
+        ])
 
         @if($poem->location)
           <dd>{{$poem->location}}</dd>

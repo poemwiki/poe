@@ -29,12 +29,6 @@ $createPageUrl = $poems[0]->topOriginalPoem->is_original ? route('poems/create',
         </span></h1>
       @endforeach
 
-      @if(config('app.env') === 'local')
-        @foreach($poems as $key=>$poem)
-          <h5 class="compare-bg-{{$key}}">{{$poem->id}}</h5>
-        @endforeach
-      @endif
-
       <span itemprops="provider" itemscope itemtype="https://schema.org/Organization" class="hidden">
           <span itemprops="name" style="display: none">PoemWiki</span>
           <meta itemprops="url" content="https://poemwiki.org" />
@@ -48,7 +42,7 @@ $createPageUrl = $poems[0]->topOriginalPoem->is_original ? route('poems/create',
 
       @foreach($poems as $key=>$poem)
         @if($poem->preface)
-          <pre class="preface font-hei compare-font-{{$key}}" itemprop="preface">{{ $poem->preface }}</pre>
+          <pre class="preface font-hei compare-font-{{$key}}" itemprop="preface">{{ $poem->preface }}</pre><br>
         @endif
       @endforeach
 
@@ -64,9 +58,9 @@ $createPageUrl = $poems[0]->topOriginalPoem->is_original ? route('poems/create',
             <?php
               $translators = $poems[$key]->isTranslated ? $poems[$key]->translatorsStr : $poems[$key]->poet;
             ?>
-            <div class="poem-line-wrapper compare-bg-{{$key}}" data-translators="{{$translators}}">
+            <div class="poem-line-wrapper compare-bg-{{$key}}" data-translators="{{$translators}}" title="{{$poems[$key]->from}}">
             @if(trim($lineOfPoem))
-              <pre class="poem-line font-hei">{{$lineOfPoem}}</pre>
+              <pre class="poem-line font-hei compare-bg-{{$key}}">{{$lineOfPoem}}</pre>
             @else
               <pre class="poem-line poem-line-empty"><br></pre>
             @endif
@@ -82,16 +76,22 @@ $createPageUrl = $poems[0]->topOriginalPoem->is_original ? route('poems/create',
     <section class="poem-meta">
       <dl class="poem-info">
 
-        @include('poems.fields.date', ['poem' => $poems[0]])
+        @foreach($poems as $key => $poem)
+          @include('poems.fields.date', [
+            'poem' => $poem,
+            'class' => 'compare-font-' . $key,
+          ])
+        @endforeach
 
-        @if($poem->location)
-          <dd>{{$poem->location}}</dd>
-        @endif
+        @foreach($poems as $key => $poem)
+          @if($poem->location)
+            <dd class="compare-font-{{$key}}">{{$poem->location}}</dd>
+          @endif
+        @endforeach
 
-        @include('poems.fields.poet', ['poem' => $poems[0]])<br>
-
-        @include('poems.fields.from', ['poem' => $poems[0]])
-
+{{--        @foreach($poems as $poem)--}}
+{{--          @include('poems.fields.from', ['poem' => $poem])--}}
+{{--        @endforeach--}}
 {{--        <a class="btn share" id="share"--}}
 {{--           href="{{ route('poems/share', ['fakeId' => $poem->fakeId]) }}">@lang('poem.Share')</a>--}}
 
