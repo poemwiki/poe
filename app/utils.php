@@ -435,3 +435,7 @@ function isValidUrl($url) {
 function cosUrl($key = '', $cosConfig = []) {
     return (new \App\Services\Tx($cosConfig))->getUrl($key);
 }
+
+function urlOrLoginRef($url) {
+    return Auth::check() ? $url : route('login', ['ref' => $url]);
+}
