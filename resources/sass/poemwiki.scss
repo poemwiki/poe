@@ -50,12 +50,14 @@
   position: relative;
   line-height: 1.5;
   $left-padding: -10px;
+  .child {
+    position: relative;
+    margin: .5em 0;
+  }
 
   .parent {
     margin: 0 0 0 20px;
     .child {
-      position: relative;
-      margin: .5em 0;
       &:before {
         position: absolute;
         left: $left-padding;
