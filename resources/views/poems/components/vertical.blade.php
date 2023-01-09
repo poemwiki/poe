@@ -55,6 +55,9 @@ $createPageUrl = $poems[0]->topOriginalPoem->is_original ? route('poems/create',
         @foreach($compareLines as $lineNum => $lines)
           <div class="compare-line" data-line-num="{{$lineNum+1}}">
           @foreach($lines as $key => $lineOfPoem)
+            @if(is_null($lineOfPoem))
+              @continue
+            @endif
             <?php
               $translators = $poems[$key]->isTranslated ? $poems[$key]->translatorsStr : $poems[$key]->poet;
             ?>
