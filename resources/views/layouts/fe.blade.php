@@ -6,11 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="Cache-Control" content="no-transform">
     <meta http-equiv="Cache-Control" content="no-siteapp">
-    <meta name="applicable-device"content="pc,mobile">
+    <meta name="applicable-device" content="pc,mobile">
     <meta name="format-detection" content="telephone=no">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
     <meta name="author" content="PoemWiki,@yield('author')">
-    <meta name="description" content="PoemWiki">
 
     <meta name="keyword" content="@yield('keywords'),@yield('title'),@yield('author'),@yield('title') 评论,@yield('title') 诗评,@yield('title') review,poemwiki,poem,poetry,poet,诗,诗歌,诗人,诗评,poem review">
     <meta name="description" content="@yield('author') @yield('title') 诗歌全文,@yield('author') @yield('title') 评论、评分">
@@ -27,7 +26,6 @@
     <link href="{{ mix('/css/post.css') }}" rel="stylesheet">
 
     @stack('styles')
-    @livewireStyles
 
     @include('layouts.analyze')
 
@@ -37,7 +35,6 @@
     @include('layouts.fe-menu')
     <main>@yield('content')</main>
 
-    @livewireScripts
     @stack('scripts')
 
     <script>
@@ -69,14 +66,4 @@
         }
     </script>
 </body>
-
-
-@if(Auth::check())
-    @php
-        $currentUser = Auth::user();
-    @endphp
-<!--
-{{$currentUser->name}} {{$currentUser->last_online_at}}
--->
-@endif
 </html>

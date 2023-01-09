@@ -76,15 +76,21 @@ class PoemAPIController extends Controller {
             }
         }
 
+        $select = [
+            'poem.id', 'title', 'poem', 'poet', 'poet_cn', 'poet_id', 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'
+        ];
+
         $noScoreNum = 2;
-        $scorePoems = $this->poemRepository->suggest($num - $noScoreNum, ['reviews'])
-            ->whereNull('campaign_id')
-            ->where('score', '>=', 7)
+        $scorePoems = $this->poemRepository->suggest($num - $noScoreNum, ['reviews'], function ($query) {
+            $query->whereNull('campaign_id')
+                ->where('score', '>=', 7);
+        }, $select)
             ->get();
         $poems        = $poems->concat($scorePoems);
-        $noScorePoems = $this->poemRepository->suggest($noScoreNum, ['reviews'])
-            ->whereNull('campaign_id')
-            ->whereNull('score')
+        $noScorePoems = $this->poemRepository->suggest($noScoreNum, ['reviews'], function ($query) {
+            $query->whereNull('campaign_id')
+                ->whereNull('score');
+        }, $select)
             ->get();
         $poems = $poems->concat($noScorePoems);
 

@@ -318,6 +318,8 @@ Route::prefix('campaign')->name('campaign/')->group(static function () {
 
 Route::any('/contribution', 'PoemController@user')->name('contribution');
 
+Route::any('/compare/{ids}', 'PoemController@compare')->name('compare');
+
 Route::get('/page/{page}', function ($page) {
     $view = 'page/' . $page;
     if (view()->exists($view)) {

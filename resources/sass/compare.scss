@@ -1,0 +1,99 @@
+@import 'variables';
+
+$compare-color-0: #e7f5e0;
+$compare-color-1: #d6e4ff;
+$compare-color-2: #f5f5f5;
+$compare-color-3: #f4ede1;
+//$border-color: $gray;
+
+.compare{
+  font-size: 1em!important;
+  .title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: $font-size-h2;
+  }
+  .title-version {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 3em;
+  }
+}
+
+.compare-line + .compare-line {
+  margin-top: .7em;
+}
+.compare-line {
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  position: relative;
+}
+.compare-line:hover {
+  border: 1px solid $border-color;
+  border-radius: .2em!important;
+}
+.compare-line:not(:hover)::before {
+  position: absolute;
+  content: attr(data-line-num);
+  display: inline-block;
+  right: 0;
+  top: 0;
+  width: 1.5em;
+  text-align: right;
+  margin-right: 0.5em;
+  color: $gray;
+  font-size: .6em;
+  z-index: 1;
+}
+.poem-line {
+  position: relative;
+  padding: 0 .3em;
+  display: inline;
+}
+.poem-line-wrapper{
+  position: relative;
+  padding: 0 0.3em;
+  pre {
+    padding: 0;
+  }
+}
+.compare-line:hover>.poem-line-wrapper::before {
+  content: attr(data-translators);
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-right: 0.5em;
+  color: $gray;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.line-num {
+  display: inline-block;
+}
+.compare-font-0 {
+  color: darken($compare-color-0, 50%) !important;
+}
+.compare-font-1 {
+  color: darken($compare-color-1, 50%) !important;
+}
+.compare-font-2 {
+  color: darken($compare-color-2, 50%) !important;
+}
+.compare-font-3 {
+  color: darken($compare-color-3, 50%) !important;
+}
+.compare-bg-0 {
+  background: $compare-color-0;
+}
+.compare-bg-1 {
+  background: $compare-color-1;
+}
+.compare-bg-2 {
+  background: $compare-color-2;
+}
+.compare-bg-3 {
+  background: $compare-color-3;
+}

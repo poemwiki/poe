@@ -51,7 +51,7 @@ section.poem {
       @include media-breakpoint-down(xs) {
         font-size: 3.8vw;
         //white-space: nowrap;
-        overflow: auto;
+        //overflow: auto;
       }
       @media (max-width: 375px) {
         font-size: 4vw;
@@ -113,6 +113,7 @@ section.poem {
       }
 
       dd {
+        margin: 0;
         &:before {
           content: "";
           display: inline-block;
@@ -142,10 +143,20 @@ section.poem {
         text-indent: .4em;
       }
 
-      &.poem-versions {
-        a:hover > dt {
-          color: $white;
+      a.translated {
+        display: inline-block;
+        padding: 0 0.5em 0 0;
+        dt, dd{
+          display: inline-block;
+          height: 2em;
+          line-height: 2em;
         }
+      }
+      .parent a.translated {
+        padding-left: .5em;
+      }
+      a.translated:hover > dt {
+        color: $white;
       }
       .poemwiki-link:before{
         line-height: 2.5em;
@@ -153,6 +164,10 @@ section.poem {
 
       .author-label+.author-label{
         margin-left: .8em;
+      }
+
+      .add-translate-btn{
+        margin: .5em 0 0 .5em;
       }
     }
     dl.poem-ugc {
@@ -236,3 +251,18 @@ nav.next {
   }
 }
 
+.btn-compare {
+  display: inline-block;
+  margin-left: 1em;
+  background: #FFFFFF;
+  padding: 0 .2em;
+  height: 2em;
+  line-height: 2em;
+  white-space: nowrap;
+
+  @include media-breakpoint-down(xs) {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+}
