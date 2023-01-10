@@ -54,21 +54,30 @@ $createPageUrl = $poems[0]->topOriginalPoem->is_original ? route('poems/create',
         {{-- output line 0 of each poem, then line 1, etc. --}}
         @foreach($compareLines as $lineNum => $lines)
           <div class="compare-line" data-line-num="{{$lineNum+1}}">
-          @foreach($lines as $key => $lineOfPoem)
-            @if(is_null($lineOfPoem))
-              @continue
-            @endif
-            <?php
+          <?php
+            $isAllEmpty = $lines->every(function ($line) {
+                return trim($line) === '';
+            });
+          ?>
+          @if($isAllEmpty)
+            <code class="poem-line poem-line-empty"><br></code>
+          @else
+            @foreach($lines as $key => $lineOfPoem)
+              @if(is_null($lineOfPoem))
+                @continue
+              @endif
+              <?php
               $translators = $poems[$key]->isTranslated ? $poems[$key]->translatorsStr : $poems[$key]->poet;
-            ?>
-            <div class="poem-line-wrapper compare-bg-{{$key}}" data-translators="{{$translators}}" title="{{$poems[$key]->from}}">
-            @if(trim($lineOfPoem))
-              <pre class="poem-line font-hei compare-bg-{{$key}}">{{$lineOfPoem}}</pre>
-            @else
-              <pre class="poem-line poem-line-empty"><br></pre>
-            @endif
-            </div>
-          @endforeach
+              ?>
+              <div class="poem-line-wrapper compare-bg-{{$key}}" data-translators="{{$translators}}" title="{{$poems[$key]->from}}">
+                @if(trim($lineOfPoem))
+                  <pre class="poem-line font-hei compare-bg-{{$key}}">{{$lineOfPoem}}</pre>
+                @else
+                  <pre class="poem-line poem-line-empty"><br></pre>
+                @endif
+              </div>
+            @endforeach
+          @endif
           </div>
         @endforeach
         <p class="poem-line no-height"><br></p>
