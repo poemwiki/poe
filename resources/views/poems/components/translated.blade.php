@@ -43,7 +43,7 @@ if(isset($idArr)){
 
     @if(!$isComparePage)
       @if($poem->id !== $currentPageId)
-        <a class="btn-compare btn-compare-add" href="{{urlOrLoginRef(route('compare', implode(',', [$currentPageId, $poem->id])))}}">+对照</a>
+        <a class="btn-compare btn-compare-add" href="{{route('compare', implode(',', [$currentPageId, $poem->id]))}}">+对照</a>
       @endif
     @else
       @if(array_search($poem->id, $idArr) === false)
@@ -51,7 +51,7 @@ if(isset($idArr)){
           <?php
           $added = array_merge($idArr, [$poem->id]);
           ?>
-          <a class="btn-compare btn-compare-add" href="{{urlOrLoginRef(route('compare', implode(',', $added)))}}">+对照</a>
+          <a class="btn-compare btn-compare-add" href="{{route('compare', implode(',', $added))}}">+对照</a>
         @endif
       @elseif(count($idArr) > 2)
         <?php
@@ -59,7 +59,7 @@ if(isset($idArr)){
           return $id !== $poem->id;
         });
         ?>
-        <a class="btn-compare btn-compare-remove" href="{{urlOrLoginRef(route('compare', implode(',', $filtered)))}}">-对照</a>
+        <a class="btn-compare btn-compare-remove" href="{{route('compare', implode(',', $filtered))}}">-对照</a>
       @endif
     @endif
   </a>

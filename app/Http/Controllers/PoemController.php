@@ -28,7 +28,7 @@ class PoemController extends Controller {
     private $authorRepository;
 
     public function __construct(PoemRepository $poemRepo, AuthorRepository $authorRepository) {
-        $this->middleware('auth')->except(['show', 'showPoem', 'random', 'showContributions']);
+        $this->middleware('auth')->except(['show', 'showPoem', 'random', 'showContributions', 'compare']);
         $this->poemRepository   = $poemRepo;
         $this->authorRepository = $authorRepository;
     }
@@ -348,6 +348,9 @@ class PoemController extends Controller {
             return intval($id);
         }, explode(',', $ids));
         $idCount = count($idArr);
+        if (!Auth::check() && $idCount > config('app.max_compare_poem_count_guest')) {
+            return redirect(route('login', ['ref' => route('compare', $ids)]));
+        }
         if ($idCount > config('app.max_compare_poem_count')) {
             abort(400, 'compare only support 4 poems');
         }

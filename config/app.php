@@ -255,7 +255,8 @@ $config = [
         'id'         => env('ALI_ACCESS_ID'),
         'secret'     => env('ALI_ACCESS_SECRET'),
     ],
-    'max_compare_poem_count' => 4,
+    'max_compare_poem_count_guest' => 2,
+    'max_compare_poem_count'       => 4,
 ];
 
 return $config;
