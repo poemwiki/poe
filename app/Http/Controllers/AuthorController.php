@@ -40,8 +40,9 @@ class AuthorController extends Controller {
         $poemsAsPoet = Poem::where(['poet_id' => $id])->whereNotExists(function ($query) {
             $query->select(DB::raw(1))
                 ->from('relatable')
-                ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
-        })->get();
+                ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem'])
+            ;
+        })->orderByRaw('convert(title using gb2312)')->get();
         $authorUserOriginalWorks = $author->user ? $author->user->originalPoemsOwned : [];
 
         // TODO poem.translator_id should be deprecated
