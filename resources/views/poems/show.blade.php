@@ -47,7 +47,11 @@
   </p>
 </nav>
 
+@push('styles')
+  @livewireStyles
+@endpush
 @push('scripts')
+  @livewireScripts
   @include('poems.components.script')
 @endpush
 @endsection

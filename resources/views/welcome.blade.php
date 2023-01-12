@@ -15,7 +15,6 @@
     <!-- Fonts -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
-    @livewireStyles
 </head>
 <body class="position-ref">
 
