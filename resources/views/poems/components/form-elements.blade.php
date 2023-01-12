@@ -370,6 +370,7 @@
 </div>
 
 {{--genre_id--}}
+<!--
 <div :class="{'hidden' : form.is_original==0, 'has-danger': errors.has('genre_id'), 'has-success': fields.genre_id && fields.genre_id.valid }">
   <label for="genre_id" class="col-form-label text-md-right">{{ trans('admin.poem.columns.genre_id') }}</label>
 
@@ -381,9 +382,9 @@
             data-vv-as="{{ trans('admin.poem.columns.genre_id') }}" data-vv-name="genre_id"
             name="genre_id_fake_element">
       <option value="" :selected="form.genre_id==''">  </option>
-      @foreach($genreList as $genre)
-        <option value="{{$genre->id}}" :selected="form.genre_id=={{$genre->id}}">{{ $genre->name_lang }}</option>
-      @endforeach
+{{--      @foreach($genreList as $genre)--}}
+{{--        <option value="{{$genre->id}}" :selected="form.genre_id=={{$genre->id}}">{{ $genre->name_lang }}</option>--}}
+{{--      @endforeach--}}
     </select>
     <input type="hidden" name="genre_id" :value="form.genre_id">
     <div v-if="errors.has('genre_id')" class="form-control-feedback form-text" v-cloak>@{{
@@ -391,41 +392,8 @@
     </div>
   </div>
 </div>
+-->
 
-@if(Auth::user()->is_admin)
-<div :class="{'has-danger': errors.has('bedtime_post_id') }">
-  <label for="bedtime_post_id" class="col-form-label text-md-right">{{ trans('admin.poem.columns.bedtime_post_id') }}</label>
-  <div>
-    <input type="text" v-model="form.bedtime_post_id"
-           v-validate="''"
-           value="{{$originalPoem->bedtime_post_id ?? $translatedPoem->bedtime_post_id ?? ''}}"
-           data-vv-as="{{ trans('admin.poem.columns.bedtime_post_id') }}"
-           @input="validate($event)" class="form-control"
-           :class="{'form-control-danger': errors.has('bedtime_post_id'), 'form-control-success': fields.bedtime_post_id && fields.bedtime_post_id.valid}"
-           id="bedtime_post_id" name="bedtime_post_id" placeholder="">
-    <div v-if="errors.has('bedtime_post_id')" class="form-control-feedback form-text" v-cloak>@{{
-        errors.first('bedtime_post_id') }}
-    </div>
-  </div>
-</div>
-
-<div :class="{'has-danger': errors.has('bedtime_post_title')}">
-  <label for="bedtime_post_title" class="col-form-label text-md-right">{{ trans('admin.poem.columns.bedtime_post_title') }}</label>
-  <div>
-    <input type="text" v-model="form.bedtime_post_title"
-           v-validate="''"
-           value="{{$originalPoem->bedtime_post_title ?? $translatedPoem->bedtime_post_title ?? ''}}"
-           data-vv-as="{{ trans('admin.poem.columns.bedtime_post_title') }}"
-           @input="validate($event)"
-           class="form-control"
-           :class="{'form-control-danger': errors.has('bedtime_post_title'), 'form-control-success': fields.bedtime_post_title && fields.bedtime_post_title.valid}"
-           id="bedtime_post_title" name="bedtime_post_title" placeholder="">
-    <div v-if="errors.has('bedtime_post_title')" class="form-control-feedback form-text" v-cloak>@{{
-        errors.first('bedtime_post_title') }}
-    </div>
-  </div>
-</div>
-@endif
 
 <div class="hidden"
  :class="{'has-danger': errors.has('length'), 'has-success': fields.length && fields.length.valid }">
