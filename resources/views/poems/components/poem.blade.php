@@ -1,16 +1,6 @@
 <?php
 
 /** @var \App\Models\Poem $poem */
-if($poem->poetAuthor) {
-  // dd($poem->poetAuthor->nation);
-  $nation = $poem->poetAuthor->dynasty ? $poem->poetAuthor->dynasty->name_lang
-    : '';
-} else {
-  $nation = $poem->dynasty
-    ? "[$poem->dynasty] "
-    : '';
-}
-
 $graphemeLength = max(array_map(function($line) {
   return grapheme_strlen($line);
 }, explode("\n", $poem->poem)));
