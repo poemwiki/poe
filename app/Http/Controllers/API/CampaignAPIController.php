@@ -33,7 +33,7 @@ class CampaignAPIController extends Controller {
                 $ret['user_count'] = $campaign->user_count;
 
                 return $ret;
-            });
+            })->slice(0, 20);
         });
 
         return $this->responseSuccess($campaigns);
