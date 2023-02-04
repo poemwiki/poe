@@ -32,7 +32,8 @@ if (!mix.inProduction()) {
  |
  */
 
-mix.js('resources/js/app.js', 'public/js')
+mix
+  .js('resources/js/app.js', 'public/js')
   .sass('resources/sass/app.scss', 'public/css')
   .sass('resources/sass/post.scss', 'public/css')
   .sass('resources/sass/search.scss', 'public/css')
@@ -41,10 +42,12 @@ mix.js('resources/js/app.js', 'public/js')
 
 mix.js('resources/js/review.js', 'public/js');
 
-mix.js(['resources/js/admin/admin.js'], 'public/js')
+mix
+  .js(['resources/js/admin/admin.js'], 'public/js')
   .sass('resources/sass/admin/admin.scss', 'public/css');
 
-mix.js(['resources/js/author/author.js'], 'public/js')
+mix
+  .js(['resources/js/author/author.js'], 'public/js')
   .js(['resources/js/poem/index.js'], 'public/js/poem.js')
   .sass('resources/sass/form.scss', 'public/css');
 
