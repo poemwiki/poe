@@ -22,13 +22,12 @@
 
 <div class="flex-center position-ref full-height">
 
-
     <div class="content">
       <div class="title m-b-md">
         <a class="no-bg" style="font-size: 46px;" href="{{ $poemUrl }}">诗歌维基</a>
         <br>
 
-        <img class="qr" style="width: 50%" src="https://poemwiki-1254719278.cos.ap-guangzhou.myqcloud.com/img/common/weapp-qr-50.jpg" alt="">
+        <img class="qr" style="width: 20%" src="<?=cosUrl('/img/common/weapp-qr-50.jpg') ?>" alt="">
       </div>
     </div>
 
