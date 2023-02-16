@@ -260,6 +260,7 @@ class PoemRepository extends BaseRepository {
 
     public function getByOwner($userID) {
         return self::newQuery()->where('upload_user_id', $userID)
+            // TODO handle other $poem->is_owner_uploaded values, and fix api.poem.delete gate
             ->whereIn('is_owner_uploaded', [Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])
             ->with('reviews')->orderByDesc('created_at')
             ->get()->map(function (Poem $item) use ($userID) {

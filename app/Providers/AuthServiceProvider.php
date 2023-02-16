@@ -6,12 +6,10 @@ use App\Models\Poem;
 use App\User;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Passport\Passport;
 
-class AuthServiceProvider extends ServiceProvider
-{
+class AuthServiceProvider extends ServiceProvider {
     /**
      * The policy mappings for the application.
      *
@@ -26,8 +24,7 @@ class AuthServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
-    {
+    public function boot() {
         $this->registerPolicies();
 
         Gate::define('web.poem.create', function (User $user) {
@@ -38,16 +35,20 @@ class AuthServiceProvider extends ServiceProvider
         });
         Gate::define('api.poem.update', function (User $user, Poem $poem) {
             // 如果是用户上传的原创作品，只有作者账号可更改
-            if ($poem->is_owner_uploaded===Poem::$OWNER['uploader']) {
+            if ($poem->is_owner_uploaded === Poem::$OWNER['uploader']) {
                 return $user->id === $poem->uploader->id ? Response::allow() : Response::deny('Not Allowed');
             }
+
             return isset($user->id);
         });
         Gate::define('api.poem.delete', function (User $user, Poem $poem) {
             // 如果是用户上传的原创作品，只有作者账号或管理员可删除
-            if ($poem->is_owner_uploaded===Poem::$OWNER['uploader']) {
+            if ($poem->is_owner_uploaded === Poem::$OWNER['uploader']
+                || $poem->is_owner_uploaded === Poem::$OWNER['translatorUploader']) {
                 return $user->id === $poem->upload_user_id or $user->is_admin;
             }
+            // TODO handle other $poem->is_owner_uploaded values
+
             return $user->is_admin;
         });
         Gate::define('api.review.create', function (User $user) {
@@ -59,9 +60,10 @@ class AuthServiceProvider extends ServiceProvider
 
         Gate::define('web.poem.change', function (User $user, Poem $poem) {
             // 如果是用户上传的原创作品，只有作者账号可更改
-            if ($poem->is_owner_uploaded===Poem::$OWNER['uploader']) {
+            if ($poem->is_owner_uploaded === Poem::$OWNER['uploader']) {
                 return $user->id === $poem->uploader->id ? Response::allow() : Response::deny('Not Allowed');
             }
+
             return isset($user->id);
         });
         Gate::define('web.author.change', function (User $user) {
