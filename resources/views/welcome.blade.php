@@ -24,7 +24,7 @@
 
   <div class="content">
     <div class="title m-b-md">
-      <a class="site-name" href="{{ $poemUrl }}">诗歌维基</a>
+      <a class="site-name no-bg" href="{{ $poemUrl }}">诗歌维基</a>
       <br>
 
       <img class="qr" style="width: 20%" src="<?=cosUrl('/img/common/weapp-qr-50.jpg') ?>" alt="">
@@ -49,7 +49,7 @@
     font-family: source-han-serif-sc, "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "Source Han Serif CN", STSong, "AR PL New Sung", "AR PL SungtiL GB", NSimSun, "SimSun", "\5B8B\4F53", "TW\-Sung", "WenQuanYi Bitmap Song", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", PMingLiU, MingLiU, Georgia, "Nimbus Roman No9 L", serif;
     font-weight: 500;
     font-style: normal;
-    font-size: 66px;
+    font-size: 46px;
     /*text-shadow: 0 0 80px rgb(192 219 255 / 75%), 0 0 32px rgb(65 120 255 / 24%);*/
     /*background: linear-gradient(to right, #30CFD0, #c43ad6);*/
     /*-webkit-background-clip: text;*/
