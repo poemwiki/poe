@@ -40,7 +40,7 @@
         <a class="no-bg" href="/calendar">诗歌日历</a>
       @endif
     @endauth
-    <a class="no-bg" href="https://iddpldra3f.larksuite.com/docx/JvqZduINZoPudcxqmtuu07uXsQg" target="_blank">提案与积分</a>
+    <a class="no-bg" href="/page/proposals" target="_blank">提案与积分</a>
     <a class="no-bg" target="_blank" href="https://bedtimepoem.com">读首诗再睡觉</a>
   </div>
 </div>

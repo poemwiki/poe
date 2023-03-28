@@ -258,6 +258,11 @@ $config = [
     'max_compare_poem_count_guest' => 2,
     'max_compare_poem_count'       => 4,
     'score_min_count'              => 3,
+
+    'lark' => [
+        'app_id'     => env('LARK_APP_ID'),
+        'app_secret' => env('LARK_APP_SECRET'),
+    ],
 ];
 
 return $config;
