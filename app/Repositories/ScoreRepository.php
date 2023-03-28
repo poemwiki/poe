@@ -2,13 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Models\Score;
 use App\Models\Poem;
-use App\Repositories\BaseRepository;
+use App\Models\Score;
 
 /**
- * Class PoemRepository
- * @package App\Repositories
+ * Class PoemRepository.
  * @version July 17, 2020, 12:24 pm UTC
  */
 class ScoreRepository extends BaseRepository {
@@ -16,12 +14,12 @@ class ScoreRepository extends BaseRepository {
      * @var array
      */
     protected $fieldSearchable = [
-//        'poem_id',
-//        'score',
+        //        'poem_id',
+        //        'score',
     ];
 
     /**
-     * Return searchable fields
+     * Return searchable fields.
      *
      * @return array
      */
@@ -30,17 +28,16 @@ class ScoreRepository extends BaseRepository {
     }
 
     /**
-     * Configure the Model
+     * Configure the Model.
      **/
     public static function model() {
         return Score::class;
     }
 
-
     /**
      * Paginate records for scaffold.
      *
-     * @param int $perPage
+     * @param int   $perPage
      * @param array $columns
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
@@ -59,21 +56,23 @@ class ScoreRepository extends BaseRepository {
     public function listByPoemsUsers($poemIds, $userIds, $columns = ['*']) {
         $query = $this->allQuery()->select($columns)->whereIn('poem_id', $poemIds, 'and')
             ->whereIn('user_id', $userIds);
+
         return $query;
     }
 
     public function listByPoemsUser($poemIds, $userId, $columns = ['poem_id', 'score', 'weight']) {
         $query = $this->allQuery()->select($columns)->whereIn('poem_id', $poemIds, 'and')
             ->where('user_id', '=', $userId);
+
         return $query;
     }
 
     public function listByUserId($userId, $columns = ['poem_id', 'score']) {
         $query = $this->allQuery()->select($columns)
             ->where('user_id', '=', $userId);
+
         return $query;
     }
-
 
     /**
      * Create or update a record matching the attributes, and fill it with values.
@@ -84,15 +83,14 @@ class ScoreRepository extends BaseRepository {
      */
     public function updateOrCreate(array $attributes, array $values = []) {
         $find = $this->model->withTrashed()->where($attributes)->first();
-        if($find) {
+        if ($find) {
             $find->restore();
+
             return $find->update($values);
-        } else {
-            return $this->newQuery()->updateOrCreate($attributes, $values);
         }
+
+        return $this->newQuery()->updateOrCreate($attributes, $values);
     }
-
-
 
     /**
      * @param Poem $poem
@@ -103,7 +101,7 @@ class ScoreRepository extends BaseRepository {
     }
 
     /**
-     * @param Int $poemId
+     * @param int $poemId
      * @return array
      */
     public function calcScoreByPoemId($poemId): array {
@@ -118,38 +116,46 @@ class ScoreRepository extends BaseRepository {
      */
     public static function calc($poemId, $start = null, $end = null) {
         $query = Score::query()->where(['poem_id' => $poemId]);
-        if($start) {
+        if ($start) {
             $query->where('updated_at', '>=', $start);
         }
-        if($end) {
+        if ($end) {
             $query->where('updated_at', '<=', $end);
         }
 
         $scores = $query->get();
+
         return self::calcScores($scores);
     }
 
     /**
      * @param \App\Models\Score[] $scores
-     * @param bool $withGroupCount
+     * @param bool                $withGroupCount
      * @return array
      */
     public static function calcScores($scores, $withGroupCount = true) {
         $scoreTotal = Score::$DEFAULT_SCORE_ARR;
 
-        if($withGroupCount) {
+        if ($withGroupCount) {
             $scoreTotal['groupCount'] = $scores->groupBy('score')->map(function ($item) {
                 return collect($item)->count();
             });
         }
 
         foreach ($scores as $item) {
-            $scoreTotal['sum'] += $item['score'] * $item['weight'];
+            $scoreTotal['sum']    += $item['score'] * $item['weight'];
             $scoreTotal['weight'] += $item['weight'];
         }
 
-        $scoreTotal['score'] = $scoreTotal['weight'] ? number_format($scoreTotal['sum'] / $scoreTotal['weight'], 1) : null;
         $scoreTotal['count'] = count($scores);
+        if ($scoreTotal['count'] < config('app.score_min_count')) {
+            $scoreTotal['score'] = null;
+
+            return $scoreTotal;
+        }
+
+        $scoreTotal['score'] = $scoreTotal['weight'] ? number_format($scoreTotal['sum'] / $scoreTotal['weight'], 1) : null;
+
         return $scoreTotal;
     }
 
@@ -160,17 +166,17 @@ class ScoreRepository extends BaseRepository {
      * @param null $end
      * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
      */
-    public static function batchCalc($poemIds, $start = null, $end = null, $withGroupCount=false) {
+    public static function batchCalc($poemIds, $start = null, $end = null, $withGroupCount = false) {
         $query = Score::query()->whereIn('poem_id', $poemIds);
 
-        if($start) {
+        if ($start) {
             $query->where('updated_at', '>=', $start);
         }
-        if($end) {
+        if ($end) {
             $query->where('updated_at', '<=', $end);
         }
 
-        $scores = $query->get();
+        $scores     = $query->get();
         $poemScores = $scores->groupBy('poem_id')->map(function ($item) use ($withGroupCount) {
             return self::calcScores($item, $withGroupCount);
         });
@@ -185,13 +191,13 @@ class ScoreRepository extends BaseRepository {
     // TODO save count to poem.score_count and poem.campaign_score_count
     public static function calcCount($poemId, $startTime = null, $endTime = null) {
         $builder = Score::query()->where(['poem_id' => $poemId]);
-        if($startTime) {
+        if ($startTime) {
             $builder->where('updated_at', '>=', $startTime);
         }
-        if($endTime) {
+        if ($endTime) {
             $builder->where('updated_at', '<=', $endTime);
         }
+
         return $builder->count('user_id');
     }
-
 }

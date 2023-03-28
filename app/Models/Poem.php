@@ -613,7 +613,7 @@ class Poem extends Model implements Searchable {
     }
 
     public function getTotalScoreAttribute() {
-        return $this->score ?: ScoreRepository::calc($this->id)['score'];
+        return ScoreRepository::calc($this->id)['score'];
     }
 
     public function getScoreArrayAttribute() {

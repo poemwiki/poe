@@ -257,6 +257,7 @@ $config = [
     ],
     'max_compare_poem_count_guest' => 2,
     'max_compare_poem_count'       => 4,
+    'score_min_count'              => 3,
 ];
 
 return $config;
