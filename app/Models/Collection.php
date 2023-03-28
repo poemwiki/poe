@@ -58,7 +58,8 @@ class Collection extends Model implements Searchable {
     protected $appends = [];
 
     public function poems() {
-        return $this->hasMany(\App\Models\Poem::class, 'poem_id', 'id');
+        return $this->hasManyThrough(\App\Models\Poem::class, \App\Models\CollectionPoem::class,
+            'list_id', 'id', 'id', 'poem_id');
     }
 
     public function collections() {

@@ -55,8 +55,7 @@ class CollectionPoem extends Model {
 
     protected $appends = [];
 
-    public function poems() {
-        return $this->hasManyThrough(\App\Models\Poem::class, \App\Models\CollectionPoems, 'list_id', 'poem_id',
-        'id', 'id');
+    public function poem() {
+        return $this->hasOne(Poem::class, 'id', 'poem_id');
     }
 }
