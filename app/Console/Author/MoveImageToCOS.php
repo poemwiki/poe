@@ -62,6 +62,7 @@ class MoveImageToCOS extends Command {
         try {
             $authors->each(function ($author) {
                 $this->process($author);
+                logger()->info('process end:[author->id=' . $author->id . ']');
             });
         } catch (\Exception $e) {
             $this->error('error while put file to COS ' . $e->getMessage());
@@ -93,10 +94,18 @@ class MoveImageToCOS extends Command {
             $ext      = $pathInfo['extension'];
 
             logger()->info('fetching url:' . $url);
-            $response = \Illuminate\Support\Facades\Http::withOptions($options)->timeout(10)->retry(3, 1)->get($url);
-            if ($response->status() !== 200) {
-                return -1;
+
+            try {
+                $response = \Illuminate\Support\Facades\Http::withOptions($options)->timeout(10)->retry(3, 1)->get($url);
+                if ($response->status() !== 200) {
+                    continue;
+                }
+            } catch (\Exception $e) {
+                logger()->warning('fetchImage failed:' . $e->getMessage());
+
+                continue;
             }
+
             $imgContent = $response->body();
 
             $toFormat = TX::SUPPORTED_FORMAT['webp'];
@@ -110,9 +119,13 @@ class MoveImageToCOS extends Command {
             }
 
             // 获取 wikimedia 链接及版权信息，保存至 image 表
-            $wikimediaPicInfo = collect(get_wikimedia_pic_info([
+            $wikiMediaData = get_wikimedia_pic_info([
                 'title' => $pathInfo['basename'],
-            ])->query->pages)->first();
+            ]);
+            if (!$wikiMediaData) {
+                continue;
+            }
+            $wikimediaPicInfo = collect($wikiMediaData->query->pages)->first();
 
             if (isset($wikimediaPicInfo->imageinfo[0]->extmetadata->Artist)) {
                 $MediaFile->setProp('wikimediaPicInfo', $wikimediaPicInfo->imageinfo[0]->extmetadata->Artist->value)->save();
@@ -178,7 +191,7 @@ class MoveImageToCOS extends Command {
 
         $MediaFile = $this->authorRepo->saveAuthorMediaFile($author, MediaFile::TYPE['image'], $compressedKey, $name, $toFormat, $compressed['Size']);
 
-        if ($index === 0) {
+        if ($index === 0 && !$author->avatar) {
             $scropSize      = min(600, $compressed['Width'], $compressed['Height']);
             $avatarResult   = $this->scropAvatar($compressedKey, $author->fakeId, $toFormat, $scropSize);
             $author->avatar = 'https://' . $avatarResult['Location'];
