@@ -132,10 +132,8 @@ class MoveImageToCOS extends Command {
             }
         }
 
-        if (!empty($urls)) {
-            $author->pic_url = $urls;
-            $author->save();
-        }
+        $author->pic_url = !empty($urls) ? $urls : null;
+        $author->save();
 
         return 0;
     }

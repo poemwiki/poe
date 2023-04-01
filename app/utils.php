@@ -239,7 +239,7 @@ function get_wikimedia_pic_info(array $titleLocale) {
     try {
         $str = fuckGWF($url);
     } catch (Exception $e) {
-        Log::warning('request fail. url:' . $url . '\nException:' . $e->getMessage());
+        Log::warning('request fail. url:' . $url . "\nException:" . $e->getMessage());
 
         return false;
     }
