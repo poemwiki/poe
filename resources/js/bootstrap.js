@@ -1,8 +1,10 @@
 window._ = require('lodash');
 
-import jQuery from 'jquery';
+// import jQuery from 'jquery';
 import Vue from 'vue';
+import Notifications from 'vue-notification';
 window.Vue = Vue;
+Vue.use(Notifications);
 
 window.$ = window.jQuery = jQuery;
 /**
