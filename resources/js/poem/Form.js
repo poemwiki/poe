@@ -119,13 +119,12 @@ Vue.component('poem-form', {
     },
 
     'form.poem': async function (newVal, old) {
-      console.log({old}, !old.trim());
       // TODO debounce detect
       // detect language when pasting to empty textarea
-      if(!newVal.trim() || old.trim()) return;
+      const trimed = newVal.trim();
+      if(!trimed || trimed.length < 6 || old.trim()) return;
 
-      this.detectLanguage(newVal).then(lang => {
-        console.log('detect language', lang, newVal);
+      this.detectLanguage(newVal.trim()).then(lang => {
         this.form.language_id = lang;
       });
     }
@@ -410,8 +409,8 @@ Vue.component('poem-form', {
     },
 
     detectLanguage(poem) {
-      const topLines = poem.split('\n').slice(0, 3).reduce((accumulator, line) => {
-        return accumulator + '\n' + line;
+      const topLines = poem.trim().split('\n').slice(0, 3).reduce((accumulator, line) => {
+        return accumulator + (accumulator.length ? '\n' : '') + line;
       }, '')
       return axios(
         `/api/v1/poem/detect`,
