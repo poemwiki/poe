@@ -33,7 +33,6 @@
     "echarts": "^5.4.2",
     "lodash": "^4.17.13",
     "medium-editor": "^5.23.3",
-    "popper.js": "^1.12",
     "simple-line-icons": "2.4.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.1",
     "vue": "^2.5.17",

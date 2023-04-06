@@ -12,10 +12,6 @@ Vue.use(Notifications);
  */
 
 try {
-    window.Popper = require('popper.js').default;
-    // window.$ = window.zepto = require('zepto');
-
-    // require('bootstrap');
 } catch (e) {}
 
 /**
