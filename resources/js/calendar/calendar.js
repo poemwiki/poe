@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import '../bootstrap.js';
 import LunarFullCalendar from "vue-lunar-full-calendar";
 import VueElementLoading from 'vue-element-loading';
