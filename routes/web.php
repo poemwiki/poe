@@ -317,9 +317,10 @@ Route::prefix('campaign')->name('campaign/')->group(static function () {
 });
 
 // todo add /contribution to show all contributions
-// todo move /contribution to /me/contribution
-Route::any('/contribution', 'PoemController@user')->name('contribution');
-Route::any('/me', 'ListController@index')->name('list');
+Route::prefix('me')->name('me/')->group(static function () {
+    Route::any('/contributions', 'MeController@contributions')->name('contributions');
+    Route::any('/', 'MeController@index')->name('me');
+});
 
 Route::any('/compare/{ids}', 'PoemController@compare')->name('compare');
 

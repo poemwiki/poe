@@ -40,6 +40,7 @@ Route::middleware(['api'])->group(static function () {
             Route::get('/detail/{id}', [\App\Http\Controllers\API\AuthorAPIController::class, 'detail'])->name('detail');
             Route::get('/info/{id}', [\App\Http\Controllers\API\AuthorAPIController::class, 'info'])->name('info');
         });
+        Route::get('/contribution', [\App\Http\Controllers\API\ContributionAPIController::class, 'query'])->name('contribution');
     });
 });
 
