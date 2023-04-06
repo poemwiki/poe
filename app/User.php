@@ -35,6 +35,7 @@ use Spatie\Activitylog\ActivitylogServiceProvider;
  * @property int    $invited_by
  * @property float  $weight
  * @property int    $newMessagesCount
+ * @property $poemActivityLogs
  */
 class User extends Authenticatable implements MustVerifyEmail {
     use HasApiTokens;
