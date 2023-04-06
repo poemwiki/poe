@@ -14,7 +14,6 @@ import { Admin } from 'craftable';
 import VModal from 'vue-js-modal'
 import Vue from 'vue';
 
-import './app-components/bootstrap';
 import './index';
 
 import 'craftable/dist/ui';
