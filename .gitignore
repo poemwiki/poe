@@ -25,6 +25,7 @@ fields_sample.json
 /public/img/avatars/*
 /public/vendor/swaggervel/*
 
-/storage/clockwork
-/storage/logs/request*
-/storage/poems_hezhibin
+/storage/*
+!/storage/app
+!/storage/framework
+!/storage/logs
