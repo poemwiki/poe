@@ -18,9 +18,9 @@ class MeController extends Controller {
     }
 
     public function index() {
-        $lists = Collection::find(1)->with('poems')->get();
+        // $lists = Collection::find(1)->with('poems')->get();
 
-        $collectionPoems = $lists[0]->poems;
+        $collectionPoems = []; //$lists[0]->poems;
 
         /** @var User $user */
         $user         = auth()->user();

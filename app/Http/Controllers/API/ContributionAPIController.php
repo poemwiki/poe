@@ -50,7 +50,7 @@ class ContributionAPIController extends Controller {
 
         $columns = ['id', 'description', 'subject_type', 'subject_id', 'properties', 'created_at'];
 
-        $data = $query->paginate($size, $columns, 'page', $page);
+        $data = $query->get(); //paginate($size, $columns, 'page', $page);
         // map data to simplify the data, group by date
         return $this->responseSuccess($data->map(function (ActivityLog $item) {
             $item->append('diffs');
