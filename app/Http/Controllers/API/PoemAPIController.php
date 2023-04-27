@@ -191,6 +191,19 @@ class PoemAPIController extends Controller {
         return $this->responseSuccess($res);
     }
 
+    public function userPoems($userID, $page = 1, $pageSize = 20) {
+        return $this->poemRepository->getByOwnerPaginate($userID, $page, $pageSize, [
+            'firstLine' => function (Poem $poem) {
+                return $poem->firstLine;
+            }
+        ]);
+    }
+
+    /**
+     * for WeChat mini program.
+     * @param Request $request
+     * @return array
+     */
     public function mine(Request $request) {
         $userId = $request->user()->id;
 

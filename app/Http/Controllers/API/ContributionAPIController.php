@@ -24,7 +24,7 @@ class ContributionAPIController {
         if ($dateFrom && $dateTo) {
             $dateFrom = \Carbon\Carbon::parse($dateFrom);
             $dateTo   = \Carbon\Carbon::parse($dateTo);
-            if ($dateFrom->diffInDays($dateTo) > 300) {
+            if ($dateFrom->diffInDays($dateTo) > 365) {
                 return response()->json([
                     'error' => 'Date range too large',
                 ], 400);

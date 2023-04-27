@@ -20,15 +20,16 @@ class MeController extends Controller {
     public function index() {
         $lists = Collection::find(1)->with('poems')->get();
 
-        $poems = $lists[0]->poems;
+        $collectionPoems = $lists[0]->poems;
 
+        /** @var User $user */
         $user         = auth()->user();
         $activityLogs = $user->poemActivityLogs->take(81);
 
         return view('me.index', [
-            'poems'        => $poems,
-            'user'         => $user,
-            'activityLogs' => $activityLogs,
+            'collectionPoems' => $collectionPoems,
+            'user'            => $user,
+            'activityLogs'    => $activityLogs,
         ]);
     }
 

@@ -44,7 +44,12 @@ Route::middleware(['api'])->group(static function () {
     });
 });
 
-Route::middleware(['auth:api', 'api'])->group(static function () {
+// TODO don't add poemwiki_session cookie for api response
+// To enable web page request pass authenticate, add ',web' after the auth:api,
+// then add \Illuminate\Session\Middleware\StartSession::class
+// to the $middlewareGroups['api'] in app/Http/Kernel.php.
+// But it will add poemwiki_session cookie for api response
+Route::middleware(['auth:api,web', 'api'])->group(static function () {
     Route::prefix('v1')->name('api/')->group(static function () {
         Route::prefix('user')->name('user/')->group(static function () {
             Route::post('/profile', [\App\Http\Controllers\API\UserAPIController::class, 'update'])->name('profile');
@@ -62,6 +67,7 @@ Route::middleware(['auth:api', 'api'])->group(static function () {
             Route::get('/delete/{poemId}', [\App\Http\Controllers\API\PoemAPIController::class, 'delete'])->name('delete');
             Route::get('/related', [\App\Http\Controllers\API\PoemAPIController::class, 'related'])->name('related');
             Route::any('/import', [\App\Http\Controllers\API\PoemAPIController::class, 'import'])->name('import');
+            Route::any('/user/{userID}/{page?}/{pageSize?}', [\App\Http\Controllers\API\PoemAPIController::class, 'userPoems'])->name('user');
         });
         Route::prefix('nft')->name('nft/')->group(static function () {
             Route::post('/listing', [\App\Http\Controllers\API\NFTAPIController::class, 'listing'])->name('listing');

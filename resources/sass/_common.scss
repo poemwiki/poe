@@ -199,11 +199,11 @@ main {
 }
 
 
-main>.page {
+main .page {
   padding: 2rem 1.6rem;
 }
 @media (min-width: theme('screens.md.min')) {
-  main>.page {
+  main .page {
     width: theme('screens.md.min');
   }
 }
