@@ -191,7 +191,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     /**
-     * request from wechat browser.
+     * request from WeChat browser.
      * @return bool
      */
     public static function isWechat() {
@@ -206,7 +206,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     /**
-     * request from wechat mini program.
+     * request from WeChat mini program.
      * @return bool
      */
     public static function isWeApp() {
@@ -220,7 +220,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     /**
-     * request from wechat mini program's webview component.
+     * request from WeChat mini program's webview component.
      * @return bool
      */
     public static function isWeAppWebview() {
