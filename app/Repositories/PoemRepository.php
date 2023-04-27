@@ -258,27 +258,67 @@ class PoemRepository extends BaseRepository {
             });
     }
 
-    public function getByOwner($userID) {
+    public function getByOwnerPaginate($userID, $page = 1, $pageSize = 20, $extraFieldsMap = null): array {
+        $query = $this->_getByOwner($userID);
+
+        $paginator = $query->paginate($pageSize, ['*'], 'page', $page);
+
+        $data = $paginator->map(function (Poem $item) use ($extraFieldsMap) {
+            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
+            $item['poet'] = $item->poetLabel;
+
+            if ($extraFieldsMap) {
+                foreach ($extraFieldsMap as $field => $func) {
+                    $item[$field] = $func($item);
+                }
+            }
+
+            return $item->only(array_merge(
+                self::$listColumns,
+                array_keys($extraFieldsMap ?? []
+            )));
+        });
+
+        return [
+            'data'           => $data,
+            'total'          => $paginator->total(),
+            'per_page'       => $paginator->perPage(),
+            'current_page'   => $paginator->currentPage(),
+            'last_page'      => $paginator->lastPage(),
+            'has_more_pages' => $paginator->hasMorePages()
+        ];
+    }
+
+    private function _getByOwner($userID) {
         return self::newQuery()->where('upload_user_id', $userID)
             // TODO handle other $poem->is_owner_uploaded values, and fix api.poem.delete gate
             ->whereIn('is_owner_uploaded', [Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])
-            ->with('reviews')->orderByDesc('created_at')
-            ->get()->map(function (Poem $item) use ($userID) {
-                $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
-                $item['poet'] = $item->poetLabel;
-                $item['score_count'] = ScoreRepository::calcCount($item->id);
-                $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
-                $item['listable'] = (!$item->nft && NFT::isMintable($item, $userID))
-                    || ($item->nft && $item->nft->isListableByUser($userID));
-                $item['unlistable'] = $item->nft && $item->nft->isUnlistableByUser($userID);
-                $item['nft_id'] = $item->nft ? $item->nft->id : null;
+            ->with('reviews')->orderByDesc('created_at');
+    }
 
-                return $item->only(self::$listColumns);
-            });
+    public function getByOwner($userID, $page = null, $pageSize = 20) {
+        $query = $this->_getByOwner($userID);
+
+        if (is_numeric($page)) {
+            $query->paginate($pageSize, ['*'], 'page', $page);
+        }
+
+        return $query->get()->map(function (Poem $item) use ($userID) {
+            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
+            $item['poet'] = $item->poetLabel;
+            $item['score_count'] = ScoreRepository::calcCount($item->id);
+            $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
+            $item['listable'] = (!$item->nft && NFT::isMintable($item, $userID))
+                    || ($item->nft && $item->nft->isListableByUser($userID));
+            $item['unlistable'] = $item->nft && $item->nft->isUnlistableByUser($userID);
+            $item['nft_id'] = $item->nft ? $item->nft->id : null;
+
+            return $item->only(self::$listColumns);
+        });
     }
 
     public static $listColumns = [
-        'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
+        'fake_id', 'id', 'created_at', 'date_ago', 'title', //'subtitle', 'preface', 'location',
         'poem', 'poet', 'poet_id', 'poet_avatar', 'poet_cn',
         'score', 'score_count', 'score_weight', 'rank',
         'reviews', 'reviews_count', 'poet_is_v', 'listable', 'unlistable', 'nft_id'
