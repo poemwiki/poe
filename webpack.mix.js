@@ -12,7 +12,10 @@ mix.webpackConfig({
   }
 });
 mix.options({
-  processCssUrls: false
+  processCssUrls: false,
+  terser: {
+    extractComments: false,
+  }
 });
 if (!mix.inProduction()) {
   mix.webpackConfig({
