@@ -34,8 +34,8 @@ class CampaignController extends Controller {
             return $poem->campaign_id === $campaignId;
         })->count();
 
-        $awards  = [];
-        $error   = '';
+        $awards = [];
+        $error  = '';
         if ($isParticipated) {
             $awards = RewardResult::where([
                 ['campaign_id', $campaignId],
@@ -74,7 +74,7 @@ class CampaignController extends Controller {
     }
 
     public function show(int $awardID) {
-        $userID  = auth()->user()->id;
+        $userID = auth()->user()->id;
         // TODO save show time to reward_result
         logger()->info('award:' . $awardID . '-' . $userID);
         $results = RewardResult::where([

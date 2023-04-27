@@ -5,7 +5,7 @@
         <li class="flex-center-vertically user-logo">
             @auth
                 <a class="menu-button no-bg logout" href="{{route('logout')}}">@lang('Logout')</a>
-                <a class="menu-button no-bg" href="#">
+                <a class="menu-button no-bg" href="/me">
                   @if(Auth::user()->is_v)
                     {!! Auth::user()->getVerifiedAvatarHtml() !!}
                   @else

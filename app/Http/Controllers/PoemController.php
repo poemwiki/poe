@@ -323,26 +323,6 @@ class PoemController extends Controller {
         return $this->responseSuccess(route('p/show', Poem::getFakeId($poem->id)));
     }
 
-    /**
-     * User center. Show user's poem and contribution, rank list.
-     * @return \Illuminate\Contracts\Foundation\Application|Factory|View
-     */
-    public function user() {
-        $user = Auth::user();
-
-        /** @var \Illuminate\Support\Collection $activityLogs */
-        $activityLogs = $user->poemActivityLogs->take(81);
-
-        return view('user.contribution', [
-            'user'         => $user,
-            'activityLogs' => $activityLogs,
-            // 'poem'          => $poems,
-            'languageList'  => LanguageRepository::allInUse()->keyBy('id'),
-            'genreList'     => GenreRepository::allInUse()->keyBy('id'),
-            'randomPoemUrl' => '/'
-        ]);
-    }
-
     public function compare($ids) {
         $idArr = array_map(function ($id) {
             return intval($id);

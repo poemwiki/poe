@@ -191,6 +191,19 @@ class PoemAPIController extends Controller {
         return $this->responseSuccess($res);
     }
 
+    public function userPoems($userID, $page = 1, $pageSize = 20) {
+        return $this->poemRepository->getByOwnerPaginate($userID, $page, $pageSize, [
+            'firstLine' => function (Poem $poem) {
+                return $poem->firstLine;
+            }
+        ]);
+    }
+
+    /**
+     * for WeChat mini program.
+     * @param Request $request
+     * @return array
+     */
     public function mine(Request $request) {
         $userId = $request->user()->id;
 
@@ -955,8 +968,14 @@ class PoemAPIController extends Controller {
     }
 
     public function detectLanguage(Request $request) {
-        $text = $request->input('text');
+        $text = $request->input('text', '');
 
-        return AliTranslate::detectLanguage($text);
+        try {
+            return AliTranslate::detectLanguage($text);
+        } catch (Exception $e) {
+            return $this->responseFail([], $e->getMessage());
+        } catch (Error $e) {
+            return $this->responseFail([], $e->getMessage());
+        }
     }
 }

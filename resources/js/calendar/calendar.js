@@ -1,8 +1,6 @@
-import Vue from 'vue';
 import '../bootstrap.js';
 import LunarFullCalendar from "vue-lunar-full-calendar";
 import VueElementLoading from 'vue-element-loading';
-
 
 Vue.use(LunarFullCalendar);
 
@@ -70,7 +68,7 @@ new Vue({
       this.birth = null;
       this.death = null;
 
-      $(this.$refs.calendar.$el).find(`td[data-date="${date.format()}"]`).addClass('fc-highlight');
+      this.$refs.calendar.$el.querySelector(`td[data-date="${date.format()}"]`).classList.add('fc-highlight');
 
       axios('/calendar/q/' + (date.month() + 1) + '/' + date.date()).then(reply => {
         if(!reply || !reply.data) return;

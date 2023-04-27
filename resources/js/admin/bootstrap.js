@@ -1,10 +1,8 @@
 import axios from 'axios';
 import _ from 'lodash';
 import Vue from 'vue';
-import jQuery from 'jquery';
 import moment from 'moment';
 
-window.$ = window.jQuery = jQuery;
 window.Vue = Vue;
 window._ = _;
 window.axios = axios;
@@ -23,7 +21,6 @@ let token = document.head.querySelector('meta[name="csrf-token"]');
 
 if (token) {
 	window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
-    $.ajaxSetup({headers: {'X-CSRF-TOKEN': token.content}});
 } else {
 	console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
 }

@@ -316,7 +316,11 @@ Route::prefix('campaign')->name('campaign/')->group(static function () {
     Route::get('reward/{campaignId}/{fakeUID}', [\App\Http\Controllers\CampaignController::class, 'reward'])->name('reward');
 });
 
-Route::any('/contribution', 'PoemController@user')->name('contribution');
+// todo add /contribution to show all contributions
+Route::prefix('me')->name('me/')->group(static function () {
+    Route::any('/contributions', [\App\Http\Controllers\MeController::class, 'contributions'])->name('contributions');
+    Route::any('/', [\App\Http\Controllers\MeController::class, 'index'])->name('me');
+});
 
 Route::any('/compare/{ids}', 'PoemController@compare')->name('compare');
 

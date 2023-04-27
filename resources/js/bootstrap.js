@@ -1,10 +1,10 @@
 window._ = require('lodash');
 
-import jQuery from 'jquery';
 import Vue from 'vue';
+import Notifications from 'vue-notification';
 window.Vue = Vue;
+Vue.use(Notifications);
 
-window.$ = window.jQuery = jQuery;
 /**
  * We'll load jQuery and the Bootstrap jQuery plugin which provides support
  * for JavaScript based Bootstrap features such as modals and tabs. This
@@ -12,10 +12,6 @@ window.$ = window.jQuery = jQuery;
  */
 
 try {
-    window.Popper = require('popper.js').default;
-    // window.$ = window.zepto = require('zepto');
-
-    // require('bootstrap');
 } catch (e) {}
 
 /**

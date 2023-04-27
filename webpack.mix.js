@@ -9,7 +9,7 @@ mix.webpackConfig({
     alias: {
       "@": ".."
     }
-  },
+  }
 });
 mix.options({
   processCssUrls: false
@@ -33,7 +33,6 @@ if (!mix.inProduction()) {
  */
 
 mix
-  .js('resources/js/app.js', 'public/js')
   .sass('resources/sass/app.scss', 'public/css')
   .sass('resources/sass/post.scss', 'public/css')
   .sass('resources/sass/search.scss', 'public/css')
@@ -50,6 +49,9 @@ mix
   .js(['resources/js/author/author.js'], 'public/js')
   .js(['resources/js/poem/index.js'], 'public/js/poem.js')
   .sass('resources/sass/form.scss', 'public/css');
+
+mix
+  .js('resources/js/me/me.js', 'public/js/me.js').vue();
 
 mix.js(['resources/js/calendar/calendar.js'], 'public/js')
   .sass('resources/sass/calendar.scss', 'public/css')

@@ -12,10 +12,6 @@
   @include('layouts.analyze')
 
 
-  <!-- Scripts -->
-  <script src="{{ mix('/js/app.js') }}" defer></script>
-
-
   <!-- Styles -->
   <link href="{{ mix('/css/app.css') }}" rel="stylesheet">
   <?php

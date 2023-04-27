@@ -4,8 +4,7 @@ namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
-class Kernel extends HttpKernel
-{
+class Kernel extends HttpKernel {
     /**
      * The application's global HTTP middleware stack.
      *
@@ -21,13 +20,13 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
 
-//        \RenatoMarinho\LaravelPageSpeed\Middleware\InlineCss::class,
-//        \RenatoMarinho\LaravelPageSpeed\Middleware\ElideAttributes::class,
-//        \RenatoMarinho\LaravelPageSpeed\Middleware\InsertDNSPrefetch::class,
-//        \RenatoMarinho\LaravelPageSpeed\Middleware\RemoveComments::class,
-//        \RenatoMarinho\LaravelPageSpeed\Middleware\TrimUrls::class,
-//        \RenatoMarinho\LaravelPageSpeed\Middleware\RemoveQuotes::class,
-//        \RenatoMarinho\LaravelPageSpeed\Middleware\CollapseWhitespace::class,
+        //        \RenatoMarinho\LaravelPageSpeed\Middleware\InlineCss::class,
+        //        \RenatoMarinho\LaravelPageSpeed\Middleware\ElideAttributes::class,
+        //        \RenatoMarinho\LaravelPageSpeed\Middleware\InsertDNSPrefetch::class,
+        //        \RenatoMarinho\LaravelPageSpeed\Middleware\RemoveComments::class,
+        //        \RenatoMarinho\LaravelPageSpeed\Middleware\TrimUrls::class,
+        //        \RenatoMarinho\LaravelPageSpeed\Middleware\RemoveQuotes::class,
+        //        \RenatoMarinho\LaravelPageSpeed\Middleware\CollapseWhitespace::class,
     ];
 
     /**
@@ -51,6 +50,7 @@ class Kernel extends HttpKernel
 
         'api' => [
             'throttle:25|50,0.3',
+            \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\LastOnline::class
         ],
@@ -64,18 +64,18 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        'auth' => \App\Http\Middleware\Authenticate::class,
-        'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
-        'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
-        'can' => \Illuminate\Auth\Middleware\Authorize::class,
-        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'auth'             => \App\Http\Middleware\Authenticate::class,
+        'auth.basic'       => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'bindings'         => \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        'cache.headers'    => \Illuminate\Http\Middleware\SetCacheHeaders::class,
+        'can'              => \Illuminate\Auth\Middleware\Authorize::class,
+        'guest'            => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
-        'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
-        'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'isInvited' => \App\Http\Middleware\CheckInviteCode::class,
-        'wechat.oauth' => \Overtrue\LaravelWeChat\Middleware\OAuthAuthenticate::class,
+        'signed'           => \Illuminate\Routing\Middleware\ValidateSignature::class,
+        'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'isInvited'        => \App\Http\Middleware\CheckInviteCode::class,
+        'wechat.oauth'     => \Overtrue\LaravelWeChat\Middleware\OAuthAuthenticate::class,
         'horizonBasicAuth' => \App\Http\Middleware\HorizonBasicAuth::class,
     ];
 }
