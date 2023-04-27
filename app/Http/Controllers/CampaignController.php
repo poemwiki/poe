@@ -153,4 +153,12 @@ class CampaignController extends Controller {
             'campaigns' => Campaign::all()
         ]);
     }
+
+    public function poems(int $campaignID) {
+        $poems = Poem::where('campaign_id', $campaignID)->get();
+
+        return view('campaign.poems', [
+            'poems' => $poems
+        ]);
+    }
 }

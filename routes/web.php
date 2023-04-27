@@ -315,6 +315,7 @@ Route::prefix('campaign')->name('campaign/')->group(static function () {
     Route::get('reward/show/{awardID}', [\App\Http\Controllers\CampaignController::class, 'show'])->name('reward/show');
     Route::get('reward/{campaignId}/{fakeUID}', [\App\Http\Controllers\CampaignController::class, 'reward'])->name('reward');
     Route::get('/', [\App\Http\Controllers\CampaignController::class, 'index'])->name('index');
+    Route::get('/{campaignID}/poems', [\App\Http\Controllers\CampaignController::class, 'poems'])->name('poems');
 });
 
 // todo add /contribution to show all contributions
