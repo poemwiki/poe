@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Repositories\CampaignRepository;
 use App\Repositories\PoemRepository;
 use Illuminate\Http\Request;
 
-class ContributionAPIController {
+class ContributionAPIController extends Controller {
     public function __construct(CampaignRepository $campaignRepository, PoemRepository $poemRepository) {
         $this->campaignRepository = $campaignRepository;
         $this->poemRepository     = $poemRepository;
@@ -51,12 +52,12 @@ class ContributionAPIController {
 
         $data = $query->paginate($size, $columns, 'page', $page);
         // map data to simplify the data, group by date
-        return $data->map(function (ActivityLog $item) {
+        return $this->responseSuccess($data->map(function (ActivityLog $item) {
             $item->append('diffs');
             $item->makeHidden('properties');
             $item->date = $item->created_at->format('Y-m-d');
 
             return $item;
-        })->groupBy('date');
+        })->groupBy('date'));
     }
 }

@@ -147,4 +147,10 @@ class CampaignController extends Controller {
             return null;
         }
     }
+
+    public function index() {
+        return view('campaign.index', [
+            'campaigns' => Campaign::all()
+        ]);
+    }
 }
