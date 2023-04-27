@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class CampaignController extends Controller {
     public function __construct(PoemRepository $poemRepo) {
-        $this->middleware('auth')->except(['reward']);
+        $this->middleware('auth')->except(['reward', 'index', 'poems']);
         $this->poemRepository = $poemRepo;
     }
 
