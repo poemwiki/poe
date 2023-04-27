@@ -7,7 +7,6 @@ use App\Models\Campaign;
 use App\Repositories\CampaignRepository;
 use App\Repositories\PoemRepository;
 use Cache;
-use Illuminate\Http\Request;
 
 /**
  * Class LanguageController.
@@ -23,7 +22,36 @@ class CampaignAPIController extends Controller {
         $this->poemRepository     = $poemRepository;
     }
 
-    public function index(Request $request) {
+    /**
+     * for /campaign page.
+     * @param $page
+     * @return array
+     */
+    public function list($page = 1) {
+        $paginator = Campaign::with('tag:id,name_lang')
+            ->orderBy('start', 'desc')->paginate(20,
+                ['id', 'image', 'start', 'end', 'name_lang', 'tag_id'],
+                'page', $page
+            );
+
+        $data = $paginator->map(function ($campaign) {
+            $ret = $campaign->toArray();
+
+            return $ret;
+        });
+
+        // TODO cache this
+        return $this->responseSuccess([
+            'data'           => $data,
+            'total'          => $paginator->total(),
+            'per_page'       => $paginator->perPage(),
+            'current_page'   => $paginator->currentPage(),
+            'last_page'      => $paginator->lastPage(),
+            'has_more_pages' => $paginator->hasMorePages()
+        ]);
+    }
+
+    public function index() {
         // TODO Cache::forget('api-campaign-index') if new campaign set
         $campaigns = Cache::remember('api-campaign-index', now()->addMinutes(config('app.env') === 'production' ? 3 : 0), function () {
             return $this->campaignRepository->allInUse()->map(function ($campaign) {

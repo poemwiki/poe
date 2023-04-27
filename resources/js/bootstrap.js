@@ -38,7 +38,12 @@ axios.create = function createPatchedAxios(conf) {
 
 // usage
 const responseInterceptor = [
-  res => res.data,
+  res => {
+    if(res.data.code === 0 && res.data.data) {
+      return res.data.data;
+    }
+    return res.data;
+  },
   error => {
 
     if(error.response.status === 422) {

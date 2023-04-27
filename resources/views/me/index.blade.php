@@ -22,12 +22,12 @@
 
 @section('content')
 <div id="app" @scroll.passive="onScroll">
-  <div class="page">
+  <div class="page" ref="page">
     <span class="hidden" ref="userID">{{$user->id}}</span>
     <h1 class="text-xl font-bold">{{$user->name}}</h1>
 
     <section class="mb-16">
-      <h2 class="text-lg font-bold mb-4"><span ref="contributionCount"></span>&nbsp;contributions in the last year</h2>
+      <h2 class="text-lg font-bold mb-4"><span ref="contributionCount"></span>&nbsp;次贡献（过去一年）</h2>
       <calendar-heat class="calendar"
                      :data-fetch="() => fetchContributions({{$user->id}})"
       ></calendar-heat>

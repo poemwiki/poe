@@ -147,4 +147,18 @@ class CampaignController extends Controller {
             return null;
         }
     }
+
+    public function index() {
+        return view('campaign.index', [
+            'campaigns' => Campaign::all()
+        ]);
+    }
+
+    public function poems(int $campaignID) {
+        $poems = Poem::where('campaign_id', $campaignID)->get();
+
+        return view('campaign.poems', [
+            'poems' => $poems
+        ]);
+    }
 }

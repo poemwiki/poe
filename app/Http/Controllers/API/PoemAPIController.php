@@ -22,7 +22,6 @@ use App\Rules\NoDuplicatedPoem;
 use App\Rules\ValidPoemContent;
 use App\Services\AliTranslate;
 use App\Services\Weapp;
-use App\User;
 use EasyWeChat\Factory;
 use Error;
 use Exception;
@@ -192,11 +191,11 @@ class PoemAPIController extends Controller {
     }
 
     public function userPoems($userID, $page = 1, $pageSize = 20) {
-        return $this->poemRepository->getByOwnerPaginate($userID, $page, $pageSize, [
+        return $this->responseSuccess($this->poemRepository->getByOwnerPaginate($userID, $page, $pageSize, [
             'firstLine' => function (Poem $poem) {
                 return $poem->firstLine;
             }
-        ]);
+        ]));
     }
 
     /**
