@@ -314,6 +314,7 @@ Route::any('/calendar/q/{month}/{day}', 'CalendarController@query')->name('calen
 Route::prefix('campaign')->name('campaign/')->group(static function () {
     Route::get('reward/show/{awardID}', [\App\Http\Controllers\CampaignController::class, 'show'])->name('reward/show');
     Route::get('reward/{campaignId}/{fakeUID}', [\App\Http\Controllers\CampaignController::class, 'reward'])->name('reward');
+    Route::get('/', [\App\Http\Controllers\CampaignController::class, 'index'])->name('index');
 });
 
 // todo add /contribution to show all contributions

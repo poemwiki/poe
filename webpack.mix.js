@@ -40,7 +40,8 @@ mix
   .sass('resources/sass/post.scss', 'public/css')
   .sass('resources/sass/search.scss', 'public/css')
   .sass('resources/sass/author.scss', 'public/css')
-  .sass('resources/sass/compare.scss', 'public/css');
+  .sass('resources/sass/compare.scss', 'public/css')
+  .sass('resources/sass/campaign.scss', 'public/css');
 
 mix.js('resources/js/review.js', 'public/js');
 
@@ -55,6 +56,9 @@ mix
 
 mix
   .js('resources/js/me/me.js', 'public/js/me.js').vue();
+
+mix
+  .js('resources/js/campaign/campaign.js', 'public/js/campaign.js').vue();
 
 mix.js(['resources/js/calendar/calendar.js'], 'public/js')
   .sass('resources/sass/calendar.scss', 'public/css')
