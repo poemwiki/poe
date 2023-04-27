@@ -43,18 +43,20 @@ new Vue({
       }
 
       const bottomOfWindow =
-        document.documentElement.scrollTop + window.innerHeight >=
-        document.documentElement.offsetHeight;
+        this.$refs.page.parentElement.scrollTop + window.innerHeight > this.$refs.page.offsetHeight;
       if(!bottomOfWindow) {
         return;
       }
 
       this.stopFetchMorePoems = true;
-      const newData = await this.fetchPoems(this.currentPage+1);
-      this.originalPoems = this.originalPoems.concat(newData.data);
+      const res = await this.fetchPoems(this.currentPage+1);
+      this.originalPoems = this.originalPoems.concat(res.data);
 
       this.currentPage++;
-      this.stopFetchMorePoems = !newData.has_more_pages;
+
+      setTimeout(() => {
+        this.stopFetchMorePoems = !res.has_more_pages;
+      }, 1000);
     },
 
     fetchPoems: async function(page = 1) {
