@@ -6,8 +6,7 @@ use App\Models\Campaign;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Class LanguageRepository
- * @package App\Repositories
+ * Class LanguageRepository.
  * @version July 19, 2020, 11:24 am UTC
  */
 class CampaignRepository extends BaseRepository {
@@ -22,7 +21,7 @@ class CampaignRepository extends BaseRepository {
     ];
 
     /**
-     * Return searchable fields
+     * Return searchable fields.
      *
      * @return array
      */
@@ -32,19 +31,21 @@ class CampaignRepository extends BaseRepository {
 
     public static function findByName($name) {
         $value = DB::connection()->getPdo()->quote('%' . strtolower($name) . '%');
+
         return Campaign::select(['id', 'name_lang'])
             ->whereRaw('LOWER(tag.name_lang) LIKE ' . $value)->first();
     }
 
     /**
-     * Configure the Model
+     * Configure the Model.
      **/
     public static function model() {
         return Campaign::class;
     }
 
     public static function allInUse() {
-        return Campaign::with('tag:id,name_lang')->orderBy('start', 'desc')->get();
+        return Campaign::with('tag:id,name_lang')
+            ->select(['id', 'image', 'start', 'end', 'name_lang', 'tag_id'])
+            ->orderBy('start', 'desc')->get();
     }
-
 }

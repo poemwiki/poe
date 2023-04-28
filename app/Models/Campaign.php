@@ -204,6 +204,10 @@ class Campaign extends Model {
         $poemIds = Poem::select('id')->whereHas('tags', function ($q) {
             $q->where('tag.id', '=', $this->tag->id);
         })->pluck('id');
+
+        if (!count($poemIds)) {
+            return 0;
+        }
         // scorer
         $scorer = Score::select(['user_id'])->whereIn('poem_id', $poemIds)->pluck('user_id');
 
