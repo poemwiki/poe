@@ -4,7 +4,6 @@
         <li class="flex-center-vertically"><span class="title title-bar no-bg font-hei no-select" id="menu-title">@yield('title')</span></li>
         <li class="flex-center-vertically user-logo">
             @auth
-                <a class="menu-button no-bg logout" href="{{route('logout')}}">@lang('Logout')</a>
                 <a class="menu-button no-bg" href="/me">
                   @if(Auth::user()->is_v)
                     {!! Auth::user()->getVerifiedAvatarHtml() !!}

@@ -22,9 +22,6 @@ nav.header-fixed {
       display: flex;
       height: 5rem;
       min-width: 5rem;
-      &:hover>.logout{
-        display: flex;
-      }
 
       &.search-logo {
         position: absolute;
@@ -124,9 +121,6 @@ nav.header-fixed {
     align-items: center;
     img{
       width: 4rem;
-    }
-    &.logout{
-      display: none;
     }
   }
 

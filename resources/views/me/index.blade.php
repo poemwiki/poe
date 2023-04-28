@@ -24,7 +24,10 @@
 <div id="app" @scroll.passive="onScroll">
   <div class="page" ref="page">
     <span class="hidden" ref="userID">{{$user->id}}</span>
-    <h1 class="text-xl font-bold">{{$user->name}}</h1>
+    <div class="flex justify-between">
+      <h1 class="text-xl font-bold">{{$user->name}}</h1>
+      <a class="no-bg h-10 border rounded-lg px-2 py-0 flex items-center text-sm" href="{{route('logout')}}">@lang('Logout')</a>
+    </div>
 
     <section class="mb-16">
       <h2 class="text-lg font-bold mb-4"><span ref="contributionCount"></span>&nbsp;次贡献（过去一年）</h2>

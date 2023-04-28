@@ -27,7 +27,7 @@
       <section class="mb-16">
         <ul class="min-h-screen flex flex-col justify-center">
           <li class="mb-8" v-for="campaign in campaigns" v-cloak>
-            <a class="campaign" target="_blank" :href="'/campaign/' + campaign['id'] + '/poems'">
+            <a class="campaign no-bg" target="_blank" :href="'/campaign/' + campaign['id'] + '/poems'">
               <img :src="campaign['image_url']" :alt="campaign['name_lang']" class="w-full inline-block">
             </a>
           </li>
