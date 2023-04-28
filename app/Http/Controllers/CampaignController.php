@@ -155,7 +155,10 @@ class CampaignController extends Controller {
     }
 
     public function poems(int $campaignID) {
-        $poems = Poem::where('campaign_id', $campaignID)->get();
+        $poems = Poem::with('uploader')
+            ->select([
+                'poem.id', 'title', 'poem', 'poet', 'poet_cn', 'poet_id', 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'created_at'
+            ])->where('campaign_id', $campaignID)->get();
 
         return view('campaign.poems', [
             'poems' => $poems
