@@ -48,10 +48,10 @@
             <div class="flex items-center"><img class="rounded-full mr-2 w-10 inline-block" src="{{$poem->poet_avatar}}" alt="avatar">{{$poem->poetLabel}}</div>
             <div class="flex items-center">
               <span>{{date_ago($poem->created_at)}}</span>
-              <button class="ml-2 p-2 generate-share-img"
+              <button class="ml-2 p-2 generate-share-img cursor-pointer"
                 data-id="{{$poem->id}}"  data-title="{{$poem->title}}" data-poet="{{$poem->poetLabel}}"
               >
-                <img src="{{asset('/images/share.svg')}}" alt="share">
+                {!! file_get_contents(public_path('/images/share.svg')) !!}
               </button>
             </div>
           </div>

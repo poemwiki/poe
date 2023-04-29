@@ -110,3 +110,13 @@
     }
   }
 }
+
+.generate-share-img {
+  color: $gray;
+  >svg {
+    fill: $gray-lighter;
+    &:hover {
+      fill: $blue;
+    }
+  }
+}

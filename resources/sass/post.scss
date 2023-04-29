@@ -51,12 +51,3 @@
     color: $gray;
   }
 }
-
-.generate-share-img {
-  >svg {
-    fill: $gray-lighter;
-    &:hover {
-      fill: $blue;
-    }
-  }
-}
