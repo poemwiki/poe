@@ -20,9 +20,13 @@ section.poem {
   padding: 2rem 1.6rem;
 
   article {
-
-    .title {
-      margin-bottom: 1.6rem;
+    button.share {
+      >svg {
+        fill: $gray-lighter;
+        &:hover {
+          fill: $blue;
+        }
+      }
     }
 
     .subtitle {
@@ -48,10 +52,8 @@ section.poem {
       animation: fadein 2s ease-out;
       white-space: pre-wrap;
       word-break: normal;
-      @include media-breakpoint-down(xs) {
+      @media (max-width: theme('screens.sm.min')) {
         font-size: 3.8vw;
-        //white-space: nowrap;
-        //overflow: auto;
       }
       @media (max-width: 375px) {
         font-size: 4vw;
@@ -259,7 +261,7 @@ nav.next {
   line-height: 2em;
   white-space: nowrap;
 
-  @include media-breakpoint-down(xs) {
+  @media (max-width: theme('screens.sm.min')) {
     position: absolute;
     right: 0;
     top: 0;

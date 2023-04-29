@@ -1,5 +1,11 @@
+/* purgecss start ignore */
+@tailwind  base;
+@tailwind  components;
+/* purgecss end ignore */
+
+@tailwind utilities;
+
 @import 'variables';
-@import '~bootstrap/scss/bootstrap-reboot';
 @import 'css/MajorMonoDisplayFont.css';
 @import 'css/starability-slot.css';
 

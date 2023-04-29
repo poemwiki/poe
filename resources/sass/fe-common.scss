@@ -167,9 +167,9 @@ html{
   -webkit-tap-highlight-color: transparent;
 }
 
-@include media-breakpoint-up(md) {
+@screen md {
   html, body, nav.header-fixed {
-    width: breakpoint-min(md);
+    width: theme('screens.md.min');
     margin: 0 auto;
   }
 }
