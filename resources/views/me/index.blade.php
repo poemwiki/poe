@@ -34,16 +34,16 @@
       <calendar-heat class="calendar"
                      :data-fetch="() => fetchContributions({{$user->id}})"
       ></calendar-heat>
-
     </section>
 
     <section class="mb-16">
       <h2 class="mt-5 text-lg font-bold">我的原创&nbsp;<span v-cloak>共 @{{originalPoemsTotal}} 首</span></h2>
-      <ul>
+      <ul class="min-h-screen/4 flex flex-col justify-center">
         <li class="title-list-item" v-for="poem in originalPoems" v-cloak>
           <a class="title title-bar font-song no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['title']}}</a>
           <a class="first-line no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['firstLine']}}</a>
         </li>
+        <li v-if="loading" class="w-full text-center loading-box self-center"></li>
       </ul>
     </section>
 
@@ -61,6 +61,7 @@
       </ul>
     </section>
   </div>
+
   <notifications position="bottom right" :duration="2000" />
 
 </div>

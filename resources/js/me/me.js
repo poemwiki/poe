@@ -12,6 +12,7 @@ new Vue({
     stopFetchMorePoems: false,
     userID: '',
     originalPoemsTotal: null,
+    loading: true,
   },
   async mounted() {
     this.userID = this.$refs.userID.textContent;
@@ -55,20 +56,26 @@ new Vue({
       }, 1000);
     },
 
-    fetchPoems: async function(page = 1) {
-      const url = `/api/v1/poem/user/${this.userID}/${page}/10/hj`;
+    _fetchPoems: async function(page = 1) {
+      const url = `/api/v1/poem/user/${this.userID}/${page}/10`;
       try {
         const resp = await axios.get(url);
+
         if(resp.code !== 0) {
           return [];
         }
-        if(resp.data.length === 0) {
-          this.stopFetchMorePoems = true;
-        }
+
         return resp.data;
       } catch (error) {
         console.error(error);
       }
+    },
+
+    fetchPoems: async function(page = 1) {
+      this.loading = true;
+      const res = await this._fetchPoems(page);
+      this.loading = false;
+      return res;
     },
 
     fetchContributions: async function(userID) {

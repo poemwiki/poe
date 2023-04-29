@@ -43,8 +43,7 @@ new Vue({
       }, 1000);
     },
 
-    fetchCampaigns: async function(page = 1) {
-      this.loading = true;
+    _fetchCampaigns: async function(page = 1) {
       const url = `/api/v1/campaign/list/${page}`;
       try {
         const resp = await axios.get(url);
@@ -53,12 +52,17 @@ new Vue({
           return [];
         }
 
-        this.loading = false;
         return resp.data;
       } catch (error) {
-        this.loading = false;
         console.error(error);
       }
+    },
+
+    fetchCampaigns: async function(page = 1) {
+      this.loading = true;
+      const resp = await this._fetchCampaigns(page);
+      this.loading = false;
+      return resp;
     },
 
   }
