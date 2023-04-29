@@ -81,7 +81,6 @@ section.poem {
         }
 
         &::selection, & > br::selection {
-          color: var(--main-color);
           background-color: transparent;
         }
 

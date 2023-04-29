@@ -2,14 +2,28 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const colorHash = new ColorHash({lightness: 0.6, saturation: 0.86});
-    const mainColor = colorHash.hex(document.querySelector('article .title').innerText);
+
     const $next = document.querySelector('.next .title');
     const $body = document.getElementsByTagName("body")[0];
-    if($next) {
-      const mainColorNext = colorHash.hex($next.innerText);
-      $body.style.setProperty('--main-color-next', mainColorNext);
-    }
-    $body.style.setProperty('--main-color', mainColor);
+    const $head = document.head || document.getElementsByTagName('head')[0];
+
+    const mainColor = colorHash.hex(document.querySelector('article .title').innerText);
+    const mainColorNext = $next ? colorHash.hex($next.innerText) : '';
+
+    // insert style to header
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    const cssText = `
+      .poem-line::selection {
+        color: ${mainColor};
+      }
+      body {
+        --main-color: ${mainColor};
+        ${mainColorNext ? '--main-color-next: ' + mainColorNext : ''};
+      }
+    `;
+    style.appendChild(document.createTextNode(cssText));
+    $head.appendChild(style);
 
     const $nav = document.getElementById('top-nav');
     window.addEventListener('scroll', function(e) {
