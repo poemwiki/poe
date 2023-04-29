@@ -20,14 +20,3 @@
         @endauth
     </ul>
 </nav>
-
-<svg class="hidden" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <symbol id="menu-button" viewBox="0 0 68 68" preserveAspectRatio="xMinYMid meet">
-        <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-            <g id="Group-2" transform="translate(18.0, 26.0)" fill="#000000">
-                <rect x="0" y="0" width="32" height="4"></rect>
-                <rect x="0" y="12" width="32" height="4"></rect>
-            </g>
-        </g>
-    </symbol>
-</svg>
