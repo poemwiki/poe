@@ -13,7 +13,12 @@ $firstLine = $poem->firstLine;
 <section class="poem" itemscope itemtype="https://schema.org/Article" itemid="{{ $poem->fake_id }}">
   <article>
     <div class="poem-main">
-      <h1 class="title title-bar font-hei" itemprop="headline" id="title">{{ $poem->title }}</h1>
+      <div class="flex justify-between items-center">
+        <h1 class="title title-bar font-hei" itemprop="headline" id="title">{{ $poem->title }}</h1>
+        <button class="share" title="@lang('poem.Share')" onclick="onShare({{$poem->id}}, '{{$poem->title}}', '{{$poem->poetLabel}}')">
+          {!! file_get_contents(public_path('/images/share.svg')) !!}
+        </button>
+      </div>
 
       @if(config('app.env') === 'local') <h5>{{$poem->id}}</h5> @endif
 
@@ -126,8 +131,6 @@ $firstLine = $poem->firstLine;
 
         <a class="btn create"
            href="{{ Auth::check() ? route('poems/create') : route('login', ['ref' => route('poems/create')]) }}">@lang('poem.add poem')</a>
-{{--        <a class="btn share" id="share"--}}
-{{--           href="{{ route('poems/share', ['fakeId' => $poem->fakeId]) }}">@lang('poem.Share')</a>--}}
 
         <dl class="poem-info poem-versions nested-tree">
           <dt>@lang('poem.Translated/Original Version of This Poem')</dt>

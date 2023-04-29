@@ -8,7 +8,7 @@
     const $head = document.head || document.getElementsByTagName('head')[0];
 
     const mainColor = colorHash.hex(document.querySelector('article .title').innerText);
-    const mainColorNext = $next ? colorHash.hex($next.innerText) : '';
+    const nextMainColorRule = $next ? `--main-color-next: ${colorHash.hex($next.innerText)};` : '';
 
     // insert style to header
     const style = document.createElement('style');
@@ -17,9 +17,9 @@
       .poem-line::selection {
         color: ${mainColor};
       }
-      body {
+      :root {
         --main-color: ${mainColor};
-        ${mainColorNext ? '--main-color-next: ' + mainColorNext : ''};
+        ${nextMainColorRule}
       }
     `;
     style.appendChild(document.createTextNode(cssText));
@@ -46,7 +46,7 @@
       //if the selection is short let's not annoy our users
       if (("" + selection).length < 10) return;
 
-      //create a div outside of the visible area
+      //create a div outside the visible area
       const newdiv = document.createElement('div');
       newdiv.style.position = 'absolute';
       newdiv.style.left = '-99999px';
