@@ -50,9 +50,14 @@
   position: relative;
   line-height: 1.5;
   $left-padding: -10px;
+
+  $font-size: 14px;
+  $tree-branch-height: $font-size * 1.5; // font-size * line-height / 2 + margin-bottom
   .child {
     position: relative;
     margin: .5em 0;
+    font-size: $font-size;
+    line-height: 2;
   }
 
   .parent {
@@ -73,11 +78,11 @@
       &:after {
         position: absolute;
         left: $left-padding;
-        bottom: -7px;
+        bottom: -$font-size * 0.5;
         content: '';
         display: block;
         border-left: 1px solid $border-color;
-        height: 100%;
+        height: $tree-branch-height;
       }
 
       &.root {
