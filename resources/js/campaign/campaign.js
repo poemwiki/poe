@@ -13,9 +13,7 @@ new Vue({
   },
 
   async mounted() {
-    const response = await this.fetchCampaigns();
-    console.log(response.data);
-    this.campaigns = response.data;
+    this.campaigns = (await this.fetchCampaigns()).data;
   },
 
   watch: {
@@ -49,9 +47,14 @@ new Vue({
       this.loading = true;
       const url = `/api/v1/campaign/list/${page}`;
       try {
-        const data = await axios.get(url);
+        const resp = await axios.get(url);
+
+        if(resp.code !== 0) {
+          return [];
+        }
+
         this.loading = false;
-        return data;
+        return resp.data;
       } catch (error) {
         this.loading = false;
         console.error(error);

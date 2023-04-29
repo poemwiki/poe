@@ -1,26 +1,17 @@
-window._ = require('lodash');
-
+import _ from 'lodash';
+import axios from 'axios';
 import Vue from 'vue';
 import Notifications from 'vue-notification';
+window._ = _;
 window.Vue = Vue;
 Vue.use(Notifications);
-
-/**
- * We'll load jQuery and the Bootstrap jQuery plugin which provides support
- * for JavaScript based Bootstrap features such as modals and tabs. This
- * code may be modified to fit the specific needs of your application.
- */
-
-try {
-} catch (e) {}
 
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests
  * to our Laravel back-end. This library automatically handles sending the
  * CSRF token as a header based on the value of the "XSRF" token cookie.
  */
-
-window.axios = require('axios');
+window.axios = axios;
 
 const _createAxios = axios.create;
 
@@ -36,26 +27,24 @@ axios.create = function createPatchedAxios(conf) {
   return instance;
 };
 
-// usage
 const responseInterceptor = [
   res => {
-    if(res.data.code === 0 && res.data.data) {
-      return res.data.data;
-    }
     return res.data;
   },
-  error => {
 
+  // Handle request errors here,
+  // handle application errors(status === 200 but some wrong happened) after each request
+  error => {
     if(error.response.status === 422) {
-      var text = [];
-      var data = error.response.data
+      const text = [];
+      const data = error.response.data
       Object.keys(error.response.data.errors).map(function (key) {
         text.push(data.errors[key][0]);
       });
 
       Vue.notify({
         type: 'error',
-        title: 'Error!',
+        title: 'Error while processing your request!',
         text: text.join("<br/>")
       });
       console.error(error.response.data);
@@ -65,13 +54,12 @@ const responseInterceptor = [
     if(error.response.status !== 200) {
       Vue.notify({
         type: 'error',
-        title: 'Error!',
-        text: error.response.statusText,
-        duration: 6000
+        title: 'Error',
+        text: `Code: ${error.response.status} ${error.response.statusText}`
       });
-      console.error(error.response);
     }
-    console.error(error.response.statusText);
+
+    console.error('Response Error', error.response);
   }
 ];
 

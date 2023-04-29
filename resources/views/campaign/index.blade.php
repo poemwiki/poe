@@ -37,6 +37,7 @@
       </section>
 
     </div>
+    <notifications position="bottom right" :duration="2000" />
 
   </div>
 @endsection

@@ -30,11 +30,6 @@ new Vue({
       }
     }
   },
-  // provide: function () {
-  //   return {
-  //     fetchContributions: this.fetchContributions
-  //   }
-  // },
 
   methods: {
     onScroll: async function() {
@@ -54,15 +49,23 @@ new Vue({
 
       this.currentPage++;
 
+      // rate limit
       setTimeout(() => {
         this.stopFetchMorePoems = !res.has_more_pages;
       }, 1000);
     },
 
     fetchPoems: async function(page = 1) {
-      const url = `/api/v1/poem/user/${this.userID}/${page}/10`;
+      const url = `/api/v1/poem/user/${this.userID}/${page}/10/hj`;
       try {
-        return await axios.get(url);
+        const resp = await axios.get(url);
+        if(resp.code !== 0) {
+          return [];
+        }
+        if(resp.data.length === 0) {
+          this.stopFetchMorePoems = true;
+        }
+        return resp.data;
       } catch (error) {
         console.error(error);
       }
@@ -78,7 +81,13 @@ new Vue({
       const url = `/api/v1/contribution?user=${userID}&date-from=${startDateString}&date-to=${endDateString}`;
 
       try {
-        this.contributions = await axios.get(url);
+        const resp = await axios.get(url);
+
+        if(resp.code !== 0) {
+          this.contributions = [];
+        }
+
+        this.contributions = resp.data;
       } catch (error) {
         this.contributions = {'2022-1-1': []};
         console.error(error);
