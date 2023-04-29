@@ -30,39 +30,7 @@
   </style>
 @endpush
 
-@push('scripts')
-  <script src="https://cdn.staticfile.org/axios/1.3.6/axios.js"></script>
-  <script>
-    const $modal = document.getElementById('modal');
-    function showModal() {
-      $modal.classList.remove('hidden');
-      $modal.classList.add('flex');
-    }
-    function hideModal() {
-      $modal.classList.remove('flex');
-      $modal.classList.add('hidden');
-    }
-    async function onShare(id, title, poet) {
-      const url = `/api/v1/poem/share/${id}/pure`;
-      console.log(url);
-      showModal();
-      const res = await axios.get(url);
-      hideModal();
-      console.log(res);
-      if(res.data.code !== 0) {
-        alert('生成图片失败，请稍后再试');
-        return;
-      }
-      const imgUrl = res.data.data.url;
-      // download
-      const a = document.createElement('a');
-      a.href = imgUrl;
-      a.download = `${title} - ${poet}`;
-      a.click();
 
-    }
-  </script>
-@endpush
 
 @section('content')
   <div id="app" class="page">
@@ -80,7 +48,9 @@
             <div class="flex items-center"><img class="rounded-full mr-2 w-10 inline-block" src="{{$poem->poet_avatar}}" alt="avatar">{{$poem->poetLabel}}</div>
             <div class="flex items-center">
               <span>{{date_ago($poem->created_at)}}</span>
-              <button class="ml-2 p-2 cursor-pointer" onclick="onShare({{$poem->id}}, '{{$poem->title}}', '{{$poem->poetLabel}}')">
+              <button class="ml-2 p-2 generate-share-img"
+                data-id="{{$poem->id}}"  data-title="{{$poem->title}}" data-poet="{{$poem->poetLabel}}"
+              >
                 <img src="{{asset('/images/share.svg')}}" alt="share">
               </button>
             </div>
@@ -89,9 +59,6 @@
       @endforeach
     </ul>
 
-    <div id="modal" class="fixed hidden w-screen h-screen items-center justify-center flex-col z-50">
-      <div class="loading-box mb-4"></div>
-      <p class="text-white">正在生成诗歌卡片</p>
-    </div>
+    @include('poems.components.share')
   </div>
 @endsection

@@ -58,6 +58,12 @@
     margin: .5em 0;
     font-size: $font-size;
     line-height: 2;
+
+    @media (max-width: theme('screens.sm.min')) {
+      &:not(:has(>.parent)):hover {
+        background: $select-line-bg;
+      }
+    }
   }
 
   .parent {

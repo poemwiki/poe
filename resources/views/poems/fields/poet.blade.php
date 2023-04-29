@@ -1,6 +1,6 @@
 <dt>@lang('admin.poem.columns.poet')</dt>
 <dd itemscope itemtype="https://schema.org/Person">
-  <address itemprop="name" class="poem-writer">
+  <address itemprop="name" class="not-italic">
     @if($poem->poetAuthor)
       <a href="{{route('author/show',  ['fakeId' => $poem->poetAuthor->fakeId, 'from' => $poem->id])}}" class="poemwiki-link">
         {{$poem->poetLabel}}

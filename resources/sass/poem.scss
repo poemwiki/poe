@@ -20,15 +20,6 @@ section.poem {
   padding: 2rem 1.6rem;
 
   article {
-    button.share {
-      >svg {
-        fill: $gray-lighter;
-        &:hover {
-          fill: $blue;
-        }
-      }
-    }
-
     .subtitle {
       font-size: 1.1em;
       font-weight: bolder;
@@ -88,7 +79,7 @@ section.poem {
 
         &:hover {
           // TODO this is for share function
-          background-color: lighten($gray-lighter, 10);
+          background-color: $select-line-bg;
         }
       }
     }
@@ -255,7 +246,6 @@ nav.next {
 .btn-compare {
   display: inline-block;
   margin-left: 1em;
-  background: #FFFFFF;
   padding: 0 .2em;
   height: 2em;
   line-height: 2em;

@@ -47,5 +47,6 @@ $darker-content-bg-color: #f7f7f7;
 $transparent-black: rgb(0 0 0 / 30%);
 $modal-black: rgb(0 0 0 / 60%);
 $link-visited: darken($blue, 40%);
+$select-line-bg: lighten($gray-lighter, 10);
 
 $soft-enter-bezier: cubic-bezier(.1,0,.1,1);

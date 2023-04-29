@@ -13,9 +13,11 @@ $firstLine = $poem->firstLine;
 <section class="poem" itemscope itemtype="https://schema.org/Article" itemid="{{ $poem->fake_id }}">
   <article>
     <div class="poem-main">
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center mb-6">
         <h1 class="title title-bar font-hei" itemprop="headline" id="title">{{ $poem->title }}</h1>
-        <button class="share" title="@lang('poem.Share')" onclick="onShare({{$poem->id}}, '{{$poem->title}}', '{{$poem->poetLabel}}')">
+        <button class="generate-share-img" title="@lang('poem.Share')"
+          data-id="{{$poem->id}}" data-title="{{$poem->title}}" data-poet="{{$poem->poetLabel}}"
+        >
           {!! file_get_contents(public_path('/images/share.svg')) !!}
         </button>
       </div>
@@ -23,9 +25,9 @@ $firstLine = $poem->firstLine;
       @if(config('app.env') === 'local') <h5>{{$poem->id}}</h5> @endif
 
       <span itemprops="provider" itemscope itemtype="https://schema.org/Organization" class="hidden">
-                    <span itemprops="name" style="display: none">PoemWiki</span>
-                    <meta itemprops="url" content="https://poemwiki.org" />
-                </span>
+          <span itemprops="name" style="display: none">PoemWiki</span>
+          <meta itemprops="url" content="https://poemwiki.org" />
+      </span>
 
       @if($poem->subtitle)
         <pre class="subtitle font-hei" itemprop="subtitle">{{ $poem->subtitle }}</pre>
@@ -99,7 +101,7 @@ $firstLine = $poem->firstLine;
           <dl class="poem-ugc"><dt title="本作品由{{$poem->is_owner_uploaded === 1 ? '作者' : '译者'}}上传">原创</dt></dl>
         @endif
 
-        <ol class="contribution">
+        <ol class="contribution mt-4">
           @php
             /** @var \App\Models\Poem $poem */
             $maxKey = $poem->activityLogs->keys()->max();
@@ -129,7 +131,7 @@ $firstLine = $poem->firstLine;
           @endif
         </ol>
 
-        <a class="btn create"
+        <a class="btn create mt-4"
            href="{{ Auth::check() ? route('poems/create') : route('login', ['ref' => route('poems/create')]) }}">@lang('poem.add poem')</a>
 
         <dl class="poem-info poem-versions nested-tree">
@@ -146,4 +148,6 @@ $firstLine = $poem->firstLine;
     </section>
 
   </article>
+
+  @include('poems.components.share')
 </section>
