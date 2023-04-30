@@ -1,18 +1,21 @@
 nav.header-fixed {
-  width: 100%;
-  position: absolute;
-  left: 50%;
+  position: sticky;
+  left: 0;
   top: 0;
-  transform: translate(-50%, -100%);
+  width: 100%;
+  margin: 0 auto;
+
   z-index: 10;
   background-color: $bg-color;
   border-bottom: 1px solid $gray-lighter;
   box-shadow: 0 1px 2px 0 rgba(0,0,0,.1);
   overflow: hidden;
   user-select: none;
+
   //@include media-breakpoint-down(md) {
   //  background-color: rgba(0, 0, 0, 0.93);
   //}
+
   &>ul{
     height: 6rem;
     padding: 0 1.6rem;
@@ -56,6 +59,7 @@ nav.header-fixed {
     left: 1.6rem;
     line-height: 6rem;
     transition: top .8s ease-in;
+    visibility: hidden;
 
     //@include media-breakpoint-only(xs) {
     //  font-size: $font-size * 1.2;
@@ -63,6 +67,7 @@ nav.header-fixed {
   }
   &.show-title{
     .title{
+      visibility: visible;
       display: flex;
       top: 0;
       transition: top .8s $soft-enter-bezier;
@@ -99,8 +104,8 @@ nav.header-fixed {
     transition: opacity 2s ease-in;
 
     a{
-      width: 5rem;
-      height: 5rem;
+      width: 50px;
+      height: 50px;
       white-space: pre-line;
       background: url("https://p-1254719278.cos.ap-hongkong.myqcloud.com/img/common/poemwiki.svg") no-repeat 0 0;
       background-size: 5rem 5rem;

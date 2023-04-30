@@ -31,7 +31,7 @@
 
     @stack('head-scripts')
 </head>
-<body class="position-ref">
+<body class="relative">
     @include('layouts.fe-menu')
     <main>@yield('content')</main>
 

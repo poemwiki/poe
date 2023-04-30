@@ -176,7 +176,7 @@ html{
 body{
   font-size: $body-font-size-in-px;
   background-color: $bg-color;
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: none; // Disabling overscroll glow and rubber-banding effects
 }
 .error-page{
   min-height: calc(100vh - 6rem);
@@ -187,10 +187,12 @@ body{
   }
 }
 
+:root {
+  --main-color: transparent;
+  --main-color-next: transparent;
+}
+
 main{
-  margin-top: 6rem;
-  z-index: 2;
-  //position: sticky;
   background-color: $bg-color;
 }
 
@@ -229,8 +231,8 @@ main{
   width: 100%;
   height: 100%;
 }
-nav.header-fixed {
-  position: fixed;
-  top: 6rem;
-}
+//nav.header-fixed {
+//  position: fixed;
+//  top: 6rem;
+//}
 
