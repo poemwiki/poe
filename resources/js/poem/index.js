@@ -2,14 +2,13 @@ import '../bootstrap';
 
 // import 'flatpickr/dist/flatpickr.css';
 // import flatPickr from 'vue-flatpickr-component';
-import Notifications from 'vue-notification';
+
 // import 'vue-multiselect/dist/vue-multiselect.min.css';
 // import Multiselect from 'vue-multiselect';
 import VeeValidate, { Validator } from 'vee-validate';
 import zh_CN from "vee-validate/dist/locale/zh_CN";
 import en from "vee-validate/dist/locale/en";
-import VueCookie from 'vue-cookie';
-import VModal from 'vue-js-modal';
+// import VModal from 'vue-js-modal';
 
 
 // Vue.component('multiselect', Multiselect);
@@ -35,9 +34,7 @@ if (lang === 'zh-CN') {
 }
 
 // Vue.component('datetime', flatPickr);
-Vue.use(VModal, { dialog: true, dynamic: true, injectModalsContainer: true });
-Vue.use(Notifications);
-Vue.use(VueCookie);
+// Vue.use(VModal, { dialog: true, dynamic: true, injectModalsContainer: true });
 
 Vue.directive('visible', function(el, binding) {
   el.style.opacity = !!binding.value ? '1' : '0';
