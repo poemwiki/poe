@@ -1,15 +1,5 @@
-/* purgecss start ignore */
-@tailwind  base;
-@tailwind  components;
-/* purgecss end ignore */
-
-@tailwind utilities;
-
 @import 'variables';
 @import "vue-select/src/scss/vue-select.scss";
-//@import '~bootstrap/scss/bootstrap-reboot';
-//@import 'css/MajorMonoDisplayFont.css';
-//@import 'css/starability-slot.css';
 
 input[type],select {
   @apply text-base;
@@ -148,5 +138,3 @@ input[type],select {
     }
   }
 }
-
-@import 'common.scss';

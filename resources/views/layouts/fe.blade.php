@@ -23,7 +23,7 @@
 
     <title>@yield('title') - {{config('app.name')}}</title>
 
-    <!-- Fonts -->
+    <link href="{{ mix('/css/base.css') }}" rel="stylesheet">
     <link href="{{ mix('/css/post.css') }}" rel="stylesheet">
 
     @stack('styles')

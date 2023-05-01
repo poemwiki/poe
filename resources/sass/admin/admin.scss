@@ -6,7 +6,6 @@
 
 // Your own, project specific styles
 @import "styles/index";
-@import "../css/MajorMonoDisplayFont.css";
 @import "../_variables";
 
 .card-header{
@@ -15,7 +14,7 @@
 }
 
 .logo {
-  font-family: "Major Mono Display", monospace, sans-serif;
+  font-family: monospace, sans-serif;
   color: #000;
   white-space: pre-line;
   display: inline-block;

@@ -1,16 +1,5 @@
-/* purgecss start ignore */
-@tailwind  base;
-@tailwind  components;
-/* purgecss end ignore */
-
-@tailwind utilities;
-
-@import 'variables';
-@import 'css/MajorMonoDisplayFont.css';
+@import '_variables';
 @import 'css/starability-slot.css';
-
-
-@import "common";
 @import "poem";
 @import "comments";
 

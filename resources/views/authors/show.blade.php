@@ -10,6 +10,7 @@
 
 
 @push('styles')
+  <link href="{{ mix('/css/base.css') }}" rel="stylesheet">
   <link href="{{ mix('/css/author.css') }}" rel="stylesheet">
 @endpush
 

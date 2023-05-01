@@ -3,6 +3,7 @@ const mix = require('laravel-mix');
 require('laravel-mix-tailwind');
 // require('laravel-mix-purgecss');
 
+const noAdmin = process.env.hasOwnProperty('NO_ADMIN');
 
 mix.webpackConfig({
   resolve: {
@@ -36,18 +37,13 @@ if (!mix.inProduction()) {
  */
 
 mix
-  .sass('resources/sass/app.scss', 'public/css')
   .sass('resources/sass/post.scss', 'public/css')
   .sass('resources/sass/search.scss', 'public/css')
   .sass('resources/sass/author.scss', 'public/css')
   .sass('resources/sass/compare.scss', 'public/css')
-  .sass('resources/sass/campaign.scss', 'public/css');
+  .sass('resources/sass/base.scss', 'public/css');
 
 mix.js('resources/js/review.js', 'public/js');
-
-mix
-  .js(['resources/js/admin/admin.js'], 'public/js')
-  .sass('resources/sass/admin/admin.scss', 'public/css');
 
 mix
   .js(['resources/js/author/author.js'], 'public/js')
@@ -60,9 +56,15 @@ mix
 mix
   .js('resources/js/campaign/campaign.js', 'public/js/campaign.js').vue();
 
-mix.js(['resources/js/calendar/calendar.js'], 'public/js')
-  .sass('resources/sass/calendar.scss', 'public/css')
-  .tailwind();
+
+if (!noAdmin) {
+  mix.js(['resources/js/calendar/calendar.js'], 'public/js');
+  mix
+    .js(['resources/js/admin/admin.js'], 'public/js')
+    .sass('resources/sass/admin/admin.scss', 'public/css');
+}
+
+mix.tailwind();
   // .purgeCss(); // purge too many things
 
 

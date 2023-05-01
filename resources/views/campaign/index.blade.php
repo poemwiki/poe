@@ -3,8 +3,14 @@
 @section('title', '赛诗会')
 
 @push('styles')
-  <link href="{{ mix('/css/campaign.css') }}" rel="stylesheet">
+  <link href="{{ mix('/css/base.css') }}" rel="stylesheet">
   <style>
+    a {
+      all: unset;
+      cursor: pointer;
+      color: inherit;
+      text-decoration: none;
+    }
     #app {
       height: 100%;
       overflow-y: auto;

@@ -3,10 +3,12 @@
   "scripts": {
     "dev": "npm run development",
     "development": "cross-env NODE_ENV=development mix",
-    "watch": "mix watch",
+    "watch": "cross-env NO_ADMIN=1 mix watch",
+    "watch-all": "mix watch",
     "watch-poll": "mix watch -- --watch-options-poll=1000",
     "hot": "mix watch --hot",
     "prod": "npm run production",
+    "prod-no-admin": "cross-env NO_ADMIN=1 npm run production",
     "production": "cross-env NODE_ENV=production mix --production"
   },
   "devDependencies": {

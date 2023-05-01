@@ -6,7 +6,13 @@
 @endsection
 
 @push('styles')
-  <link href="{{ mix('/css/calendar.css') }}" rel="stylesheet">
+  <link href="{{ mix('/css/base.css') }}" rel="stylesheet">
+  <style>
+    .fc-right{visibility: hidden}
+    .wrapper .birth th,.wrapper .death th {
+      width: 33%;
+    }
+  </style>
 @endpush
 
 @section('content')

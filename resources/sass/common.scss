@@ -3,6 +3,7 @@
  */
 @import 'menu';
 @import 'poemwiki.scss';
+@import '_variables';
 
 :root {
   --main-color: transparent;
@@ -149,9 +150,9 @@ body{
 }
 
 .flex-center {
-  align-items: center;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .flex-center-vertically {

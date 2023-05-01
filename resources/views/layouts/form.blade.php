@@ -5,6 +5,7 @@
 @endsection
 
 @push('styles')
+  <link href="{{ mix('/css/base.css') }}" rel="stylesheet">
   <link href="{{ mix('/css/form.css') }}" rel="stylesheet">
 @endpush
 

@@ -1,15 +1,2 @@
 @import "form-common";
 
-main {
-  #calendar-page {
-    .fc-right{visibility: hidden}
-
-    .wrapper {
-      .birth,.death{
-        th {
-          width: 33%;
-        }
-      }
-    }
-  }
-}
