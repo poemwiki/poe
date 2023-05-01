@@ -53,12 +53,12 @@ $blocks = $doc['data']['items'];
 @endsection
 
 @section('content')
-  <h1>{{$titleBlock['page']['elements'][0]['text_run']['content']}}</h1>
+  <h1 class="text-2xl mb-8">{{$titleBlock['page']['elements'][0]['text_run']['content']}}</h1>
   @foreach($blocks as $block)
     @if($block['block_type'] == 2)
       @foreach($block['text']['elements'] as $element)
         @if(isset($element['mention_doc']))
-          <p><a href="{{$element['mention_doc']['url']}}" target="_blank">{{$element['mention_doc']['real_title'] ?? $element['mention_doc']['title']}}</p>
+          <p class="mb-4"><a href="{{$element['mention_doc']['url']}}" target="_blank">{{$element['mention_doc']['real_title'] ?? $element['mention_doc']['title']}}</p>
         @endif
       @endforeach
     @endif
