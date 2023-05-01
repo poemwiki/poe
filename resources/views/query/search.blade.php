@@ -7,6 +7,7 @@
 
 
 @push('styles')
+  <link href="{{ mix('/css/base.css') }}" rel="stylesheet">
   <link href="{{ mix('/css/search.css') }}" rel="stylesheet">
 @endpush
 
