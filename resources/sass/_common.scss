@@ -63,7 +63,9 @@ a {
   user-select: none;
 }
 
+
 /* global layout */
+
 html, body {
   color: $default-text-color;
   font-size: 62.5%;
@@ -81,39 +83,30 @@ html{
   -webkit-tap-highlight-color: transparent;
 }
 
-
 body{
   font-size: $body-font-size-in-px;
   background-color: $bg-color;
+  overflow: hidden auto;
   overscroll-behavior-y: none;
+  // see https://www.zhangxinxu.com/wordpress/2015/01/css-page-scrollbar-toggle-center-no-jumping/
+  padding-left: calc(100vw - 100%);
 }
 .main-wrapper {
   width: 100%;
   min-height: calc(100vh - 6rem - 1px);
-}
-main {
-  // see https://www.zhangxinxu.com/wordpress/2015/01/css-page-scrollbar-toggle-center-no-jumping/
-  padding-left: calc(100vw - 100%);
-  margin: 0 auto;
-  overflow: hidden visible;
-  z-index: 2;
-  background-color: $bg-color;
-  @screen md {
-    width: theme('screens.md.min');
-  }
-  .page{
+  &>main {
     margin: 0 auto;
+    overflow: hidden visible;
+    background-color: $bg-color;
+    @screen md {
+      width: theme('screens.md.min');
+    }
+    .page{
+      padding: 2rem 1.6rem;
+    }
   }
 }
 
-main .page {
-  padding: 2rem 1.6rem;
-}
-@media (min-width: theme('screens.md.min')) {
-  main .page {
-    width: theme('screens.md.min');
-  }
-}
 
 /* custom utils */
 
@@ -225,7 +218,6 @@ main .page {
   opacity: 1!important;
 }
 
-
 .avatar-wrapper { /* for author show page */
   width: 106px;
   height: 106px;
@@ -238,7 +230,9 @@ main .page {
   height: 100%;
 }
 
+
 /* animations */
+
 .fade-enter {
   opacity: 0;
 }
