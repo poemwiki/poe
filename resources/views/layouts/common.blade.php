@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{{-- layouts.common for index, details, search, and error page --}}
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
   <meta charset="utf-8">
@@ -30,7 +31,7 @@
 <body class="relative">
     @include('layouts.fe-menu')
     <div class="main-wrapper relative">
-      <main class="absolute">@yield('content')</main>
+      <main>@yield('content')</main>
     </div>
 
     @stack('scripts')

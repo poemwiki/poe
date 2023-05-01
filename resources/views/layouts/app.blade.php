@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{{-- layouts.app for email verify and confirm page --}}
 <html>
 <head>
   <meta charset="utf-8">

@@ -1,4 +1,4 @@
-@extends('layouts.fe-form')
+@extends('layouts.form')
 
 @php
   /** @var \App\Models\Poem $poem */

@@ -1,4 +1,4 @@
-@extends('layouts.fe-form')
+@extends('layouts.form')
 
 @section('title', trans('Add Author') )
 

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{{-- layouts.fe for poem, compare, contribution and static pages --}}
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
@@ -33,7 +34,9 @@
 </head>
 <body class="relative">
     @include('layouts.fe-menu')
-    <main>@yield('content')</main>
+    <div class="main-wrapper">
+      <main>@yield('content')</main>
+    </div>
 
     @stack('scripts')
 
