@@ -89,7 +89,7 @@ section.poem {
     dl.poem-info,dl.poem-ugc {
       line-height: 1em;
       margin: 3.2rem 0 0;
-      font-size: $font-size-sm;
+      //font-size: $font-size-sm;
 
       dt, dd {
         display: inline;
@@ -161,7 +161,7 @@ section.poem {
       }
 
       .add-translate-btn{
-        margin: .5em 0 0 .5em;
+        margin: 0 .5em 0 0;
       }
     }
     dl.poem-ugc {

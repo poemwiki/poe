@@ -48,13 +48,13 @@
         <form wire:submit.prevent="" wire:ignore>
             <div class="review-form-header flex-center-vertically">
                 <p class="review-form-h">@lang('Write Review')</p>
-                <div class="review-form-btn"><a href="#" class="btn close-review">@lang('Close')</a><button class="btn btn-wire" type="submit"
+                <div class="review-form-btn"><a href="#" class="btn close-review mr-4">@lang('Close')</a><button class="btn btn-wire" type="submit"
                     wire:loading.attr="disabled"
                     wire:click="submit()">@lang('Submit')</button>
                 </div>
             </div>
 {{--   see:  https://laracasts.com/discuss/channels/laravel/how-to-bind-ckeditor-value-to-laravel-livewire-component?page=1#reply=607889       --}}
-            <input name="title" type="text" class="review-title" placeholder="@lang('Title')"
+            <input name="title" type="text" class="review-title text-base" placeholder="@lang('Title')"
                    wire:model.debounce.999999ms="title"
                    wire:key="review-title">
 
