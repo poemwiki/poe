@@ -1,44 +1,5 @@
 @import "form-common";
 
-.title-list-item{
-  position: relative;
-  width: 100%;
-  >a.title{
-    padding: 1em 0 0 0;
-    width: 100%;
-    display: inline-block;
-    color: $blue;
-    line-height: 1.2em;
-    overflow-y: hidden;
-
-    &>span{
-      //vertical-align: bottom;
-      display: inline-block;
-      //transform: translateY(100%);
-      //animation: appear .75s ease-out forwards;
-    }
-
-    &:before{
-      opacity: 0;
-      animation: none;
-      transition: opacity 1.2s ease-out;
-      color: var(--title-color); // attr(data-color color);
-    }
-    &:hover{
-      cursor: pointer;
-      &:before{
-        opacity: 1;
-      }
-    }
-  }
-
-  .first-line{
-    padding-left: $font-size-larger-in-px;
-    color: $gray;
-    position: relative;
-  }
-}
-
 // search page
 .search {
   padding: 1rem 1.6rem 2rem;

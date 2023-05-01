@@ -97,8 +97,9 @@ body{
   min-height: calc(100vh - 6rem - 1px);
   &>main {
     margin: 0 auto;
-    overflow: hidden visible;
+    overflow: hidden;
     background-color: $bg-color;
+    min-height: calc(100vh - 6rem - 1px);
     @screen md {
       width: theme('screens.md.min');
     }
@@ -190,7 +191,6 @@ body{
     content: '▍';
     vertical-align: unset;
     animation: fadein 5s ease;
-    color: rgba(255, 255, 255, 0);
     color: var(--main-color);
   }
 }
@@ -206,7 +206,6 @@ body{
   padding: 0;
   color: $gray!important;
 
-
   >span {
     display: inline-block;
     opacity: 0;
@@ -214,6 +213,42 @@ body{
     transition: transform .666s $soft-enter-bezier, opacity 1.333s $soft-enter-bezier;
   }
 }
+
+.title-list-item{
+  position: relative;
+  width: 100%;
+  >a.title{
+    padding: 1em 0 0 0;
+    width: 100%;
+    display: inline-block;
+    color: $blue;
+    line-height: 1.2em;
+    overflow-y: hidden;
+
+    &>span{
+      display: inline-block;
+    }
+
+    &:before{
+      opacity: 0;
+      animation: none;
+      transition: opacity 1.2s ease-out;
+      color: var(--title-color); // attr(data-color color);
+    }
+    &:hover{
+      cursor: pointer;
+      &:before{
+        opacity: 1;
+      }
+    }
+  }
+
+  .first-line{
+    padding-left: $font-size-larger-in-px;
+    position: relative;
+  }
+}
+
 .show-first-line .first-line>span{
   transform: translateY(0);
   opacity: 1!important;
