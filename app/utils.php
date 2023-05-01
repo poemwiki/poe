@@ -252,6 +252,9 @@ function get_wikimedia_pic_info(array $titleLocale) {
 }
 
 function t2s($str) {
+    if (!function_exists('opencc_open')) {
+        return $str;
+    }
     $od      = opencc_open('t2s.json');
     $content = opencc_convert($str, $od);
     opencc_close($od);

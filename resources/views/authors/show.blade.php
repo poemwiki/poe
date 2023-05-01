@@ -81,7 +81,7 @@ $aliasMaxLength = 4;
         </p>
       @endif
 
-      <p class="poet-brief" style="white-space: pre-line;"><span class="poet-label">@lang('Introduction')：</span>{{$author->describe_lang}}
+      <p class="poet-brief leading-loose" style="white-space: pre-line;"><span class="poet-label">@lang('Introduction')：</span>{{$author->describe_lang}}
         @if($author->short_url)<a class="weapp-code" href="{{$author->short_url}}" target="_blank"><img src="{{$author->short_url}}" alt="微信小程序码"></a>@endif
       </p>
 
