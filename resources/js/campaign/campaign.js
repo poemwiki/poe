@@ -21,7 +21,6 @@ new Vue({
 
   methods: {
     onScroll: async function() {
-      console.log('onScroll');
       if (this.stopFetchMore) {
         return
       }

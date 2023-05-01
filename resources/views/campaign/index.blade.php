@@ -12,7 +12,7 @@
       text-decoration: none;
     }
     #app {
-      height: 100%;
+      height: calc(100vh - 6rem);
       overflow-y: auto;
     }
     #app::-webkit-scrollbar {

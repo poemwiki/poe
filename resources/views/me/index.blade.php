@@ -8,7 +8,7 @@
   <link href="{{ mix('/css/author.css') }}" rel="stylesheet">
 <style>
 #app {
-  height: 100%;
+  height: calc(100vh - 6rem);
   overflow-y: auto;
 }
 #app::-webkit-scrollbar {
