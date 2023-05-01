@@ -1,27 +1,25 @@
-
+/**
+ * reset rules, global layout, top nav menu, animations, customs utils
+ */
 @import 'menu';
 @import 'poemwiki.scss';
+
+:root {
+  --main-color: transparent;
+  --main-color-next: transparent;
+}
+
 [v-cloak] {
   display: none !important;
-}
-.fade-enter {
-  opacity: 0;
-}
-.fade-enter-active {
-  /* opacity: 1; default already is 1 */
-  transition: opacity 3s;
-}
-.fade-leave {
-  /* opacity: 1; default already is 1 */
-}
-.fade-leave-active {
-  opacity: 0;
-  transition: opacity 3s;
 }
 
 ol{
   list-style-type: none;
   padding: 0;
+}
+
+pre {
+  margin-bottom: 0;
 }
 
 a {
@@ -56,12 +54,74 @@ a {
 
 }
 
+::selection {
+  color: $white;
+  background-color: $transparent-black;
+}
+
+.no-select {
+  user-select: none;
+}
+
+/* global layout */
+html, body {
+  color: $default-text-color;
+  font-size: 62.5%;
+  font-family: $font-family-sans-serif;
+  font-weight: normal;
+  min-height: 100%;
+  margin: 0;
+}
+
+html{
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+body{
+  font-size: $body-font-size-in-px;
+  background-color: $bg-color;
+  overscroll-behavior-y: none;
+}
+.main-wrapper {
+  width: 100%;
+  min-height: calc(100vh - 6rem - 1px);
+}
+main {
+  // see https://www.zhangxinxu.com/wordpress/2015/01/css-page-scrollbar-toggle-center-no-jumping/
+  padding-left: calc(100vw - 100%);
+  margin: 0 auto;
+  overflow: hidden visible;
+  z-index: 2;
+  background-color: $bg-color;
+  @screen md {
+    width: theme('screens.md.min');
+  }
+  .page{
+    margin: 0 auto;
+  }
+}
+
+main .page {
+  padding: 2rem 1.6rem;
+}
+@media (min-width: theme('screens.md.min')) {
+  main .page {
+    width: theme('screens.md.min');
+  }
+}
+
+/* custom utils */
+
 .btn {
   font-size: $font-size-sm;
   color: $blue;
   background-color: transparent;
   display: inline-block;
-  margin-left: 1em;
   line-height: 1.2em;
   &:focus{
     outline: none;
@@ -88,7 +148,7 @@ a {
   color: gray;
 }
 
-.soft-wrap {
+.soft-wrap, .soft-wrap pre {
   white-space: normal!important;
 }
 .text-justify {
@@ -109,102 +169,13 @@ a {
   align-items: center;
 }
 
-@keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes fadeout {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-@keyframes width-stretch {
-  from { width: 0; }
-  to   { width: 100%; }
-}
-@keyframes scale-in {
-  0% {
-    opacity: 0;
-    transform: scale(.9)
-  }
-
-  100% {
-    opacity: 1
-  }
-}
-@keyframes appear {
-  0% {
-    opacity: 0;
-    transform: translateY(100%)
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0)
-  }
-}
-
 .no-vertical-padding {
   padding-top: 0;
   padding-bottom: 0;
 }
 
 .full-height {
-  height: calc(100vh - env(safe-area-inset-top));
-}
-
-html, body {
-  color: $default-text-color;
-  font-size: 62.5%;
-  font-family: $font-family-sans-serif;
-  font-weight: normal;
-  min-height: 100%;
-  margin: 0;
-}
-
-html{
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
-  -webkit-tap-highlight-color: transparent;
-}
-
-
-::selection {
-  color: $white;
-  background-color: $transparent-black;
-}
-body{
-  font-size: $body-font-size-in-px;
-  background-color: $bg-color;
-  overscroll-behavior-y: none;
-}
-.main-wrapper {
-  height: calc(100vh - 6rem);
-  overflow: hidden overlay;
-}
-// see https://www.zhangxinxu.com/wordpress/2015/01/css-page-scrollbar-toggle-center-no-jumping/
-main {
-  width: 100%;
-  height: calc(100vh - 6rem);
-  padding-left: calc(100vw - 100%);
-  overflow: hidden visible;
-  z-index: 2;
-  //position: sticky;
-  background-color: $bg-color;
-  .page{
-    margin: 0 auto;
-  }
-}
-
-
-main .page {
-  padding: 2rem 1.6rem;
-}
-@media (min-width: theme('screens.md.min')) {
-  main .page {
-    width: theme('screens.md.min');
-  }
+  height: calc(100vh - env(safe-area-inset-top) - 6rem - 1px);
 }
 
 .error-page{
@@ -214,7 +185,6 @@ main .page {
     text-align: center;
   }
 }
-
 
 .title {
   font-size: $font-size-larger;
@@ -230,6 +200,7 @@ main .page {
     color: var(--main-color);
   }
 }
+
 .first-line{
   display: block;
   font-size: $font-size-sm;
@@ -265,6 +236,56 @@ main .page {
   background-size: 40%,100%;
   width: 100%;
   height: 100%;
+}
+
+/* animations */
+.fade-enter {
+  opacity: 0;
+}
+.fade-enter-active {
+  /* opacity: 1; default already is 1 */
+  transition: opacity 3s;
+}
+.fade-leave {
+  /* opacity: 1; default already is 1 */
+}
+.fade-leave-active {
+  opacity: 0;
+  transition: opacity 3s;
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeout {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes width-stretch {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(.9)
+  }
+
+  100% {
+    opacity: 1
+  }
+}
+@keyframes appear {
+  0% {
+    opacity: 0;
+    transform: translateY(100%)
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0)
+  }
 }
 
 .loading-box {
