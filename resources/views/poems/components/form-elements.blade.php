@@ -1,4 +1,3 @@
-
 @if(isset($originalPoem) && $mode==='create translated')
     <div class="form-check">
         <label class="col-form-label text-md-right">
