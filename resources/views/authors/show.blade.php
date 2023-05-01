@@ -52,7 +52,7 @@ $aliasMaxLength = 4;
       {{--      alias--}}
 
       @if(!empty($author->alias_arr))
-        <div class="poet-brief poet-alias-wrapper">
+        <div class="poet-brief poet-alias-wrapper leading-loose">
           <span class="poet-label">@lang('admin.author.columns.alias_arr')：</span>
           <p class="poet-alias">
             @foreach($author->alias_arr as $key=>$alias)
