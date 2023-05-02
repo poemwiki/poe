@@ -2,7 +2,6 @@ import './bootstrap';
 
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 import flatPickr from 'vue-flatpickr-component';
-import VueQuillEditor from 'vue-quill-editor';
 import Notifications from 'vue-notification';
 import Multiselect from 'vue-multiselect';
 import VeeValidate, { Validator } from 'vee-validate';
@@ -55,7 +54,6 @@ Vue.filter('niceDateTime', function (v) {
 
 Vue.component('datetime', flatPickr);
 Vue.use(VModal, { dialog: true, dynamic: true, injectModalsContainer: true });
-Vue.use(VueQuillEditor);
 Vue.use(Notifications);
 Vue.use(VueCookie);
 
