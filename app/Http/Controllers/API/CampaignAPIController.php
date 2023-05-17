@@ -55,16 +55,20 @@ class CampaignAPIController extends Controller {
         // TODO Cache::forget('api-campaign-index') if new campaign set
         $campaigns = Cache::remember('api-campaign-index', now()->addMinutes(config('app.env') === 'production' ? 3 : 0), function () {
             return $this->campaignRepository->allInUse()->slice(0, 15)
-                ->filter(function ($campaign) {
-                    return !isset($campaign->settings['test']) || $campaign->settings['test'] != true;
-                })->map(function ($campaign) {
+                ->map(function ($campaign) {
+                    if (isset($campaign->settings['test']) && $campaign->settings['test']) {
+                        return null;
+                    }
                     $ret = $campaign->toArray();
                     $ret['settings'] = collect($campaign->settings)->except(['result']);
                     $ret['poem_count'] = $campaign->poem_count;
                     $ret['user_count'] = $campaign->user_count;
 
                     return $ret;
-                });
+                })
+                ->filter(function ($campaign) {
+                    return $campaign;
+                })->values();
         });
 
         return $this->responseSuccess($campaigns);
