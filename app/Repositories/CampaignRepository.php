@@ -45,7 +45,7 @@ class CampaignRepository extends BaseRepository {
 
     public static function allInUse() {
         return Campaign::with('tag:id,name_lang')
-            ->select(['id', 'image', 'start', 'end', 'name_lang', 'tag_id'])
+            ->select(['id', 'image', 'start', 'end', 'name_lang', 'tag_id', 'settings'])
             ->orderBy('start', 'desc')->get();
     }
 }
