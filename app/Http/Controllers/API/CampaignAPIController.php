@@ -29,20 +29,17 @@ class CampaignAPIController extends Controller {
      */
     public function list($page = 1) {
         $paginator = Campaign::with('tag:id,name_lang')
-            ->orderBy('start', 'desc')->paginate(20,
+            ->where('start', '<=', now())
+            ->whereRaw("(settings->'$.test' is null or settings->'$.test' = 0)")
+            ->orderBy('start', 'desc')
+            ->paginate(5,
                 ['id', 'image', 'start', 'end', 'name_lang', 'tag_id'],
                 'page', $page
             );
 
-        $data = $paginator->map(function ($campaign) {
-            $ret = $campaign->toArray();
-
-            return $ret;
-        });
-
         // TODO cache this
         return $this->responseSuccess([
-            'data'           => $data,
+            'data'           => $paginator->items(),
             'total'          => $paginator->total(),
             'per_page'       => $paginator->perPage(),
             'current_page'   => $paginator->currentPage(),
