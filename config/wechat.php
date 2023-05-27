@@ -24,7 +24,7 @@ return [
          */
         'use_laravel_cache' => true,
 
-        /**
+        /*
          * 日志配置
          *
          * level: 日志级别, 可选为：
@@ -32,19 +32,19 @@ return [
          * path：日志文件位置(绝对路径!!!)，要求可写权限
          */
         'log' => [
-            'default' => env('APP_DEBUG', false) ? 'dev' : 'prod', // 默认使用的 channel，生产环境可以改为下面的 prod
+            'default'  => env('APP_DEBUG', false) ? 'dev' : 'prod', // 默认使用的 channel，生产环境可以改为下面的 prod
             'channels' => [
                 // 测试环境
                 'dev' => [
                     'driver' => 'single',
-                    'path' => storage_path('logs/easywechat.log'),
-                    'level' => 'debug',
+                    'path'   => storage_path('logs/easywechat.log'),
+                    'level'  => 'debug',
                 ],
                 // 生产环境
                 'prod' => [
                     'driver' => 'daily',
-                    'path' => '/tmp/easywechat.log',
-                    'level' => 'info',
+                    'path'   => '/tmp/easywechat.log',
+                    'level'  => 'info',
                 ],
             ],
         ],
@@ -72,8 +72,8 @@ return [
      */
     'official_account' => [
         'default' => [
-            'app_id'  => env('WECHAT_OFFICIAL_ACCOUNT_APPID', 'wx56d3e5f3771a9e92'),         // AppID
-            'secret'  => env('WECHAT_OFFICIAL_ACCOUNT_SECRET', '0d7076ea683c671ccd0c53ae1ab26e45'),    // AppSecret
+            'app_id'  => env('WECHAT_OFFICIAL_ACCOUNT_APPID', ''),         // AppID
+            'secret'  => env('WECHAT_OFFICIAL_ACCOUNT_SECRET', ''),    // AppSecret
             'token'   => env('WECHAT_OFFICIAL_ACCOUNT_TOKEN', 'your-token'),           // Token
             'aes_key' => env('WECHAT_OFFICIAL_ACCOUNT_AES_KEY', ''),                 // EncodingAESKey
 
@@ -84,11 +84,11 @@ return [
              * callback：OAuth授权完成后的回调页地址(如果使用中间件，则随便填写。。。)
              * enforce_https：是否强制使用 HTTPS 跳转
              */
-             'oauth'   => [
-                 'scopes'        => array_map('trim', explode(',', env('WECHAT_OFFICIAL_ACCOUNT_OAUTH_SCOPES', 'snsapi_userinfo'))),
-                 'callback'      => env('WECHAT_OFFICIAL_ACCOUNT_OAUTH_CALLBACK', '/examples/oauth_callback.php'),
-                 'enforce_https' => false,
-             ],
+            'oauth'   => [
+                'scopes'        => array_map('trim', explode(',', env('WECHAT_OFFICIAL_ACCOUNT_OAUTH_SCOPES', 'snsapi_userinfo'))),
+                'callback'      => env('WECHAT_OFFICIAL_ACCOUNT_OAUTH_CALLBACK', '/examples/oauth_callback.php'),
+                'enforce_https' => false,
+            ],
         ],
     ],
 
