@@ -8,22 +8,22 @@
   <link href="{{ mix('/css/author.css') }}" rel="stylesheet">
 <style>
 #app {
-  height: calc(100vh - 6rem);
+  height: 100vh;
   overflow-y: auto;
 }
-#app::-webkit-scrollbar {
-  display: none;
-}
-#app {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
+/*#app::-webkit-scrollbar {*/
+/*  display: none;*/
+/*}*/
+/*#app {*/
+/*  -ms-overflow-style: none;  !* IE and Edge *!*/
+/*  scrollbar-width: none;  !* Firefox *!*/
+/*}*/
 </style>
 @endpush
 
 @section('content')
-<div id="app" @scroll.passive="onScroll">
-  <div class="page" ref="page">
+<div>
+  <div class="page">
     <span class="hidden" ref="userID">{{$user->id}}</span>
     <div class="flex justify-between">
       <h1 class="text-xl font-bold">{{$user->name}}</h1>

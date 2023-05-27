@@ -12,7 +12,7 @@
       text-decoration: none;
     }
     #app {
-      height: 100%;
+      height: 100vh;
       overflow-y: auto;
     }
     #app::-webkit-scrollbar {
@@ -31,7 +31,7 @@
 
 
 @section('content')
-  <div id="app" class="page">
+  <div class="page">
     <ul>
       @foreach($poems as $poem)
         <li class="mb-10 hover:bg-gray-100 rounded-lg p-4 pb-8">

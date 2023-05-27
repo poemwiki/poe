@@ -29,42 +29,43 @@
   @stack('head-scripts')
 </head>
 <body class="relative">
+  <div id="app" @scroll.passive="onScroll">
     @include('layouts.fe-menu')
-    <div class="main-wrapper relative">
+    <div class="main-wrapper relative" ref="page">
       <main>@yield('content')</main>
     </div>
 
-    @stack('scripts')
+  </div>
 
+  @stack('scripts')
 
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            $firstLines = document.querySelectorAll('.first-line');
-            if('IntersectionObserver' in window) {
-                var options = {root: null, rootMargin: '0px', threshold: [0.9]};
-                var observer = new IntersectionObserver(function (entries) {
-                    entries.forEach(function (entry) {
-                        if (entry.intersectionRatio >= 0.9) {
-                            document.body.classList.add('show-first-line');
-                        }
-                    });
-                }, options);
-                [].forEach.call($firstLines, function($line) {
-                    observer.observe($line);
-                });
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      $firstLines = document.querySelectorAll('.first-line');
+      if('IntersectionObserver' in window) {
+        var options = {root: null, rootMargin: '0px', threshold: [0.9]};
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.intersectionRatio >= 0.9) {
+              document.body.classList.add('show-first-line');
             }
+          });
+        }, options);
+        [].forEach.call($firstLines, function($line) {
+          observer.observe($line);
         });
+      }
+    });
 
-        function ready() {
-          console.log(window.__wxjs_environment === 'miniprogram') // true
-        }
-        if (!window.WeixinJSBridge || !WeixinJSBridge.invoke) {
-          document.addEventListener('WeixinJSBridgeReady', ready, false)
-        } else {
-          ready()
-        }
-    </script>
+    function ready() {
+      console.log(window.__wxjs_environment === 'miniprogram') // true
+    }
+    if (!window.WeixinJSBridge || !WeixinJSBridge.invoke) {
+      document.addEventListener('WeixinJSBridgeReady', ready, false)
+    } else {
+      ready()
+    }
+  </script>
 </body>
 
 

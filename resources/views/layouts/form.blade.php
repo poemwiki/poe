@@ -12,7 +12,7 @@
 @section('content')
 
 
-  <div id="app" :class="{'loading': loading}" class="page">
+  <div :class="{'loading': loading}" class="page">
     <div class="modals">
       <v-dialog></v-dialog>
     </div>

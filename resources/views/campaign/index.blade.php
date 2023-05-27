@@ -12,7 +12,7 @@
       text-decoration: none;
     }
     #app {
-      height: calc(100vh - 6rem);
+      height: 100vh;
       overflow-y: auto;
     }
     #app::-webkit-scrollbar {
@@ -26,8 +26,8 @@
 @endpush
 
 @section('content')
-  <div id="app" @scroll.passive="onScroll">
-    <div class="page" ref="page">
+  <div>
+    <div class="page">
       <h1 class="text-xl font-bold hidden">赛诗会</h1>
 
       <section class="mb-16">
