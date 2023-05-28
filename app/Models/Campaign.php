@@ -143,7 +143,7 @@ class Campaign extends Model {
                 if (isset($master['id'])) {
                     $user = User::find($master['id']);
                     if ($user) {
-                        $ret['avatar'] = asset($user->avatarUrl);
+                        $ret['avatar'] = cosUrl($user->avatarUrl);
 
                         if ($user->author) {
                             $ret['author_id'] = $user->author->id;
@@ -152,7 +152,7 @@ class Campaign extends Model {
                 }
 
                 if (isset($master['avatar'])) {
-                    $ret['avatar'] = asset($master['avatar']);
+                    $ret['avatar'] = cosUrl($master['avatar']);
                 }
                 $ret['avatar'] = cosUrl($ret['avatar'] ?? config('app.avatar.default'));
 

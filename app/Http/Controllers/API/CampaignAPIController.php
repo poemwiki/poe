@@ -88,11 +88,11 @@ class CampaignAPIController extends Controller {
 
             $poems = $this->poemRepository->getCampaignPoemsByTagId($campaign->tag_id);
             $ret['poemData'] = $poems;
-            $ret['settings'] = collect($campaign->settings)->except(['result']);
+            $ret['settings'] = collect($campaign->settings)->except(['result'])->toArray();
             $ret['settings']['inner_image_url'] = cosUrl($campaign->settings['inner_image_url']);
             $ret['settings']['share_image_url'] = cosUrl($campaign->settings['share_image_url']);
-            if (isset($campaign->settings['sell']['picUrl'])) {
-                //$ret['settings']['sell']['picUrl'] = cosUrl($campaign->settings['sell']['picUrl']);
+            if (isset($ret['settings']['sell']['picUrl'])) {
+                $ret['settings']['sell']['picUrl'] = cosUrl($campaign->settings['sell']['picUrl']);
             }
             $ret['poem_count'] = $campaign->poem_count;
             $ret['user_count'] = $campaign->user_count;
