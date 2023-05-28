@@ -12,16 +12,12 @@
     <form method="post" action="{{ url('/password/reset') }}">
       @csrf
       <input type="hidden" name="token" value="{{ $token }}">
-      <h1>@lang('auth.password.action.reset')</h1>
-      <p class="text-muted">@lang('auth.password.Enter email and new password')</p>
+      <p class="text-muted text-lg">@lang('auth.password.Please set your new password')</p>
       <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text">@</span>
-        </div>
         <input type="email" class="form-control {{ $errors->has('email')?'is-invalid':'' }}" name="email"
-               value="{{ old('email') }}" placeholder="Email">
+               value="{{ $email }}" placeholder="Email">
         @if ($errors->has('email'))
-          <span class="invalid-feedback">
+          <span class="invalid-feedback ml-2">
               <strong>{{ $errors->first('email') }}</strong>
           </span>
         @endif
@@ -35,7 +31,7 @@
         <input type="password" class="form-control {{ $errors->has('password')?'is-invalid':''}}" name="password"
                placeholder="Password">
         @if ($errors->has('password'))
-          <span class="invalid-feedback">
+          <span class="invalid-feedback ml-2">
               <strong>{{ $errors->first('password') }}</strong>
           </span>
         @endif
@@ -55,7 +51,7 @@
         @endif
       </div>
       <button type="submit" class="btn btn-wire btn-primary btn-block btn-flat">
-        <i class="fa fa-btn fa-refresh"></i> Reset
+        <i class="fa fa-btn fa-refresh"></i> @lang('auth.password.action.reset')
       </button>
     </form>
   </div>
