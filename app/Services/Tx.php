@@ -46,23 +46,25 @@ class Tx {
     protected $cosClient;
 
     public function __construct($cosConfig = []) {
-        $cosConfig['credentials']     = [
+        $cosConfig['credentials'] = [
             'appId'     => config('filesystems.disks.cosv5.credentials.appId'),
             'secretId'  => config('filesystems.disks.cosv5.credentials.secretId'),
             'secretKey' => config('filesystems.disks.cosv5.credentials.secretKey'),
             'token'     => config('filesystems.disks.cosv5.credentials.token')
         ];
-        $cosConfig['schema']          = $cosConfig['schema']                   ?? config('filesystems.disks.cosv5.scheme');
+        $cosConfig['schema']          = $cosConfig['schema'] ?? config('filesystems.disks.cosv5.scheme');
         $cosConfig['region']          = isset($cosConfig['region']) ? region_map($cosConfig['region']) : config('filesystems.disks.cosv5.region');
         $cosConfig['appId']           = $cosConfig['credentials']['appId'];
         $cosConfig['secretId']        = $cosConfig['credentials']['secretId'];
         $cosConfig['secretKey']       = $cosConfig['credentials']['secretKey'];
         $cosConfig['token']           = $cosConfig['credentials']['token'];
-        $cosConfig['timeout']         = $cosConfig['timeout']                  ?? config('filesystems.disks.cosv5.timeout');
-        $cosConfig['connect_timeout'] = $cosConfig['connect_timeout']          ?? config('filesystems.disks.cosv5.connect_timeout');
+        $cosConfig['timeout']         = $cosConfig['timeout']         ?? config('filesystems.disks.cosv5.timeout');
+        $cosConfig['connect_timeout'] = $cosConfig['connect_timeout'] ?? config('filesystems.disks.cosv5.connect_timeout');
 
-        $this->bucket                 = config('filesystems.disks.cosv5.bucket');
-        $this->secretKey              = $cosConfig['credentials']['secretKey'] ?? config('filesystems.disks.cosv5.credentials.secretKey');
+        $cosConfig['allow_accelerate'] = $cosConfig['allow_accelerate'] ?? config('filesystems.disks.cosv5.allow_accelerate');
+
+        $this->bucket    = config('filesystems.disks.cosv5.bucket');
+        $this->secretKey = $cosConfig['credentials']['secretKey'] ?? config('filesystems.disks.cosv5.credentials.secretKey');
 
         $this->cosConfig = $cosConfig;
         $this->cosClient = new CosClient($cosConfig);
@@ -222,5 +224,9 @@ class Tx {
             'Body'          => $content,
             'PicOperations' => $picOperationsTemplate->queryString(),
         ])->toArray();
+    }
+
+    public static function useCustomDomain($url) {
+        return preg_replace('#https?://(poe|p)\-1254719278\.cos.+\.myqcloud.com#', config('app.cos_custom_domain_url'), $url);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use App\Services\Tx;
+
 if (!function_exists('file_get_contents_post')) {
     /**
      * post $data to $url.
@@ -435,8 +437,15 @@ function isValidUrl($url) {
     return preg_match('/((ftp|http|https):\/\/)([a-z]+:{0,1}[a-z]*@)?(\S+)(:[0-9]+)?(\/|\/([[a-z]#!:.?+=&%@!\-\/]))?/i', $url);
 }
 
-function cosUrl($key = '') {
-    return config('app.cos_custom_domain_url') . '/' . $key;
+function cosUrl($key = ''): string {
+    if (str_starts_with($key, 'http')) {
+        return Tx::useCustomDomain($key);
+    }
+    if (!str_starts_with($key, '/')) {
+        $key = '/' . $key;
+    }
+
+    return config('app.cos_custom_domain_url') . $key;
 }
 
 function urlOrLoginRef($url) {

@@ -92,7 +92,7 @@ class Campaign extends Model {
      */
     protected $with = ['tag'];
 
-    protected $appends = ['tag_name', 'image_url', 'masters', 'share_image_url'];
+    protected $appends = ['tag_name', 'image_url', 'masters'];
 
     /* ************************ ACCESSOR ************************* */
 
@@ -104,7 +104,7 @@ class Campaign extends Model {
     }
 
     public function getImageUrlAttribute() {
-        return cosUrl($this->image); // . '!campaign.main.webp.70';
+        return cosUrl($this->image);
     }
 
     public function getMasterIDsAttribute() {
@@ -154,7 +154,7 @@ class Campaign extends Model {
                 if (isset($master['avatar'])) {
                     $ret['avatar'] = asset($master['avatar']);
                 }
-                $ret['avatar'] = $ret['avatar'] ?? config('app.avatar.default');
+                $ret['avatar'] = cosUrl($ret['avatar'] ?? config('app.avatar.default'));
 
                 return $ret;
             }, $masterInfos);
@@ -171,7 +171,7 @@ class Campaign extends Model {
             // 同时存在 masters和 masterInfos 的情况下，优先使用 masterInfos 内的 name 和 avatar
             if ($masterInfos && ($info = $masterInfos[$index])) {
                 $masterUser['name']   = $info['name'];
-                $masterUser['avatar'] = asset($info['avatar']);
+                $masterUser['avatar'] = cosUrl($info['avatar']);
             }
             if ($user->author) {
                 $masterUser['author_id'] = $user->author->id;
@@ -183,7 +183,7 @@ class Campaign extends Model {
     }
 
     public function getShareImageUrlAttribute() {
-        return asset($this->settings['share_image_url'] ?? $this->image);
+        return cosUrl($this->settings->share_image_url);
     }
 
     public function getPoemCountAttribute() {

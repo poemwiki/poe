@@ -342,10 +342,10 @@ class Author extends Model implements Searchable {
      */
     public function getAvatarUrlAttribute() {
         if ($this->avatar) {
-            return $this->avatar;
+            return cosUrl($this->avatar);
         }
         if ($this->user) {
-            return $this->user->avatar_url;
+            return cosUrl($this->user->avatar_url);
         }
         $defaultAvatar = config('app.avatar.default');
         $url           = isValidPicUrl($this->pic_url[0] ?? '') ? $this->pic_url[0] : $defaultAvatar;
@@ -354,7 +354,7 @@ class Author extends Model implements Searchable {
             $url = $defaultAvatar;
         }
 
-        return $url;
+        return cosUrl($url);
     }
 
     public function getBirthFieldsAttribute(): ?string {

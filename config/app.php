@@ -242,7 +242,10 @@ $config = [
     'render_server' => env('POE_RENDER_SERVER', 'http://47.105.165.228:8888'),
 
     'avatar' => [
-        'default'     => 'http://' . env('COSV5_BUCKET') . '.cos.' . env('COSV5_REGION') . '.myqcloud.com/avatar/_.png',
+        'default'     => env(
+            'COSV5_CUSTOM_DOMAIN_URL',
+            'https://' . env('COSV5_BUCKET') . '.cos.' . env('COSV5_REGION') . '.myqcloud.com'
+        ) . '/avatar/_.png',
         'user_path'   => env('USER_AVATAR_PATH', 'avatar/u'), // user avatar path
         'author_path' => env('AUTHOR_AVATAR_PATH', 'avatar/a')  // author avatar path
     ],

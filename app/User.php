@@ -74,7 +74,8 @@ class User extends Authenticatable implements MustVerifyEmail {
         'email_verified_at' => 'datetime',
         'invite_code'       => 'string',
         'last_online_at'    => 'datetime',
-        'weight'            => 'float'
+        'weight'            => 'float',
+        'is_v'              => 'boolean'
     ];
 
     protected $dates = [
@@ -296,7 +297,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return string
      */
     public function getAvatarUrlAttribute() {
-        return $this->avatar ?? config('app.avatar.default');
+        return cosUrl($this->avatar ?? config('app.avatar.default'));
     }
 
     public function getVerifiedAvatarHtml() {

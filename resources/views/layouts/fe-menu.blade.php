@@ -1,6 +1,7 @@
 <nav class="header-fixed" id="top-nav">
     <ul class="flex-center-vertically">
-        <li class="flex-center-vertically site-logo" id="site-logo"><a class="no-bg" href="/"></a></li>
+        <li class="flex-center-vertically site-logo" id="site-logo"><a class="no-bg" href="/"
+          style="background-image: url({{cosUrl('/img/common/poemwiki.svg')}})"></a></li>
         <li class="flex-center-vertically"><span class="title title-bar no-bg font-hei no-select" id="menu-title">@yield('title')</span></li>
         <li class="flex-center-vertically user-logo">
             @auth
