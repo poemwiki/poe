@@ -605,9 +605,16 @@ class PoemAPIController extends Controller {
         $postData = [
             'compositionId' => $compositionID,
             'id'            => $poem->id,
+            'title'         => $poem->title,
             'poem'          => $poem->poem,
+            'subtitle'      => $poem->subtitle,
+            'preface'       => $poem->preface,
             'poet'          => $poem->poetLabel,
-            'title'         => $poem->title
+            'poetVerified'  => false, //$poem->poetAuthor->user->isVerified,
+            'config'        => [
+                'wrap'  => true,
+                'scale' => 1.5,
+            ],
         ];
         if ($compositionID === 'nft') {
             $postData['hash']      = $poem->nft->shortedHash;
@@ -680,7 +687,7 @@ class PoemAPIController extends Controller {
             return $poemImgPath;
         }
 
-        $poemImg = file_get_contents_post(config('app.render_server'), $postData, 'application/x-www-form-urlencoded', 30);
+        $poemImg = file_get_contents_post(config('app.render_server'), $postData, 'application/json', 30);
         if (file_put_contents($poemImgPath, $poemImg)) {
             if (File::mimeType($poemImgPath) == 'text/plain') {
                 unlink($poemImgPath);
