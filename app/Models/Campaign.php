@@ -104,7 +104,7 @@ class Campaign extends Model {
     }
 
     public function getImageUrlAttribute() {
-        return cosUrl($this->image);
+        return cosUrl($this->image) . '/campaign.main.webp.70';
     }
 
     public function getMasterIDsAttribute() {
