@@ -66,11 +66,11 @@ $aliasMaxLength = 4;
       @endif
 
       @if($author->nation)
-        <p><span class="pr-2 font-bold">@lang('admin.author.columns.nation_id')</span>{{$author->nation->name_lang}}</p>
+        <p class="mt-4"><span class="pr-2 font-bold">@lang('admin.author.columns.nation_id')</span>{{$author->nation->name_lang}}</p>
       @endif
 
       @if($author->dynasty)
-        <p><span class="pr-2 font-bold">@lang('admin.author.columns.dynasty_id')</span>{{$author->dynasty->name_lang}}</p>
+        <p class="mt-4"><span class="pr-2 font-bold">@lang('admin.author.columns.dynasty_id')</span>{{$author->dynasty->name_lang}}</p>
       @endif
 
 {{--  short description  @if($author->wikiData) <p class="poet-brief poet-brief-wikdiata">@lang('wiki.data.desc')：{{$author->wikiData->getDescription(config('app.locale'))}}</p> @endif--}}
