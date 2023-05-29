@@ -357,6 +357,12 @@ class Author extends Model implements Searchable {
         return cosUrl($url);
     }
 
+    public function getPicturesAttribute() {
+        return array_map(function ($url) {
+            return cosUrl($url);
+        }, $this->pic_url ?? []);
+    }
+
     public function getBirthFieldsAttribute(): ?string {
         return $this->birth_year && $this->birth_month && $this->birth_day ? 'day'
             : ($this->birth_year  && $this->birth_month ? 'month'

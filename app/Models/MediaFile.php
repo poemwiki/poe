@@ -11,14 +11,15 @@ use Spatie\Activitylog\Traits\LogsActivity;
 /**
  * App\MediaFile.
  *
- * @property int   $id
- * @property array $props
+ * @property int    $id
+ * @property string $path
+ * @property array  $props
  * @mixin \Eloquent
  */
 class MediaFile extends Model {
     use LogsActivity;
     use RelatableNode;
-    protected $table     = 'file';
+    protected $table = 'file';
 
     public const TYPE = [
         'image'      => 0,

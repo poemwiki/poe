@@ -74,29 +74,21 @@ class MoveImageToCOS extends Command {
     }
 
     public function process(Author $author): int {
-        $urls = [];
-
         logger()->info('processing started:[author->id=' . $author->id . ']');
 
         $picUrls = collect($author->pic_url)->filter(function ($url) {
-            return isValidPicUrl($url) && (isWikimediaUrl($url)
-                || !str_starts_with($url, cosUrl()));
+            return isValidPicUrl($url) && isWikimediaUrl($url);
         })
             ->values();
 
         foreach ($picUrls as $index => $url) {
-            $options = config('app.env') === 'production' ? [] : [
-                'proxy' => 'http://127.0.0.1:1087',
-                // 'https' => 'tcp://127.0.0.1:1087'
-            ];
-
             $pathInfo = pathinfo($url);
             $ext      = $pathInfo['extension'];
 
             logger()->info('fetching url:' . $url);
 
             try {
-                $response = \Illuminate\Support\Facades\Http::withOptions($options)->timeout(10)->retry(3, 1)->get($url);
+                $response = \Illuminate\Support\Facades\Http::timeout(10)->retry(3, 1)->get($url);
                 if ($response->status() !== 200) {
                     continue;
                 }
@@ -111,7 +103,8 @@ class MoveImageToCOS extends Command {
             $toFormat = TX::SUPPORTED_FORMAT['webp'];
 
             try {
-                $MediaFile = $this->upload($author, $imgContent, $ext, $toFormat, $urls, $index, $pathInfo['filename']);
+                $MediaFile       = $this->upload($author, $imgContent, $ext, $toFormat, $index, $pathInfo['filename']);
+                $picUrls[$index] = $MediaFile->path;
             } catch (\Exception $e) {
                 logger()->error('uploadImage Error:' . $e->getMessage() . "\n" . $e->getTraceAsString());
 
@@ -132,7 +125,7 @@ class MoveImageToCOS extends Command {
             }
         }
 
-        $author->pic_url = !empty($urls) ? $urls : null;
+        $author->pic_url = $picUrls;
         $author->save();
 
         return 0;
@@ -177,7 +170,7 @@ class MoveImageToCOS extends Command {
      * @param $pathInfo
      * @return MediaFile
      */
-    protected function upload(Author $author, string $imgContent, string $ext, string $toFormat, array &$urls, $index, $name): MediaFile {
+    protected function upload(Author $author, string $imgContent, string $ext, string $toFormat, $index, $name): MediaFile {
         $result                    = $this->uploadImage($imgContent, $ext, $toFormat);
         list($fileID, $compressed) = $result;
         $this->client->deleteObject($fileID);
@@ -185,14 +178,12 @@ class MoveImageToCOS extends Command {
         $compressedKey = $compressed['Key'];
         logger()->info('uploadImage finished:[author->id=' . $author->id . ']', $result);
 
-        $urls[$index] = $this->client->getUrl($compressedKey);
-
         $MediaFile = $this->authorRepo->saveAuthorMediaFile($author, MediaFile::TYPE['image'], $compressedKey, $name, $toFormat, $compressed['Size']);
 
         if ($index === 0 && !$author->avatar) {
             $scropSize      = min(600, $compressed['Width'], $compressed['Height']);
             $avatarResult   = $this->scropAvatar($compressedKey, $author->fakeId, $toFormat, $scropSize);
-            $author->avatar = 'https://' . $avatarResult['Location'];
+            $author->avatar = $avatarResult['Key'];
             $author->save();
 
             $this->authorRepo->saveAuthorMediaFile($author, MediaFile::TYPE['avatar'], $avatarResult['Key'], $name, $toFormat, $avatarResult['Size'], $MediaFile->id);

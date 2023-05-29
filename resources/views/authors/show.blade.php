@@ -107,7 +107,6 @@ $aliasMaxLength = 4;
       </div>
 
 
-
       @if($poemsAsPoet->isNotEmpty())
       <h2 class="mt-8 text-xl font-bold">@lang("Author's Poem", ['author' => $author->label])</h2>
       @endif
