@@ -8,7 +8,7 @@
   //line-height: 2.4em;
   background-color: transparent;
 }
-.wikidata-link, .wikipedia-link, .weapp-link, .weapp-code{
+.wikidata-link, .weapp-link, .weapp-code{
   vertical-align: text-bottom;
   line-height: 1em;
   width: 1em;
@@ -19,7 +19,7 @@
     background-color: transparent;
   }
 }
-.wikidata-link:before, .wikipedia-link:before, .weapp-link:before {
+.wikidata-link:before, .wikipedia-link:after, .weapp-link:before {
   content: '';
   display: inline-block;
   width: 1em;
@@ -31,7 +31,13 @@
 .wikidata-link:before {
   background-image: url("/images/wikidata.svg");
 }
-.wikipedia-link:before {
+.wikipedia-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.2em;
+}
+.wikipedia-link:after {
+  margin-left: 1em;
   background-image: url("/images/wikipedia.svg");
 }
 .weapp-link:before {

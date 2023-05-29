@@ -20,15 +20,21 @@ $aliasMaxLength = 4;
 
 @section('content')
     <article class="poet page">
-      <h1 class="text-xl font-bold">{{$author->label}}
-        @if($author->short_url)<a class="weapp-code" href="{{$author->short_url}}" target="_blank"><img src="{{$author->short_url}}" alt="微信小程序码"></a>@endif
-        @if($author->wikiData)
-          <a class="wikidata-link" href="{{$author->wikiData->wikidata_url}}" target="_blank"></a>
+
+      <div class="flex items-center">
+        @if($author->avatarUrl)
+          <img class="w-1/12 mr-2" style="max-width: unset" src="{{$author->avatarUrl}}" alt="avatar of {{$author->name_lang}}">
         @endif
-      </h1>
-      @if(config('app.env') === 'local') {{$author->id}} @endif
-      <a class="edit btn"
-         href="{{ Auth::check() ? route('author/edit', $author->fakeId) : route('login', ['ref' => route('author/edit', $author->fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
+
+        <h1 class="text-xl font-bold">{{$author->label}}
+          @if($author->short_url)<a class="weapp-code" href="{{$author->short_url}}" target="_blank"><img src="{{$author->short_url}}" alt="微信小程序码"></a>@endif
+          @if($author->wikiData)
+            <a class="wikidata-link" href="{{$author->wikiData->wikidata_url}}" target="_blank"></a>
+          @endif
+        </h1>
+
+        @if(config('app.env') === 'local') {{$author->id}} @endif
+      </div>
 
       <div class="author-relate">
         @if($author->user)
@@ -37,13 +43,10 @@ $aliasMaxLength = 4;
         @endif
       </div>
 
-      <div class="poet-gallery">
-        @if($author->avatar)
-          <a href="{{$author->avatar}}" target="_blank"><img class="poet-pic" style="max-width: unset" src="{{$author->avatar}}" alt="avatar of {{$author->name_lang}}"></a>
-        @endif
-        @if($author->pic_url)
-          @foreach($author->pic_url as $url)
-              <a href="{{$url}}" target="_blank"><img class="poet-pic" style="max-width: unset" src="{{$url}}" alt="image of {{$author->name_lang}}"></a>
+      <div class="poet-gallery mt-4">
+        @if($author->pictures)
+          @foreach($author->pictures as $url)
+              <a href="{{$url}}" target="_blank"><img class="poet-pic" src="{{$url}}" alt="image of {{$author->name_lang}}"></a>
           @endforeach
         @endif
       </div>
@@ -52,8 +55,8 @@ $aliasMaxLength = 4;
       {{--      alias--}}
 
       @if(!empty($author->alias_arr))
-        <div class="poet-brief poet-alias-wrapper leading-loose">
-          <span class="poet-label">@lang('admin.author.columns.alias_arr')：</span>
+        <div class="poet-alias-wrapper mt-8 leading-loose flex items-baseline">
+          <span class="pr-2 font-bold">@lang('admin.author.columns.alias_arr')</span>
           <p class="poet-alias">
             @foreach($author->alias_arr as $key=>$alias)
               <a class="poet-alias-item" href="{{route('search', $alias)}}">{{$alias}}</a>
@@ -63,60 +66,80 @@ $aliasMaxLength = 4;
       @endif
 
       @if($author->nation)
-        <p class="poet-brief"><span class="poet-label">@lang('admin.author.columns.nation_id')：</span>{{$author->nation->name_lang}}</p>
+        <p><span class="pr-2 font-bold">@lang('admin.author.columns.nation_id')</span>{{$author->nation->name_lang}}</p>
       @endif
 
       @if($author->dynasty)
-        <p class="poet-brief"><span class="poet-label">@lang('admin.author.columns.dynasty_id')：</span>{{$author->dynasty->name_lang}}</p>
+        <p><span class="pr-2 font-bold">@lang('admin.author.columns.dynasty_id')</span>{{$author->dynasty->name_lang}}</p>
       @endif
 
 {{--  short description  @if($author->wikiData) <p class="poet-brief poet-brief-wikdiata">@lang('wiki.data.desc')：{{$author->wikiData->getDescription(config('app.locale'))}}</p> @endif--}}
-      @if($author->wikiData)
-        <p class="poet-brief poet-brief-wikdiata"><span class="poet-label">@lang('wiki.pedia.summary')：</span>{{
+{{--      tabs to show descriptions --}}
+
+      <div class="tabs mt-8">
+
+        <input type="radio" name="tabs" id="tabone" checked="checked">
+        <label class="z-10" for="tabone">@lang('Introduction')</label>
+        <div class="tab">
+          <p class="poet-brief leading-loose" style="white-space: pre-line;">{{$author->describe_lang}}
+            @if($author->short_url)<a class="weapp-code" href="{{$author->short_url}}" target="_blank"><img src="{{$author->short_url}}" alt="微信小程序码"></a>@endif
+          </p>
+
+          <a class="edit btn text-xs"
+             href="{{ Auth::check() ? route('author/edit', $author->fakeId) : route('login', ['ref' => route('author/edit', $author->fakeId, false)]) }}">@lang('poem.correct errors or edit')</a>
+        </div>
+
+
+        @if($author->wikiData)
+          <input type="radio" name="tabs" id="tabtwo">
+          <label for="tabtwo">Wikipedia</label>
+          <div class="tab">
+            <p class="poet-brief poet-brief-wikdiata">{{
               t2s($author->wiki_desc_lang ?: $author->fetchWikiDesc())
               }}
-          @if($author->wikiData->url)
-            <a class="wikipedia-link" href="{{$author->wikiData->url}}" target="_blank"></a>
-          @endif
-        </p>
+            </p>
+            @if($author->wikiData->url)
+              <a class="wikipedia-link mt-2" href="{{$author->wikiData->url}}" target="_blank">{{$author->wikiData->url}}</a>
+            @endif
+          </div>
+        @endif
+
+      </div>
+
+
+
+      @if($poemsAsPoet->isNotEmpty())
+      <h2 class="mt-8 text-xl font-bold">@lang("Author's Poem", ['author' => $author->label])</h2>
       @endif
 
-      <p class="poet-brief leading-loose" style="white-space: pre-line;"><span class="poet-label">@lang('Introduction')：</span>{{$author->describe_lang}}
-        @if($author->short_url)<a class="weapp-code" href="{{$author->short_url}}" target="_blank"><img src="{{$author->short_url}}" alt="微信小程序码"></a>@endif
-      </p>
+      <ul>
+      @foreach($poemsAsPoet as $poem)
+          <li class="title-list-item">
+              <a class="title title-bar font-song no-bg" href="{{$poem->url}}">{{trim($poem->title) ? trim($poem->title) : '无题'}}</a>
+              <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->firstLine)->surround('span', function ($i) {
+                          return 'style="transition-delay:'.($i*20).'ms"';
+                  })!!}</a>
+          </li>
+      @endforeach
+      </ul>
 
-        @if($poemsAsPoet->isNotEmpty())
-        <h2>@lang("Author's Poem", ['author' => $author->label])</h2>
-        @endif
+      @if($poemsAsTranslator->isNotEmpty())
+      <h2 class="mt-8 text-xl font-bold">@lang("Translation Works", ['author' => $author->label])</h2>
+      @endif
 
-        <ul>
-        @foreach($poemsAsPoet as $poem)
-            <li class="title-list-item">
-                <a class="title title-bar font-song no-bg" href="{{$poem->url}}">{{trim($poem->title) ? trim($poem->title) : '无题'}}</a>
-                <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->firstLine)->surround('span', function ($i) {
-                            return 'style="transition-delay:'.($i*20).'ms"';
-                    })!!}</a>
-            </li>
-        @endforeach
-        </ul>
-
-        @if($poemsAsTranslator->isNotEmpty())
-        <h2>@lang("Translation Works", ['author' => $author->label])</h2>
-        @endif
-
-        <ul>
-            @foreach($poemsAsTranslator as $poem)
-                <li class="title-list-item">
-                    <a class="title title-bar font-song no-bg" href="{{$poem->url}}">{!!
-                    Str::of(trim($poem->title) ? trim($poem->title) : '无题')
-                        ->surround('span')!!}</a>
-                    <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->firstLine)->surround('span', function ($i) {
-                            return 'style="transition-delay:'.($i*20).'ms"';
-                    })!!}<span
-                        class="text-gray-400 float-right item-poem-author {{$poem->poetAuthor ? 'poemwiki-link' : ''}}">{{$poem->poetLabel}}</span></a>
-                </li>
-            @endforeach
-        </ul>
+      <ul>
+          @foreach($poemsAsTranslator as $poem)
+              <li class="title-list-item">
+                  <a class="title title-bar font-song no-bg" href="{{$poem->url}}">{!!
+                  Str::of(trim($poem->title) ? trim($poem->title) : '无题')
+                      ->surround('span')!!}</a>
+                  <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->firstLine)->surround('span', function ($i) {
+                          return 'style="transition-delay:'.($i*20).'ms"';
+                  })!!}<span
+                      class="text-gray-400 float-right item-poem-author {{$poem->poetAuthor ? 'poemwiki-link' : ''}}">{{$poem->poetLabel}}</span></a>
+              </li>
+          @endforeach
+      </ul>
     </article>
 
 @endsection
