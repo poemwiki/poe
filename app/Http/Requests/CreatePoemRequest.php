@@ -149,9 +149,13 @@ class CreatePoemRequest extends FormRequest {
 
         $sanitized['upload_user_id'] = $user->id;
 
-        $sanitized['title']    = Str::trimSpaces($sanitized['title']);
-        $sanitized['subtitle'] = Str::trimSpaces($sanitized['subtitle']);
-        $sanitized['preface']  = Str::trimSpaces($sanitized['preface']);
+        $sanitized['title'] = Str::trimSpaces($sanitized['title']);
+        if (isset($sanitized['subtitle'])) {
+            $sanitized['subtitle'] = Str::trimSpaces($sanitized['subtitle']);
+        }
+        if (isset($sanitized['preface'])) {
+            $sanitized['preface'] = Str::trimSpaces($sanitized['preface']);
+        }
 
         return $sanitized;
     }
