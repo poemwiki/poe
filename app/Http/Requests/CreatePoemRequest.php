@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Author;
 use App\Models\Poem;
 use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
@@ -12,6 +11,7 @@ use App\Rules\ValidTranslatorId;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class CreatePoemRequest extends FormRequest {
@@ -148,6 +148,10 @@ class CreatePoemRequest extends FormRequest {
         // }
 
         $sanitized['upload_user_id'] = $user->id;
+
+        $sanitized['title']    = Str::trimSpaces($sanitized['title']);
+        $sanitized['subtitle'] = Str::trimSpaces($sanitized['subtitle']);
+        $sanitized['preface']  = Str::trimSpaces($sanitized['preface']);
 
         return $sanitized;
     }
