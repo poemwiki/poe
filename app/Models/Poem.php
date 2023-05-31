@@ -173,7 +173,8 @@ class Poem extends Model implements Searchable {
         'is_owner_uploaded'      => 'integer',
         'share_pics'             => 'json',
         'campaign_id'            => 'integer',
-        'weapp_url'              => 'json'
+        'weapp_url'              => 'json',
+        'flag'                   => 'integer',
     ];
 
     protected $dates = [
@@ -212,6 +213,13 @@ class Poem extends Model implements Searchable {
         // TODO check if created same poem by hash
         self::creating(function ($model) {
             $model->poem = Str::trimEmptyLines(Str::trimTailSpaces($model->poem));
+            if (is_null($model->flag)) {
+                // Because the flag field is nullable (with a default value of 0) and fillable,
+                // if it is not manually set to 0 when the flag is null, the flag field will be null.
+                // After saving, the flag field will be automatically set to 0, which will cause
+                // changes in the value of the flag field and generate unnecessary activity logs.
+                $model->flag = self::$FLAG['none'];
+            }
             $model->length = grapheme_strlen($model->poem);
         });
 
