@@ -111,6 +111,22 @@ class PoemController extends Controller {
             $poem->original_id = $originalPoem->id;
             $poem->is_original = 0;
         }
+        if ($a = request()->get('author_fake_id')) {
+            $author          = Author::findOrFail(Author::getIdFromFakeId($a));
+            $mode            = 'create poem by author';
+            $preset          = new Poem();
+            $preset->poet_id = $author->id;
+            $preset->poet    = $author->label;
+            $preset->poet_cn = $author->label_cn;
+        }
+        if ($presetTranslatorFakeID = request()->get('translator_fake_id')) {
+            $translator                     = Author::findOrFail(Author::getIdFromFakeId($presetTranslatorFakeID));
+            $mode                           = 'create poem by translator';
+            $poem->is_original              = 0;
+            $poem->translator_ids           = [$translator->id];
+            $poem->translator               = $translator->label;
+            $poem['#translators_label_arr'] = $poem->translatorsLabelArr;
+        }
 
         if ($preset) {
             $poem->poet_id                = $preset->poet_id;
@@ -132,17 +148,23 @@ class PoemController extends Controller {
         $poem['#user_name'] = Auth::user()->name;
         $poem['poem']       = "\n\n\n\n\n\n";
 
-        $deftaultAuthors = ($preset && $preset->poetLabel) ? AuthorRepository::searchLabel($preset->poetLabel, [$preset->poet_id]) : [];
+        $deftaultAuthors = ($preset && $preset->poetLabel)
+            ? AuthorRepository::searchLabel($preset->poetLabel, [$preset->poet_id])
+            : [];
+        $defaultTranslators = $mode === 'create poem by translator'
+            ? AuthorRepository::searchLabel($poem->translatorsStr, $poem->translator_ids)
+            : [];
 
         return view('poems.create', [
-            'poem'           => $poem,
-            'trans'          => $this->trans(),
-            'languageList'   => LanguageRepository::allInUse(),
-            'genreList'      => Genre::select('name_lang', 'id')->get(),
-            'translatedPoem' => $translatedPoem ?? null, // TODO don't pass translatedPoem
-            'originalPoem'   => $originalPoem ?? null, // TODO don't pass originalPoem
-            'defaultAuthors' => $deftaultAuthors, //Author::select('name_lang', 'id')->limit(10)->get()->toArray(),
-            'mode'           => $mode
+            'poem'               => $poem,
+            'trans'              => $this->trans(),
+            'languageList'       => LanguageRepository::allInUse(),
+            'genreList'          => Genre::select('name_lang', 'id')->get(),
+            'translatedPoem'     => $translatedPoem ?? null, // TODO don't pass translatedPoem
+            'originalPoem'       => $originalPoem ?? null, // TODO don't pass originalPoem
+            'defaultAuthors'     => $deftaultAuthors, //Author::select('name_lang', 'id')->limit(10)->get()->toArray(),
+            'defaultTranslators' => $defaultTranslators,
+            'mode'               => $mode
         ]);
     }
 

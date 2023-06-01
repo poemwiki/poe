@@ -132,7 +132,7 @@ $firstLine = $poem->firstLine;
         </ol>
 
         <a class="btn create mt-4"
-           href="{{ Auth::check() ? route('poems/create') : route('login', ['ref' => route('poems/create')]) }}">@lang('poem.add poem')</a>
+           href="{{ urlOrLoginRef(route('poems/create')) }}">@lang('poem.add poem')</a>
 
         <dl class="poem-info poem-versions nested-tree text-sm">
           <dt>@lang('poem.Translated/Original Version of This Poem')</dt>

@@ -8,10 +8,11 @@
     display: none;
   }
   input[type="radio"]:checked + label {
-    background: $alabaster;
-    border-left-color: $alabaster;
-    border-right-color: $alabaster;
+    background: #fff;
+    font-weight: bold;
+    color: $default-text-color;
   }
+
   input[type="radio"]:checked + label + .tab {
     display: block;
   }
@@ -20,38 +21,24 @@
     order: 1;
     padding: 1rem 2rem;
     cursor: pointer;
-    font-weight: bold;
     margin-right: .2rem;
     border-color: $border-color;
     border-style: solid;
     border-width: 1px 1px 0 1px;
   }
+
   .tab {
-    order: 9;
-    flex-grow: 1;
+    order: 2;
     width: 100%;
     height: 100%;
     display: none;
     padding: 1rem;
-    background: $alabaster;
   }
 
-  @media (max-width: 465px) {
-    .tab,
-    label {
-      order: initial;
-    }
-
-    label {
-      width: 100%;
-      margin-left: 50px;
-    }
-  }
 }
 
 // author page
 article.poet{
-  padding: 1rem 1.6rem 2rem;
 
   .author-relate {
     color: $gray;
@@ -125,30 +112,27 @@ article.poet{
     padding-left: 0;
     //line-height: 3em;
   }
-  details{
-    display: inline;
-    position: relative;
-    summary{
-      &::marker{
-        color: $text-muted;
-        font-size: $font-size-sm-in-px;
-      }
-      &:hover::marker{
-        color: $default-text-color;
-        background-color: $gray;
-      }
+
+  .tabs-desc {
+    input[type="radio"]:checked + label {
+      background: $alabaster;
+      border-left-color: $alabaster;
+      border-right-color: $alabaster;
     }
-    &[open]>summary{
-      height: 1em;
-      line-height: 1em;
-      width: 2em;
-      position: absolute;
-      bottom: -.5em;
-      right: -.5em;
-      z-index: 1;
-      &::marker{
-        content: '收起';
-      }
+    .tab {
+      background: $alabaster;
+      min-height: 2em;
+    }
+  }
+  .tabs-poems {
+    label {
+      padding-bottom: 0;
+      color: $text-muted;
+      border: none;
+      padding-left: 0;
+    }
+    .tab {
+      padding: 0;
     }
   }
 }

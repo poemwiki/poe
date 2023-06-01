@@ -16,12 +16,15 @@
         :action="'{{ url('poems/store') }}'"
         @if($mode === 'create original')
           :data="{{ $poem->toFillableJson(0, ['#user_name', '#translated_id']) }}"
+        @elseif($mode === 'create poem by translator')
+          :data="{{ $poem->toFillableJson(0, ['#user_name', 'translator_ids', '#translators_label_arr']) }}"
         @else
           :data="{{ $poem->toFillableJson(0, ['#user_name']) }}"
         @endif
         :trans="{{json_encode($trans)}}"
         :locales="{{ json_encode($locales) }}"
         :default-authors="{{ json_encode($defaultAuthors) }}"
+        :default-translators="{{ json_encode($defaultTranslators) }}"
         v-cloak
         inline-template>
 

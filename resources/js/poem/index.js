@@ -8,11 +8,12 @@ import '../bootstrap';
 import VeeValidate, { Validator } from 'vee-validate';
 import zh_CN from "vee-validate/dist/locale/zh_CN";
 import en from "vee-validate/dist/locale/en";
-// import VModal from 'vue-js-modal';
+import VModal from 'vue-js-modal';
 
 
 // Vue.component('multiselect', Multiselect);
 Vue.use(VeeValidate, {strict: true});
+Vue.use(VModal, { dialog: true, dynamic: true, injectModalsContainer: true });
 
 zh_CN.messages.required = function(n) {
   return n+"是必填的";

@@ -47,6 +47,7 @@ Vue.component('poem-form', {
         translator_wikidata_id: null,
         is_owner_uploaded: 0,
         '#user_name': '',
+        '#translators_label_arr': [],
         original_link: ''
       },
 
