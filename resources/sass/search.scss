@@ -1,8 +1,7 @@
 @import "form-common";
 
 // search page
-.search {
-  padding: 1rem 1.6rem 2rem;
+.search.page {
 
   .search-box{
     margin: 2rem 0;
@@ -13,30 +12,14 @@
     }
   }
 
-  >h1 {
-    font-size: $font-size-larger;
-    font-weight: bolder;
-    margin: 2rem 0 0;
-  }
-  .search-count {
-    color: $gray-lighter;
-    font-size: $font-size-sm;
-  }
   .search-group {
-    h2{
-      font-size: $font-size-h2;
-      font-weight: bolder;
-      margin: 2rem 0 1rem;
-    }
     ol{
       padding-left: 0;
       list-style: none;
       .item{
-        margin-bottom: 1rem;
         display: flex;
         .title{
           line-height: 1.6em;
-          margin-top: -.3em;
         }
         &:first-child .title {
           padding-top: 0;
@@ -67,49 +50,42 @@
 
         &.item-author{
           height: 10rem;
-          .title{
-            padding-top: 0;
-            line-height: 1.2em;
-          }
           .item-desc{
-            .item-link:hover {
-              color: unset;
-            }
             &.block-with-text {
               /* hide text if it more than N lines  */
               overflow: hidden;
               /* for set '...' in absolute position */
               position: relative;
-              /* use this value to count block height */
-              line-height: 1.2em;
               /* max-height = line-height (1.2) * lines max number (3) */
-              max-height: 3.6em;
+              max-height: 4.5em;
               /* fix problem when last visible word doesn't adjoin right side  */
               text-align: justify;
-              /* place for '...' */
-              margin-right: -1em;
-              padding-right: 1em;
             }
             /* create the ... */
             &.block-with-text:before {
               /* points in the end */
-              content: '...';
+              content: ' ';
+              display: inline-block;
+              width: 4em;
+              height: 1.5em;
               /* absolute position */
               position: absolute;
               /* set position to right bottom corner of block */
               right: 0;
               bottom: 0;
+              text-align: right;
+              background: linear-gradient(90deg, transparent 0%, hsl(var(--primary-foreground)) 100%);
             }
             /* hide ... if we have text, which is less than or equal to max lines */
             &.block-with-text:after {
               /* points in the end */
               content: '';
+              display: inline-block;
+              width: 4em;
               /* absolute position */
               position: absolute;
               /* set position to right bottom corner of text */
               right: 0;
-              /* set width and height */
-              width: 1em;
               height: 1em;
               margin-top: 0.2em;
               /* bg color = bg color under block */

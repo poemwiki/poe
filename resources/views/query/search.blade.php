@@ -25,61 +25,62 @@
 
 
     @if(isset($keyword))
-      <h1>@lang('search.result of', ['keyword' => $keyword])</h1>
+      <h1 class="mt-8 text-lg hidden">@lang('search.result of', ['keyword' => $keyword])</h1>
     @endif
 
 
     @if(isset($authors) && isset($poems))
-    <p class="search-count">@lang('search.count', ['count' => count($authors) + count($poems)])</p>
+    <p class="text-sm text-gray-400 text-light">@lang('search.count', ['count' => count($authors) + count($poems)])</p>
     @endif
 
 
     @if(isset($keyword))
       <aside class="mt-4">
-        <a class="mr-4" href="{{route('author/create')}}" class="btn">@lang('Add Author') {{$keyword}}</a>
-        <a class="mr-4" href="{{route('new')}}" class="btn">@lang('Add Poem') {{$keyword}}</a>
+        <a class="mr-8" href="{{route('author/create')}}" class="btn">@lang('Add Author') {{$keyword}}</a>
+        <a class="mr-8" href="{{route('new')}}" class="btn">@lang('Add Poem') {{$keyword}}</a>
       </aside>
     @endif
 
-    @if(isset($authors) && $authors && count($authors))
+
+    @if(isset($authors[0]))
       <div class="search-group">
-        <h2>@lang('search.result-author')</h2>
+        <h2 class="mt-8 mb-4 text-lg font-bold">@lang('search.result-author')</h2>
 
         <ol>
           @foreach($authors as $author)
-            <li class="item item-author">
+            <li class="group item item-author mb-8 relative">
               @if(isset($author->searchable->avatar_url))
-                <img class="item-pic item-left" src="{{$author->searchable->avatar_url}}">
+                <img class="item-pic item-left" src="{{$author->searchable->avatar_url}}" alt="{{$author->title}}" />
               @endif
-              <div class="item-right title-list-item">
-                <a class="item-link title no-bg" href="{{ $author->url }}">{{ $author->title }}</a>
-                <p class="item-desc block-with-text"><a class="item-link no-bg"
-                                                        href="{{ $author->url }}">{{mb_substr($author->searchable->describe_lang, 0, 200)}}</a>
-                </p>
+              <div class="item-right">
+                <span class="group-hover:text-link inline-block align-text-top font-bold mb-4 text-lg leading-none">{{ $author->title }}</span>
+                <p class="item-desc block-with-text leading-normal">{{mb_substr($author->searchable->describe_lang, 0, 200)}}</p>
               </div>
+
+              <a class="no-bg block p-0 absolute w-full h-full left-0 top-0" href="{{ $author->url }}"></a>
             </li>
           @endforeach
-
         </ol>
       </div>
     @endif
 
+
     @if(isset($poems) && count($poems))
       <div class="search-group">
-        <h2>@lang('search.result-poem')</h2>
+        <h2 class="mt-8 mb-4 text-lg font-bold">@lang('search.result-poem')</h2>
 
         <ol>
 
           @foreach($poems as $poem)
-            <li class="item item-poem">
+            <li class="group item item-poem">
               {{--                    <a class="" href="{{ $item->url }}">{{ $item->title }}</a>--}}
               <div class="item-right title-list-item">
-                <a class="item-link title-bar title font-song no-bg" target="_blank" href="{{$poem->url}}">{{trim($poem->title) ?: '无题'}}</a>
+                <a class="title font-song no-bg" target="_blank" href="{{$poem->url}}">{{trim($poem->title) ?: '无题'}}</a>
                 <a class="first-line no-bg" target="_blank" href="{{$poem->url}}">{!!Str::of($poem->firstLine)->surround('span', function ($i) {
                             return 'style="transition-delay:'.($i*20).'ms"';
                     })!!}
                   <span
-                    class="text-gray-400 float-right item-poem-author {{$poem->poetAuthor ? 'poemwiki-link' : ''}}">{{$poem->poetLabel}}</span></a>
+                    class="group-hover:text-link text-gray-400 float-right item-poem-author {{$poem->poetAuthor ? 'poemwiki-link' : ''}}">{{$poem->poetLabel}}</span></a>
               </div>
             </li>
           @endforeach
@@ -88,6 +89,10 @@
       </div>
     @endif
 
+
+    @if(isset($authors[0]) && (in_array($authors[0]->title, ['neruda', 'Neruda', 'Pablo Neruda', '巴勃罗·聂鲁达', '巴勃罗·聶魯達', '聂鲁达', '聶魯達'])))
+      <p class="mt-8 text-gray-400 text-xs text-right">“诗歌永远是一种和平的举动。诗歌出自和平，就像面包成于面粉。纵火犯、战犯和豺狼，搜索诗人，为了焚掉他、杀掉他、撕咬他”<br>Pablo Neruda</p>
+    @endif
   </div>
 
 
