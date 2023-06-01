@@ -434,7 +434,27 @@ function textClean($str, int $longTextLineLength = 70): string {
 }
 
 function isValidUrl($url) {
-    return preg_match('/((ftp|http|https):\/\/)([a-z]+:{0,1}[a-z]*@)?(\S+)(:[0-9]+)?(\/|\/([[a-z]#!:.?+=&%@!\-\/]))?/i', $url);
+    return preg_match('/^((ftp|http|https):\/\/)([a-z]+:{0,1}[a-z]*@)?(\S+)(:[0-9]+)?(\/|\/([[a-z]#!:.?+=&%@!\-\/]))?$/i', $url);
+}
+
+/**
+ * Replace http/https url to <a> tag.
+ * @param $text
+ * @return array|string|string[]|null
+ */
+function renderLink($text, $target = '_blank') {
+    $text = preg_replace_callback('/(https?:\/\/[^\s]+)/', function ($matches) use ($target) {
+        $url = $matches[0];
+
+        return <<<HTML
+<a href="$url" target="$target">$url</a>
+HTML;
+    },
+        // go through e(htmlspecialchars) then nl2br so that we can use <br> in the text
+        nl2br(e($text))
+    );
+    // replace spaces outside <a> tag
+    return preg_replace('@(\s)(?![^<]*>|[^<>]*</)@', '&nbsp;', $text);
 }
 
 function cosUrl($key = ''): string {
