@@ -32,6 +32,10 @@
 
 @section('content')
   <div class="page">
+    <div class="flex items-center justify-between">
+      <a href="/campaign" class="">返回</a>
+      <span>共 {{count($poems)}} 首</span>
+    </div>
     <ul>
       @foreach($poems as $poem)
         <li class="mb-10 hover:bg-gray-100 rounded-lg p-4 pb-8">
