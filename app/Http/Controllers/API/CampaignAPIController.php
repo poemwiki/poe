@@ -96,7 +96,13 @@ class CampaignAPIController extends Controller {
             }
             $ret['poem_count'] = $campaign->poem_count;
             $ret['user_count'] = $campaign->user_count;
+
             $ret['image_url'] = cosUrl($campaign->image_url);
+
+            // additional data
+            // TODO remove this if weapp don't need campaign.share_image_url
+            // (after onShareAppMessage function of weapp is updated)
+            $ret['share_image_url'] = $ret['settings']['share_image_url'];
 
             return $ret;
         });
