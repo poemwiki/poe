@@ -32,7 +32,7 @@
 
 @section('content')
   <div class="page">
-    <div class="flex items-center justify-between">
+    <div class="mt-4 mb-8 flex items-center justify-between">
       <a href="/campaign" class="">返回</a>
       <span>共 {{count($poems)}} 首</span>
     </div>
@@ -43,8 +43,7 @@
           <h2 class="mb-4 text-xl font-bold"><a class="no-underline text-black hover:text-black hover:bg-transparent focus:text-black active:text-black" target="_blank" href="/p/{{$poem->fakeId}}">{{$poem['title']}}
           </a></h2>
 
-
-          <a class="no-underline text-black hover:text-black hover:bg-transparent focus:text-black active:text-black" target="_blank" href="/p/{{$poem->fakeId}}"><pre class="mb-4 leading-loose">{{$poem['poem']}}</pre></a>
+          <a class="no-underline text-black hover:text-black hover:bg-transparent focus:text-black active:text-black" target="_blank" href="/p/{{$poem->fakeId}}"><pre class="mb-4 leading-loose whitespace-pre-wrap">{{$poem['poem']}}</pre></a>
 
           <div class="text-gray-500 flex justify-between">
             <div class="flex items-center"><img class="rounded-full mr-2 w-10 inline-block" src="{{$poem->poet_avatar}}" alt="avatar">{{$poem->poetLabel}}</div>
