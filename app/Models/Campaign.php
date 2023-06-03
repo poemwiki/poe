@@ -6,6 +6,7 @@ use App\Traits\HasTranslations;
 use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 /**
  * App\Models\Campaign.
@@ -104,6 +105,10 @@ class Campaign extends Model {
     }
 
     public function getImageUrlAttribute() {
+        if (Str::endsWith($this->image, '.webp')) {
+            return cosUrl($this->image);
+        }
+
         return cosUrl($this->image) . '/campaign.main.webp.70';
     }
 
