@@ -81,7 +81,8 @@ class StorePoem extends CreatePoemRequest {
         }
 
         if (isset($sanitized['translator_ids'])) {
-            $sanitized['translator'] = '';
+            $sanitized['is_original'] = false;
+            $sanitized['translator']  = '';
 
             $translatorsOrder = [];
             foreach ($sanitized['translator_ids'] as $key => $id) {
@@ -89,14 +90,24 @@ class StorePoem extends CreatePoemRequest {
                     $translatorAuthor                  = $this->authorRepository->getExistedAuthor(ltrim($id, 'Q'));
                     $sanitized['translator_ids'][$key] = $translatorAuthor->id;
                     $translatorsOrder[]                = $translatorAuthor->id;
-                } elseif (ValidTranslatorId::isNew($id)) {
+
+                    continue;
+                }
+
+                if (ValidTranslatorId::isNew($id)) {
                     $sanitized['translator_ids'][$key] = mb_substr($id, strlen('new_'));
                     $translatorsOrder[]                = substr($id, 4, strlen($id));
                 } else {
                     $sanitized['translator_ids'][$key] = (int) $id;
                     $translatorsOrder[]                = $id;
+
+                    $userAuthor = Auth::user()->author;
+                    if ($key === 0 && $userAuthor && $userAuthor->id === $id) {
+                        $sanitized['is_owner_uploaded'] = \App\Models\Poem::$OWNER['translatorUploader'];
+                    }
                 }
             }
+
             // WARNING for poems have related translator(relatable record), poem.translator is just for indicating translator order
             if (!empty($translatorsOrder)) {
                 $sanitized['translator'] = json_encode($translatorsOrder, JSON_UNESCAPED_UNICODE);
