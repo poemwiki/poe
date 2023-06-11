@@ -734,7 +734,7 @@ class Poem extends Model implements Searchable {
     }
 
     /**
-     * poetAvatar is an dynamic attribute of Poem, for these scene:
+     * poetAvatar is a dynamic attribute of Poem, for these scene:
      * 1. uploader->avatar_url if is_owner_uploaded
      * 2. poetAuthor->pic_url[0]  if the poet author has no related user
      * 3. poetAuthor->user->avatarUrl.
@@ -766,7 +766,12 @@ class Poem extends Model implements Searchable {
                 return $this->translatorAuthor->user->avatarUrl;
             }
 
-            return $this->translatorAuthor->avatar_url;
+            return $this->translatorAuthor->avatarUrl;
+        }
+
+        $firstRelatedTranslator = $this->translators->first();
+        if ($firstRelatedTranslator instanceof Author) {
+            return $firstRelatedTranslator->avatarUrl;
         }
 
         return config('app.avatar.default');
