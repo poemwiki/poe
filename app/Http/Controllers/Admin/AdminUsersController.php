@@ -8,13 +8,11 @@ use App\Http\Requests\Admin\AdminUser\ImpersonalLoginAdminUser;
 use App\Http\Requests\Admin\AdminUser\IndexAdminUser;
 use App\Http\Requests\Admin\AdminUser\StoreAdminUser;
 use App\Http\Requests\Admin\AdminUser\UpdateAdminUser;
-use Brackets\AdminAuth\Models\AdminUser;
-use Spatie\Permission\Models\Role;
 use Brackets\AdminAuth\Activation\Facades\Activation;
+use Brackets\AdminAuth\Models\AdminUser;
 use Brackets\AdminAuth\Services\ActivationService;
 use Brackets\AdminListing\Facades\AdminListing;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Contracts\View\Factory;
@@ -22,14 +20,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 
-class AdminUsersController extends Controller
-{
-
+class AdminUsersController extends Controller {
     /**
-     * Guard used for admin user
+     * Guard used for admin user.
      *
      * @var string
      */
@@ -40,8 +38,7 @@ class AdminUsersController extends Controller
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->guard = config('admin-auth.defaults.guard');
     }
 
@@ -51,8 +48,7 @@ class AdminUsersController extends Controller
      * @param IndexAdminUser $request
      * @return Factory|View
      */
-    public function index(IndexAdminUser $request)
-    {
+    public function index(IndexAdminUser $request) {
         // create and AdminListing instance for a specific model and
         $data = AdminListing::create(AdminUser::class)->processRequestAndGet(
             // pass the request with params
@@ -78,13 +74,12 @@ class AdminUsersController extends Controller
      * @throws AuthorizationException
      * @return Factory|View
      */
-    public function create()
-    {
+    public function create() {
         $this->authorize('admin.admin-user.create');
 
         return view('admin.admin-user.create', [
             'activation' => Config::get('admin-auth.activation_enabled'),
-            'roles' => Role::where('guard_name', $this->guard)->get(),
+            'roles'      => Role::where('guard_name', $this->guard)->get(),
         ]);
     }
 
@@ -94,8 +89,7 @@ class AdminUsersController extends Controller
      * @param StoreAdminUser $request
      * @return array|RedirectResponse|Redirector
      */
-    public function store(StoreAdminUser $request)
-    {
+    public function store(StoreAdminUser $request) {
         // Sanitize input
         $sanitized = $request->getModifiedData();
 
@@ -115,12 +109,11 @@ class AdminUsersController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param AdminUser $adminUser
+     * @param  AdminUser              $adminUser
      * @throws AuthorizationException
      * @return void
      */
-    public function show(AdminUser $adminUser)
-    {
+    public function show(AdminUser $adminUser) {
         $this->authorize('admin.admin-user.show', $adminUser);
 
         // TODO your code goes here
@@ -129,20 +122,19 @@ class AdminUsersController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param AdminUser $adminUser
+     * @param  AdminUser              $adminUser
      * @throws AuthorizationException
      * @return Factory|View
      */
-    public function edit(AdminUser $adminUser)
-    {
+    public function edit(AdminUser $adminUser) {
         $this->authorize('admin.admin-user.edit', $adminUser);
 
         $adminUser->load('roles');
 
         return view('admin.admin-user.edit', [
-            'adminUser' => $adminUser,
+            'adminUser'  => $adminUser,
             'activation' => Config::get('admin-auth.activation_enabled'),
-            'roles' => Role::where('guard_name', $this->guard)->get(),
+            'roles'      => Role::where('guard_name', $this->guard)->get(),
         ]);
     }
 
@@ -150,11 +142,10 @@ class AdminUsersController extends Controller
      * Update the specified resource in storage.
      *
      * @param UpdateAdminUser $request
-     * @param AdminUser $adminUser
+     * @param AdminUser       $adminUser
      * @return array|RedirectResponse|Redirector
      */
-    public function update(UpdateAdminUser $request, AdminUser $adminUser)
-    {
+    public function update(UpdateAdminUser $request, AdminUser $adminUser) {
         // Sanitize input
         $sanitized = $request->getModifiedData();
 
@@ -176,13 +167,12 @@ class AdminUsersController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param DestroyAdminUser $request
-     * @param AdminUser $adminUser
+     * @param  DestroyAdminUser $request
+     * @param  AdminUser        $adminUser
      * @throws Exception
      * @return ResponseFactory|RedirectResponse|Response
      */
-    public function destroy(DestroyAdminUser $request, AdminUser $adminUser)
-    {
+    public function destroy(DestroyAdminUser $request, AdminUser $adminUser) {
         $adminUser->delete();
 
         if ($request->ajax()) {
@@ -193,15 +183,14 @@ class AdminUsersController extends Controller
     }
 
     /**
-     * Resend activation e-mail
+     * Resend activation e-mail.
      *
-     * @param Request $request
+     * @param Request           $request
      * @param ActivationService $activationService
-     * @param AdminUser $adminUser
+     * @param AdminUser         $adminUser
      * @return array|RedirectResponse
      */
-    public function resendActivationEmail(Request $request, ActivationService $activationService, AdminUser $adminUser)
-    {
+    public function resendActivationEmail(Request $request, ActivationService $activationService, AdminUser $adminUser) {
         if (Config::get('admin-auth.activation_enabled')) {
             $response = $activationService->handle($adminUser);
             if ($response == Activation::ACTIVATION_LINK_SENT) {
@@ -210,31 +199,29 @@ class AdminUsersController extends Controller
                 }
 
                 return redirect()->back();
-            } else {
-                if ($request->ajax()) {
-                    abort(409, trans('brackets/admin-ui::admin.operation.failed'));
-                }
-
-                return redirect()->back();
             }
-        } else {
             if ($request->ajax()) {
-                abort(400, trans('brackets/admin-ui::admin.operation.not_allowed'));
+                abort(409, trans('brackets/admin-ui::admin.operation.failed'));
             }
 
             return redirect()->back();
         }
+        if ($request->ajax()) {
+            abort(400, trans('brackets/admin-ui::admin.operation.not_allowed'));
+        }
+
+        return redirect()->back();
     }
 
     /**
      * @param ImpersonalLoginAdminUser $request
-     * @param AdminUser $adminUser
+     * @param AdminUser                $adminUser
      * @return RedirectResponse
-     * @throws  AuthorizationException
+     * @throws AuthorizationException
      */
     public function impersonalLogin(ImpersonalLoginAdminUser $request, AdminUser $adminUser) {
         Auth::login($adminUser);
+
         return redirect()->back();
     }
-
 }
