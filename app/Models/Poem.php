@@ -13,9 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Searchable\Searchable;
-use Spatie\Searchable\SearchResult;
 
 /**
  * App\Models\Poem.
@@ -45,11 +44,12 @@ use Spatie\Searchable\SearchResult;
  * @property mixed                               $activityLogs
  * @property NFT                                 $nft
  */
-class Poem extends Model implements Searchable {
+class Poem extends Model {
     use SoftDeletes;
     use LogsActivity;
     use HasFakeId;
     use RelatableNode;
+    use Searchable;
 
     /**DO NOT CHANGE FAKEID STATICS**/
     public static $FAKEID_KEY    = 'PoemWikikiWmeoP'; // Symmetric-key for xor
@@ -821,12 +821,14 @@ class Poem extends Model implements Searchable {
         return $json;
     }
 
-    public function getSearchResult(): SearchResult {
-        return new SearchResult(
-            $this,
-            $this->title,
-            $this->url,
-            $this->poet_label
-        );
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array
+     */
+    public function toSearchableArray() {
+        $array = $this->toArray();
+
+        return $array;
     }
 }
