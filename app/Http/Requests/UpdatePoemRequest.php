@@ -135,9 +135,13 @@ class UpdatePoemRequest extends FormRequest {
 
         // TODO 添加测试：译作改为原作，不管是否有 original_link 提交，都应将 original_id 置为自身的 poem.id
 
-        $sanitized['title']    = Str::trimSpaces($sanitized['title']);
-        $sanitized['subtitle'] = Str::trimSpaces($sanitized['subtitle']);
-        $sanitized['preface']  = Str::trimSpaces($sanitized['preface']);
+        $sanitized['title'] = Str::trimSpaces($sanitized['title']);
+        if ($sanitized['subtitle']) {
+            $sanitized['subtitle'] = Str::trimSpaces($sanitized['subtitle']);
+        }
+        if ($sanitized['preface']) {
+            $sanitized['preface'] = Str::trimSpaces($sanitized['preface']);
+        }
 
         return $sanitized;
     }
