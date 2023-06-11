@@ -761,17 +761,13 @@ class Poem extends Model implements Searchable {
             return $this->uploader->avatarUrl;
         }
 
-        if ($this->translatorAuthor) {
-            if ($this->translatorAuthor->user) {
-                return $this->translatorAuthor->user->avatarUrl;
-            }
-
-            return $this->translatorAuthor->avatarUrl;
-        }
-
         $firstRelatedTranslator = $this->translators->first();
         if ($firstRelatedTranslator instanceof Author) {
             return $firstRelatedTranslator->avatarUrl;
+        }
+
+        if ($this->translatorAuthor) {
+            return $this->translatorAuthor->avatarUrl;
         }
 
         return config('app.avatar.default');
