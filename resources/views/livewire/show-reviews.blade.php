@@ -6,26 +6,25 @@
 <section class="reviews full-row">
     <ol class="review-list">
         @foreach($reviews as $review)
-            <li class="review-card">
-                <div class="review-h flex-center-vertically">
-                    <div><img class="avatar" src="{{$review->avatar}}"></div>
-                    <div class="review-info"><b>{{$review->name}}</b><span class="review-time" title="{{$review->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($review->created_at)->diffForHumans(now())}}</span></div>
-                </div>
+        <li class="review-card">
+          <div class="review-h flex-center-vertically">
+            <div><img class="avatar" src="{{$review->avatar}}"></div>
+            <div class="review-info leading-normal"><b>{{$review->name}}</b><span class="review-time" title="{{$review->created_at}} UTC">{{\Illuminate\Support\Carbon::parse($review->created_at)->diffForHumans(now())}}</span></div>
+          </div>
 
-                @if(isset($userScore[$review->user_id]))
-                    <svg class="stars"><use href="#stars-{{floor($userScore[$review->user_id] / 2)}}"></use></svg>
-                @endif
-                <h2 class="review-title">{{$review->title}}</h2>
+          @if(isset($userScore[$review->user_id]))
+            <svg class="stars"><use href="#stars-{{floor($userScore[$review->user_id] / 2)}}"></use></svg>
+          @endif
+          <h2 class="review-title">{{$review->title}}</h2>
 
-                <div class="review-content">{!! strip_tags(nl2br($review->content), '<p><br><a>') !!}</div>
+          <div class="review-content my-4">{!! strip_tags(nl2br($review->content), '<p><br><a>') !!}</div>
 
-
-                @auth
-                @if($review->user_id === Auth::user()->id || Auth::user()->is_admin)
-                    <a href="#" wire:click.prevent="delete({{$review->id}})" class="btn">@lang('Delete')</a>
-                @endif
-                @endauth
-            </li>
+          @auth
+            @if($review->user_id === Auth::user()->id || Auth::user()->is_admin)
+              <a href="#" wire:click.prevent="delete({{$review->id}})" class="btn text-sm">@lang('Delete')</a>
+            @endif
+          @endauth
+        </li>
         @endforeach
         @if(count($reviews) <= 0)
             <li>
