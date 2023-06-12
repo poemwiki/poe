@@ -35,7 +35,7 @@ use Spatie\Activitylog\ActivitylogServiceProvider;
  * @property int    $invited_by
  * @property float  $weight
  * @property int    $newMessagesCount
- * @property $poemActivityLogs
+ * @property        $poemActivityLogs
  */
 class User extends Authenticatable implements MustVerifyEmail {
     use HasApiTokens;
@@ -227,7 +227,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     public static function isWeAppWebview() {
         if (isset($_SERVER['HTTP_USER_AGENT'])
             && strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false
-            && strpos($_SERVER['HTTP_USER_AGENT'], 'miniProgram') !== false
+            && strpos($_SERVER['HTTP_USER_AGENT'], 'miniProgram')    !== false
         ) {
             return true;
         }
@@ -335,12 +335,12 @@ HTML;
             // TODO: it's an ugly way to filter the redundant update log after create,
             // it should not be written to db at the poem creation
             if ($oldVal && array_key_exists('poem', $oldVal) && is_null($oldVal['poem'])
-                && array_key_exists('title', $oldVal) && is_null($oldVal['title'])) {
+                        && array_key_exists('title', $oldVal) && is_null($oldVal['title'])) {
                 return false;
             }
 
             if ($activity->description === 'updated') {
-                $diffs = $activity->diffs;
+                $diffs    = $activity->diffs;
                 $diffKeys = array_keys($activity->diffs);
                 foreach ($diffKeys as $key) {
                     if (in_array($key, Poem::$ignoreChangedAttributes)) {

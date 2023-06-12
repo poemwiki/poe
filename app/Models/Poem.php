@@ -57,11 +57,13 @@ class Poem extends Model {
     public static $FAKEID_SPARSE = 96969696969;
     /**DO NOT CHANGE FAKEID STATICS**/
 
+    public static array $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id'];
+
     public function getActivitylogOptions(): LogOptions {
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
-            ->logExcept(['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id']);
+            ->logExcept(self::$ignoreChangedAttributes);
     }
 
     public static $OWNER = [

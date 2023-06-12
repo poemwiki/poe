@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "21d22132446e6985c2eed0b306852814",
+    "content-hash": "7508d9c3bc55d79f81d9d91c4d5d3c40",
     "packages": [
         {
             "name": "adbario/php-dot-notation",
@@ -2243,59 +2243,6 @@
             "time": "2022-09-18T07:06:19+00:00"
         },
         {
-            "name": "fideloper/proxy",
-            "version": "4.4.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/fideloper/TrustedProxy.git",
-                "reference": "a751f2bc86dd8e6cfef12dc0cbdada82f5a18750"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://mirrors.huaweicloud.com/repository/php/fideloper/proxy/4.4.2/fideloper-proxy-4.4.2.zip",
-                "reference": "a751f2bc86dd8e6cfef12dc0cbdada82f5a18750",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/contracts": "^5.0|^6.0|^7.0|^8.0|^9.0",
-                "php": ">=5.4.0"
-            },
-            "require-dev": {
-                "illuminate/http": "^5.0|^6.0|^7.0|^8.0|^9.0",
-                "mockery/mockery": "^1.0",
-                "phpunit/phpunit": "^8.5.8|^9.3.3"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Fideloper\\Proxy\\TrustedProxyServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Fideloper\\Proxy\\": "src/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Chris Fidao",
-                    "email": "fideloper@gmail.com"
-                }
-            ],
-            "description": "Set trusted proxies for Laravel",
-            "keywords": [
-                "load balancing",
-                "proxy",
-                "trusted proxy"
-            ],
-            "time": "2022-02-09T13:33:34+00:00"
-        },
-        {
             "name": "firebase/php-jwt",
             "version": "v6.5.0",
             "source": {
@@ -3205,22 +3152,21 @@
         },
         {
             "name": "itsgoingd/clockwork",
-            "version": "v4.1.8",
+            "version": "v5.1.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/itsgoingd/clockwork.git",
-                "reference": "0dc2e5be39de88b18719bb4f3cdacfa605ad2146"
+                "reference": "c9dbdbb1f0efd19bb80f1080ef63f1b9b1bc3b1b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://mirrors.huaweicloud.com/repository/php/itsgoingd/clockwork/v4.1.8/itsgoingd-clockwork-v4.1.8.zip",
-                "reference": "0dc2e5be39de88b18719bb4f3cdacfa605ad2146",
+                "url": "https://mirrors.huaweicloud.com/repository/php/itsgoingd/clockwork/v5.1.12/itsgoingd-clockwork-v5.1.12.zip",
+                "reference": "c9dbdbb1f0efd19bb80f1080ef63f1b9b1bc3b1b",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "php": ">=5.5",
-                "psr/log": "1.*"
+                "php": ">=5.6"
             },
             "type": "library",
             "extra": {
@@ -3248,7 +3194,7 @@
                     "homepage": "https://twitter.com/itsgoingd"
                 }
             ],
-            "description": "php dev tools integrated to your browser",
+            "description": "php dev tools in your browser",
             "homepage": "https://underground.works/clockwork",
             "keywords": [
                 "Devtools",
@@ -3265,7 +3211,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-09-17T19:21:25+00:00"
+            "time": "2022-12-13T00:04:12+00:00"
         },
         {
             "name": "jfcherng/php-color-output",
@@ -7331,30 +7277,30 @@
         },
         {
             "name": "psr/log",
-            "version": "1.1.4",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "d49695b909c3b7628b6289db5479a1c204601f11"
+                "reference": "fe5ea303b0887d5caefd3d431c3e61ad47037001"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://mirrors.huaweicloud.com/repository/php/psr/log/1.1.4/psr-log-1.1.4.zip",
-                "reference": "d49695b909c3b7628b6289db5479a1c204601f11",
+                "url": "https://mirrors.huaweicloud.com/repository/php/psr/log/3.0.0/psr-log-3.0.0.zip",
+                "reference": "fe5ea303b0887d5caefd3d431c3e61ad47037001",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0"
+                "php": ">=8.0.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.1.x-dev"
+                    "dev-master": "3.x-dev"
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Psr\\Log\\": "Psr/Log/"
+                    "Psr\\Log\\": "src"
                 }
             },
             "license": [
@@ -7373,7 +7319,7 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2021-05-03T11:20:27+00:00"
+            "time": "2021-07-14T16:46:02+00:00"
         },
         {
             "name": "psr/simple-cache",

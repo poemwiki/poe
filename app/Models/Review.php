@@ -6,6 +6,7 @@ use App\Traits\Likeable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -42,9 +43,12 @@ class Review extends Model {
 
     protected $table = 'review';
 
-    protected static $logFillable             = true;
-    protected static $logOnlyDirty            = true;
-    protected static $ignoreChangedAttributes = ['created_at'];
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['created_at']);
+    }
 
     protected $fillable = [
         'poem_id',
