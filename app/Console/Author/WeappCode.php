@@ -103,7 +103,7 @@ class WeappCode extends Command {
             $author->save();
 
             $this->authorRepository->saveAuthorMediaFile($author, MediaFile::TYPE['weapp_code'], $image['Key'],
-                    md5($fileContent), $format, $image['Size']);
+                md5($fileContent), $format, $image['Size']);
         }
 
         logger()->info('uploaded:', $result);
@@ -111,10 +111,13 @@ class WeappCode extends Command {
         return 0;
     }
 
-    private function fetchAppCodeImg(int $id, bool $force = false, string $appCodeFileName = 'weapp.jpg') {
+    private function fetchAppCodeImg(int $id): bool|string {
         $relativeStoreDir = 'app/public/tmp-author-weapp/' . $id;
         $appCodeImgDir    = storage_path($relativeStoreDir);
 
-        return (new Weapp())->fetchAppCodeImg($id, $appCodeImgDir, 'pages/author/author', $force, $appCodeFileName);
+        return (new Weapp())->fetchAppCodeImg(
+            $id, $appCodeImgDir,
+            'pages/author/author',
+            'weapp.jpg');
     }
 }
