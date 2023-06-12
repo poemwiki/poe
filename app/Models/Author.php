@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -93,6 +94,7 @@ class Author extends Model {
     use HasFakeId;
     use LogsActivity;
     use RelatableNode;
+    use Searchable;
 
     /**DO NOT CHANGE FAKEID STATICS**/
     public static $FAKEID_KEY    = 'PoemWikikiWmeoP'; // Symmetric-key for xor
@@ -103,6 +105,8 @@ class Author extends Model {
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->dontLogIfAttributesChangedOnly(['updated_at'])
             ->logExcept(['created_at', 'need_confirm']);
     }
 
@@ -427,5 +431,14 @@ class Author extends Model {
         }
 
         return $this->wiki_desc_lang;
+    }
+
+    public function toSearchableArray() {
+        return [
+            'id'             => $this->id,
+            'name_lang'      => $this->name_lang,
+            'describe_lang'  => $this->describe_lang,
+            'wiki_desc_lang' => $this->wiki_desc_lang,
+        ];
     }
 }

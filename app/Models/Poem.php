@@ -44,6 +44,12 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Date                                $updated_at
  * @property mixed                               $activityLogs
  * @property NFT                                 $nft
+ * @property int                                 $flag
+ * @property string                              $poem
+ * @property string                              $translatorsStr
+ * @property string                              $title
+ * @property string                              $subtitle
+ * @property string                              $preface
  */
 class Poem extends Model {
     use SoftDeletes;
@@ -63,6 +69,8 @@ class Poem extends Model {
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->dontLogIfAttributesChangedOnly(['updated_at'])
             ->logExcept(self::$ignoreChangedAttributes);
     }
 
@@ -833,9 +841,34 @@ class Poem extends Model {
      *
      * @return array
      */
-    public function toSearchableArray() {
-        $array = $this->toArray();
+    public function toSearchableArray(): array {
+        $translatorsLabels = $this->translators->reduce(function ($labels, $translator) {
+            if ($translator instanceof Author) {
+                return $labels . ',' . implode($translator->name_lang, ',');
+            } elseif ($translator instanceof Entry) {
+                return $labels . ',' . implode($translator->name, ',');
+            }
 
-        return $array;
+            return $labels;
+        }, '');
+
+        return [
+            'id'         => $this->id,
+            'title'      => $this->title,
+            'preface'    => $this->preface,
+            'subtitle'   => $this->subtitle,
+            // 'uploader'   => $this->uploader->name,
+            'relatedTranslators' => $translatorsLabels,
+            'poet'               => $this->poetAuthor->name_lang,
+            'content'            => $this->poem,
+        ];
+    }
+    /**
+     * Determine if the model should be searchable.
+     *
+     * @return bool
+     */
+    public function shouldBeSearchable(): bool {
+        return in_array($this->flag, [self::$FLAG['none'], self::$FLAG['infoNeedConfirm']]);
     }
 }
