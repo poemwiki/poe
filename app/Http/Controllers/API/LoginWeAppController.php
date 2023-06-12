@@ -12,16 +12,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class LoginWeAppController extends Controller {
-    //    use RedirectsUsers;
-    private $weApp;
+    private \EasyWeChat\MiniApp\Application $weApp;
+    private \EasyWeChat\MiniApp\Utils $utils;
 
     public function __construct() {
-        $this->weApp = \EasyWeChat\Factory::miniProgram([
-            'app_id' => config('wechat.mini_program.default.app_id'),
-            'secret' => config('wechat.mini_program.default.secret'),
-
-            // 指定 API 调用返回结果的类型：array(default)/collection/object/raw/自定义类名
-            'response_type' => 'array', ]);
+        $this->weApp = app('easywechat.mini_app');
+        $this->utils = $this->weApp->getUtils();
     }
 
     /**
@@ -37,7 +33,13 @@ class LoginWeAppController extends Controller {
 
         $code = $request->code;
         // 根据 code 获取微信 openid 和 session_key
-        $data = $this->weApp->auth->session($code);
+        try {
+            $data = $this->utils->codeToSession($code);
+        } catch (\Exception $e) {
+            Log::error('try weApp login failed at getting openid: ' . $e->getMessage());
+
+            return $this->responseFail([], 'Failed to get openid, please try again later');
+        }
         if (isset($data['errcode'])) {
             Log::info('try weApp login failed:', $data);
 
@@ -135,7 +137,8 @@ class LoginWeAppController extends Controller {
             'bind_ref' => UserBind::BIND_REF['weapp'],
             'user_id'  => $request->user()->id
         ])->first();
-        $decrypted = $this->weApp->encryptor->decryptData($userBind->weapp_session_key, $detail['iv'], $detail['encryptedData']);
+        $decrypted = $this->utils->decryptSession($userBind->weapp_session_key, $detail['iv'], $detail['encryptedData']);
+        dd($decrypted);
 
         return $this->responseSuccess([
             'user'      => $userBind->user,
@@ -153,8 +156,8 @@ class LoginWeAppController extends Controller {
     }
 
     /**
-     * @param $openID
-     * @param $bindRef
+     * @param     $openID
+     * @param     $bindRef
      * @param int $bindStatus
      *                        TODO move it to BindInfoRepository
      * @return UserBind|null
@@ -177,7 +180,7 @@ class LoginWeAppController extends Controller {
     }
 
     /**
-     * @param $unionID
+     * @param          $unionID
      * @param int      $bindRef
      * @param int|null $bindStatus
      * @return UserBind|null
