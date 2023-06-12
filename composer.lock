@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f94d2c944508a8534fcf249bf7fe43a4",
+    "content-hash": "21d22132446e6985c2eed0b306852814",
     "packages": [
         {
             "name": "adbario/php-dot-notation",
@@ -2483,36 +2483,35 @@
         },
         {
             "name": "fukuball/jieba-php",
-            "version": "0.33",
+            "version": "0.34",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fukuball/jieba-php.git",
-                "reference": "a5980dc88ae98a261a0bdb1130be14d0136b373f"
+                "reference": "44d62bda8b80fe07ff59e8fc654f477685109a66"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://mirrors.huaweicloud.com/repository/php/fukuball/jieba-php/0.33/fukuball-jieba-php-0.33.zip",
-                "reference": "a5980dc88ae98a261a0bdb1130be14d0136b373f",
+                "url": "https://mirrors.huaweicloud.com/repository/php/fukuball/jieba-php/0.34/fukuball-jieba-php-0.34.zip",
+                "reference": "44d62bda8b80fe07ff59e8fc654f477685109a66",
                 "shasum": ""
             },
             "require": {
                 "php": ">= 5.3"
             },
             "require-dev": {
-                "phpunit/phpunit": "4.4.1",
-                "satooshi/php-coveralls": "dev-master",
-                "squizlabs/php_codesniffer": "1.5.6"
+                "php-coveralls/php-coveralls": "dev-master",
+                "phpunit/phpunit": "~9.0",
+                "squizlabs/php_codesniffer": "4.0.x-dev"
             },
             "type": "library",
             "autoload": {
                 "files": [
-                    "src/class/Jieba.php",
-                    "src/class/JiebaAnalyse.php",
-                    "src/class/Finalseg.php",
-                    "src/class/Posseg.php",
                     "src/vendor/multi-array/MultiArray.php",
                     "src/vendor/multi-array/Factory/MultiArrayFactory.php"
-                ]
+                ],
+                "psr-4": {
+                    "Fukuball\\Jieba\\": "src/class/"
+                }
             },
             "license": [
                 "MIT"
@@ -2528,7 +2527,7 @@
                 "Jieba",
                 "php"
             ],
-            "time": "2017-11-22T10:02:12+00:00"
+            "time": "2022-08-15T06:26:03+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -4060,6 +4059,64 @@
                 "psysh"
             ],
             "time": "2023-02-15T16:40:09+00:00"
+        },
+        {
+            "name": "laravel/ui",
+            "version": "v4.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/ui.git",
+                "reference": "a58ec468db4a340b33f3426c778784717a2c144b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.huaweicloud.com/repository/php/laravel/ui/v4.2.2/laravel-ui-v4.2.2.zip",
+                "reference": "a58ec468db4a340b33f3426c778784717a2c144b",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/console": "^9.21|^10.0",
+                "illuminate/filesystem": "^9.21|^10.0",
+                "illuminate/support": "^9.21|^10.0",
+                "illuminate/validation": "^9.21|^10.0",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^7.0|^8.0",
+                "phpunit/phpunit": "^9.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.x-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "Laravel\\Ui\\UiServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\Ui\\": "src/",
+                    "Illuminate\\Foundation\\Auth\\": "auth-backend/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "Laravel UI utilities and presets.",
+            "keywords": [
+                "laravel",
+                "ui"
+            ],
+            "time": "2023-05-09T19:47:28+00:00"
         },
         {
             "name": "laravelcollective/html",
