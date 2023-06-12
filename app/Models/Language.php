@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -55,9 +56,12 @@ class Language extends Model {
     use HasTranslations;
     use LogsActivity;
 
-    protected static $logFillable             = true;
-    protected static $logOnlyDirty            = true;
-    protected static $ignoreChangedAttributes = ['created_at'];
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['created_at', 'updated_at']);
+    }
 
     public $table = 'language';
 

@@ -4,9 +4,8 @@ namespace App\Models;
 
 use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Searchable\Searchable;
-use Spatie\Searchable\SearchResult;
 
 /**
  * App\Models\Wikidata.
@@ -19,7 +18,7 @@ use Spatie\Searchable\SearchResult;
  * @property \Illuminate\Support\Carbon|null                                    $updated_at
  * @property \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
  */
-class Wikidata extends Model implements Searchable {
+class Wikidata extends Model {
     use HasTranslations;
     use LogsActivity;
 
@@ -60,9 +59,12 @@ class Wikidata extends Model implements Searchable {
     ];
 
     // TODO log activity for command execution
-    protected static $logFillable             = true;
-    protected static $logOnlyDirty            = true;
-    protected static $ignoreChangedAttributes = ['created_at'];
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['created_at']);
+    }
 
     protected $dates = [
         'created_at',
@@ -193,15 +195,5 @@ class Wikidata extends Model implements Searchable {
         }
 
         return $picUrl;
-    }
-
-    public function getSearchResult(): SearchResult {
-        $url = ''; // TODO wikidata url here
-
-        return new SearchResult(
-            $this,
-            $this->getSiteTitle('zh')['title'],
-            $url
-        );
     }
 }

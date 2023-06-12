@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -56,10 +57,14 @@ class Poem extends Model {
     public static $FAKEID_SPARSE = 96969696969;
     /**DO NOT CHANGE FAKEID STATICS**/
 
-    protected static $logFillable          = true;
-    protected static $logOnlyDirty         = true;
-    public static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id'];
-    public static $OWNER                   = [
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id']);
+    }
+
+    public static $OWNER = [
         'none'                    => 0, // 上传时未标注原创，此时应以 poetAuthor 为作者 owner，以 translatorAuthor 为译者 owner
         'uploader'                => 1, // 作者用户上传原创原作，此时以 upload_user_id 代表作者 owner
         'translatorUploader'      => 2, // 译者用户上传原创译作，且为单译者情况，此时以 upload_user_id 代表译者 owner
@@ -248,15 +253,15 @@ class Poem extends Model {
         });
 
         self::updating(function ($model) {
-            $model->poem = Str::trimEmptyLines(Str::trimTailSpaces($model->poem));
+            $model->poem   = Str::trimEmptyLines(Str::trimTailSpaces($model->poem));
             $model->length = grapheme_strlen($model->poem);
 
             $fullHash = Str::contentFullHash($model->poem);
             if (!$model->content) {
-                $oldPoem = Poem::find($model->id);
+                $oldPoem     = Poem::find($model->id);
                 $oldFullHash = Str::contentFullHash($oldPoem->poem);
-                $oldHash = Str::contentHash($oldPoem->poem);
-                $oldContent = Content::create([
+                $oldHash     = Str::contentHash($oldPoem->poem);
+                $oldContent  = Content::create([
                     'entry_id'    => $oldPoem->id,
                     'type'        => 0,
                     'content'     => $oldPoem->poem,
@@ -270,7 +275,7 @@ class Poem extends Model {
                 $oldPoem->save();
             } else {
                 $oldFullHash = $model->content->full_hash ?: Str::contentFullHash($model->content->content);
-                $oldHash = $model->content->hash;
+                $oldHash     = $model->content->hash;
             }
 
             if ($fullHash !== $oldFullHash) {
@@ -285,7 +290,7 @@ class Poem extends Model {
                     'full_hash'   => $fullHash
                 ]);
                 // TODO WHY content_id modification not loged in activityLog?
-                $model->content_id = $content->id;
+                $model->content_id   = $content->id;
                 $model->need_confirm = 0;
             }
         });
@@ -777,12 +782,12 @@ class Poem extends Model {
             // TODO: it's an ugly way to filter the redundant update log after create,
             // it should not be written to db at the poem creation
             if ($oldVal && array_key_exists('poem', $oldVal) && is_null($oldVal['poem'])
-                && array_key_exists('title', $oldVal) && is_null($oldVal['title'])) {
+                        && array_key_exists('title', $oldVal) && is_null($oldVal['title'])) {
                 return false;
             }
 
             if ($activity->description === 'updated') {
-                $diffs = $activity->diffs;
+                $diffs    = $activity->diffs;
                 $diffKeys = array_keys($activity->diffs);
                 foreach ($diffKeys as $key) {
                     if (in_array($key, self::$ignoreChangedAttributes)) {

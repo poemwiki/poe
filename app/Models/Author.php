@@ -11,9 +11,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Searchable\Searchable;
-use Spatie\Searchable\SearchResult;
 
 /**
  * Class Author.
@@ -88,7 +87,7 @@ use Spatie\Searchable\SearchResult;
  * @method static \Illuminate\Database\Query\Builder|Author withoutTrashed()
  * @mixin \Eloquent
  */
-class Author extends Model implements Searchable {
+class Author extends Model {
     use SoftDeletes;
     use HasTranslations;
     use HasFakeId;
@@ -100,9 +99,12 @@ class Author extends Model implements Searchable {
     public static $FAKEID_SPARSE = 96969696969;
     /**DO NOT CHANGE FAKEID STATICS**/
 
-    protected static $logFillable             = true;
-    protected static $logOnlyDirty            = true;
-    protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length'];
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['created_at', 'need_confirm']);
+    }
 
     protected $table = 'author';
 
@@ -252,7 +254,7 @@ class Author extends Model implements Searchable {
         });
 
         self::saving(function ($model) {
-            $changes = $model->getDirty();
+            $changes  = $model->getDirty();
             $original = self::find($model->id);
 
             // TODO 如果前端可编辑别名列表，此处不应再有处理别名相关逻辑，应在controller处理
@@ -425,22 +427,5 @@ class Author extends Model implements Searchable {
         }
 
         return $this->wiki_desc_lang;
-    }
-
-    /**
-     * TODO move this to Query service
-     * search poems within this author's works.
-     */
-    public static function searchPoems() {
-    }
-
-    public function getSearchResult(): SearchResult {
-        $url = route('author/show', ['fakeId' => $this->fakeId]);
-
-        return new SearchResult(
-            $this,
-            $this->name_lang,
-            $url
-        );
     }
 }

@@ -4,16 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * App\Models\Taggable
  *
- * @property int $id
- * @property int $tag_id
- * @property int $taggable_id
- * @property string $taggable_type
- * @property \Illuminate\Support\Carbon $created_at
+ * @property int                             $id
+ * @property int                             $tag_id
+ * @property int                             $taggable_id
+ * @property string                          $taggable_type
+ * @property \Illuminate\Support\Carbon      $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ActivityLog[] $activities
  * @property-read int|null $activities_count
@@ -21,11 +22,14 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Taggable extends MorphPivot {
     use LogsActivity;
 
-    protected static $logFillable = true;
-    protected static $logOnlyDirty = true;
-    protected static $ignoreChangedAttributes = ['created_at'];
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['created_at']);
+    }
 
-    protected $table = 'taggable';
+    protected $table     = 'taggable';
     public $incrementing = true;
 
 
@@ -45,9 +49,9 @@ class Taggable extends MorphPivot {
      * @var array
      */
     protected $casts = [
-        'id' => 'integer',
-        'tag_id' => 'integer',
-        'taggable_id' => 'integer',
+        'id'            => 'integer',
+        'tag_id'        => 'integer',
+        'taggable_id'   => 'integer',
         'taggable_type' => 'string'
     ];
 
@@ -63,14 +67,12 @@ class Taggable extends MorphPivot {
      * @var array
      */
     public static $rules = [
-        'tag_id' => 'required',
-        'taggable_id' => 'required',
+        'tag_id'        => 'required',
+        'taggable_id'   => 'required',
         'taggable_type' => 'required',
     ];
 
     protected $appends = [];
 
     /* ************************ ACCESSOR ************************* */
-
-
 }

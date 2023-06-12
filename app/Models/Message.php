@@ -5,6 +5,7 @@ namespace App\Models;
 use App\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -26,6 +27,13 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Message extends Model {
     use LogsActivity;
     protected $table = 'message';
+
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['created_at', 'updated_at']);
+    }
 
     public const TYPE = [
         'reminder'      => '0', // normal system notice to specific user: "Your wallet has been activated.", "Your poem has a new comment", "Your poem NFT has sold to someone"
@@ -75,7 +83,7 @@ class Message extends Model {
     }
 
     /**
-     * @param $query
+     * @param     $query
      * @param int $userID
      * @return Builder
      */
