@@ -28,27 +28,26 @@ Auth::routes(['verify' => true]);
 
 Route::get('/logout', 'Auth\LoginController@logout');
 
-//Route::get('generator_builder', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@builder')->name('io_generator_builder');
+// Route::get('generator_builder', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@builder')->name('io_generator_builder');
 //
-//Route::get('field_template', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@fieldTemplate')->name('io_field_template');
+// Route::get('field_template', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@fieldTemplate')->name('io_field_template');
 //
-//Route::get('relation_field_template', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@relationFieldTemplate')->name('io_relation_field_template');
+// Route::get('relation_field_template', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@relationFieldTemplate')->name('io_relation_field_template');
 //
-//Route::post('generator_builder/generate', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@generate')->name('io_generator_builder_generate');
+// Route::post('generator_builder/generate', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@generate')->name('io_generator_builder_generate');
 //
-//Route::post('generator_builder/rollback', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@rollback')->name('io_generator_builder_rollback');
+// Route::post('generator_builder/rollback', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@rollback')->name('io_generator_builder_rollback');
 //
-//Route::post(
+// Route::post(
 //    'generator_builder/generate-from-file',
 //    '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@generateFromFile'
-//)->name('io_generator_builder_generate_from_file');
+// )->name('io_generator_builder_generate_from_file');
 
 // Route::resource('contents', 'contentController');
-Auth::routes();
 
 Route::resource('/bot', 'BotController');
 
-//Route::resource('poems', 'PoemController');
+// Route::resource('poems', 'PoemController');
 Route::prefix('poems')->name('poems/')->group(static function () {
     Route::get('/random', 'PoemController@random')->name('random');
     Route::get('/search', 'PoemController@index')->name('index');
@@ -76,12 +75,12 @@ Route::prefix('author')->name('author/')->group(static function () {
     Route::post('/{avatar}', 'AuthorController@avatar')->name('avatar');
 });
 
-//Route::get('/login-wechat', function () {
+// Route::get('/login-wechat', function () {
 //    $user = session('wechat.oauth_user.default'); // 拿到授权用户资料
 //    if(request()->input('code'))
 //        dd($user);
 //    return $user;
-//})->name('login-wechat')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
+// })->name('login-wechat')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
 
 if (User::isWechat()) {
     Route::any('/login', [\App\Http\Controllers\Auth\LoginWechatController::class, 'login'])

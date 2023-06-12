@@ -16,7 +16,6 @@ $finder = PhpCsFixer\Finder::create()
 return (new PhpCsFixer\Config())
     ->setFinder($finder)
     ->setRules([
-        '@Symfony'                                   => true, // 开启预设的规则
         // 'header_comment'                             => array('header' => $header),
         'array_syntax'                               => ['syntax' => 'short'],
         'ordered_imports'                            => true, // 按顺序use导入
@@ -68,7 +67,8 @@ return (new PhpCsFixer\Config())
             ]
         ],
         'braces' => [
-            'position_after_functions_and_oop_constructs' => 'same'
+            'position_after_functions_and_oop_constructs' => 'same',
+            'allow_single_line_closure'                    => true
         ],
         'yoda_style' => [
             'equal'            => null,
