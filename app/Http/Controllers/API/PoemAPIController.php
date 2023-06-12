@@ -22,6 +22,7 @@ use App\Rules\NoDuplicatedPoem;
 use App\Rules\ValidPoemContent;
 use App\Services\AliTranslate;
 use App\Services\Weapp;
+use App\User;
 use EasyWeChat\Factory;
 use Error;
 use Exception;
@@ -212,9 +213,9 @@ class PoemAPIController extends Controller {
                 ->where('balance.user_id', '=', $userId);
             // ->where('balance.user_id', '=', 1);
         })->get(['nft.id', 'nft.poem_id', 'nft.content_id'])->map(function ($item) {
-            $res = $item->only('id');
+            $res          = $item->only('id');
             $res['title'] = $item->poem->title;
-            $res['poem'] = $item->content->content;
+            $res['poem']  = $item->content->content;
 
             return $res;
         });
@@ -320,10 +321,10 @@ class PoemAPIController extends Controller {
         $res['listing_status'] = $nft->listing ? $nft->listing->status : null;
 
         $res['txs'] = $nft->txs->where('f_id', '=', 0)->map(function ($tx) {
-            $res = $tx->only(['id', 'tx_hash', 'amount', 'from_user_id', 'to_user_id', 'action']);
-            $res['date_ago'] = date_ago($tx->created_at);
+            $res                   = $tx->only(['id', 'tx_hash', 'amount', 'from_user_id', 'to_user_id', 'action']);
+            $res['date_ago']       = date_ago($tx->created_at);
             $res['from_user_name'] = $tx->fromUser ? $tx->fromUser->name : "[$tx->from_user_id]";
-            $res['to_user_name'] = $tx->toUser ? $tx->toUser->name : "[$tx->to_user_id]";
+            $res['to_user_name']   = $tx->toUser ? $tx->toUser->name : "[$tx->to_user_id]";
 
             if ($tx->nft_id) {
                 $res['amount'] = $tx->children ? $tx->children->where('nft_id', '=', 0)->sum('amount') : '';
@@ -431,7 +432,7 @@ class PoemAPIController extends Controller {
                 }
 
                 $review['date_ago'] = date_ago($review->created_at);
-                $review['content'] = $review->pureContent;
+                $review['content']  = $review->pureContent;
 
                 return $review->only(['id', 'content', 'created_at', 'user_id', 'like', 'reply_id', 'name', 'avatar', 'reply_to_user', 'date_ago']);
             });
@@ -482,7 +483,7 @@ class PoemAPIController extends Controller {
 
         return $relatedQuery->get()
             ->map(function ($item) {
-                $arr = $item->toArray();
+                $arr         = $item->toArray();
                 $arr['poet'] = $item->poet_label;
 
                 return $arr;
@@ -491,7 +492,7 @@ class PoemAPIController extends Controller {
     }
 
     /**
-     * store poem.
+     * Store poem. **Only for weapp user**.
      * @param StorePoem $request
      * @return array
      * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
@@ -499,14 +500,13 @@ class PoemAPIController extends Controller {
      */
     public function create(StorePoem $request) {
         $sanitized = $request->getSanitized();
+        /* @var User $user */
+        $user = $request->user();
 
-        $wechatApp = Factory::miniProgram([
-            'app_id'        => config('wechat.mini_program.default.app_id'),
-            'secret'        => config('wechat.mini_program.default.secret'),
-            'response_type' => 'object',
-        ]);
-        $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['poem']);
-        if ($result->errcode !== 0 && $result->errcode !== -1) {
+        $wechatApp = new Weapp();
+        $content   = $sanitized['title'] . $sanitized['poem'];
+
+        if (!$wechatApp->checkText($content)) {
             return $this->responseFail([], '请检查是否含有敏感词', Controller::$CODE['content_security_failed']);
         }
 
@@ -618,7 +618,7 @@ class PoemAPIController extends Controller {
 
         $hash = crc32(json_encode($postData));
         if (!$force && $poem->share_pics && isset($poem->share_pics[$compositionID])
-            && file_exists(storage_path($poem->share_pics[$compositionID]))) {
+                    && file_exists(storage_path($poem->share_pics[$compositionID]))) {
             if (str_contains($poem->share_pics[$compositionID], $hash)) {
                 return $this->responseSuccess(['url' => $posterUrl . '?t=' . time()]);
             }
@@ -644,7 +644,7 @@ class PoemAPIController extends Controller {
 
             $scene          = $poem->is_campaign ? ($poem->campaign_id . '-' . $poem->id) : $poem->id;
             $page           = $poem->is_campaign ? 'pages/campaign/campaign' : 'pages/poems/index';
-            $appCodeImgPath = (new Weapp())->fetchAppCodeImg($scene, $dir, $page, $force);
+            $appCodeImgPath = (new Weapp())->fetchAppCodeImg($scene, $dir, $page);
 
             if (!$this->composite($poemImgPath, $appCodeImgPath, $posterPath, $compositionID)) {
                 return $this->responseFail();
@@ -667,9 +667,9 @@ class PoemAPIController extends Controller {
     }
 
     /**
-     * @param $postData
-     * @param $dir
-     * @param $poemImgFileName
+     * @param      $postData
+     * @param      $dir
+     * @param      $poemImgFileName
      * @param bool $force
      * @return string
      * @throws Exception
@@ -827,12 +827,12 @@ class PoemAPIController extends Controller {
             }
 
             if ($authorSearchRes->searchable instanceof \App\Models\Author) {
-                $author = $authorSearchRes->searchable;
+                $author           = $authorSearchRes->searchable;
                 $author['#label'] = $author->label === $authorSearchRes->title ? $author->label : $author->label . ' ( ' . $authorSearchRes->title . ' )';
 
                 if ($mode !== 'author-select') {
                     foreach ($author->poems as $poem) {
-                        $item = $poem;
+                        $item                          = $poem;
                         $item['poet_contains_keyword'] = true;
                         // $item['#from_author'] = true;
                         $item['#poet_label'] = $poem->poet_label === $authorSearchRes->title
@@ -862,15 +862,15 @@ class PoemAPIController extends Controller {
             if ($posOnPoem) {
                 $pos = $posOnPoem['pos'];
                 // TODO don't do noSpace for english poem
-                $item['poem'] = Str::of($poem->poem)->substr($pos - min(20, $pos), 40)->trimPunct()->replace("\n", ' ')->__toString();
+                $item['poem']                  = Str::of($poem->poem)->substr($pos - min(20, $pos), 40)->trimPunct()->replace("\n", ' ')->__toString();
                 $item['poem_contains_keyword'] = true;
             } else {
-                $item['poem'] = $poem->firstLine;
+                $item['poem']                  = $poem->firstLine;
                 $item['poem_contains_keyword'] = false;
             }
 
-            $item['poet_is_v'] = $poem->poet_is_v;
-            $item['poet_label'] = $poem->poet_label;
+            $item['poet_is_v']        = $poem->poet_is_v;
+            $item['poet_label']       = $poem->poet_label;
             $item['translator_label'] = $poem->translator_label;
 
             if ($poem->poet_label && str_pos_one_of($poem->poet_label, $keywordArr)) {

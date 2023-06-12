@@ -211,7 +211,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return bool
      */
     public static function isWeApp() {
-        $appID = config('easywecsat.mini_app.default.app_id');
+        $appID = config('wechat.mini_program.default.app_id');
         if ($appID && isset($_SERVER['HTTP_REFERER'])
                    && str_contains($_SERVER['HTTP_REFERER'], $appID)
         ) {

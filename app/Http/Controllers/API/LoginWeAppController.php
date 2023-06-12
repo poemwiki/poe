@@ -12,12 +12,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class LoginWeAppController extends Controller {
-    private \EasyWeChat\MiniApp\Application $weApp;
-    private \EasyWeChat\MiniApp\Utils $utils;
+    private \EasyWeChat\MiniProgram\Application $weApp;
 
     public function __construct() {
-        $this->weApp = app('easywechat.mini_app');
-        $this->utils = $this->weApp->getUtils();
+        $this->weApp = \EasyWeChat::miniProgram();
     }
 
     /**
@@ -34,7 +32,7 @@ class LoginWeAppController extends Controller {
         $code = $request->code;
         // 根据 code 获取微信 openid 和 session_key
         try {
-            $data = $this->utils->codeToSession($code);
+            $data = $this->weApp->auth->session($code);
         } catch (\Exception $e) {
             Log::error('try weApp login failed at getting openid: ' . $e->getMessage());
 
@@ -137,8 +135,8 @@ class LoginWeAppController extends Controller {
             'bind_ref' => UserBind::BIND_REF['weapp'],
             'user_id'  => $request->user()->id
         ])->first();
-        $decrypted = $this->utils->decryptSession($userBind->weapp_session_key, $detail['iv'], $detail['encryptedData']);
-        dd($decrypted);
+        $decrypted = $this->weApp->encryptor->decryptData(
+            $userBind->weapp_session_key, $detail['iv'], $detail['encryptedData']);
 
         return $this->responseSuccess([
             'user'      => $userBind->user,

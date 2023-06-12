@@ -14,9 +14,6 @@ return [
      * 默认配置，将会合并到各模块中
      */
     'defaults'         => [
-        'http' => [
-            'timeout' => 5.0,
-        ],
         /*
          * 指定 API 调用返回结果的类型：array(default)/collection/object/raw/自定义类名
          */
@@ -110,7 +107,7 @@ return [
     /*
      * 小程序
      */
-    'mini_app' => [
+    'mini_program' => [
         'default' => [
             'app_id'  => env('WECHAT_MINI_PROGRAM_APPID', ''),
             'secret'  => env('WECHAT_MINI_PROGRAM_SECRET', ''),

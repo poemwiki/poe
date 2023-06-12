@@ -56,8 +56,8 @@ class CampaignAPIController extends Controller {
                     if (isset($campaign->settings['test']) && $campaign->settings['test']) {
                         return null;
                     }
-                    $ret = $campaign->toArray();
-                    $ret['settings'] = collect($campaign->settings)->except(['result']);
+                    $ret               = $campaign->toArray();
+                    $ret['settings']   = collect($campaign->settings)->except(['result']);
                     $ret['poem_count'] = $campaign->poem_count;
                     $ret['user_count'] = $campaign->user_count;
 
@@ -72,7 +72,7 @@ class CampaignAPIController extends Controller {
     }
 
     // TODO get campaign app code image from cache or generate it
-    // (new Weapp())->fetchAppCodeImg('campaign-35', storage_path('app/public/campaign/'.'35'), 'pages/index/index', 0)
+    // (new Weapp())->fetchAppCodeImg('campaign-35', storage_path('app/public/campaign/'.'35'), 'pages/index/index')
 
     public function show($id) {
         // TODO Cache::forget('api-campaign-show-') if new campaign poem uploaded
@@ -86,9 +86,9 @@ class CampaignAPIController extends Controller {
             }
             $ret = $campaign->toArray();
 
-            $poems = $this->poemRepository->getCampaignPoemsByTagId($campaign->tag_id);
-            $ret['poemData'] = $poems;
-            $ret['settings'] = collect($campaign->settings)->except(['result'])->toArray();
+            $poems                              = $this->poemRepository->getCampaignPoemsByTagId($campaign->tag_id);
+            $ret['poemData']                    = $poems;
+            $ret['settings']                    = collect($campaign->settings)->except(['result'])->toArray();
             $ret['settings']['inner_image_url'] = cosUrl($campaign->settings['inner_image_url']);
             $ret['settings']['share_image_url'] = cosUrl($campaign->settings['share_image_url']);
             if (isset($ret['settings']['sell']['picUrl'])) {
