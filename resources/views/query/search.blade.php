@@ -30,7 +30,7 @@
 
 
     @if(isset($authors) && isset($poems))
-    <p class="text-sm text-gray-400 text-light">@lang('search.count', ['count' => count($authors) + count($poems)])</p>
+    <p class="text-sm text-gray-400 text-light">@lang('search.count', ['count' => $authors->total() + $poems->total()])</p>
     @endif
 
 
@@ -42,19 +42,19 @@
     @endif
 
 
-    @if(isset($authors[0]))
+    @if(isset($authors) && $authors->total())
       <div class="search-group">
         <h2 class="mt-8 mb-4 text-lg font-bold">@lang('search.result-author')</h2>
 
         <ol>
-          @foreach($authors as $author)
+          @foreach($authors->items() as $author)
             <li class="group item item-author mb-8 relative">
-              @if(isset($author->searchable->avatar_url))
-                <img class="item-pic item-left" src="{{$author->searchable->avatar_url}}" alt="{{$author->title}}" />
+              @if(isset($author->avatarUrl))
+                <img class="item-pic item-left" src="{{$author->avatarUrl}}" alt="{{$author->name_lang}}" />
               @endif
               <div class="item-right">
-                <span class="group-hover:text-link inline-block align-text-top font-bold mb-4 text-lg leading-none">{{ $author->title }}</span>
-                <p class="item-desc block-with-text leading-normal">{{mb_substr($author->searchable->describe_lang, 0, 200)}}</p>
+                <span class="group-hover:text-link inline-block align-text-top font-bold mb-4 text-lg leading-none">{{ $author->name_lang }}</span>
+                <p class="item-desc block-with-text leading-normal">{{mb_substr($author->describe_lang, 0, 200)}}</p>
               </div>
 
               <a class="no-bg block p-0 absolute w-full h-full left-0 top-0" href="{{ $author->url }}"></a>
@@ -65,13 +65,13 @@
     @endif
 
 
-    @if(isset($poems) && count($poems))
+    @if(isset($poems) && $poems->total())
       <div class="search-group">
         <h2 class="mt-8 mb-4 text-lg font-bold">@lang('search.result-poem')</h2>
 
         <ol>
 
-          @foreach($poems as $poem)
+          @foreach($poems->items() as $poem)
             <li class="group item item-poem">
               {{--                    <a class="" href="{{ $item->url }}">{{ $item->title }}</a>--}}
               <div class="item-right title-list-item">
@@ -90,7 +90,7 @@
     @endif
 
 
-    @if(isset($authors[0]) && (in_array($authors[0]->title, ['neruda', 'Neruda', 'Pablo Neruda', '巴勃罗·聂鲁达', '巴勃罗·聶魯達', '聂鲁达', '聶魯達'])))
+    @if(in_array($keyword, ['neruda', 'Neruda', 'Pablo Neruda', '巴勃罗·聂鲁达', '巴勃罗·聶魯達', '聂鲁达', '聶魯達'])))
       <p class="mt-8 text-gray-400 text-xs text-right">“诗歌永远是一种和平的举动。诗歌出自和平，就像面包成于面粉。纵火犯、战犯和豺狼，搜索诗人，为了焚掉他、杀掉他、撕咬他”<br>Pablo Neruda</p>
     @endif
   </div>
