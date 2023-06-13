@@ -81,8 +81,7 @@ class StorePoem extends CreatePoemRequest {
         }
 
         if (isset($sanitized['translator_ids'])) {
-            $sanitized['is_original'] = false;
-            $sanitized['translator']  = '';
+            $sanitized['translator'] = '';
 
             $translatorsOrder = [];
             foreach ($sanitized['translator_ids'] as $key => $id) {
@@ -110,7 +109,8 @@ class StorePoem extends CreatePoemRequest {
 
             // WARNING for poems have related translator(relatable record), poem.translator is just for indicating translator order
             if (!empty($translatorsOrder)) {
-                $sanitized['translator'] = json_encode($translatorsOrder, JSON_UNESCAPED_UNICODE);
+                $sanitized['is_original'] = false;
+                $sanitized['translator']  = json_encode($translatorsOrder, JSON_UNESCAPED_UNICODE);
             }
         }
 

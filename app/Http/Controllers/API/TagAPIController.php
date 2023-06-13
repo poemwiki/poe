@@ -8,7 +8,7 @@ use App\Repositories\TagRepository;
 use Illuminate\Http\Request;
 
 class TagAPIController extends Controller {
-    /** @var  TagRepository */
+    /** @var TagRepository */
     private $tagRepository;
 
     public function __construct(TagRepository $tagRepository) {
