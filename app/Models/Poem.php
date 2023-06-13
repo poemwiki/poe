@@ -844,9 +844,9 @@ class Poem extends Model {
     public function toSearchableArray(): array {
         $translatorsLabels = $this->translators->reduce(function ($labels, $translator) {
             if ($translator instanceof Author) {
-                return $labels . ',' . implode($translator->name_lang, ',');
+                return $labels . ',' . implode(',', $translator->getOriginal('name_lang'));
             } elseif ($translator instanceof Entry) {
-                return $labels . ',' . implode($translator->name, ',');
+                return $labels . ',' . $translator->name;
             }
 
             return $labels;
@@ -857,10 +857,10 @@ class Poem extends Model {
             'title'      => $this->title,
             'preface'    => $this->preface,
             'subtitle'   => $this->subtitle,
-            // 'uploader'   => $this->uploader->name,
+            // // 'uploader'   => $this->uploader->name,
             'relatedTranslators' => $translatorsLabels,
-            'poet'               => $this->poetAuthor->name_lang,
-            'content'            => $this->poem,
+            'poet'               => $this->poetAuthor ? $this->poetAuthor->name_lang : $this->poet,
+            'poem'               => $this->poem,
         ];
     }
     /**
