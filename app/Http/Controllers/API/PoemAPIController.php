@@ -39,9 +39,6 @@ use Spatie\Searchable\ModelSearchAspect;
 use Spatie\Searchable\Search;
 use Spatie\Searchable\SearchResult;
 
-/**
- * Class LanguageController.
- */
 class PoemAPIController extends Controller {
     /** @var PoemRepository */
     private $poemRepository;

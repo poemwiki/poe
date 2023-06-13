@@ -8,9 +8,6 @@ use App\Repositories\CampaignRepository;
 use App\Repositories\PoemRepository;
 use Cache;
 
-/**
- * Class LanguageController.
- */
 class CampaignAPIController extends Controller {
     /** @var CampaignRepository */
     private $campaignRepository;
