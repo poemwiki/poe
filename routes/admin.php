@@ -14,7 +14,7 @@ use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UsersController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->name('admin')->group(static function () {
+Route::middleware(['auth:' . config('admin-auth.defaults.guard'), 'admin'])->name('admin.')->group(static function () {
     Route::get('/profile', [ProfileController::class, 'editProfile'])->name('edit-profile');
     Route::post('/profile', [ProfileController::class, 'updateProfile'])->name('update-profile');
     Route::get('/password', [ProfileController::class, 'editPassword'])->name('edit-password');
