@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\PoemController;
+use App\Http\Controllers;
 use App\Models\Poem;
 use App\Repositories\PoemRepository;
 use App\User;
@@ -28,26 +28,8 @@ Auth::routes(['verify' => true]);
 
 Route::get('/logout', 'Auth\LoginController@logout');
 
-// Route::get('generator_builder', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@builder')->name('io_generator_builder');
-//
-// Route::get('field_template', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@fieldTemplate')->name('io_field_template');
-//
-// Route::get('relation_field_template', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@relationFieldTemplate')->name('io_relation_field_template');
-//
-// Route::post('generator_builder/generate', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@generate')->name('io_generator_builder_generate');
-//
-// Route::post('generator_builder/rollback', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@rollback')->name('io_generator_builder_rollback');
-//
-// Route::post(
-//    'generator_builder/generate-from-file',
-//    '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@generateFromFile'
-// )->name('io_generator_builder_generate_from_file');
+Route::get('/bot', [Controllers\BotController::class, 'index']);
 
-// Route::resource('contents', 'contentController');
-
-Route::resource('/bot', 'BotController');
-
-// Route::resource('poems', 'PoemController');
 Route::prefix('poems')->name('poems/')->group(static function () {
     Route::get('/random', 'PoemController@random')->name('random');
     Route::get('/search', 'PoemController@index')->name('index');

@@ -23,7 +23,6 @@
     "brackets/craftable": "^8.0",
     "doctrine/dbal": "~2.3",
     "freyo/flysystem-qcloud-cos-v5": "^2.2",
-    "fukuball/jieba-php": "^0.34.0",
     "guzzlehttp/guzzle": "^7.0",
     "itsgoingd/clockwork": "^5.1",
     "jfcherng/php-diff": "^6.10",

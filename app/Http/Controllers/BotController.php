@@ -8,8 +8,6 @@ use App\Models\Poem;
 use App\Repositories\PoemRepository;
 use App\Repositories\ScoreRepository;
 use App\User;
-// use Fukuball\Jieba\Finalseg;
-// use Fukuball\Jieba\Jieba;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
@@ -128,7 +126,7 @@ class BotController extends Controller {
             }
             Poem::withoutEvents(function () use ($poem, $url) {
                 $poem->timestamps = false;
-                $poem->short_url = $url;
+                $poem->short_url  = $url;
                 $poem->save();
             });
         }
@@ -534,9 +532,11 @@ SQL;
                 }
 
                 // convert to simplified chinese
-                $od   = opencc_open('t2s.json');
-                $poem = opencc_convert(implode("\n", $parts), $od);
-                opencc_close($od);
+                // $od   = opencc_open('t2s.json');
+                // $poem = opencc_convert(implode("\n", $parts), $od);
+                // opencc_close($od);
+
+                $poem = implode("\n", $parts);
 
                 if ($post->last_selected_time) {
                     $stmt = $poeDB->prepare('UPDATE `chatroom_poem_selected` SET `selected_count`=1+`selected_count`
@@ -571,7 +571,7 @@ SQL;
 
     /**
      * @param PDO $db
-     * @param $poemID
+     * @param     $poemID
      * @return array|object
      */
     private function findWxPost(PDO $db, $poemID) {
@@ -593,7 +593,7 @@ SQL;
      * @param bool   $divide
      * @return string[]|string
      */
-    private function getKeywords($str, $divide = false) {
+    private function getKeywords($str) {
         $str     = trim(preg_replace('@[[:punct:]\n\r～｜　\s]+@u', ' ', $str));
         $keyword = '';
         $matches = [];
@@ -604,10 +604,6 @@ SQL;
             $matches = [];
             preg_match('@^(有没有??|告诉我|帮我找|我想要|(给我来|给我|来)|搜索?)(一首|一下)??((和|跟|带|包?含)有??)??\s*?(?<keyword>.*)((有关|相关)?的?((十四行|十六行|古|现代)?诗歌?|词))$@Uu', $str, $matches);
             $keyword = isset($matches['keyword']) ? trim($matches['keyword']) : '';
-        }
-
-        if ($divide) {
-            // return Jieba::cut($keyword);
         }
 
         return strstr($keyword, ' ')
