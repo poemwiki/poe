@@ -86,8 +86,9 @@ class CampaignAPIController extends Controller {
             $poems                              = $this->poemRepository->getCampaignPoemsByTagId($campaign->tag_id);
             $ret['poemData']                    = $poems;
             $ret['settings']                    = collect($campaign->settings)->except(['result'])->toArray();
-            $ret['settings']['inner_image_url'] = cosUrl($campaign->settings['inner_image_url']);
-            $ret['settings']['share_image_url'] = cosUrl($campaign->settings['share_image_url']);
+            $ret['settings']['inner_image_url'] = cosUrl($campaign->settings['inner_image_url'] ?? $campaign->image
+            );
+            $ret['settings']['share_image_url'] = cosUrl($campaign->settings['share_image_url'] ?? $campaign->image);
             if (isset($ret['settings']['sell']['picUrl'])) {
                 $ret['settings']['sell']['picUrl'] = cosUrl($campaign->settings['sell']['picUrl']);
             }
