@@ -44,7 +44,7 @@
       @endif
     </div>
 
-    <div class="author-relate">
+    <div class="author-relate mt-4">
       @if($author->user)
         <div class="avatar-wrapper">{!!$author->user->getVerifiedAvatarHtml()!!}</div>
         <span>此作者页已关联到用户 {{$author->user->name}}{{$lastOnline ? " ($lastOnline 在线)" : ''}}</span>
