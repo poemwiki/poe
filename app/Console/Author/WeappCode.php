@@ -94,12 +94,10 @@ class WeappCode extends Command {
         // TODO remove temp file after uploaded to cloud
 
         $image = $result['Data']['ProcessResults']['Object'][0];
-        if (isset($image['Location'])) {
-            $objectUrlWithoutSign = 'https://' . $image['Location'];
-
+        if (isset($image['Key'])) {
             // Tencent cos client has set default timezone to PRC
             date_default_timezone_set(config('app.timezone', 'UTC'));
-            $author->short_url = $objectUrlWithoutSign . '?v=' . now()->timestamp;
+            $author->short_url = $image['Key'] . '?v=' . now()->timestamp;
             $author->save();
 
             $this->authorRepository->saveAuthorMediaFile($author, MediaFile::TYPE['weapp_code'], $image['Key'],

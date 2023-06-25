@@ -313,6 +313,13 @@ class Author extends Model {
     }
 
     /**
+     * @return string
+     */
+    public function getWeappCodeUrlAttribute() {
+        return $this->short_url ? cosUrl($this->short_url) : '';
+    }
+
+    /**
      * @return mixed|string
      */
     public function getLabelAttribute() {
