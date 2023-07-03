@@ -79,7 +79,7 @@ class CampaignAPIController extends Controller {
             $campaign = $this->campaignRepository->find($id);
 
             if (empty($campaign)) {
-                return $this->responseFail([], '没有找到这个活动。', self::$CODE['no_entry']);
+                return null;
             }
             $ret = $campaign->toArray();
 
