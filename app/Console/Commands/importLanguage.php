@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class initialLanguage extends Command {
+class importLanguage extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -106,6 +106,3 @@ class initialLanguage extends Command {
         return 0;
     }
 }
-
-
-
