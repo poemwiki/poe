@@ -55,10 +55,21 @@ class LoginWeAppController extends Controller {
         // 找到 openid 对应的用户
         // TODO 考虑同一unionid下不同openid的虚拟身份（欢乐马、神经蛙等）
         // TODO 考虑解绑情况
-        $userBind = isset($data['unionid']) && !empty($data['unionid']) ? $this->getUserBindInfoByUnionID($data['unionid'], UserBind::BIND_REF['weapp'], 1) : null;
-        // 待解决的问题：微信服务端返回的 $data 中是否会包含 unionid？在何种情况下包含？
+        $userBind = $weappOpenid ? $this->getUserBindInfoByOpenID($weappOpenid, UserBind::BIND_REF['weapp'], 1) : null;
 
         if ($userBind) {
+            // 由于小程序迁移主体，union_id 变更，需要将同一 user 的 weapp 和 wechat 的绑定记录的 union_id 同步变更
+            if (isset($data['unionid']) && !empty($data['unionid']) && $userBind->union_id !== $data['unionid']) {
+                UserBind::where('user_id', $userBind->user_id)
+                    ->whereIn('bind_ref', [
+                        UserBind::BIND_REF['weapp'],
+                        UserBind::BIND_REF['wechat'],
+                        UserBind::BIND_REF['wechat-scan']
+                    ])->update([
+                        'union_id' => $data['unionid']
+                    ]);
+            }
+
             // 已经登录过小程序
             $attributes = [
                 'updated_at'        => now(),
@@ -69,14 +80,19 @@ class LoginWeAppController extends Controller {
                 'info'              => json_encode($data),
                 'weapp_session_key' => $weixinSessionKey
             ];
+            if (isset($data['unionid']) && !empty($data['unionid'])) {
+                $attributes['union_id'] = $data['unionid'];
+            }
+
             // 更新用户数据
             $userBind->update($attributes);
             $user = $userBind->user;
             $user->save();
         } else {
-            // 从未注册过的用户
-            // 注册过网站，但还未用微信登录过，没有任何微信相关的 userBind
-            // 用微信登录过web版，还未登录过小程序，有相同 unionid 的 BIND_REF['wechat'] 的 userBind, 无 BIND_REF['weapp'] 的 userBind
+            // 以下登录逻辑适用于：
+            // 1. 从未注册过的用户
+            // 2. 注册过网站，但还未用微信登录过，没有任何微信相关的 userBind
+            // 3. 用微信登录过web版，还未登录过小程序，有相同 unionid 且 BIND_REF['wechat'] 的 userBind, 无 BIND_REF['weapp'] 的 userBind
 
             $wechatBind = isset($data['unionid']) && !empty($data['unionid']) ? $this->getUserBindInfoByUnionID($data['unionid'], UserBind::BIND_REF['wechat'], 1) : null;
 
@@ -154,10 +170,10 @@ class LoginWeAppController extends Controller {
     }
 
     /**
-     * @param     $openID
-     * @param     $bindRef
-     * @param int $bindStatus
-     *                        TODO move it to BindInfoRepository
+     * @param          $openID
+     * @param          $bindRef
+     * @param int|null $bindStatus
+     *                             TODO move it to BindInfoRepository
      * @return UserBind|null
      */
     public function getUserBindInfoByOpenID($openID, $bindRef = UserBind::BIND_REF['weapp'], $bindStatus = null) {
