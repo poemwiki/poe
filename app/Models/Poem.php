@@ -857,7 +857,7 @@ class Poem extends Model {
             'title'      => $this->title,
             'preface'    => $this->preface,
             'subtitle'   => $this->subtitle,
-            // // 'uploader'   => $this->uploader->name,
+            // 'uploader'   => $this->uploader->name,
             'relatedTranslators' => $translatorsLabels,
             'poet'               => $this->poetAuthor ? $this->poetAuthor->name_lang : $this->poet,
             'poem'               => $this->poem,

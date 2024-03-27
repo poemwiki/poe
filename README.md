@@ -9,6 +9,25 @@ php 7.4+
 Nginx  
 redis  
 
+## Tech Stack
+Laravel 9  
+Meilisearch  
+
+
+## Start
+
+### Initialize
+Import all searchable data to meilisearch
+```
+php artisan scout:import "App\Models\Author"
+php artisan scout:import "App\Models\Poem"
+```
+
+### Front-end Watch & Build
+```
+yarn run watch
+```
+
 ## Contribution
 
 ### Code Style

@@ -47,7 +47,7 @@ class UserBind extends Model {
 
     protected $table      = 'user_bind_info';
     public const BIND_REF = [
-        'wechat'      => 0, // 微信内授权
+        'wechat'      => 0, // 微信内授权（微信内置浏览器打开时，使用微信登录）
         'wechat-scan' => 1, // 微信扫码登录
         'weapp'       => 2, // 微信小程序登录
     ];

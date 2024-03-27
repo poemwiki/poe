@@ -132,9 +132,31 @@ return [
         'host'           => env('MEILISEARCH_HOST', 'http://localhost:7700'),
         'key'            => env('MEILISEARCH_KEY', null),
         'index-settings' => [
-            // 'users' => [
-            //     'filterableAttributes'=> ['id', 'name', 'email'],
-            // ],
+            \App\Models\Author::class => [
+                'filterableAttributes'  => ['id', 'name_lang', 'describe_lang', '__soft_deleted'],
+                'sortableAttributes'    => ['name_lang'],
+                'rankingRules'          => [
+                    'exactness',
+                    'attribute',
+                    // 'name_lang:asc',
+                    'words',
+                    // 'proximity',
+                    // 'sort',
+                    // 'typo',
+                ],
+            ],
+            \App\Models\Poem::class => [
+                'filterableAttributes'       => ['id', 'title', 'preface', 'subtitle', 'relatedTranslators', 'poet', 'poem', '__soft_deleted'],
+                'sortableAttributes'         => ['title', 'poem'],
+                'rankingRules'               => [
+                    'exactness',
+                    'attribute',
+                    'words',
+                    // 'proximity',
+                    // 'sort',
+                    // 'typo',
+                ],
+            ],
         ],
     ],
 ];

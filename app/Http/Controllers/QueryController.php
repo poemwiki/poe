@@ -52,7 +52,7 @@ class QueryController extends Controller {
             ]);
         }
 
-        $authors = \App\Models\Author::search($keyword4Query)->paginate();
+        $authors = \App\Models\Author::search($keyword4Query)->paginate(3, null, 1);
 
         return view('query.search')->with([
             'authors' => $authors,

@@ -44,17 +44,17 @@
 
     @if(isset($authors) && $authors->total())
       <div class="search-group">
-        <h2 class="mt-8 mb-4 text-lg font-bold">@lang('search.result-author')</h2>
+        <h2 class="text-lg mt-16 mb-6 font-bold leading-normal"><span class="align-bottom">@lang('search.result-author')</span><span class="ml-4 text-sm font-normal align-text-bottom text-gray-400">{{$authors->total()}}</span></h2>
 
         <ol>
           @foreach($authors->items() as $author)
-            <li class="group item item-author mb-8 relative">
+            <li class="group item item-author mb-10 relative">
               @if(isset($author->avatarUrl))
-                <img class="item-pic item-left" src="{{$author->avatarUrl}}" alt="{{$author->name_lang}}" />
+                <div class="w-32 h-auto flex-shrink-0 after:w-full after:block"><img class="block w-full h-full object-cover" src="{{$author->avatarUrl}}" alt="{{$author->name_lang}}" /></div>
               @endif
-              <div class="item-right">
-                <span class="group-hover:text-link inline-block align-text-top font-bold mb-4 text-lg leading-none">{{ $author->name_lang }}</span>
-                <p class="item-desc block-with-text leading-normal">{{mb_substr($author->describe_lang, 0, 200)}}</p>
+              <div class="ml-6 flex flex-col flex-1">
+                <span class="group-hover:text-link inline-block align-text-top font-bold mb-3 text-lg leading-none">{{ $author->name_lang }}</span>
+                <p class="item-desc block-with-text leading-relaxed">{{mb_substr($author->describe_lang, 0, 200)}}</p>
               </div>
 
               <a class="no-bg block p-0 absolute w-full h-full left-0 top-0" href="{{ $author->url }}"></a>
@@ -67,7 +67,7 @@
 
     @if(isset($poems) && $poems->total())
       <div class="search-group">
-        <h2 class="mt-8 mb-4 text-lg font-bold">@lang('search.result-poem')</h2>
+        <h2 class="text-lg mt-16 mb-4 font-bold leading-normal"><span class="align-bottom">@lang('search.result-poem')</span><span class="ml-4 text-sm font-normal align-text-bottom text-gray-400">{{$poems->total()}}</span></h2>
 
         <ol>
 
@@ -90,7 +90,7 @@
     @endif
 
 
-    @if(in_array($keyword, ['neruda', 'Neruda', 'Pablo Neruda', '巴勃罗·聂鲁达', '巴勃罗·聶魯達', '聂鲁达', '聶魯達'])))
+    @if(isset($keyword) && in_array($keyword, ['neruda', 'Neruda', 'Pablo Neruda', '巴勃罗·聂鲁达', '巴勃罗·聶魯達', '聂鲁达', '聶魯達'])))
       <p class="mt-8 text-gray-400 text-xs text-right">“诗歌永远是一种和平的举动。诗歌出自和平，就像面包成于面粉。纵火犯、战犯和豺狼，搜索诗人，为了焚掉他、杀掉他、撕咬他”<br>Pablo Neruda</p>
     @endif
   </div>
