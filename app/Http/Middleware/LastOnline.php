@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use Cache;
+use Illuminate\Support\Facades\Cache;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
@@ -16,7 +16,7 @@ class LastOnline {
 
         $key = 'online_' . Auth::id();
         $value = (new \DateTime())->format("Y-m-d H:i:s");
-        Cache::set($key, $value);
+        Cache::put($key, $value, now()->addMinutes(30 * 24 * 30));
 
         return $next($request);
     }
