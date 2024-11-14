@@ -601,6 +601,9 @@ class PoemAPIController extends Controller {
 
         $postData = [
             'compositionId' => $compositionID,
+            'config'        => [
+                'wrap' => true
+            ],
             'id'            => $poem->id,
             'poem'          => $poem->poem,
             'poet'          => $poem->poetLabel,
