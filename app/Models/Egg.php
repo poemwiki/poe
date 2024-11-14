@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Traits\LogsActivity;
+// use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * App\Egg.
@@ -13,7 +13,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Egg {
     use SoftDeletes;
-    use LogsActivity;
+    // use LogsActivity;
     protected $table = 'egg';
 
     protected $fillable = [
