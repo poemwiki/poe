@@ -27,19 +27,18 @@
                 @endauth
             </li>
         @endforeach
-        @if(count($reviews) <= 0)
-            <li>
-                <p class="review-none">
-                    @lang('No reviews.')&nbsp;&nbsp;&nbsp;&nbsp;
-                    <a
-                    @auth
-                        href="#" class="add-review btn btn-wire"
-                    @else
-                        href="{{ route('login', ['ref' => route('p/show', $poem->fake_id, false)]) }}" class="btn btn-wire"
-                    @endauth >@lang('Write Review')</a>
-                </p>
-            </li>
-        @endif
+
+        <li>
+            <p class="review-none">
+                @if(count($reviews) <= 0) @lang('No reviews.')&nbsp;&nbsp;&nbsp;&nbsp;@endif
+                <a
+                @auth
+                    href="#" class="add-review btn btn-wire"
+                @else
+                    href="{{ route('login', ['ref' => route('p/show', $poem->fake_id, false)]) }}" class="btn btn-wire"
+                @endauth >@lang('Write Review')</a>
+            </p>
+        </li>
     </ol>
 
     <section id="review-modal" @if(!$showModal) class="hidden" @endif>
