@@ -23,9 +23,24 @@ class LoginWechatController extends Controller {
         Log::info(json_encode(request()->all()));
         $wechatUser = session('wechat.oauth_user.default'); // 拿到授权用户资料
 
-        if ($userBind = $this->getUserBindInfoByUnionID($wechatUser->raw['unionid'])) {
+        if ($userBind = $this->getUserBindInfoByOpenID($wechatUser->raw['openid'])) {
+            // 由于小程序迁移主体，union_id 变更，需要将同一 user 的 weapp 和 wechat 的绑定记录的 union_id 同步变更
+            if ($wechatUser->raw['unionid'] && $userBind->union_id !== $wechatUser->raw['unionid']) {
+                UserBind::where('user_id', $userBind->user_id)
+                    ->whereIn('bind_ref', [
+                        UserBind::BIND_REF['weapp'],
+                        UserBind::BIND_REF['wechat'],
+                        UserBind::BIND_REF['wechat-scan']
+                    ])->update([
+                        ['union_id' => $wechatUser->raw['unionid']]
+                    ]);
+            }
+
             $this->guard()->login(User::find($userBind->user_id));
         } else {
+            // TODO redirect to weapp code page, tell user 'press image to go to weapp'
+            return redirect('/');
+
             // 注册过小程序，还未用微信登录过web版，有相同 unionid 的 BIND_REF['weapp'] 的 userBind, 无 BIND_REF['wechat'] 的 userBind
             $weappBind = $wechatUser->raw['unionid'] ? $this->getUserBindInfoByUnionID($wechatUser->raw['unionid'], UserBind::BIND_REF['weapp']) : null;
 
