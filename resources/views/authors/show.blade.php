@@ -30,8 +30,8 @@
       @endif
 
       <h1 class="text-xl font-bold">{{$author->label}}
-        @if($author->short_url)
-          <a class="weapp-code" href="{{$author->short_url}}" target="_blank"><img src="{{$author->short_url}}"
+        @if($author->weappCodeUrl)
+          <a class="weapp-code" href="{{$author->weappCodeUrl}}" target="_blank"><img src="{{$author->weappCodeUrl}}"
                                                                                    alt="微信小程序码"></a>
         @endif
         @if($author->wikiData)
@@ -44,7 +44,7 @@
       @endif
     </div>
 
-    <div class="author-relate">
+    <div class="author-relate mt-4">
       @if($author->user)
         <div class="avatar-wrapper">{!!$author->user->getVerifiedAvatarHtml()!!}</div>
         <span>此作者页已关联到用户 {{$author->user->name}}{{$lastOnline ? " ($lastOnline 在线)" : ''}}</span>
@@ -87,8 +87,8 @@
       <label for="tab-desc-poemwiki">@lang('Introduction')</label>
       <div class="tab">
         <p class="text-justify leading-loose" style="white-space: pre-line;">{{$author->describe_lang}}
-          @if($author->short_url)
-            <a class="weapp-code" href="{{$author->short_url}}" target="_blank"><img src="{{$author->short_url}}"
+          @if($author->weappCodeUrl)
+            <a class="weapp-code" href="{{$author->weappCodeUrl}}" target="_blank"><img src="{{$author->weappCodeUrl}}"
                                                                                      alt="微信小程序码"></a>
           @endif
         </p>

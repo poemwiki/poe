@@ -306,6 +306,14 @@ class Author extends Model implements Searchable {
         return route('author/show', ['fakeId' => $this->fakeId]);
     }
 
+
+    /**
+     * @return string
+     */
+    public function getWeappCodeUrlAttribute() {
+        return $this->short_url ? cosUrl($this->short_url) : '';
+    }
+
     /**
      * @return mixed|string
      */
