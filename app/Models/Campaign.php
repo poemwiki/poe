@@ -173,6 +173,7 @@ class Campaign extends Model {
             }
 
             $masterUser = $user->only(['id', 'avatar', 'name', 'author_id']);
+            $masterUser['avatar'] = $user->avatarUrl;
             // 同时存在 masters和 masterInfos 的情况下，优先使用 masterInfos 内的 name 和 avatar
             if ($masterInfos && ($info = $masterInfos[$index])) {
                 $masterUser['name']   = $info['name'];
