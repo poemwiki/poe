@@ -16,7 +16,7 @@ class LastOnline {
 
         $key = 'online_' . Auth::id();
         $value = (new \DateTime())->format("Y-m-d H:i:s");
-        Cache::set($key, $value);
+	Cache::put($key, $value, now()->addMinutes(7 * 24 * 60));
 
         return $next($request);
     }
