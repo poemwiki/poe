@@ -70,7 +70,7 @@
 <label for="preface" class="col-form-label text-md-right">{{ trans('admin.poem.columns.preface') }}</label>
 <div>
     <textarea type="text" v-model="form.preface"
-           v-validate="'max:300'"
+           v-validate="'max:10000'"
            data-vv-as="{{ trans('admin.poem.columns.preface') }}"
            @input="validate($event)" class="form-control"
            :class="{'form-control-danger': errors.has('preface'), 'form-control-success': fields.preface && fields.preface.valid}"
