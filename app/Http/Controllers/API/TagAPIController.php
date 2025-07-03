@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
  * @package App\Http\Controllers\API
  */
 class TagAPIController extends Controller {
-    /** @var  TagRepository */
+    /** @var TagRepository */
     private $tagRepository;
 
     public function __construct(TagRepository $tagRepository) {
