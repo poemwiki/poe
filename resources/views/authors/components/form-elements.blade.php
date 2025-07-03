@@ -8,7 +8,7 @@
            class="col-md-2 col-form-label text-md-right required">{{ trans('admin.author.columns.avatar') }}</label>
     <div>
       <div class="wiki-avatar">
-        <img :src="form.avatar || form.avatar_url" :alt="form.name_lang[locales[0]]" class="wiki-avatar-img">
+        <img :src="form.avatar_url" :alt="form.name_lang[locales[0]]" class="wiki-avatar-img">
         <span class="wiki-avatar-mask wiki-avatar-btn">@{{
           uploadProgress===false ? '@lang('Change Avatar')' : uploadProgress
           }}</span>
