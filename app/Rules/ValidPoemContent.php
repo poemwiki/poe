@@ -57,7 +57,7 @@ class ValidPoemContent implements Rule {
         }
 
         if ($this->maxTextLine && $this->maxTextLine < $textLineCount) {
-            $this->reason = "行数超过限制，最多{$this->maxTextLine}行";
+            $this->reason = "行数 {$textLineCount} 超过限制，最多{$this->maxTextLine}行";
 
             return false;
         }

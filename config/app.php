@@ -268,7 +268,7 @@ $config = [
     'lark' => [
         'app_id'     => env('LARK_APP_ID'),
         'app_secret' => env('LARK_APP_SECRET'),
-    ],
+    ]
 ];
 
 return $config;
