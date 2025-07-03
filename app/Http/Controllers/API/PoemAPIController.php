@@ -532,7 +532,7 @@ class PoemAPIController extends Controller {
         $tag = Tag::find($sanitized['tag_id']);
         if ($tag && $tag->campaign && isset($tag->campaign->settings['gameType'])) {
             $gameType      = $tag->campaign->settings['gameType'];
-            $strictLineNum = $gameType === 1 ? 3 : 0;
+	    $strictLineNum = $gameType === 1 ? ($tag->campaign->settings['strictLineNum'] ?? 3) : 0;
             $maxLineNum    = $tag->campaign->settings['maxLineNum'] ?? 3;
             $validator     = Validator::make($sanitized, [
                 'poem' => [new ValidPoemContent($strictLineNum, true, $maxLineNum)],
@@ -604,6 +604,9 @@ class PoemAPIController extends Controller {
 
         $postData = [
             'compositionId' => $compositionID,
+	    'config'        => [
+                'wrap' => true
+            ],
             'id'            => $poem->id,
             'poem'          => $poem->poem,
             'poet'          => $poem->poetLabel,
