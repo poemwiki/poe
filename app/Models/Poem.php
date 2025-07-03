@@ -702,7 +702,7 @@ class Poem extends Model implements Searchable {
         // TODO if is_owner_uploaded==Poem::OWNER['poetAuthor'] && $this->uploader
         // TODO use poetAuthor->label if poem.poet and poem.poet_cn is used for SEO
         if ($this->is_owner_uploaded === static::$OWNER['uploader'] && $this->uploader) {
-            return $this->poet ?? $this->uploader->name; // . '（' . $this->poet . '）';
+            return $this->uploader->name; // . '（' . $this->poet . '）';
         } elseif ($this->poetAuthor) {
             return $this->poetAuthor->label;
         }
