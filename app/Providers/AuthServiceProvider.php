@@ -27,6 +27,10 @@ class AuthServiceProvider extends ServiceProvider {
     public function boot() {
         $this->registerPolicies();
 
+        // TODO handle admin role's permissions
+        // currently only the admin user who has record at model_has_roles table have related permissions, admin user's role actually doesn't matter
+        // so we need to handle permissions at model_has_roles + role_has_permissions tables
+
         Gate::define('web.poem.create', function (User $user) {
             return isset($user->id);
         });
