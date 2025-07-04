@@ -86,7 +86,7 @@
       <input type="radio" name="tabs" id="tab-desc-poemwiki" checked="checked">
       <label for="tab-desc-poemwiki">@lang('Introduction')</label>
       <div class="tab">
-        <p class="text-justify leading-loose" style="white-space: pre-line;">{{$author->describe_lang}}
+        <p class="text-justify leading-loose" style="white-space: pre-line; word-break: break-all;">{{$author->describe_lang}}
           @if($author->weappCodeUrl)
             <a class="weapp-code" href="{{$author->weappCodeUrl}}" target="_blank"><img src="{{$author->weappCodeUrl}}"
                                                                                      alt="微信小程序码"></a>
