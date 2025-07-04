@@ -5,7 +5,7 @@
   /** @var Poem $poem */
   $cover = $poem->wx->get(0) ? $poem->wx->get(0)->cover_src : 'https://poemwiki.org/icon/apple-touch-icon.png'
   ?>
-@section('canonical')<link rel="canonical" href="{{$poem->url}}" />@endsection
+@section('canonical')<link rel="canonical" href="{{str_replace('://www.', '://', $poem->url)}}" />@endsection
 {{--TODO 支持多语言版本UI，并且在 alternate section 列出诗歌对应语言版本的url 例如： <link rel="alternate" href="{{$poem->getAlternateUrl('en') ?: 'https://en.poemwiki.org/p/'.$poem->fake_id}}" hreflang="en" /> --}}
 @section('alternate')<link rel="alternate" href="{{$poem->url}}" hreflang="x-default" />@endsection
 @section('title'){{$poem->title}}@endsection
