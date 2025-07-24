@@ -65,7 +65,7 @@ Vue.component('author-form', {
         }
 
         console.log('upload author avatar finished', res);
-        this.form.avatar = res.data.avatar;
+        this.form.avatar_url = res.data.avatar;
       }).catch(e => {
         window.alert('上传失败。');
       }).finally(() => {
