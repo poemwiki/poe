@@ -5,9 +5,9 @@ poemwiki（诗歌维基）是一个跨语种的诗歌库系统，收集并记录
 
 ## Environment Requirements
 MySQL 8.0+  
-php 7.4+  
+PHP 8.3+  
 Nginx  
-redis  
+Redis  
 
 ## Tech Stack
 Laravel 9  
@@ -15,6 +15,16 @@ Meilisearch
 
 
 ## Start
+
+### Docker Deployment
+```bash
+# Build and run with Docker
+docker build -t poemwiki .
+docker run -p 8080:8080 poemwiki
+
+# Or use docker-compose for full stack
+docker-compose up -d
+```
 
 ### Initialize
 Import all searchable data to meilisearch
@@ -24,8 +34,13 @@ php artisan scout:import "App\Models\Poem"
 ```
 
 ### Front-end Watch & Build
-```
-yarn run watch
+```bash
+# install dependencies
+pnpm install
+# dev watch
+pnpm run watch
+# build
+pnpm run prod
 ```
 
 ## Contribution

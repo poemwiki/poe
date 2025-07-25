@@ -21,6 +21,7 @@ RUN set -eux \
   && curl -fsSL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh \
   && bash nodesource_setup.sh \
   && apt install -y nodejs \
+  && npm install -g pnpm \
   && rm -rf /var/lib/apt/lists/*
 
 RUN install-php-extensions @composer apcu bcmath gd intl mysqli opcache pcntl \
@@ -76,7 +77,7 @@ USER www-data
 RUN set -eux \
     && if [ -f composer.json ]; then composer config --no-plugins allow-plugins.easywechat-composer/easywechat-composer true; fi \
     && if [ -f composer.json ]; then composer install --optimize-autoloader --classmap-authoritative --no-dev; fi \
-    && if [ -f package.json ]; then npm install; fi
+    && if [ -f package.json ]; then pnpm install; fi
 
 RUN <<EOF
     set -ux
@@ -101,7 +102,7 @@ RUN <<EOF
     fi
 
     if grep -q '"build":' package.json; then
-        npm run build
+        pnpm run build
     fi
 EOF
 
