@@ -74,6 +74,7 @@ RUN mkdir -p /var/www/bootstrap/cache && chown -R www-data:www-data /var/www/boo
 
 USER www-data
 RUN set -eux \
+    && if [ -f composer.json ]; then composer config --no-plugins allow-plugins.easywechat-composer/easywechat-composer true; fi \
     && if [ -f composer.json ]; then composer install --optimize-autoloader --classmap-authoritative --no-dev; fi \
     && if [ -f package.json ]; then npm install; fi
 
