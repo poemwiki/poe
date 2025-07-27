@@ -61,7 +61,6 @@
   "extra": {
     "laravel": {
       "dont-discover": [
-        "brackets/*"
       ]
     }
   },
@@ -87,9 +86,7 @@
   "prefer-stable": true,
   "scripts": {
     "post-autoload-dump": [
-      "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-      "@php artisan package:discover --ansi",
-      "@php artisan vendor:publish --force --tag=livewire:assets --ansi"
+      "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump"
     ],
     "post-update-cmd": [
       "@php artisan horizon:publish --ansi"

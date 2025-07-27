@@ -26,6 +26,20 @@ docker run -p 8080:8080 poemwiki
 docker-compose up -d
 ```
 
+**注意**: 由于构建优化（从 post-autoload-dump 中移除了 package:discover 和 vendor:publish），需要在容器启动后手动执行以下命令：
+```bash
+# 进入容器
+docker exec -it <container_name> bash
+
+# 执行包发现和资源发布
+php artisan package:discover --ansi
+php artisan vendor:publish --force --tag=livewire:assets --ansi
+```
+如果你是部署到 zeabur 或者 vercel 等平台，要自动化执行这个命令，应该在设置 start command 的地方设置这个命令：
+```
+php artisan package:discover --ansi && php artisan vendor:publish --force --tag=livewire:assets --ansi
+```
+
 ### Initialize
 Import all searchable data to meilisearch
 ```
