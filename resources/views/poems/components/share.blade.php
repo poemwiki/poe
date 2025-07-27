@@ -4,7 +4,7 @@
 </div>
 
 @push('scripts')
-  <script src="https://cdn.staticfile.org/axios/1.3.6/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.6/axios.min.js" integrity="sha512-06NZg89vaTNvnFgFTqi/dJKFadQ6FIglD6Yg1HHWAUtVFFoXli9BZL4q4EO1UTKpOfCfW5ws2Z6gw49Swsilsg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
     // event delegation
     function delegateEvent(element, eventType, selector, fn) {
