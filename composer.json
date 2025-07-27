@@ -6,8 +6,7 @@
     "framework",
     "laravel"
   ],
-  "repositories": [
-  ],
+  "repositories": [],
   "license": "MIT",
   "require": {
     "php": "^8.0.2",
@@ -24,7 +23,7 @@
     "doctrine/dbal": "~2.3",
     "freyo/flysystem-qcloud-cos-v5": "^2.2",
     "guzzlehttp/guzzle": "^7.0",
-    "itsgoingd/clockwork": "^5.1",
+    "itsgoingd/clockwork": "^5.3",
     "jfcherng/php-diff": "^6.10",
     "laravel/framework": "^9.52",
     "laravel/horizon": "^5.0.0",
@@ -53,11 +52,17 @@
   "config": {
     "optimize-autoloader": true,
     "preferred-install": "dist",
-    "sort-packages": true
+    "sort-packages": true,
+    "allow-plugins": {
+      "easywechat-composer/easywechat-composer": true,
+      "php-http/discovery": true
+    }
   },
   "extra": {
     "laravel": {
-      "dont-discover": []
+      "dont-discover": [
+        "brackets/*"
+      ]
     }
   },
   "autoload": {
