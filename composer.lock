@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "af415e58ae2e0cbd967df622c63da492",
+    "content-hash": "7e045226e6906a6ed74065b018a8f94b",
     "packages": [
         {
             "name": "adbario/php-dot-notation",
@@ -3229,77 +3229,6 @@
             "time": "2022-05-21T17:30:32+00:00"
         },
         {
-            "name": "itsgoingd/clockwork",
-            "version": "v5.3.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/itsgoingd/clockwork.git",
-                "reference": "f5b14e5c871f5b5552ec8f8c146794f0aaae8b4c"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://mirrors.huaweicloud.com/repository/php/itsgoingd/clockwork/v5.3.3/itsgoingd-clockwork-v5.3.3.zip",
-                "reference": "f5b14e5c871f5b5552ec8f8c146794f0aaae8b4c",
-                "shasum": ""
-            },
-            "require": {
-                "ext-json": "*",
-                "php": ">=7.1"
-            },
-            "suggest": {
-                "ext-pdo": "Needed in order to use a SQL database for metadata storage",
-                "ext-pdo_mysql": "Needed in order to use MySQL for metadata storage",
-                "ext-pdo_postgres": "Needed in order to use Postgres for metadata storage",
-                "ext-pdo_sqlite": "Needed in order to use a SQLite for metadata storage",
-                "ext-redis": "Needed in order to use Redis for metadata storage",
-                "php-http/discovery": "Vanilla integration - required for the middleware zero-configuration setup"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "Clockwork": "Clockwork\\Support\\Laravel\\Facade"
-                    },
-                    "providers": [
-                        "Clockwork\\Support\\Laravel\\ClockworkServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Clockwork\\": "Clockwork/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "itsgoingd",
-                    "email": "itsgoingd@luzer.sk",
-                    "homepage": "https://twitter.com/itsgoingd"
-                }
-            ],
-            "description": "php dev tools in your browser",
-            "homepage": "https://underground.works/clockwork",
-            "keywords": [
-                "Devtools",
-                "debugging",
-                "laravel",
-                "logging",
-                "lumen",
-                "profiling",
-                "slim"
-            ],
-            "funding": [
-                {
-                    "url": "https://github.com/itsgoingd",
-                    "type": "github"
-                }
-            ],
-            "time": "2025-01-12T15:58:56+00:00"
-        },
-        {
             "name": "jfcherng/php-color-output",
             "version": "3.0.0",
             "source": {
@@ -5639,16 +5568,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "2.72.6",
+            "version": "2.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CarbonPHP/carbon.git",
-                "reference": "1e9d50601e7035a4c61441a208cb5bed73e108c5"
+                "reference": "9228ce90e1035ff2f0db84b40ec2e023ed802075"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://mirrors.huaweicloud.com/repository/php/nesbot/carbon/2.72.6/nesbot-carbon-2.72.6.zip",
-                "reference": "1e9d50601e7035a4c61441a208cb5bed73e108c5",
+                "url": "https://mirrors.huaweicloud.com/repository/php/nesbot/carbon/2.x-dev/nesbot-carbon-2.x-dev.zip",
+                "reference": "9228ce90e1035ff2f0db84b40ec2e023ed802075",
                 "shasum": ""
             },
             "require": {
@@ -5736,7 +5665,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-12-27T09:28:11+00:00"
+            "time": "2025-01-08T20:10:23+00:00"
         },
         {
             "name": "nette/schema",
@@ -11111,6 +11040,85 @@
     ],
     "packages-dev": [
         {
+            "name": "barryvdh/laravel-debugbar",
+            "version": "v3.14.10",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/barryvdh/laravel-debugbar.git",
+                "reference": "56b9bd235e3fe62e250124804009ce5bab97cc63"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.huaweicloud.com/repository/php/barryvdh/laravel-debugbar/v3.14.10/barryvdh-laravel-debugbar-v3.14.10.zip",
+                "reference": "56b9bd235e3fe62e250124804009ce5bab97cc63",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/routing": "^9|^10|^11",
+                "illuminate/session": "^9|^10|^11",
+                "illuminate/support": "^9|^10|^11",
+                "maximebf/debugbar": "~1.23.0",
+                "php": "^8.0",
+                "symfony/finder": "^6|^7"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.3.3",
+                "orchestra/testbench-dusk": "^5|^6|^7|^8|^9",
+                "phpunit/phpunit": "^9.6|^10.5",
+                "squizlabs/php_codesniffer": "^3.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Debugbar": "Barryvdh\\Debugbar\\Facades\\Debugbar"
+                    },
+                    "providers": [
+                        "Barryvdh\\Debugbar\\ServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-master": "3.14-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Barryvdh\\Debugbar\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Barry vd. Heuvel",
+                    "email": "barryvdh@gmail.com"
+                }
+            ],
+            "description": "PHP Debugbar integration for Laravel",
+            "keywords": [
+                "debug",
+                "debugbar",
+                "laravel",
+                "profiler",
+                "webprofiler"
+            ],
+            "funding": [
+                {
+                    "url": "https://fruitcake.nl",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/barryvdh",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-12-23T10:10:42+00:00"
+        },
+        {
             "name": "brackets/admin-generator",
             "version": "v6.3.0",
             "source": {
@@ -11480,6 +11488,69 @@
                 "laravel"
             ],
             "time": "2025-01-24T15:41:25+00:00"
+        },
+        {
+            "name": "maximebf/debugbar",
+            "version": "v1.23.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-debugbar/php-debugbar.git",
+                "reference": "eeabd61a1f19ba5dcd5ac4585a477130ee03ce25"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.huaweicloud.com/repository/php/maximebf/debugbar/v1.23.5/maximebf-debugbar-v1.23.5.zip",
+                "reference": "eeabd61a1f19ba5dcd5ac4585a477130ee03ce25",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2|^8",
+                "psr/log": "^1|^2|^3",
+                "symfony/var-dumper": "^4|^5|^6|^7"
+            },
+            "require-dev": {
+                "dbrekelmans/bdi": "^1",
+                "phpunit/phpunit": "^8|^9",
+                "symfony/panther": "^1|^2.1",
+                "twig/twig": "^1.38|^2.7|^3.0"
+            },
+            "suggest": {
+                "kriswallsmith/assetic": "The best way to manage assets",
+                "monolog/monolog": "Log using Monolog",
+                "predis/predis": "Redis storage"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.23-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "DebugBar\\": "src/DebugBar/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Maxime Bouroumeau-Fuseau",
+                    "email": "maxime.bouroumeau@gmail.com",
+                    "homepage": "http://maximebf.com"
+                },
+                {
+                    "name": "Barry vd. Heuvel",
+                    "email": "barryvdh@gmail.com"
+                }
+            ],
+            "description": "Debug bar in the browser for php application",
+            "homepage": "https://github.com/maximebf/php-debugbar",
+            "keywords": [
+                "debug",
+                "debugbar"
+            ],
+            "time": "2024-12-15T19:20:42+00:00"
         },
         {
             "name": "mockery/mockery",
