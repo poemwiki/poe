@@ -82,25 +82,6 @@ RUN set -eux \
 RUN <<EOF
     set -ux
 
-    if [ -x artisan ]; then
-        php artisan optimize
-        php artisan config:cache
-        php artisan event:cache
-        php artisan route:cache
-        php artisan view:cache
-    fi
-
-    if [ -x bin/console ]; then
-        composer dump-env prod
-        composer run-script --no-dev post-install-cmd
-        php bin/console cache:clear
-        php bin/console asset-map:compile
-    fi
-
-    if [ -x ./node_modules/.bin/encore ]; then
-        ./node_modules/.bin/encore production
-    fi
-
     if grep -q '"build":' package.json; then
         pnpm run build
     fi
