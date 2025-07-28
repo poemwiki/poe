@@ -1,38 +1,24 @@
-# syntax=docker/dockerfile:1
-
-ARG PHP_VERSION=8.3
-FROM docker.io/library/php:${PHP_VERSION}-fpm
+# 使用专门的Laravel优化镜像
+FROM webdevops/php-nginx:8.3-alpine
 
 LABEL "language"="php"
 LABEL "framework"="laravel"
 
-WORKDIR /var/www
+# 设置环境变量
+ENV WEB_DOCUMENT_ROOT=/app/public
+ENV WEB_DOCUMENT_INDEX=index.php
+ENV WEB_ALIAS_DOMAIN=*.zeabur.app
+ENV WEB_PHP_TIMEOUT=30
+ENV WEB_PHP_SOCKET=""
+ENV SERVICE_NGINX_CLIENT_MAX_BODY_SIZE="50M"
 
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-RUN chmod +x /usr/local/bin/install-php-extensions && sync
-
-RUN set -eux \
-  && apt update \
-  && apt install -y cron curl gettext git grep libicu-dev nginx pkg-config unzip \
-  && apt install -y vim htop procps wget lsof \
-  && rm -rf /var/www/html \
-  && curl -fsSL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh \
-  && bash nodesource_setup.sh \
-  && apt install -y nodejs \
-  && npm install -g pnpm \
-  && rm -rf /var/lib/apt/lists/* \
-  && install-php-extensions @composer apcu bcmath gd intl mysqli pcntl \
-     pdo_mysql sysvsem zip exif gmp redis
+WORKDIR /app
 
 # PHP性能优化配置
-RUN cat <<'EOF' > /usr/local/etc/php/conf.d/99-performance.ini
+COPY <<EOF /opt/docker/etc/php/php.ini
 ; JIT优化  
 opcache.jit_buffer_size=128M
 opcache.jit=tracing
-opcache.jit_hot_func=32
-opcache.jit_hot_loop=32
-
-; OPcache优化
 opcache.enable=1
 opcache.enable_cli=1
 opcache.memory_consumption=256M
@@ -41,109 +27,116 @@ opcache.max_accelerated_files=10000
 opcache.validate_timestamps=0
 opcache.revalidate_freq=0
 
-; 内存优化
+; 内存和性能优化
 memory_limit=512M
 post_max_size=50M
 upload_max_filesize=50M
 max_file_uploads=20
-
-; 性能优化
 expose_php=Off
 realpath_cache_size=4M
 realpath_cache_ttl=600
-max_input_vars=3000
-max_input_time=60
-max_execution_time=60
+max_execution_time=30
+
+; Session优化
+session.save_handler=files
+session.save_path="/tmp"
+session.gc_maxlifetime=7200
 EOF
 
-# PHP-FPM性能优化
-RUN cat <<'EOF' > /usr/local/etc/php-fpm.d/zzz-performance.conf
-[www]
+# PHP-FPM优化配置
+COPY <<EOF /opt/docker/etc/php/fpm/pool.d/application.conf
+[global]
+error_log = /proc/self/fd/2
+daemonize = no
+
+[application]
+listen = 127.0.0.1:9000
 pm = dynamic
 pm.max_children = 20
 pm.start_servers = 4
 pm.min_spare_servers = 2
 pm.max_spare_servers = 6
 pm.max_requests = 1000
-request_terminate_timeout = 15
-; 在容器环境中禁用slowlog以避免ptrace权限问题
-slowlog = 
-request_slowlog_timeout = 0
+request_terminate_timeout = 30
+access.log = /proc/self/fd/2
 EOF
 
-
-RUN cat <<'EOF' > /etc/nginx/sites-enabled/default
+# Nginx优化配置
+COPY <<EOF /opt/docker/etc/nginx/vhost.conf
 server {
-    listen 8080;
-    root /var/www;
+    listen 8080 default_server;
+    listen [::]:8080 default_server;
 
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
-
+    server_name _;
+    root /app/public;
     index index.php index.html;
-    charset utf-8;
 
-    location = /favicon.ico { access_log off; log_not_found off; }
-    location = /robots.txt  { access_log off; log_not_found off; }
+    # 静态文件缓存
+    location ~* \.(css|js|gif|jpe?g|png|ico|woff|woff2|ttf|svg|eot|otf)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options nosniff;
+        access_log off;
+    }
 
-    error_page 404 /index.php;
+    # Gzip压缩
+    gzip on;
+    gzip_vary on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+
+    location / {
+        try_files $uri $uri/ /index.php$is_args$args;
+    }
 
     location ~ \.php$ {
         try_files $uri =404;
-        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
         fastcgi_pass 127.0.0.1:9000;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_hide_header X-Powered-By;
         
-        # 增加FastCGI超时和缓冲区设置
+        # FastCGI优化
         fastcgi_read_timeout 30s;
         fastcgi_send_timeout 30s;
-        fastcgi_connect_timeout 30s;
+        fastcgi_connect_timeout 5s;
         fastcgi_buffer_size 128k;
         fastcgi_buffers 4 256k;
         fastcgi_busy_buffers_size 256k;
     }
 
-    location / {
-        try_files $uri $uri/ /index.php$is_args$args;
-        gzip_static on;
-    }
-
-    location ~ /\.(?!well-known).* {
+    location ~ /\.ht {
         deny all;
     }
-
-    error_log /dev/stderr;
-    access_log /dev/stdout;
 }
 EOF
 
-COPY --link . /var/www
-RUN chown -R www-data:www-data /var/www \
-    && mkdir -p /var/www/bootstrap/cache
+# 安装Node.js和包管理器
+RUN apk add --no-cache nodejs npm && npm install -g pnpm
 
-USER www-data
-RUN set -eux \
-    && if [ -f composer.json ]; then composer config --no-plugins allow-plugins.easywechat-composer/easywechat-composer true; fi \
-    && if [ -f composer.json ]; then composer install --optimize-autoloader --classmap-authoritative --no-dev; fi \
-    && if [ -f package.json ]; then pnpm install; fi
+# 复制应用文件
+COPY --chown=application:application . /app
 
-RUN <<EOF
-    set -ux
-
-    if grep -q '"build":' package.json; then
-        pnpm run build
+# 安装依赖并构建
+USER application
+RUN if [ -f composer.json ]; then \
+        composer config --no-plugins allow-plugins.easywechat-composer/easywechat-composer true && \
+        composer install --optimize-autoloader --classmap-authoritative --no-dev; \
     fi
-EOF
+
+RUN if [ -f package.json ]; then \
+        pnpm install && \
+        if grep -q '"build":' package.json; then pnpm run build; fi; \
+    fi
+
+# Laravel优化缓存
+RUN if [ -f artisan ]; then \
+        php artisan config:cache && \
+        php artisan route:cache && \
+        php artisan view:cache; \
+    fi
 
 USER root
-
-RUN if [ -d /var/www/public ]; then sed -i 's|root /var/www;|root /var/www/public;|' /etc/nginx/sites-enabled/default; fi
-
-CMD nginx; php-fpm;
 
 EXPOSE 8080
