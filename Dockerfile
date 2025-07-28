@@ -14,6 +14,7 @@ RUN chmod +x /usr/local/bin/install-php-extensions && sync
 RUN set -eux \
   && apt update \
   && apt install -y cron curl gettext git grep libicu-dev nginx pkg-config unzip \
+  && apt install -y vim htop procps wget lsof \
   && rm -rf /var/www/html \
   && curl -fsSL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh \
   && bash nodesource_setup.sh \
@@ -65,9 +66,10 @@ pm.min_spare_servers = 2
 pm.max_spare_servers = 6
 pm.max_requests = 1000
 request_terminate_timeout = 15
-slowlog = /var/log/php-fpm-slow.log
-request_slowlog_timeout = 10s
+slowlog = /proc/self/fd/2
+request_slowlog_timeout = 5s
 EOF
+
 
 RUN cat <<'EOF' > /etc/nginx/sites-enabled/default
 server {
@@ -95,6 +97,14 @@ server {
         fastcgi_param DOCUMENT_ROOT $realpath_root;
         fastcgi_param PATH_INFO $fastcgi_path_info;
         fastcgi_hide_header X-Powered-By;
+        
+        # 增加FastCGI超时和缓冲区设置
+        fastcgi_read_timeout 30s;
+        fastcgi_send_timeout 30s;
+        fastcgi_connect_timeout 30s;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
     }
 
     location / {
@@ -107,7 +117,7 @@ server {
     }
 
     error_log /dev/stderr;
-    access_log /dev/stderr;
+    access_log /dev/stdout;
 }
 EOF
 
