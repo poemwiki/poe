@@ -24,7 +24,6 @@ fields_sample.json
 #/public/css
 #/public/js
 /public/img/avatars/*
-/public/vendor/swaggervel/*
 /public/**/*LICENSE.txt
 
 /storage/*
