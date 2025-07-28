@@ -43,13 +43,13 @@ session.save_path="/tmp"
 session.gc_maxlifetime=7200
 EOF
 
-# PHP-FPM优化配置
-COPY <<EOF /opt/docker/etc/php/fpm/pool.d/application.conf
+# PHP-FPM优化配置 - 覆盖默认的www pool
+COPY <<EOF /opt/docker/etc/php/fpm/pool.d/www.conf
 [global]
 error_log = /proc/self/fd/2
 daemonize = no
 
-[application]
+[www]
 user = application
 group = application
 listen = 127.0.0.1:9000
