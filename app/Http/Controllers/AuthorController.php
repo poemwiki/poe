@@ -15,7 +15,7 @@ use App\Repositories\DynastyRepository;
 use App\Repositories\LanguageRepository;
 use App\Repositories\NationRepository;
 use App\Services\Tx;
-use Cache;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +36,11 @@ class AuthorController extends Controller {
      */
     public function show($fakeId) {
         $id          = Author::getIdFromFakeId($fakeId);
-        $author      = Author::findOrFail($id);
+        $author      = Author::findOrFail($id/*, [
+            'id', 'name_lang', 'describe_lang',
+            'nation_id', 'user_id', 'avatar', 'wikidata_id',
+            'short_url', 'wiki_desc_lang'
+        ]*/);
         $poemsAsPoet = Poem::where(['poet_id' => $id])->whereNotExists(function ($query) {
             $query->select(DB::raw(1))
                 ->from('relatable')
@@ -80,6 +84,8 @@ class AuthorController extends Controller {
 
         return view('authors.show')->with([
             'author'            => $author,
+            'alias'             => $author->alias_arr,
+            'label'             => $author->label,
             'poemsAsPoet'       => $poemsAsPoet->concat($authorUserOriginalWorks),
             'poemsAsTranslator' => $poemsAsTranslator,
             'fromPoetName'      => $fromPoetName,

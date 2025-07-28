@@ -58,10 +58,13 @@ return [
             'engine'         => null,
             'timezone'       => '+00:00',
             'options'        => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-                PDO::ATTR_TIMEOUT      => 20,
-                PDO::ATTR_PERSISTENT => true,
+                // PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_TIMEOUT      => 5,  // reduce connection timeout
+                PDO::ATTR_PERSISTENT => true, // enable persistent connection
                 PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+                // PDO::MYSQL_ATTR_INIT_COMMAND => "SET sql_mode='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'",
+                PDO::ATTR_EMULATE_PREPARES => false,
+                // PDO::MYSQL_ATTR_COMPRESS => true, // disable compression for now, it's not supported
             ]) : [],
         ],
 

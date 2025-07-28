@@ -1,10 +1,10 @@
 @extends('layouts.common')
 
-@section('title', $author->label)
+@section('title', $label)
 
-@section('keywords', !empty($author->alias_arr) ? $author->alias_arr->join(', ') : '')
+@section('keywords', !empty($alias) ? $alias->join(', ') : '')
 
-@section('author', $author->label)
+@section('author', $label)
 
 @section('canonical')
   <link rel="canonical" href="{{$author->url}}"/>
@@ -29,7 +29,7 @@
              alt="avatar of {{$author->name_lang}}">
       @endif
 
-      <h1 class="text-xl font-bold">{{$author->label}}
+      <h1 class="text-xl font-bold">{{$label}}
         @if($author->weappCodeUrl)
           <a class="weapp-code" href="{{$author->weappCodeUrl}}" target="_blank"><img src="{{$author->weappCodeUrl}}"
                                                                                    alt="微信小程序码"></a>
@@ -59,12 +59,12 @@
       @endif
     </div>
 
-    @if(!empty($author->alias_arr))
+    @if(!empty($alias))
       <div class="poet-alias-wrapper mt-8 leading-loose flex items-baseline">
         <span class="pr-2 font-bold">@lang('admin.author.columns.alias_arr')</span>
         <p class="poet-alias">
-          @foreach($author->alias_arr as $key=>$alias)
-            <a class="poet-alias-item" href="{{route('search', $alias)}}">{{$alias}}</a>
+          @foreach($alias as $key=>$aliaName)
+            <a class="poet-alias-item" href="{{route('search', $aliaName)}}">{{$aliaName}}</a>
           @endforeach
         </p>
       </div>
@@ -118,7 +118,7 @@
     <div class="tabs mt-8 tabs-poems">
 
       <input type="radio" name="poem-tabs" id="tab-author-poem" checked="checked">
-      <label class="text-lg" for="tab-author-poem">@lang("Author's Poem", ['author' => $author->label])</label>
+      <label class="text-lg" for="tab-author-poem">@lang("Author's Poem", ['author' => $label])</label>
 
       <div class="tab">
         @if($poemsAsPoet->isNotEmpty())
@@ -145,13 +145,13 @@
         @endif
 
         <a href="{{urlOrLoginRef(route('poems/create', ['author_fake_id' => $author->fakeID], false))}}"
-           class="btn btn-wire mt-8">@lang('Add original work by', ['author' => $author->label])</a>
+           class="btn btn-wire mt-8">@lang('Add original work by', ['author' => $label])</a>
       </div>
 
       @if($poemsAsTranslator->isNotEmpty())
         <input type="radio" name="poem-tabs" id="tab-translator-poem">
         <label class="text-lg"
-               for="tab-translator-poem">@lang("Translation Works", ['author' => $author->label])</label>
+               for="tab-translator-poem">@lang("Translation Works", ['author' => $label])</label>
 
         <div class="tab">
           <ul>
@@ -169,7 +169,7 @@
           </ul>
 
           <a href="{{urlOrLoginRef(route('poems/create', ['translator_fake_id' => $author->fakeID], false))}}"
-             class="btn btn-wire mt-8">@lang('Add translated work by', ['translator' => $author->label])</a>
+             class="btn btn-wire mt-8">@lang('Add translated work by', ['translator' => $label])</a>
         </div>
       @endif
 
