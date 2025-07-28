@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG PHP_VERSION=8.3
+ARG PHP_VERSION=8.4
 FROM docker.io/library/php:${PHP_VERSION}-fpm
 
 LABEL "language"="php"
@@ -26,6 +26,38 @@ RUN set -eux \
 
 RUN install-php-extensions @composer apcu bcmath gd intl mysqli opcache pcntl \
     pdo_mysql sysvsem zip curl exif gmp json redis
+
+# PHP性能优化配置
+RUN cat <<'EOF' > /usr/local/etc/php/conf.d/99-performance.ini
+; JIT优化
+opcache.jit_buffer_size=128M
+opcache.jit=tracing
+opcache.jit_hot_func=16
+opcache.jit_hot_loop=16
+
+; OPcache优化
+opcache.enable=1
+opcache.enable_cli=1
+opcache.memory_consumption=256M
+opcache.interned_strings_buffer=16
+opcache.max_accelerated_files=10000
+opcache.validate_timestamps=0
+opcache.revalidate_freq=0
+
+; 内存优化
+memory_limit=512M
+post_max_size=50M
+upload_max_filesize=50M
+max_file_uploads=20
+
+; 性能优化
+expose_php=Off
+realpath_cache_size=4M
+realpath_cache_ttl=600
+max_input_vars=3000
+max_input_time=60
+max_execution_time=60
+EOF
 
 RUN cat <<'EOF' > /etc/nginx/sites-enabled/default
 server {
