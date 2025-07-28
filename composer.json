@@ -17,7 +17,7 @@
     "ext-json": "*",
     "ext-redis": "*",
     "alibabacloud/alimt-20181012": "^1.1.0",
-    "nesbot/carbon": "^2.75",
+    "nesbot/carbon": "^2.73",
     "bordercloud/sparql": "^2.0",
     "brackets/admin-translations": "^4.4",
     "brackets/craftable": "^8.0",
