@@ -97,9 +97,9 @@ server {
 }
 EOF
 
-RUN chown -R www-data:www-data /var/www
-COPY --link --chown=www-data:www-data . /var/www
-RUN mkdir -p /var/www/bootstrap/cache && chown -R www-data:www-data /var/www/bootstrap/cache
+COPY --link . /var/www
+RUN chown -R www-data:www-data /var/www \
+    && mkdir -p /var/www/bootstrap/cache
 
 USER www-data
 RUN set -eux \
