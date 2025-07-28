@@ -66,8 +66,9 @@ pm.min_spare_servers = 2
 pm.max_spare_servers = 6
 pm.max_requests = 1000
 request_terminate_timeout = 15
-;slowlog = /proc/self/fd/2
-;request_slowlog_timeout = 5s
+; 在容器环境中禁用slowlog以避免ptrace权限问题
+slowlog = 
+request_slowlog_timeout = 0
 EOF
 
 
