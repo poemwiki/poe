@@ -26,11 +26,11 @@ RUN set -eux \
 
 # PHP性能优化配置
 RUN cat <<'EOF' > /usr/local/etc/php/conf.d/99-performance.ini
-; JIT优化
+; JIT优化  
 opcache.jit_buffer_size=128M
 opcache.jit=tracing
-opcache.jit_hot_func=16
-opcache.jit_hot_loop=16
+opcache.jit_hot_func=32
+opcache.jit_hot_loop=32
 
 ; OPcache优化
 opcache.enable=1
