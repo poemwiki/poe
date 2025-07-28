@@ -55,6 +55,20 @@ max_input_time=60
 max_execution_time=60
 EOF
 
+# PHP-FPM性能优化
+RUN cat <<'EOF' > /usr/local/etc/php-fpm.d/zzz-performance.conf
+[www]
+pm = dynamic
+pm.max_children = 20
+pm.start_servers = 4
+pm.min_spare_servers = 2
+pm.max_spare_servers = 6
+pm.max_requests = 1000
+request_terminate_timeout = 15
+slowlog = /var/log/php-fpm-slow.log
+request_slowlog_timeout = 10s
+EOF
+
 RUN cat <<'EOF' > /etc/nginx/sites-enabled/default
 server {
     listen 8080;
