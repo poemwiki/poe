@@ -1,13 +1,10 @@
 # syntax=docker/dockerfile:1
 
-ARG PHP_VERSION=8.4
+ARG PHP_VERSION=8.3
 FROM docker.io/library/php:${PHP_VERSION}-fpm
 
 LABEL "language"="php"
 LABEL "framework"="laravel"
-
-ENV APP_ENV=prod
-ENV APP_DEBUG=true
 
 WORKDIR /var/www
 
@@ -22,10 +19,9 @@ RUN set -eux \
   && bash nodesource_setup.sh \
   && apt install -y nodejs \
   && npm install -g pnpm \
-  && rm -rf /var/lib/apt/lists/*
-
-RUN install-php-extensions @composer apcu bcmath gd intl mysqli opcache pcntl \
-    pdo_mysql sysvsem zip curl exif gmp json redis
+  && rm -rf /var/lib/apt/lists/* \
+  && install-php-extensions @composer apcu bcmath gd intl mysqli pcntl \
+     pdo_mysql sysvsem zip exif gmp redis
 
 # PHP性能优化配置
 RUN cat <<'EOF' > /usr/local/etc/php/conf.d/99-performance.ini
@@ -102,7 +98,7 @@ server {
 EOF
 
 RUN chown -R www-data:www-data /var/www
-COPY --link --chown=www-data:www-data --chmod=755 . /var/www
+COPY --link --chown=www-data:www-data . /var/www
 RUN mkdir -p /var/www/bootstrap/cache && chown -R www-data:www-data /var/www/bootstrap/cache
 
 USER www-data
