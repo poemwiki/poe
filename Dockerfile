@@ -130,12 +130,6 @@ RUN if [ -f package.json ]; then \
         if grep -q '"build":' package.json; then pnpm run build; fi; \
     fi
 
-# Laravel优化缓存
-RUN if [ -f artisan ]; then \
-        php artisan config:cache && \
-        php artisan route:cache && \
-        php artisan view:cache; \
-    fi
 
 USER root
 
