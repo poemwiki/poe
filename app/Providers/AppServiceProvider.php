@@ -14,6 +14,10 @@ class AppServiceProvider extends ServiceProvider {
      * @return void
      */
     public function register() {
+        if (env('APP_ENV') === 'local') {
+            $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+            $loader->alias('Debugbar', \Barryvdh\Debugbar\Facades\Debugbar::class);
+        }
     }
 
     /**
@@ -22,6 +26,8 @@ class AppServiceProvider extends ServiceProvider {
      * @return void
      */
     public function boot() {
+        // 手动性能监控
+        \Illuminate\Support\Facades\Log::info('Application boot time: ' . (microtime(true) - LARAVEL_START) . 's');
         Stringable::macro('surround', function ($tagName = 'span', $attrFn = null) {
             $i = 0;
 
