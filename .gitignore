@@ -21,8 +21,10 @@ yarn-error.log
 .php-cs-fixer.cache
 tools/php-cs-fixer/vendor
 fields_sample.json
-#/public/css
-#/public/js
+/public/css
+/public/js
+/public/images/vendor
+/public/mix-manifest.json
 /public/img/avatars/*
 /public/**/*LICENSE.txt
 
