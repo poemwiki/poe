@@ -283,6 +283,9 @@ section.reviews{
       .medium-editor-element, #review-content{
         height: 60vh;
         overflow: auto;
+        &:focus-visible {
+          outline: none;
+        }
       }
       #review-content {
         visibility: hidden;
