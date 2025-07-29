@@ -69,7 +69,7 @@ if (!function_exists('short_url')) {
      * @param null $cb
      * @return mixed
      */
-    function short_url(string $origin, callable $cb = null) {
+    function short_url(string $origin, ?callable $cb = null) {
         // TODO check redis if n_links_today <= 0, return $origin
 
         $request_url = 'https://api.xiaomark.com/v1/link/create';
@@ -107,7 +107,7 @@ if (!function_exists('create_image')) {
      * @throws Exception
      */
     function create_image($imgPath) {
-        $type = \File::mimeType($imgPath);
+        $type = \Illuminate\Support\Facades\File::mimeType($imgPath);
         switch ($type) {
             case 'image/jpeg':
                 $image = imagecreatefromjpeg($imgPath);
@@ -222,7 +222,7 @@ if (!function_exists('get_wikipedia_summary')) {
         try {
             $str = fuckGWF($url);
         } catch (Exception $e) {
-            Log::warning('request fail. url:' . $url . '\nException:' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::warning('request fail. url:' . $url . '\nException:' . $e->getMessage());
 
             return false;
         }
@@ -251,7 +251,7 @@ if (!function_exists('get_wikimedia_pic_info')) {
         try {
             $str = fuckGWF($url);
         } catch (Exception $e) {
-            Log::warning('request fail. url:' . $url . "\nException:" . $e->getMessage());
+            \Illuminate\Support\Facades\Log::warning('request fail. url:' . $url . "\nException:" . $e->getMessage());
 
             return false;
         }
@@ -297,10 +297,10 @@ if (!function_exists('isWikimediaUrl')) {
 
 if (!function_exists('responseFile')) {
     function responseFile($path) {
-        $file = File::get($path);
-        $type = File::mimeType($path);
+        $file = \Illuminate\Support\Facades\File::get($path);
+        $type = \Illuminate\Support\Facades\File::mimeType($path);
 
-        $response = Response::make($file, 200);
+        $response = \Illuminate\Support\Facades\Response::make($file, 200);
         $response->header('Content-Type', $type);
 
         return $response;
@@ -374,7 +374,7 @@ if (!function_exists('getTmpWxUrlLink')) {
 }
 
 if (!function_exists('submitPage2SYS')) {
-    function submitPage2SYS(array $pages, EasyWeChat\Kernel\BaseClient $client = null) {
+    function submitPage2SYS(array $pages, ?\EasyWeChat\Kernel\BaseClient $client = null) {
         if (!$client) {
             $wechatApp = \EasyWeChat\Factory::miniProgram([
                 'app_id'        => config('wechat.mini_program.default.app_id'),
@@ -518,6 +518,6 @@ if (!function_exists('cosUrl')) {
 
 if (!function_exists('urlOrLoginRef')) {
     function urlOrLoginRef($url) {
-        return Auth::check() ? $url : route('login', ['ref' => $url]);
+        return \Illuminate\Support\Facades\Auth::check() ? $url : route('login', ['ref' => $url]);
     }
 }
