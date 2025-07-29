@@ -1,8 +1,3 @@
-@php
-    /** @var \App\Models\Poem $poem */
-    $wxPost = $poem->wx ? $poem->wx->first() : null;
-@endphp
-
 <section class="reviews full-row">
     <ol class="review-list">
         @foreach($reviews as $review)
