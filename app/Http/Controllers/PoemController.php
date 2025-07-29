@@ -7,19 +7,18 @@ use App\Http\Requests\Admin\Poem\UpdatePoem;
 use App\Models\Author;
 use App\Models\Genre;
 use App\Models\Poem;
-use App\Models\Wikidata;
 use App\Repositories\AuthorRepository;
 use App\Repositories\GenreRepository;
 use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use App\Rules\NoDuplicatedPoem;
-use Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class PoemController extends Controller {
     /** @var PoemRepository */
@@ -33,8 +32,26 @@ class PoemController extends Controller {
         $this->authorRepository = $authorRepository;
     }
 
-    private function _poem(Poem $poem) {
+    private function _getRandomPoem() {
         $randomPoem = $this->poemRepository->randomOne();
+
+        return $randomPoem;
+    }
+
+    /**
+     * Display the specified Poem.
+     *
+     * @param string $fakeId
+     *
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function show($fakeId) {
+        $randomPoem = $this->_getRandomPoem();
+        
+        $poem = $this->poemRepository->getPoemFromFakeId($fakeId, [
+            'id', 'title', 'poem', 'is_original', 'original_id', 'poet', 'poet_cn', 
+            'year', 'month', 'date', 'preface', 'subtitle', 'genre_id', 'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded', 'upload_user_id'
+        ]);
         if ($poem->mergedToPoem) {
             return redirect($poem->mergedToPoem->url);
         }
@@ -49,25 +66,6 @@ class PoemController extends Controller {
             'logs'                => $logs
         ]);
     }
-
-    /**
-     * Display the specified Poem.
-     *
-     * @param string $fakeId
-     *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
-     */
-    public function show($fakeId) {
-        $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
-
-        return $this->_poem($poem);
-    }
-
-    // route('poem'); for poemwiki.org/poem.id
-    // public function showPoem($id){
-    //     $poem = Poem::findOrFail($id);
-    //     return $this->_poem($poem);
-    // }
 
     public function showContributions($fakeId) {
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId);

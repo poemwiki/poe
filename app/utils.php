@@ -166,9 +166,12 @@ if (!function_exists('date_ago')) {
 if (!function_exists('get_causer_name')) {
     function get_causer_name($log) {
         if ($log->causer_type === "App\User") {
-            $user = \App\User::find($log->causer_id);
+            $causerName = \Illuminate\Support\Facades\Cache::remember('causer-name-'.$log->causer_id, 60, function () use ($log) {
+                $user = \App\User::find($log->causer_id);
+                return $user ? $user->name : "User[{$log->causer_id}]";
+            });
 
-            return $user ? $user->name : "User[{$log->causer_id}]";
+            return $causerName;
         }
 
         return 'PoemWiki';

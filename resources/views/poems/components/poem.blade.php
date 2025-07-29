@@ -104,10 +104,10 @@ $firstLine = $poem->firstLine;
         <ol class="contribution mt-4">
           @php
             /** @var \App\Models\Poem $poem */
-            $maxKey = $poem->activityLogs->keys()->max();
-            $showFakeInitLog = (count($poem->activityLogs)<1) || ($poem->activityLogs->last()->description !== 'created');
+            $maxKey = $activityLogs->keys()->max();
+            $showFakeInitLog = (count($activityLogs)<1) || ($activityLogs->last()->description !== 'created');
           @endphp
-          @foreach($poem->activityLogs as $key=>$log)
+          @foreach($activityLogs as $key=>$log)
 
             @if($key===0 or $key===$maxKey)
 

@@ -100,7 +100,7 @@
           placeholder: {
             /* This example includes the default options for placeholder,
                if nothing is passed this is what it used */
-            text: '@lang('Review')',//$('#review-content').attr('placeholder'),
+            text: "@lang('Review')",//$('#review-content').attr('placeholder'),
             hideOnClick: true
           },
           // static: true,
