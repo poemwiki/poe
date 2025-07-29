@@ -50,7 +50,7 @@ class PoemController extends Controller {
         
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId, [
             'id', 'title', 'poem', 'is_original', 'original_id', 'poet', 'poet_cn', 
-            'year', 'month', 'date', 'preface', 'subtitle', 'genre_id', 'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded', 'upload_user_id'
+            'year', 'month', 'date', 'preface', 'subtitle', 'from', 'genre_id', 'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded', 'upload_user_id', 'weapp_url'
         ]);
         if ($poem->mergedToPoem) {
             return redirect($poem->mergedToPoem->url);
