@@ -37,11 +37,23 @@ class AuthorController extends Controller {
      */
     public function show($fakeId) {
         $id          = Author::getIdFromFakeId($fakeId);
-        $author      = Author::findOrFail($id/*, [
-            'id', 'name_lang', 'describe_lang',
-            'nation_id', 'user_id', 'avatar', 'wikidata_id',
-            'short_url', 'wiki_desc_lang'
-        ]*/);
+        // Get author with aliases in a single query using JOIN
+        $authorData = Author::leftJoin('alias', 'author.id', '=', 'alias.author_id')
+            ->where('author.id', $id)
+            ->select('author.*', 
+                     DB::raw('GROUP_CONCAT(DISTINCT alias.name) as alias_names'))
+            ->groupBy('author.id')
+            ->firstOrFail();
+        
+        $author = $authorData;
+        
+        // Process aliases from the joined data
+        $aliasNames = $authorData->alias_names ? 
+            collect(explode(',', $authorData->alias_names))
+                ->map(function($name) { return \Illuminate\Support\Str::trimSpaces($name); })
+                ->unique()
+                ->values() : 
+            collect();
         $poemsAsPoet = Poem::where(['poet_id' => $id])->whereNotExists(function ($query) {
             $query->select(DB::raw(1))
                 ->from('relatable')
@@ -92,7 +104,7 @@ class AuthorController extends Controller {
 
         return view('authors.show')->with([
             'author'            => $author,
-            'alias'             => $author->alias_arr,
+            'alias'             => $aliasNames,
             'label'             => $author->label,
             'poemsAsPoet'       => $poemsAsPoet->concat($authorUserOriginalWorks),
             'poemsAsTranslator' => $poemsAsTranslator,
