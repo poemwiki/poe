@@ -49,14 +49,18 @@ class PoemController extends Controller {
         $randomPoem = $this->_getRandomPoem();
         
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId, [
-            'id', 'title', 'poem', 'is_original', 'original_id', 'poet', 'poet_cn', 
-            'year', 'month', 'date', 'preface', 'subtitle', 'from', 'genre_id', 'poet_id', 'translator_id', 'location', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded', 'upload_user_id', 'weapp_url'
+            'id', 'title', 'language_id', 'is_original', 'original_id',
+            'poet', 'poet_cn', 'poem', 'length', 'translator', 'from',
+            'year', 'month', 'date',
+            'flag', 'subtitle', 'genre_id', 'poet_id', 'translator_id',
+            'preface', 'location', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded', 'upload_user_id', 'weapp_url'
         ]);
         if ($poem->mergedToPoem) {
             return redirect($poem->mergedToPoem->url);
         }
 
         $logs = $poem->activityLogs;
+        // $poem->load('translatorAuthor');
 
         return view('poems.show')->with([
             'poem'                => $poem,

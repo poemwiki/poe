@@ -364,6 +364,11 @@ class Poem extends Model {
     }
 
     public function getTranslatorsLabelArrAttribute() {
+        // Use cached translators if available (for performance optimization)
+        if ($this->relationLoaded('cached_translators')) {
+            return $this->cached_translators->toArray();
+        }
+        
         return $this->translators->map(function ($translator) {
             if ($translator instanceof Author) {
                 return ['id' => $translator->id, 'name' => $translator->label];
@@ -374,6 +379,11 @@ class Poem extends Model {
     }
 
     public function getTranslatorsStrAttribute() {
+        // Use cached translators string if available (for performance optimization)
+        if ($this->relationLoaded('cached_translators_str')) {
+            return $this->cached_translators_str;
+        }
+        
         $translators = implode(', ', array_map(function ($translator) {
             return $translator['name'];
         }, $this->translatorsLabelArr));
@@ -707,6 +717,11 @@ class Poem extends Model {
      * @return string
      */
     public function getPoetLabelAttribute() {
+        // Use cached poet if available (for performance optimization)
+        if ($this->relationLoaded('cached_poet') && $this->cached_poet->isNotEmpty()) {
+            return $this->cached_poet->first()['name'];
+        }
+        
         // TODO 考虑认领诗歌的情况。如果一首诗歌被用户成功认领，那么upload_user_id将不代表作者
         // 此时需要用 is_owner_uploaded==Poem::OWNER['author'] 来标志作者上传
         // is_owner_uploaded==Poem::$OWNER['none'] 标志默认状态，无人认领，未标注原创
@@ -737,9 +752,14 @@ class Poem extends Model {
 
     /**
      * TODO enable set locales while getting traslator name.
+     * TODO use relatable to get translators instead of translatorAuthor, after translator_id is removed.
      * @return string
      */
     public function getTranslatorLabelAttribute() {
+        // Use cached translators if available (for performance optimization)
+        if ($this->relationLoaded('cached_translators') && $this->cached_translators->isNotEmpty()) {
+            return $this->cached_translators->first()['name'];
+        }
         // TODO if is_owner_uploaded==Poem::OWNER['translator'] && $this->uploader
         if ($this->translatorAuthor) {
             return $this->translatorAuthor->label;

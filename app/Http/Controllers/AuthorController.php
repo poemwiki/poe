@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Admin\Author\StoreAuthor;
 use App\Http\Requests\Admin\Author\UpdateAuthor;
 use App\Models\Author;
+use App\Models\Entry;
 use App\Models\MediaFile;
 use App\Models\Nation;
 use App\Models\Poem;
@@ -47,6 +48,10 @@ class AuthorController extends Controller {
                 ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem'])
             ;
         })->orderByRaw('convert(title using gb2312)')->get();
+        
+        // Optimize translator data loading (for fallback cases)
+        $this->preloadTranslatorsForPoems($poemsAsPoet);
+        
         $authorUserOriginalWorks = $author->user ? $author->user->originalPoemsOwned : [];
 
         // TODO poem.translator_id should be deprecated
@@ -55,8 +60,11 @@ class AuthorController extends Controller {
                 ->from('relatable')
                 ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
         })->get();
-        $poemsAsRelatedTranslator = $author->poemsAsTranslator;
+        $poemsAsRelatedTranslator = $author->poemsAsTranslator()->get();
         $poemsAsTranslator        = $poemsAsTranslatorAuthor->concat($poemsAsRelatedTranslator)->unique('id');
+        
+        // Optimize poet data loading for translator poems (for fallback cases)
+        $this->preloadPoetsForPoems($poemsAsTranslator);
 
         $from         = request()->get('from');
         $fromPoetName = '';
@@ -250,5 +258,189 @@ class AuthorController extends Controller {
         $author = Author::create($sanitized);
 
         return $this->responseSuccess(route('author/show', $author->fakeId));
+    }
+
+    /**
+     * Preload translator data for poems to avoid N+1 queries
+     */
+    private function preloadTranslatorsForPoems($poems) {
+        if ($poems->isEmpty()) {
+            return;
+        }
+
+        $poemIds = $poems->pluck('id');
+        
+        // Get translator data from translator_id field (direct relationship)
+        $translatorIds = $poems->whereNotNull('translator_id')->pluck('translator_id')->unique();
+        $directTranslatorsData = collect();
+        
+        if ($translatorIds->isNotEmpty()) {
+            $directTranslatorsData = DB::table('author')
+                ->whereIn('id', $translatorIds)
+                ->select('id', 'name_lang')
+                ->get()
+                ->keyBy('id');
+        }
+        
+        // Get translator data from relatable table (many-to-many relationship)
+        $relatableTranslatorsData = DB::table('relatable')
+            ->leftJoin('author', function($join) {
+                $join->on('relatable.end_id', '=', 'author.id')
+                     ->where('relatable.end_type', '=', Author::class);
+            })
+            ->leftJoin('entry', function($join) {
+                $join->on('relatable.end_id', '=', 'entry.id')
+                     ->where('relatable.end_type', '=', Entry::class);
+            })
+            ->whereIn('relatable.start_id', $poemIds)
+            ->where('relatable.relation', '=', Relatable::RELATION['translator_is'])
+            ->where('relatable.start_type', '=', Poem::class)
+            ->select('relatable.start_id as poem_id', 'relatable.end_type', 'relatable.end_id',
+                    'author.name_lang as author_name', 'entry.name as entry_name')
+            ->get()
+            ->groupBy('poem_id');
+
+        // Cache translator data for each poem
+        foreach ($poems as $poem) {
+            $translators = collect();
+            
+            // First try translator_id (direct relationship)
+            if ($poem->translator_id && isset($directTranslatorsData[$poem->translator_id])) {
+                $authorData = $directTranslatorsData[$poem->translator_id];
+                $authorName = json_decode($authorData->name_lang, true);
+                $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $authorData->name_lang;
+                
+                $translators->push([
+                    'id' => $poem->translator_id,
+                    'name' => $name
+                ]);
+            }
+            
+            // Then add relatable translators (many-to-many relationship)
+            if (isset($relatableTranslatorsData[$poem->id])) {
+                $relatableTranslators = $relatableTranslatorsData[$poem->id]->map(function($item) {
+                    if ($item->end_type === Author::class) {
+                        $authorName = json_decode($item->author_name, true);
+                        $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $item->author_name;
+                    } else {
+                        $name = $item->entry_name;
+                    }
+                    return [
+                        'id' => $item->end_id,
+                        'name' => $name
+                    ];
+                });
+                
+                $translators = $translators->concat($relatableTranslators);
+            }
+            
+            if ($translators->isNotEmpty()) {
+                $poem->setRelation('cached_translators', $translators);
+                
+                // Also cache the translators string for direct access
+                $translatorsStr = $translators->pluck('name')->implode(', ');
+                $poem->setRelation('cached_translators_str', $translatorsStr);
+            } else {
+                // If no translators found in relations but poem has translator field, cache it
+                if (!empty($poem->translator)) {
+                    $poem->setRelation('cached_translators_str', $poem->translator);
+                }
+            }
+        }
+    }
+
+    /**
+     * Preload poet data for poems to avoid N+1 queries
+     */
+    private function preloadPoetsForPoems($poems) {
+        if ($poems->isEmpty()) {
+            return;
+        }
+
+        $poemIds = $poems->pluck('id');
+        
+        // Get poet data from poet_id field
+        $poetIds = $poems->whereNotNull('poet_id')->pluck('poet_id')->unique();
+        $poetsData = collect();
+        
+        if ($poetIds->isNotEmpty()) {
+            $poetsData = DB::table('author')
+                ->whereIn('id', $poetIds)
+                ->select('id', 'name_lang')
+                ->get()
+                ->keyBy('id');
+        }
+
+        // Get poet data from relatable table
+        $relatablePoetsData = DB::table('relatable')
+            ->leftJoin('author', function($join) {
+                $join->on('relatable.end_id', '=', 'author.id')
+                     ->where('relatable.end_type', '=', Author::class);
+            })
+            ->leftJoin('entry', function($join) {
+                $join->on('relatable.end_id', '=', 'entry.id')
+                     ->where('relatable.end_type', '=', Entry::class);
+            })
+            ->whereIn('relatable.start_id', $poemIds)
+            ->where('relatable.relation', '=', Relatable::RELATION['poet_is'])
+            ->where('relatable.start_type', '=', Poem::class)
+            ->select('relatable.start_id as poem_id', 'relatable.end_type', 'relatable.end_id',
+                    'author.name_lang as author_name', 'entry.name as entry_name')
+            ->get()
+            ->groupBy('poem_id');
+
+        // Cache poet data for each poem
+        foreach ($poems as $poem) {
+            $cachedPoet = null;
+            $cachedPoetAuthor = null;
+            
+            // First try poet_id
+            if ($poem->poet_id && isset($poetsData[$poem->poet_id])) {
+                $authorData = $poetsData[$poem->poet_id];
+                $authorName = json_decode($authorData->name_lang, true);
+                $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $authorData->name_lang;
+                
+                $cachedPoet = [
+                    'id' => $poem->poet_id,
+                    'name' => $name
+                ];
+                
+                // Create a cached poetAuthor object
+                $cachedPoetAuthor = (object) [
+                    'id' => $poem->poet_id,
+                    'name_lang' => $authorData->name_lang,
+                    'label' => $name
+                ];
+            }
+            // Then try relatable poets
+            elseif (isset($relatablePoetsData[$poem->id])) {
+                $poetItem = $relatablePoetsData[$poem->id]->first();
+                if ($poetItem->end_type === Author::class) {
+                    $authorName = json_decode($poetItem->author_name, true);
+                    $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $poetItem->author_name;
+                    
+                    $cachedPoetAuthor = (object) [
+                        'id' => $poetItem->end_id,
+                        'name_lang' => $poetItem->author_name,
+                        'label' => $name
+                    ];
+                } else {
+                    $name = $poetItem->entry_name;
+                }
+                
+                $cachedPoet = [
+                    'id' => $poetItem->end_id,
+                    'name' => $name
+                ];
+            }
+            
+            if ($cachedPoet) {
+                $poem->setRelation('cached_poet', collect([$cachedPoet]));
+            }
+            
+            if ($cachedPoetAuthor) {
+                $poem->setRelation('poetAuthor', $cachedPoetAuthor);
+            }
+        }
     }
 }
