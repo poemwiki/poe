@@ -50,7 +50,7 @@ class CampaignAPIController extends Controller {
 
     public function index() {
         // TODO Cache::forget('api-campaign-index') if new campaign set
-        $campaigns = Cache::remember('api-campaign-index', now()->addMinutes(config('app.env') === 'production' ? 3 : 0), function () {
+        $campaigns = Cache::remember('api-campaign-index', 3*60, function () {
             return $this->campaignRepository->allInUse()->slice(0, 15)
                 ->map(function ($campaign) {
                     if (isset($campaign->settings['test']) && $campaign->settings['test']) {
@@ -76,7 +76,7 @@ class CampaignAPIController extends Controller {
 
     public function show($id) {
         // TODO Cache::forget('api-campaign-show-') if new campaign poem uploaded
-        $ttl = now()->addMinutes(config('app.env') === 'production' ? 1 : 0);
+        $ttl = 60;
         $ret = Cache::remember('api-campaign-show-' . $id, $ttl, function () use ($id) {
             /** @var Campaign $campaign */
             $campaign = $this->campaignRepository->find($id);
