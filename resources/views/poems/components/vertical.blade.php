@@ -33,7 +33,7 @@ function getPoetOrTranslatorFromTree($translatedPoemsTree, $poemId) {
             @if($poem->isTranslated)
               {{getPoetOrTranslatorFromTree($translatedPoemsTree, $poem->id)}} 译
             @else
-              {{$poem->poet}}
+              {{getPoetOrTranslatorFromTree($translatedPoemsTree, $poem->id)}}
             @endif
         </span></h1>
       @endforeach
