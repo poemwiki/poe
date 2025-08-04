@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTranslations;
 use App\User;
+use App\Repositories\CampaignRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -81,6 +82,23 @@ class Campaign extends Model {
         'describe_lang',
         'name_lang',
     ];
+
+    public static function boot() {
+        parent::boot();
+
+        // Clear campaign index cache when campaign is created, updated, or deleted
+        self::created(function ($model) {
+            CampaignRepository::clearCampaignIndexCache();
+        });
+
+        self::updated(function ($model) {
+            CampaignRepository::clearCampaignIndexCache();
+        });
+
+        self::deleted(function ($model) {
+            CampaignRepository::clearCampaignIndexCache();
+        });
+    }
 
     public $casts = [
         'settings' => 'json'

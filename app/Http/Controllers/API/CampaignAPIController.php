@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Campaign;
 use App\Repositories\CampaignRepository;
 use App\Repositories\PoemRepository;
-use Cache;
+use Illuminate\Support\Facades\Cache;
 
 class CampaignAPIController extends Controller {
     /** @var CampaignRepository */
@@ -45,25 +45,8 @@ class CampaignAPIController extends Controller {
         ]);
     }
 
-    public function index() {
-        // TODO Cache::forget('api-campaign-index') if new campaign set
-        $campaigns = Cache::remember('api-campaign-index', now()->addMinutes(config('app.env') === 'production' ? 3 : 0), function () {
-            return $this->campaignRepository->allInUse()->slice(0, 15)
-                ->map(function ($campaign) {
-                    if (isset($campaign->settings['test']) && $campaign->settings['test']) {
-                        return null;
-                    }
-                    $ret               = $campaign->toArray();
-                    $ret['settings']   = collect($campaign->settings)->except(['result']);
-                    $ret['poem_count'] = $campaign->poem_count;
-                    $ret['user_count'] = $campaign->user_count;
-
-                    return $ret;
-                })
-                ->filter(function ($campaign) {
-                    return $campaign;
-                })->values();
-        });
+    public function index($offset = 0, $limit = 15) {
+        $campaigns = $this->campaignRepository->paninatedIndex($offset, $limit);
 
         return $this->responseSuccess($campaigns);
     }
@@ -73,7 +56,7 @@ class CampaignAPIController extends Controller {
 
     public function show($id) {
         // TODO Cache::forget('api-campaign-show-') if new campaign poem uploaded
-        $ttl = now()->addMinutes(config('app.env') === 'production' ? 1 : 0);
+        $ttl = 60;
         $ret = Cache::remember('api-campaign-show-' . $id, $ttl, function () use ($id) {
             /** @var Campaign $campaign */
             $campaign = $this->campaignRepository->find($id);
