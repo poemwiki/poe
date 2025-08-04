@@ -17,11 +17,11 @@
     "ext-json": "*",
     "ext-redis": "*",
     "alibabacloud/alimt-20181012": "^1.1.0",
-    "nesbot/carbon": "^2.73",
+    "barryvdh/laravel-debugbar": "^3.14",
     "bordercloud/sparql": "^2.0",
     "brackets/admin-translations": "^4.4",
     "brackets/craftable": "^8.0",
-    "doctrine/dbal": "~2.3",
+    "doctrine/dbal": "^3.0",
     "freyo/flysystem-qcloud-cos-v5": "^2.2",
     "guzzlehttp/guzzle": "^7.0",
     "jfcherng/php-diff": "^6.10",
@@ -35,12 +35,12 @@
     "livewire/livewire": "^2.2",
     "meilisearch/meilisearch-php": "^1.2",
     "mews/captcha": "^3.3",
+    "nesbot/carbon": "^2.73",
     "overtrue/laravel-wechat": "^6.0",
     "psr/log": "^3.0",
     "renatomarinho/laravel-page-speed": "^2.1",
     "spatie/laravel-activitylog": "^4.7",
-    "spatie/laravel-validation-rules": "^3.3",
-    "barryvdh/laravel-debugbar": "^3.14"
+    "spatie/laravel-validation-rules": "^3.3"
   },
   "require-dev": {
     "brackets/admin-generator": "^6.2.1",
