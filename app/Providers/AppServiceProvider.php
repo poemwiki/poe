@@ -22,8 +22,6 @@ class AppServiceProvider extends ServiceProvider {
      * @return void
      */
     public function boot() {
-        // 手动性能监控
-        \Illuminate\Support\Facades\Log::info('Application boot time: ' . (microtime(true) - LARAVEL_START) . 's');
         Stringable::macro('surround', function ($tagName = 'span', $attrFn = null) {
             $i = 0;
 

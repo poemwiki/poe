@@ -136,8 +136,9 @@ $firstLine = $poem->firstLine;
 
         <dl class="poem-info poem-versions nested-tree text-sm">
           <dt>@lang('poem.Translated/Original Version of This Poem')</dt>
+          
           @include('poems.components.translated', [
-              'poem' => $poem->topOriginalPoem,
+              'translatedPoemsTree' => $translatedPoemsTree,
               'currentPageId' => $poem->id,
               'currentPageOriginalId' => $poem->original_id===$poem->id ? null : $poem->original_id
           ])

@@ -2,7 +2,7 @@
 <dd itemscope itemtype="https://schema.org/Person">
   <address itemprop="name" class="not-italic">
     @if($poem->poetAuthor)
-      <a href="{{route('author/show',  ['fakeId' => $poem->poetAuthor->fakeId, 'from' => $poem->id])}}" class="poemwiki-link">
+      <a href="{{route('author/show',  ['fakeId' => $poem->poetAuthor->fakeId])}}" class="poemwiki-link">
         {{$poem->poetLabel}}
       </a>
     @else

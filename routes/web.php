@@ -38,6 +38,10 @@ Route::prefix('poems')->name('poems/')->group(static function () {
     Route::get('/edit/{fakeId}', 'PoemController@edit')->name('edit');
     Route::post('/update/{fakeId}', 'PoemController@update')->name('update');
     Route::get('/contribution/{fakeId}', 'PoemController@showContributions')->name('contribution');
+    // for debug convenience
+    if (config('app.debug') && config('app.env') === 'local') {
+        Route::get('/{id}', 'PoemController@showId')->name('showId');
+    }
     Route::get('/{fakeId}', 'PoemController@show')->name('show');
 });
 
@@ -142,3 +146,4 @@ Route::get('/poem-card/{id}/{compositionId?}', function ($id, $compositionId = n
 
     return $response;
 })->name('poem-card');
+

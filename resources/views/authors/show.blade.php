@@ -163,7 +163,7 @@
                 <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->firstLine)->surround('span', function ($i) {
                     return 'style="transition-delay:'.($i*20).'ms"';
             })!!}<span
-                    class="text-gray-400 float-right item-poem-author {{$poem->poetAuthor ? 'poemwiki-link' : ''}}">{{$poem->poetLabel}}</span></a>
+                    class="text-gray-400 float-right item-poem-author {{$poetLabelMap[$poem->id]['author_id'] ? 'poemwiki-link' : ''}}">{{$poetLabelMap[$poem->id]['name']}}</span></a>
               </li>
             @endforeach
           </ul>

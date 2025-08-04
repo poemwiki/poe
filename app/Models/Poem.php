@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Repositories\ScoreRepository;
+use App\Repositories\PoemRepository;
 use App\Traits\HasFakeId;
 use App\Traits\RelatableNode;
 use App\User;
@@ -317,10 +318,29 @@ class Poem extends Model {
                     $model->save();
                 }
             });
+
+            // Clear translated poems tree cache when poem is updated
+            $model->clearTranslatedPoemsTreeCache();
+        });
+
+        // Clear cache when poem is created or deleted
+        self::created(function ($model) {
+            $model->clearTranslatedPoemsTreeCache();
+        });
+
+        self::deleted(function ($model) {
+            $model->clearTranslatedPoemsTreeCache();
         });
 
         // TODO delete related scores?
         // TODO delete related relatable record
+    }
+
+    /**
+     * Clear translated poems tree cache for this poem
+     */
+    public function clearTranslatedPoemsTreeCache() {
+        PoemRepository::clearTranslatedPoemsTreeCache($this);
     }
 
     /**
@@ -329,6 +349,27 @@ class Poem extends Model {
      * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
      */
     public function getTranslatorsAttribute() {
+        // Use cached translators if available (performance optimized)
+        if ($this->relationLoaded('cached_translators')) {
+            return $this->cached_translators->map(function ($translator) {
+                // Create mock Author/Entry objects from cached data
+                if (isset($translator['id'])) {
+                    // This is an Author
+                    $author = new \App\Models\Author();
+                    $author->id = $translator['id'];
+                    $author->label = $translator['name'];
+                    return $author;
+                } else {
+                    // This is an Entry
+                    $entry = new \App\Models\Entry();
+                    $entry->name = $translator['name'];
+                    return $entry;
+                }
+            });
+        }
+
+        // Fallback to original implementation if not cached
+
         $translators = $this->relatedTranslators()->get();
 
         return $translators->map(function ($translator) {
@@ -489,13 +530,14 @@ class Poem extends Model {
      * @return Poem|null
      */
     public function getTopOriginalPoemAttribute(): ?Poem {
-        $ids           = [];
+        $processedIds  = [];
         $translateFrom = $this;
 
         do {
-            $ids[] = $translateFrom->id; // 保险起见，用笨办法防止环形链引起无限循环
+            // exclude processed ids to prevent infinite loop
+            $processedIds[] = $translateFrom->id;
             if (!$translateFrom->original_id
-                or in_array($translateFrom->original_id, $ids)
+                or in_array($translateFrom->original_id, $processedIds)
                 or !$translateFrom->is_translated
             ) {
                 break;
@@ -518,9 +560,6 @@ class Poem extends Model {
     public function translatedPoems(): HasMany {
         return $this->_translatedPoems()->with(['lang'])->whereRaw('original_id <> poem.id');
     }
-
-    // public function allTranslatedPoems() {
-    // }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -717,11 +756,6 @@ class Poem extends Model {
      * @return string
      */
     public function getPoetLabelAttribute() {
-        // Use cached poet if available (for performance optimization)
-        if ($this->relationLoaded('cached_poet') && $this->cached_poet->isNotEmpty()) {
-            return $this->cached_poet->first()['name'];
-        }
-        
         // TODO 考虑认领诗歌的情况。如果一首诗歌被用户成功认领，那么upload_user_id将不代表作者
         // 此时需要用 is_owner_uploaded==Poem::OWNER['author'] 来标志作者上传
         // is_owner_uploaded==Poem::$OWNER['none'] 标志默认状态，无人认领，未标注原创
