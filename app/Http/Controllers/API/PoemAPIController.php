@@ -203,6 +203,27 @@ class PoemAPIController extends Controller {
     public function mine(Request $request) {
         $userId = $request->user()->id;
 
+        // TODO delete nft query
+        // $nft = Balance::query()->with('nft:id,poem_id,content_id')->where('user_id', 1)->get();
+        $nfts = NFT::query()->with(['poem:id,title', 'content:id,content'])->join('balance', function ($join) use ($userId) {
+            $join->on('nft.id', '=', 'balance.nft_id')
+                ->where('balance.user_id', '=', $userId);
+            // ->where('balance.user_id', '=', 1);
+        })->get(['nft.id', 'nft.poem_id', 'nft.content_id'])->map(function ($item) {
+            $res          = $item->only('id');
+            $res['title'] = $item->poem->title;
+            $res['poem']  = $item->content->content;
+
+            return $res;
+        });
+
+        if ($request->input('nft')) {
+            return $this->responseSuccess([
+                'nfts'    => $nfts,
+                'author'  => $userId === 2 ? $this->poemRepository->getTobeMint($userId) : $this->poemRepository->getByOwner($userId)
+            ]);
+        }
+
         return $this->responseSuccess($this->poemRepository->getByOwner($userId));
     }
 
@@ -889,7 +910,7 @@ class PoemAPIController extends Controller {
 
     public function import(Request $request): array {
         $poems = $request->input('poems');
-        if ($request->getContentType() !== 'json') {
+        if ($request->getContentTypeFormat() !== 'json') {
             return $this->responseFail([], 'Request content type must be application/json');
         }
 
