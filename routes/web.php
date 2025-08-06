@@ -69,6 +69,7 @@ Route::prefix('author')->name('author/')->group(static function () {
 // })->name('login-wechat')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
 
 if (User::isWechat()) {
+    // 此处使用 Route::any, 因为微信服务端认证的时候是 GET, 接收用户消息时是 POST
     Route::any('/login', [\App\Http\Controllers\Auth\LoginWechatController::class, 'login'])
         ->name('login')->middleware(['web', 'wechat.oauth:default,snsapi_userinfo']);
 } elseif (User::isWeApp()) {
