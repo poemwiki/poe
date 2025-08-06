@@ -38,8 +38,6 @@ class LoginWechatController extends Controller {
 
             $this->guard()->login(User::find($userBind->user_id));
         } else {
-            // TODO redirect to weapp code page, tell user 'press image to go to weapp'
-            return redirect('/');
             // 注册过小程序，还未用微信登录过web版，有相同 unionid 的 BIND_REF['weapp'] 的 userBind, 无 BIND_REF['wechat'] 的 userBind
             $weappBind = $wechatUser->raw['unionid'] ? $this->getUserBindInfoByUnionID($wechatUser->raw['unionid'], UserBind::BIND_REF['weapp']) : null;
 
