@@ -32,3 +32,4 @@ fields_sample.json
 !/storage/app
 !/storage/framework
 !/storage/logs
+public/index-cn.html

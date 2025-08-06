@@ -10,15 +10,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use EasyWeChat\Factory;
 
 class LoginWeAppController extends Controller {
     private \EasyWeChat\MiniProgram\Application $weApp;
 
     public function __construct() {
-        $this->weApp = \EasyWeChat::miniProgram();
+        $this->weApp = Factory::miniProgram([
+            'app_id'        => config('wechat.mini_program.default.app_id'),
+            'secret'        => config('wechat.mini_program.default.secret'),
+            'response_type' => 'array',
+        ]);
     }
 
     /**
+     * Login function for weapp user.
+     * 小程序端获取 code 后，传递到 server 端，server 端根据 code 获取 openid 和 session_key，
+     * 如果 openid 对应的 user 已经存在，则更新 user 的 openid 和 session_key，
+     * 如果 openid 对应的 user 不存在，则创建 user 并添加 userBind 记录。
+     * 最后返回 access_token 和 user 信息。
      * @param \Illuminate\Http\Request $request
      * @return array
      */
@@ -199,7 +209,7 @@ class LoginWeAppController extends Controller {
      * @param int|null $bindStatus
      * @return UserBind|null
      */
-    public function getUserBindInfoByUnionID($unionID, int $bindRef = UserBind::BIND_REF['weapp'], int $bindStatus = null) {
+    public function getUserBindInfoByUnionID($unionID, int $bindRef = UserBind::BIND_REF['weapp'], ?int $bindStatus = null) {
         try {
             $q = UserBind::where([
                 'union_id_crc32' => Str::crc32($unionID),
