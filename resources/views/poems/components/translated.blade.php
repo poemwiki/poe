@@ -4,30 +4,28 @@ $isComparePage = request()->route()->getName() == 'compare';
 if(isset($idArr)){
     $canAddCompare = count($idArr) < config('app.max_compare_poem_count');
 }
+
+// Using hierarchical data structure
+/** @var array $translatedPoemsTree */
+/** @var int $currentPageId */
+/** @var int[]|null $idArr */
+/** @var int|null $currentPageOriginalId */
+
+$poemId = $translatedPoemsTree['id'];
+$poemUrl = $translatedPoemsTree['url'];
+$poemLanguage = $translatedPoemsTree['language'];
+$poemIsOriginal = $translatedPoemsTree['isOriginal'];
+$poemTitle = $translatedPoemsTree['title'];
+$poetLabel = $translatedPoemsTree['poetLabel'];
+$poemTranslatorStr = $translatedPoemsTree['translatorStr'];
+$children = $translatedPoemsTree['translatedPoems'] ?? [];
+
+$isTranslatedFrom = $poemId === $currentPageOriginalId;
+$childrenCount = count($children);
 @endphp
 
+@if(!$poemIsOriginal or $childrenCount > 0)
 <div class="child">
-
-  @php
-    // Using hierarchical data structure
-    /** @var array $translatedPoemsTree */
-    /** @var int $currentPageId */
-    /** @var int[]|null $idArr */
-    /** @var int|null $currentPageOriginalId */
-    
-    $poemId = $translatedPoemsTree['id'];
-    $poemUrl = $translatedPoemsTree['url'];
-    $poemLanguage = $translatedPoemsTree['language'];
-    $poemIsOriginal = $translatedPoemsTree['isOriginal'];
-    $poemTitle = $translatedPoemsTree['title'];
-    $poetLabel = $translatedPoemsTree['poetLabel'];
-    $poemTranslatorStr = $translatedPoemsTree['translatorStr'];
-    $children = $translatedPoemsTree['translatedPoems'] ?? [];
-    
-    $isTranslatedFrom = $poemId === $currentPageOriginalId;
-    $childrenCount = count($children);
-  @endphp
-
   <a class="translated
      @if($isComparePage) compare-bg-{{array_search($poemId, $idArr)}} @endif"
      href="{{$poemUrl}}"
@@ -79,3 +77,4 @@ if(isset($idArr)){
     </div>
   @endif
 </div>
+@endif
