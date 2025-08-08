@@ -896,23 +896,13 @@ class Poem extends Model {
      * @return array
      */
     public function toSearchableArray(): array {
-        $translatorsLabels = $this->translators->reduce(function ($labels, $translator) {
-            if ($translator instanceof Author) {
-                return $labels . ',' . implode(',', $translator->getOriginal('name_lang'));
-            } elseif ($translator instanceof Entry) {
-                return $labels . ',' . $translator->name;
-            }
-
-            return $labels;
-        }, '');
-
         return [
             'id'         => $this->id,
             'title'      => $this->title,
             'preface'    => $this->preface,
             'subtitle'   => $this->subtitle,
             // 'uploader'   => $this->uploader->name,
-            'relatedTranslators' => $translatorsLabels,
+            // 'relatedTranslators' => $translatorsLabels,
             'poet'               => $this->poetAuthor ? $this->poetAuthor->name_lang : $this->poet,
             'poem'               => $this->poem,
         ];
