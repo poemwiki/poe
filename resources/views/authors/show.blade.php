@@ -118,7 +118,7 @@
     <div class="tabs mt-8 tabs-poems">
 
       <input type="radio" name="poem-tabs" id="tab-author-poem" checked="checked">
-      <label class="text-lg" for="tab-author-poem">@lang("Author's Poem", ['author' => $label])</label>
+      <label class="text-lg" for="tab-author-poem">@lang("Author's Poem", ['author' => $label]) ({{$poemsAsPoet->count()}})</label>
 
       <div class="tab">
         @if($poemsAsPoet->isNotEmpty())
@@ -151,7 +151,7 @@
       @if($poemsAsTranslator->isNotEmpty())
         <input type="radio" name="poem-tabs" id="tab-translator-poem">
         <label class="text-lg"
-               for="tab-translator-poem">@lang("Translation Works", ['author' => $label])</label>
+               for="tab-translator-poem">@lang("Translation Works", ['author' => $label]) ({{$poemsAsTranslator->count()}})</label>
 
         <div class="tab">
           <ul>
