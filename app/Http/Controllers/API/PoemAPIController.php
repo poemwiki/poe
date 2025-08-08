@@ -83,19 +83,30 @@ class PoemAPIController extends Controller {
                 ->where('score', '>=', 7);
         }, $select)
             ->get();
-        $poems        = $poems->concat($scorePoems);
+        
         $noScorePoems = $this->poemRepository->suggest($noScoreNum, ['reviews'], function ($query) {
             $query->whereNull('campaign_id')
                 ->whereNull('score');
         }, $select)
             ->get();
-        $poems = $poems->concat($noScorePoems);
+        
+        // Use merge() to maintain Eloquent Collection type and avoid memory copy
+        $poems = $scorePoems->merge($noScorePoems);
+
+        // Optimize relationships and translators to prevent N+1 queries
+        if ($poems->isNotEmpty()) {
+            $poems = $this->loadPoemRelationships($poems);
+        }
+        
+        // Batch calculate scores to prevent N+1 queries
+        $poemIds = $poems->pluck('id');
+        $scores = $poemIds->isNotEmpty() ? \App\Repositories\ScoreRepository::batchCalc($poemIds->toArray()) : [];
 
         $res = [];
         foreach ($poems as $poem) {
             $item = $poem->only($columns);
 
-            $score                          = $poem->scoreArray;
+            $score                          = $scores[$poem->id] ?? ['score' => null, 'count' => 0];
             $item['score']                  = $score['score'];
             $item['score_count']            = $score['count'];
             $item['date_ago']               = date_ago($poem->created_at);
@@ -976,5 +987,43 @@ class PoemAPIController extends Controller {
         } catch (Error $e) {
             return $this->responseFail([], $e->getMessage());
         }
+    }
+
+    /**
+     * Load poem relationships efficiently to prevent N+1 queries
+     * No memory copy needed - works directly with Eloquent Collections
+     *
+     * @param \Illuminate\Database\Eloquent\Collection $poems
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function loadPoemRelationships($poems) {
+        // Check if we have poems with valid (non-empty, non-null) IDs before loading relations
+        $poetIds = $poems->filter(function($poem) {
+            return !empty($poem->poet_id) && $poem->poet_id !== '';
+        })->pluck('poet_id')->unique();
+        
+        $uploaderIds = $poems->filter(function($poem) {
+            return !empty($poem->upload_user_id) && $poem->upload_user_id !== '';
+        })->pluck('upload_user_id')->unique();
+        
+        $translatorIds = $poems->filter(function($poem) {
+            return !empty($poem->translator_id) && $poem->translator_id !== '';
+        })->pluck('translator_id')->unique();
+        
+        // Load relations conditionally - each relationship only if it has valid IDs
+        if ($poetIds->isNotEmpty()) {
+            $poems->loadMissing('poetAuthor.user');
+        }
+        if ($uploaderIds->isNotEmpty()) {
+            $poems->loadMissing('uploader');
+        }
+        if ($translatorIds->isNotEmpty()) {
+            $poems->loadMissing('translatorAuthor.user');
+        }
+        
+        // Use existing repository methods to optimize translator N+1 queries
+        \App\Repositories\PoemRepository::preloadTranslatorsForPoems($poems);
+        
+        return $poems;
     }
 }

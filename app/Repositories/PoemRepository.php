@@ -77,7 +77,7 @@ class PoemRepository extends BaseRepository {
      * @param string[]      $select
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public static function random(array $with = [], \Closure $callback = null, array $select = ['*']): \Illuminate\Database\Eloquent\Builder {
+    public static function random(array $with = [], ?\Closure $callback = null, array $select = ['*']): \Illuminate\Database\Eloquent\Builder {
         $builder = Poem::query()
             ->select($select)
             ->join(DB::raw('(SELECT CEIL( RAND() * ( SELECT MAX( id ) FROM `poem` WHERE poem.deleted_at is NOT NULL)) AS rand_id) AS rand'), 'poem.id', '>=', 'rand.rand_id')
@@ -98,7 +98,7 @@ class PoemRepository extends BaseRepository {
         return $builder->take(1);
     }
 
-    public function suggest($num = 1, $with = [], \Closure $callback = null, $select = ['*']) {
+    public function suggest($num = 1, $with = [], \Closure $callback, $select = ['*']) {
         // TODO 选取策略： 1. 优先选取 poem.bedtime_post_id 不为空的 poem
         // 2. 评分和评论数
         // 3. poem.length
