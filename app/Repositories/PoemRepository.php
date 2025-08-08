@@ -646,6 +646,84 @@ class PoemRepository extends BaseRepository {
     }
 
     /**
+     * Sort author poems with unified logic (only sorting, no content modification)
+     * 
+     * @param \Illuminate\Support\Collection $poems Collection of poems
+     * @param string $sortType Either 'hottest' (default) or 'newest'
+     * @return \Illuminate\Support\Collection
+     */
+    public static function sortAuthorPoems(\Illuminate\Support\Collection $poems, string $sortType = 'hottest'): \Illuminate\Support\Collection {
+        if ($sortType === 'newest') {
+            // Sort by created_at descending (newest first)
+            return $poems->sortByDesc('created_at')->values();
+        } else {
+            // Default hottest sorting - need scores for comparison
+            $poemScores = ScoreRepository::batchCalc($poems->pluck('id')->values()->all());
+            
+            return $poems->sort(function ($a, $b) use ($poemScores) {
+                $scoreA = isset($poemScores[$a->id]) ? $poemScores[$a->id] : Score::$DEFAULT_SCORE_ARR;
+                $scoreB = isset($poemScores[$b->id]) ? $poemScores[$b->id] : Score::$DEFAULT_SCORE_ARR;
+                
+                // If both have null scores, sort by created_at desc (newer first)
+                if ($scoreA['score'] === null && $scoreB['score'] === null) {
+                    return $b->created_at->timestamp <=> $a->created_at->timestamp;
+                }
+                
+                $scoreOrder = $scoreB['score'] <=> $scoreA['score'];
+                $countOrder = $scoreB['count'] <=> $scoreA['count'];
+
+                return $scoreOrder === 0
+                    ? ($countOrder === 0 ? $scoreB['weight'] <=> $scoreA['weight'] : $countOrder)
+                    : $scoreOrder;
+            })->values();
+        }
+    }
+
+    /**
+     * Prepare author poems for API output with sorting
+     * 
+     * @param \Illuminate\Support\Collection $poems Collection of poems
+     * @param string $sortType Either 'hottest' (default) or 'newest'
+     * @param array $options Options for processing ['noAvatar' => false, 'noPoet' => false]
+     * @return \Illuminate\Support\Collection
+     */
+    public static function prepareAuthorPoemsForAPI(\Illuminate\Support\Collection $poems, string $sortType = 'hottest', array $options = []): \Illuminate\Support\Collection {
+        $defaultOptions = ['noAvatar' => false, 'noPoet' => false];
+        $opt = array_merge($defaultOptions, $options);
+        list('noAvatar' => $noAvatar, 'noPoet' => $noPoet) = $opt;
+        
+        $columns = [
+            'id', 'created_at', 'date_ago', 'title',
+            'poem', 'poet', 'poet_id',
+            'score', 'score_count', 'score_weight'
+        ];
+        
+        if (!$noAvatar) {
+            $columns[] = 'poet_avatar';
+        }
+
+        // First sort the poems
+        $sortedPoems = self::sortAuthorPoems($poems, $sortType);
+        
+        // Then prepare the content for API
+        $poemScores = ScoreRepository::batchCalc($sortedPoems->pluck('id')->values()->all());
+
+        return $sortedPoems->map(function (Poem $item) use ($noPoet, $poemScores) {
+            $score = isset($poemScores[$item->id]) ? $poemScores[$item->id] : Score::$DEFAULT_SCORE_ARR;
+            $item['score'] = $score['score'];
+            $item['score_count'] = $score['count'];
+            $item['score_weight'] = $score['weight'];
+            $item['poem'] = $item->firstLine;
+
+            if (!$noPoet) {
+                $item['poet'] = $item->poetLabel;
+            }
+
+            return $item;
+        })->map->only($columns)->values();
+    }
+
+    /**
      * Get hierarchical translated poems tree starting from top original poem
      * Returns nested structure with each poem containing its direct translations
      */

@@ -8,12 +8,10 @@ use App\Http\Requests\API\StorePoem;
 use App\Models\Author;
 use App\Models\Balance;
 use App\Models\Entry;
-use App\Models\NFT;
 use App\Models\Poem;
 use App\Models\Relatable;
 use App\Models\Tag;
 use App\Models\Transaction;
-use App\Query\AuthorAliasSearchAspect;
 use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
@@ -22,11 +20,10 @@ use App\Rules\NoDuplicatedPoem;
 use App\Rules\ValidPoemContent;
 use App\Services\AliTranslate;
 use App\Services\Weapp;
-use App\User;
 use EasyWeChat\Factory;
 use Error;
 use Exception;
-use File;
+use Illuminate\Support\Facades\File;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -35,9 +32,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Spatie\Searchable\ModelSearchAspect;
-use Spatie\Searchable\Search;
-use Spatie\Searchable\SearchResult;
 
 class PoemAPIController extends Controller {
     /** @var PoemRepository */
@@ -754,7 +748,6 @@ class PoemAPIController extends Controller {
     public function query(Request $request) {
         $keyword = Str::trimSpaces($request->json('keyword', ''));
         $mode    = $request->json('mode', '');
-        $nft     = $request->json('nft', false);
 
         if ($keyword === '' || is_null($keyword)) {
             return $this->responseSuccess([
@@ -779,91 +772,56 @@ class PoemAPIController extends Controller {
             ]);
         }
 
-        // DB::enableQueryLog();
-        $search = new Search();
+        // Use Laravel Scout for search
+        $shiftPoems = collect();
 
+        // Authors
+        $authors = collect();
         if ($mode !== 'poem-select') {
-            $search = $search->registerAspect(AuthorAliasSearchAspect::class);
+            $authorLimit = $mode !== 'author-select' ? 5 : 50;
+            $authors = \App\Models\Author::search($keyword4Query)
+                ->query(function ($query) {
+                    $query->with('user');
+                })
+                ->take($authorLimit)
+                ->get();
         }
 
+        // Poems
+        $poems = collect();
         if ($mode !== 'author-select' && $mode !== 'translator-select') {
-            $search = $search->registerModel(Poem::class, function (ModelSearchAspect $modelSearchAspect) use ($nft) {
-                $modelSearchAspect
-                    ->addSearchableAttribute('title') // return results for partial matches
-                    ->addSearchableAttribute('poem')
-                    ->addSearchableAttribute('poet')
-                    ->addSearchableAttribute('poet_cn')
-                    ->addSearchableAttribute('translator')
-                    ->addSearchableAttribute('preface')
-                    ->addSearchableAttribute('subtitle')
-                    ->addSearchableAttribute('location')
-                    ->whereNotExists(function ($query) {
-                        $query->select(DB::raw(1))
+            $poems = Poem::search($keyword4Query)
+                ->query(function ($query) {
+                    $query->whereNotExists(function ($q) {
+                        $q->select(DB::raw(1))
                             ->from('relatable')
                             ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
                     });
-                if ($nft) {
-                    $modelSearchAspect->whereExists(function ($query) {
-                        $query->select(DB::raw(1))
-                            ->from('nft')
-                            ->whereRaw('nft.poem_id = poem.id');
-                    });
-                }
+                    $query->with(['poetAuthor.user', 'uploader']);
+                })
+                ->take(150)
+                ->get();
 
-                $modelSearchAspect->with('poetAuthor')->limit(150);
-                // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
-            });
-        }
-        // ->registerModel(Poem::class, 'title', 'poem', 'poet', 'poet_cn', 'translator')//, 'poet')
-
-        $searchResults = $search->search($keyword4Query);
-
-        // dd(DB::getQueryLog());
-        $results   = $searchResults->groupByType();
-        $authorRes = $results->get('authorAlias') ?: collect();
-
-        $shiftPoems = collect();
-
-        $poems = $results->get('poem') ?: [];
-        foreach ($poems as $p) {
-            $shiftPoems->push($p->searchable);
+            $shiftPoems = $poems->collect();
         }
 
-        $authors = $authorRes->map(function (SearchResult $authorSearchRes, $index) use ($mode, $shiftPoems) {
-            // TODO 返回结果中应包含尽量多的作者条目，由前端选择显示多少条目
-            // TODO a better way to handle different mode
-            // TODO trigger correspond query when switch to a tab
-            if ($mode !== 'author-select' && $index >= 5) {
-                return null;
-            }
-
-            if ($authorSearchRes->searchable instanceof \App\Models\Author) {
-                $author           = $authorSearchRes->searchable;
-                $author['#label'] = $author->label === $authorSearchRes->title ? $author->label : $author->label . ' ( ' . $authorSearchRes->title . ' )';
-
-                if ($mode !== 'author-select') {
-                    foreach ($author->poems as $poem) {
-                        $item                          = $poem;
-                        $item['poet_contains_keyword'] = true;
-                        // $item['#from_author'] = true;
-                        $item['#poet_label'] = $poem->poet_label === $authorSearchRes->title
-                            ? $poem->poet_label
-                            : ($poem->poet_label . ' ( ' . $authorSearchRes->title . ' )');
-                        $shiftPoems->push($item);
-                    }
+        // Append poems from matched authors
+        if ($mode !== 'author-select' && $authors->isNotEmpty()) {
+            $authors->loadMissing('poems');
+            foreach ($authors as $author) {
+                foreach ($author->poems as $poem) {
+                    $item                          = $poem;
+                    $item['poet_contains_keyword'] = true;
+                    $item['#poet_label']           = $poem->poet_label;
+                    $shiftPoems->push($item);
                 }
             }
-
-            // TODO show wikidata poet on search result page: $author->searchable instanceof \App\Models\Wikidata
-            return $authorSearchRes->searchable instanceof \App\Models\Author ? $authorSearchRes->searchable : null;
-        })->filter(function ($author) {
-            return $author;
-        });
+        }
 
         $keywordArr = $keyword4Query->split('#\s+#');
 
         // TODO append translated poems
-        $mergedPoems = $shiftPoems->unique('id')->map(function ($poem) use ($keywordArr, $nft) {
+        $mergedPoems = $shiftPoems->unique('id')->map(function ($poem) use ($keywordArr) {
             $columns = ['poet_label', '#poet_label', 'poet_id', 'poet_is_v', 'translator', 'id', 'title', 'url', 'poet_contains_keyword', 'poem'];
 
             $item = $poem->only($columns);
@@ -891,30 +849,24 @@ class PoemAPIController extends Controller {
                 $item['translator_contains_keyword'] = true;
             }
 
-            if ($nft) {
-                $item['nft_id'] = $poem->nft ? $poem->nft->id : null;
-            }
-
             return $item;
         })->values();
 
         $data = [
-            'authors' => $authors->map->only(['id', 'avatar_url', 'label', '#label', 'describe_lang', 'user'])->map(function ($author) {
-                if ($author['user']) {
-                    $author['user'] = $author['user']->only(['id', 'avatar_url', 'name']);
+            'authors' => $authors->map(function ($author) {
+                $arr = $author->only(['id', 'avatar_url', 'label', 'describe_lang', 'user']);
+                $arr['#label'] = $author->label;
+                if ($author->user) {
+                    $arr['user'] = $author->user->only(['id', 'avatar_url', 'name']);
                 }
+                $arr['avatar_true'] = $author->avatar_url !== config('app.avatar.default');
 
-                $author['avatar_true'] = $author['avatar_url'] !== config('app.avatar.default');
-
-                return $author;
+                return $arr;
             }),
             'keyword' => $keyword
         ];
-        if ($nft) {
-            $data['nfts'] = $mergedPoems;
-        } else {
-            $data['poems'] = $mergedPoems;
-        }
+        
+        $data['poems'] = $mergedPoems;
 
         return $this->responseSuccess($data);
     }

@@ -7,7 +7,6 @@ use App\Repositories\NationRepository;
 use App\Repositories\PoemRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Spatie\Searchable\Search;
 
 class QueryController extends Controller {
     // public function __construct() {
