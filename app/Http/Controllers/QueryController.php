@@ -52,11 +52,22 @@ class QueryController extends Controller {
             ]);
         }
 
-        $authors = \App\Models\Author::search($keyword4Query)->paginate(3, null, 1);
+        // Eager load relations to avoid N+1 queries in the view
+        $authors = \App\Models\Author::search($keyword4Query)
+            // ->query(function ($query) {
+            //     $query->with(['user']);
+            // })
+            ->paginate(3, null, 1);
+
+        $poems = \App\Models\Poem::search($keyword4Query)
+            ->query(function ($query) {
+                $query->with(['poetAuthor', 'uploader']);
+            })
+            ->paginate();
 
         return view('query.search')->with([
             'authors' => $authors,
-            'poems'   => \App\Models\Poem::search($keyword4Query)->paginate(),
+            'poems'   => $poems,
             'keyword' => $keyword
         ]);
     }
