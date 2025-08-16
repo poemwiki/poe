@@ -15,18 +15,21 @@ yarn-error.log
 /_ide_helper.php
 .phpunit.result.cache
 .env
+.env.test
 .env.production
 .env.backup
 .php-cs-fixer.cache
 tools/php-cs-fixer/vendor
 fields_sample.json
-#/public/css
-#/public/js
+/public/css
+/public/js
+/public/images/vendor
+/public/mix-manifest.json
 /public/img/avatars/*
-/public/vendor/swaggervel/*
 /public/**/*LICENSE.txt
 
 /storage/*
 !/storage/app
 !/storage/framework
 !/storage/logs
+public/index-cn.html

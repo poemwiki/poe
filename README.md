@@ -5,9 +5,51 @@ poemwiki（诗歌维基）是一个跨语种的诗歌库系统，收集并记录
 
 ## Environment Requirements
 MySQL 8.0+  
-php 7.4+  
+PHP 8.3+  
 Nginx  
-redis  
+Redis  
+
+## Tech Stack
+Laravel 9  
+Meilisearch  
+
+
+## Start
+
+### Docker Deployment
+```bash
+# Build and run with Docker
+docker build -t poemwiki .
+docker run -p 8080:8080 poemwiki
+
+# Or use docker-compose for full stack
+docker-compose up -d
+```
+
+**注意**: 由于构建优化（从 post-autoload-dump 中移除了 package:discover 和 vendor:publish），需要在容器启动后手动执行以下命令：
+```bash
+# 进入容器
+docker exec -it <container_name> bash
+
+# 执行包发现和资源发布
+php artisan package:discover --ansi
+php artisan vendor:publish --force --tag=livewire:assets --ansi
+```
+如果你是部署到 zeabur 或者 vercel 等平台，要自动化执行这个命令，应该在设置 start command 的地方设置这个命令：
+```
+php artisan package:discover --ansi && php artisan vendor:publish --force --tag=livewire:assets --ansi
+```
+
+
+### Front-end Watch & Build
+```bash
+# install dependencies
+pnpm install
+# dev watch
+pnpm run watch
+# build
+pnpm run prod
+```
 
 ## Contribution
 

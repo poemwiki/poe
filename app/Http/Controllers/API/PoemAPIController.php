@@ -8,12 +8,11 @@ use App\Http\Requests\API\StorePoem;
 use App\Models\Author;
 use App\Models\Balance;
 use App\Models\Entry;
-use App\Models\NFT;
 use App\Models\Poem;
 use App\Models\Relatable;
 use App\Models\Tag;
 use App\Models\Transaction;
-use App\Query\AuthorAliasSearchAspect;
+use App\Models\NFT;
 use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
@@ -25,7 +24,7 @@ use App\Services\Weapp;
 use EasyWeChat\Factory;
 use Error;
 use Exception;
-use File;
+use Illuminate\Support\Facades\File;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -34,13 +33,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Spatie\Searchable\ModelSearchAspect;
-use Spatie\Searchable\Search;
-use Spatie\Searchable\SearchResult;
 
-/**
- * Class LanguageController.
- */
 class PoemAPIController extends Controller {
     /** @var PoemRepository */
     private $poemRepository;
@@ -85,19 +78,30 @@ class PoemAPIController extends Controller {
                 ->where('score', '>=', 7);
         }, $select)
             ->get();
-        $poems        = $poems->concat($scorePoems);
+
         $noScorePoems = $this->poemRepository->suggest($noScoreNum, ['reviews'], function ($query) {
             $query->whereNull('campaign_id')
                 ->whereNull('score');
         }, $select)
             ->get();
-        $poems = $poems->concat($noScorePoems);
+
+        // Use merge() to maintain Eloquent Collection type and avoid memory copy
+        $poems = $scorePoems->merge($noScorePoems);
+
+        // Optimize relationships and translators to prevent N+1 queries
+        if ($poems->isNotEmpty()) {
+            $poems = $this->loadPoemRelationships($poems);
+        }
+
+        // Batch calculate scores to prevent N+1 queries
+        $poemIds = $poems->pluck('id');
+        $scores = $poemIds->isNotEmpty() ? \App\Repositories\ScoreRepository::batchCalc($poemIds->toArray()) : [];
 
         $res = [];
         foreach ($poems as $poem) {
             $item = $poem->only($columns);
 
-            $score                          = $poem->scoreArray;
+            $score                          = $scores[$poem->id] ?? ['score' => null, 'count' => 0];
             $item['score']                  = $score['score'];
             $item['score_count']            = $score['count'];
             $item['date_ago']               = date_ago($poem->created_at);
@@ -205,7 +209,7 @@ class PoemAPIController extends Controller {
     public function mine(Request $request) {
         $userId = $request->user()->id;
 
-
+        // TODO delete nft query
         // $nft = Balance::query()->with('nft:id,poem_id,content_id')->where('user_id', 1)->get();
         $nfts = NFT::query()->with(['poem:id,title', 'content:id,content'])->join('balance', function ($join) use ($userId) {
             $join->on('nft.id', '=', 'balance.nft_id')
@@ -320,10 +324,10 @@ class PoemAPIController extends Controller {
         $res['listing_status'] = $nft->listing ? $nft->listing->status : null;
 
         $res['txs'] = $nft->txs->where('f_id', '=', 0)->map(function ($tx) {
-            $res = $tx->only(['id', 'tx_hash', 'amount', 'from_user_id', 'to_user_id', 'action']);
-            $res['date_ago'] = date_ago($tx->created_at);
+            $res                   = $tx->only(['id', 'tx_hash', 'amount', 'from_user_id', 'to_user_id', 'action']);
+            $res['date_ago']       = date_ago($tx->created_at);
             $res['from_user_name'] = $tx->fromUser ? $tx->fromUser->name : "[$tx->from_user_id]";
-            $res['to_user_name'] = $tx->toUser ? $tx->toUser->name : "[$tx->to_user_id]";
+            $res['to_user_name']   = $tx->toUser ? $tx->toUser->name : "[$tx->to_user_id]";
 
             if ($tx->nft_id) {
                 $res['amount'] = $tx->children ? $tx->children->where('nft_id', '=', 0)->sum('amount') : '';
@@ -431,7 +435,7 @@ class PoemAPIController extends Controller {
                 }
 
                 $review['date_ago'] = date_ago($review->created_at);
-                $review['content'] = $review->pureContent;
+                $review['content']  = $review->pureContent;
 
                 return $review->only(['id', 'content', 'created_at', 'user_id', 'like', 'reply_id', 'name', 'avatar', 'reply_to_user', 'date_ago']);
             });
@@ -482,7 +486,7 @@ class PoemAPIController extends Controller {
 
         return $relatedQuery->get()
             ->map(function ($item) {
-                $arr = $item->toArray();
+                $arr         = $item->toArray();
                 $arr['poet'] = $item->poet_label;
 
                 return $arr;
@@ -491,7 +495,7 @@ class PoemAPIController extends Controller {
     }
 
     /**
-     * store poem.
+     * Store poem. **Only for weapp user**.
      * @param StorePoem $request
      * @return array
      * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
@@ -499,14 +503,13 @@ class PoemAPIController extends Controller {
      */
     public function create(StorePoem $request) {
         $sanitized = $request->getSanitized();
+        /* @var User $user */
+        $user = $request->user();
 
-        $wechatApp = Factory::miniProgram([
-            'app_id'        => config('wechat.mini_program.default.app_id'),
-            'secret'        => config('wechat.mini_program.default.secret'),
-            'response_type' => 'object',
-        ]);
-        $result = $wechatApp->content_security->checkText($sanitized['title'] . $sanitized['poem']);
-        if ($result->errcode !== 0 && $result->errcode !== -1) {
+        $wechatApp = new Weapp();
+        $content   = $sanitized['title'] . $sanitized['poem'];
+
+        if (!$wechatApp->checkText($content)) {
             return $this->responseFail([], '请检查是否含有敏感词', Controller::$CODE['content_security_failed']);
         }
 
@@ -532,7 +535,7 @@ class PoemAPIController extends Controller {
         $tag = Tag::find($sanitized['tag_id']);
         if ($tag && $tag->campaign && isset($tag->campaign->settings['gameType'])) {
             $gameType      = $tag->campaign->settings['gameType'];
-	    $strictLineNum = $gameType === 1 ? ($tag->campaign->settings['strictLineNum'] ?? 3) : 0;
+            $strictLineNum = $gameType === 1 ? ($tag->campaign->settings['strictLineNum'] ?? 3) : 0;
             $maxLineNum    = $tag->campaign->settings['maxLineNum'] ?? 3;
             $validator     = Validator::make($sanitized, [
                 'poem' => [new ValidPoemContent($strictLineNum, true, $maxLineNum)],
@@ -604,7 +607,7 @@ class PoemAPIController extends Controller {
 
         $postData = [
             'compositionId' => $compositionID,
-	    'config'        => [
+            'config'        => [
                 'wrap' => true
             ],
             'id'            => $poem->id,
@@ -621,7 +624,7 @@ class PoemAPIController extends Controller {
 
         $hash = crc32(json_encode($postData));
         if (!$force && $poem->share_pics && isset($poem->share_pics[$compositionID])
-            && file_exists(storage_path($poem->share_pics[$compositionID]))) {
+                    && file_exists(storage_path($poem->share_pics[$compositionID]))) {
             if (str_contains($poem->share_pics[$compositionID], $hash)) {
                 return $this->responseSuccess(['url' => $posterUrl . '?t=' . time()]);
             }
@@ -647,7 +650,7 @@ class PoemAPIController extends Controller {
 
             $scene          = $poem->is_campaign ? ($poem->campaign_id . '-' . $poem->id) : $poem->id;
             $page           = $poem->is_campaign ? 'pages/campaign/campaign' : 'pages/poems/index';
-            $appCodeImgPath = (new Weapp())->fetchAppCodeImg($scene, $dir, $page, $force);
+            $appCodeImgPath = (new Weapp())->fetchAppCodeImg($scene, $dir, $page);
 
             if (!$this->composite($poemImgPath, $appCodeImgPath, $posterPath, $compositionID)) {
                 return $this->responseFail();
@@ -670,9 +673,9 @@ class PoemAPIController extends Controller {
     }
 
     /**
-     * @param $postData
-     * @param $dir
-     * @param $poemImgFileName
+     * @param      $postData
+     * @param      $dir
+     * @param      $poemImgFileName
      * @param bool $force
      * @return string
      * @throws Exception
@@ -746,7 +749,6 @@ class PoemAPIController extends Controller {
     public function query(Request $request) {
         $keyword = Str::trimSpaces($request->json('keyword', ''));
         $mode    = $request->json('mode', '');
-        $nft     = $request->json('nft', false);
 
         if ($keyword === '' || is_null($keyword)) {
             return $this->responseSuccess([
@@ -771,91 +773,56 @@ class PoemAPIController extends Controller {
             ]);
         }
 
-        // DB::enableQueryLog();
-        $search = new Search();
+        // Use Laravel Scout for search
+        $shiftPoems = collect();
 
+        // Authors
+        $authors = collect();
         if ($mode !== 'poem-select') {
-            $search = $search->registerAspect(AuthorAliasSearchAspect::class);
+            $authorLimit = $mode !== 'author-select' ? 5 : 50;
+            $authors = \App\Models\Author::search($keyword4Query)
+                ->query(function ($query) {
+                    $query->with('user');
+                })
+                ->take($authorLimit)
+                ->get();
         }
 
+        // Poems
+        $poems = collect();
         if ($mode !== 'author-select' && $mode !== 'translator-select') {
-            $search = $search->registerModel(Poem::class, function (ModelSearchAspect $modelSearchAspect) use ($nft) {
-                $modelSearchAspect
-                    ->addSearchableAttribute('title') // return results for partial matches
-                    ->addSearchableAttribute('poem')
-                    ->addSearchableAttribute('poet')
-                    ->addSearchableAttribute('poet_cn')
-                    ->addSearchableAttribute('translator')
-                    ->addSearchableAttribute('preface')
-                    ->addSearchableAttribute('subtitle')
-                    ->addSearchableAttribute('location')
-                    ->whereNotExists(function ($query) {
-                        $query->select(DB::raw(1))
+            $poems = Poem::search($keyword4Query)
+                ->query(function ($query) {
+                    $query->whereNotExists(function ($q) {
+                        $q->select(DB::raw(1))
                             ->from('relatable')
                             ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
                     });
-                if ($nft) {
-                    $modelSearchAspect->whereExists(function ($query) {
-                        $query->select(DB::raw(1))
-                            ->from('nft')
-                            ->whereRaw('nft.poem_id = poem.id');
-                    });
-                }
+                    $query->with(['poetAuthor.user', 'uploader']);
+                })
+                ->take(150)
+                ->get();
 
-                $modelSearchAspect->with('poetAuthor')->limit(150);
-                // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
-            });
-        }
-        // ->registerModel(Poem::class, 'title', 'poem', 'poet', 'poet_cn', 'translator')//, 'poet')
-
-        $searchResults = $search->search($keyword4Query);
-
-        // dd(DB::getQueryLog());
-        $results   = $searchResults->groupByType();
-        $authorRes = $results->get('authorAlias') ?: collect();
-
-        $shiftPoems = collect();
-
-        $poems = $results->get('poem') ?: [];
-        foreach ($poems as $p) {
-            $shiftPoems->push($p->searchable);
+            $shiftPoems = $poems->collect();
         }
 
-        $authors = $authorRes->map(function (SearchResult $authorSearchRes, $index) use ($mode, $shiftPoems) {
-            // TODO 返回结果中应包含尽量多的作者条目，由前端选择显示多少条目
-            // TODO a better way to handle different mode
-            // TODO trigger correspond query when switch to a tab
-            if ($mode !== 'author-select' && $index >= 5) {
-                return null;
-            }
-
-            if ($authorSearchRes->searchable instanceof \App\Models\Author) {
-                $author = $authorSearchRes->searchable;
-                $author['#label'] = $author->label === $authorSearchRes->title ? $author->label : $author->label . ' ( ' . $authorSearchRes->title . ' )';
-
-                if ($mode !== 'author-select') {
-                    foreach ($author->poems as $poem) {
-                        $item = $poem;
-                        $item['poet_contains_keyword'] = true;
-                        // $item['#from_author'] = true;
-                        $item['#poet_label'] = $poem->poet_label === $authorSearchRes->title
-                            ? $poem->poet_label
-                            : ($poem->poet_label . ' ( ' . $authorSearchRes->title . ' )');
-                        $shiftPoems->push($item);
-                    }
+        // Append poems from matched authors
+        if ($mode !== 'author-select' && $authors->isNotEmpty()) {
+            $authors->loadMissing('poems');
+            foreach ($authors as $author) {
+                foreach ($author->poems as $poem) {
+                    $item                          = $poem;
+                    $item['poet_contains_keyword'] = true;
+                    $item['#poet_label']           = $poem->poet_label;
+                    $shiftPoems->push($item);
                 }
             }
-
-            // TODO show wikidata poet on search result page: $author->searchable instanceof \App\Models\Wikidata
-            return $authorSearchRes->searchable instanceof \App\Models\Author ? $authorSearchRes->searchable : null;
-        })->filter(function ($author) {
-            return $author;
-        });
+        }
 
         $keywordArr = $keyword4Query->split('#\s+#');
 
         // TODO append translated poems
-        $mergedPoems = $shiftPoems->unique('id')->map(function ($poem) use ($keywordArr, $nft) {
+        $mergedPoems = $shiftPoems->unique('id')->map(function ($poem) use ($keywordArr) {
             $columns = ['poet_label', '#poet_label', 'poet_id', 'poet_is_v', 'translator', 'id', 'title', 'url', 'poet_contains_keyword', 'poem'];
 
             $item = $poem->only($columns);
@@ -865,15 +832,15 @@ class PoemAPIController extends Controller {
             if ($posOnPoem) {
                 $pos = $posOnPoem['pos'];
                 // TODO don't do noSpace for english poem
-                $item['poem'] = Str::of($poem->poem)->substr($pos - min(20, $pos), 40)->trimPunct()->replace("\n", ' ')->__toString();
+                $item['poem']                  = Str::of($poem->poem)->substr($pos - min(20, $pos), 40)->trimPunct()->replace("\n", ' ')->__toString();
                 $item['poem_contains_keyword'] = true;
             } else {
-                $item['poem'] = $poem->firstLine;
+                $item['poem']                  = $poem->firstLine;
                 $item['poem_contains_keyword'] = false;
             }
 
-            $item['poet_is_v'] = $poem->poet_is_v;
-            $item['poet_label'] = $poem->poet_label;
+            $item['poet_is_v']        = $poem->poet_is_v;
+            $item['poet_label']       = $poem->poet_label;
             $item['translator_label'] = $poem->translator_label;
 
             if ($poem->poet_label && str_pos_one_of($poem->poet_label, $keywordArr)) {
@@ -883,37 +850,31 @@ class PoemAPIController extends Controller {
                 $item['translator_contains_keyword'] = true;
             }
 
-            if ($nft) {
-                $item['nft_id'] = $poem->nft ? $poem->nft->id : null;
-            }
-
             return $item;
         })->values();
 
         $data = [
-            'authors' => $authors->map->only(['id', 'avatar_url', 'label', '#label', 'describe_lang', 'user'])->map(function ($author) {
-                if ($author['user']) {
-                    $author['user'] = $author['user']->only(['id', 'avatar_url', 'name']);
+            'authors' => $authors->map(function ($author) {
+                $arr = $author->only(['id', 'avatar_url', 'label', 'describe_lang', 'user']);
+                $arr['#label'] = $author->label;
+                if ($author->user) {
+                    $arr['user'] = $author->user->only(['id', 'avatar_url', 'name']);
                 }
+                $arr['avatar_true'] = $author->avatar_url !== config('app.avatar.default');
 
-                $author['avatar_true'] = $author['avatar_url'] !== config('app.avatar.default');
-
-                return $author;
+                return $arr;
             }),
             'keyword' => $keyword
         ];
-        if ($nft) {
-            $data['nfts'] = $mergedPoems;
-        } else {
-            $data['poems'] = $mergedPoems;
-        }
+
+        $data['poems'] = $mergedPoems;
 
         return $this->responseSuccess($data);
     }
 
     public function import(Request $request): array {
         $poems = $request->input('poems');
-        if ($request->getContentType() !== 'json') {
+        if ($request->getContentTypeFormat() !== 'json') {
             return $this->responseFail([], 'Request content type must be application/json');
         }
 
@@ -979,5 +940,43 @@ class PoemAPIController extends Controller {
         } catch (Error $e) {
             return $this->responseFail([], $e->getMessage());
         }
+    }
+
+    /**
+     * Load poem relationships efficiently to prevent N+1 queries
+     * No memory copy needed - works directly with Eloquent Collections
+     *
+     * @param \Illuminate\Database\Eloquent\Collection $poems
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function loadPoemRelationships($poems) {
+        // Check if we have poems with valid (non-empty, non-null) IDs before loading relations
+        $poetIds = $poems->filter(function($poem) {
+            return !empty($poem->poet_id) && $poem->poet_id !== '';
+        })->pluck('poet_id')->unique();
+
+        $uploaderIds = $poems->filter(function($poem) {
+            return !empty($poem->upload_user_id) && $poem->upload_user_id !== '';
+        })->pluck('upload_user_id')->unique();
+
+        $translatorIds = $poems->filter(function($poem) {
+            return !empty($poem->translator_id) && $poem->translator_id !== '';
+        })->pluck('translator_id')->unique();
+
+        // Load relations conditionally - each relationship only if it has valid IDs
+        if ($poetIds->isNotEmpty()) {
+            $poems->loadMissing('poetAuthor.user');
+        }
+        if ($uploaderIds->isNotEmpty()) {
+            $poems->loadMissing('uploader');
+        }
+        if ($translatorIds->isNotEmpty()) {
+            $poems->loadMissing('translatorAuthor.user');
+        }
+
+        // Use existing repository methods to optimize translator N+1 queries
+        \App\Repositories\PoemRepository::preloadTranslatorsForPoems($poems);
+
+        return $poems;
     }
 }

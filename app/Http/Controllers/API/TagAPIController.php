@@ -7,10 +7,6 @@ use App\Models\Tag;
 use App\Repositories\TagRepository;
 use Illuminate\Http\Request;
 
-/**
- * Class LanguageController
- * @package App\Http\Controllers\API
- */
 class TagAPIController extends Controller {
     /** @var TagRepository */
     private $tagRepository;

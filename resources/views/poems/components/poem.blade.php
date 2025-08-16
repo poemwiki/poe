@@ -72,6 +72,10 @@ $firstLine = $poem->firstLine;
 
         @include('poems.fields.from', ['poem' => $poem])
 
+        @if(in_array($poem->is_owner_uploaded, [\APP\Models\Poem::$OWNER['uploader'], \APP\Models\Poem::$OWNER['translatorUploader']]))
+          <dl class="poem-ugc text-sm"><dt title="本作品由{{$poem->is_owner_uploaded === 1 ? '作者' : '译者'}}上传">原创</dt></dl>
+        @endif
+
         @if($poem->flag & \App\Models\Poem::$FLAG['infoNeedConfirm'])
           <dl><dt>此条目被标记为：信息有误，待修改。</dt></dl>
         @endif
@@ -97,17 +101,13 @@ $firstLine = $poem->firstLine;
 
 {{--    <a class="edit btn" href="#">@lang('反馈')</a>--}}
 
-        @if(in_array($poem->is_owner_uploaded, [\APP\Models\Poem::$OWNER['uploader'], \APP\Models\Poem::$OWNER['translatorUploader']]))
-          <dl class="poem-ugc text-sm"><dt title="本作品由{{$poem->is_owner_uploaded === 1 ? '作者' : '译者'}}上传">原创</dt></dl>
-        @endif
-
         <ol class="contribution mt-4">
           @php
             /** @var \App\Models\Poem $poem */
-            $maxKey = $poem->activityLogs->keys()->max();
-            $showFakeInitLog = (count($poem->activityLogs)<1) || ($poem->activityLogs->last()->description !== 'created');
+            $maxKey = $activityLogs->keys()->max();
+            $showFakeInitLog = (count($activityLogs)<1) || ($activityLogs->last()->description !== 'created');
           @endphp
-          @foreach($poem->activityLogs as $key=>$log)
+          @foreach($activityLogs as $key=>$log)
 
             @if($key===0 or $key===$maxKey)
 
@@ -136,8 +136,9 @@ $firstLine = $poem->firstLine;
 
         <dl class="poem-info poem-versions nested-tree text-sm">
           <dt>@lang('poem.Translated/Original Version of This Poem')</dt>
+          
           @include('poems.components.translated', [
-              'poem' => $poem->topOriginalPoem,
+              'translatedPoemsTree' => $translatedPoemsTree,
               'currentPageId' => $poem->id,
               'currentPageOriginalId' => $poem->original_id===$poem->id ? null : $poem->original_id
           ])

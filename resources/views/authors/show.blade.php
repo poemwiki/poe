@@ -114,66 +114,100 @@
     </div>
 
 
-    {{--poems--}}
-    <div class="tabs mt-8 tabs-poems">
+    {{-- Poems Section --}}
+    <section class="poems-section mt-8">
+      <div class="tabs tabs-poems" style="position: relative;">
 
-      <input type="radio" name="poem-tabs" id="tab-author-poem" checked="checked">
-      <label class="text-lg" for="tab-author-poem">@lang("Author's Poem", ['author' => $label])</label>
+        {{-- Sort Toggle Button --}}
+        <div class="poem-sort-toggle" style="position:absolute;top:1rem;right:0;z-index:10;height:3.6rem;display:flex;">
+          <button type="button" class="toggle-sort btn-text" data-current="{{$currentSort}}">
+            ⇵@if($currentSort === 'hottest')最热 @else最新@endif
+          </button>
+        </div>
 
-      <div class="tab">
-        @if($poemsAsPoet->isNotEmpty())
-          <ul>
-            @foreach($poemsAsPoet as $poem)
-              <li class="title-list-item">
-                <a class="title font-song no-bg" href="{{$poem->url}}">{{trim($poem->title) ?: '无题'}}</a>
-                <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->firstLine)->surround('span', function ($i) {
-                        return 'style="transition-delay:'.($i*20).'ms"';
-                })!!}
-                  @if(!$poem->isTranslated)
-                    @include('poems.fields.date', [
-                      'poem' => $poem,
-                      'class' => 'text-gray-400 float-right item-poem-author'
-                    ])
-                  @elseif($poem->translatorLabel)
-                    <span
-                      class="text-gray-400 float-right item-poem-author">@lang('Translated by', ['translator' => $poem->translatorsStr])</span>
-                  @endif
-                </a>
-              </li>
-            @endforeach
-          </ul>
+        {{-- Author's Original Poems Tab --}}
+        @php
+          $authorTabChecked = $poemsAsPoet->isNotEmpty() || $poemsAsTranslator->isEmpty();
+        @endphp
+        <input type="radio" name="poem-tabs" id="tab-author-poem" {{ $authorTabChecked ? 'checked="checked"' : '' }}>
+        <label class="text-lg" for="tab-author-poem">
+          @lang("Author's Poem", ['author' => $label]) ({{$poemsAsPoet->count()}})
+        </label>
+        <div class="tab">
+          @if($poemsAsPoet->isNotEmpty())
+            <ul class="poems-list">
+              @foreach($poemsAsPoet as $poem)
+                <li class="title-list-item">
+                  <a class="title font-song no-bg" href="{{$poem->url}}">
+                    {{trim($poem->title) ?: '无题'}}
+                  </a>
+                  <a class="first-line no-bg" href="{{$poem->url}}">
+                    {!!Str::of($poem->firstLine)->surround('span', function ($i) {
+                      return 'style="transition-delay:'.($i*20).'ms"';
+                    })!!}
+
+                    {{-- Poem metadata --}}
+                    @if(!$poem->isTranslated)
+                      @include('poems.fields.date', [
+                        'poem' => $poem,
+                        'class' => 'text-gray-400 float-right item-poem-author'
+                      ])
+                    @elseif($poem->translatorLabel)
+                      <span class="text-gray-400 float-right item-poem-author">
+                        @lang('Translated by', ['translator' => $poem->translatorsStr])
+                      </span>
+                    @endif
+                  </a>
+                </li>
+              @endforeach
+            </ul>
+          @endif
+
+          <a href="{{urlOrLoginRef(route('poems/create', ['author_fake_id' => $author->fakeID], false))}}"
+             class="btn btn-wire mt-8">
+            @lang('Add original work by', ['author' => $label])
+          </a>
+        </div>
+
+        {{-- Translation Works Tab --}}
+        @if($poemsAsTranslator->isNotEmpty())
+          @php
+            $translatorTabChecked = $poemsAsTranslator->isNotEmpty() && $poemsAsPoet->isEmpty();
+          @endphp
+          <input type="radio" name="poem-tabs" id="tab-translator-poem" {{ $translatorTabChecked ? 'checked="checked"' : '' }}>
+          <label class="text-lg" for="tab-translator-poem">
+            @lang("Translation Works", ['author' => $label]) ({{$poemsAsTranslator->count()}})
+          </label>
+          <div class="tab">
+            <ul class="poems-list">
+              @foreach($poemsAsTranslator as $poem)
+                <li class="title-list-item">
+                  <a class="title font-song no-bg" href="{{$poem->url}}">
+                    {!!Str::of(trim($poem->title) ?: '无题')->surround('span')!!}
+                  </a>
+                  <a class="first-line no-bg" href="{{$poem->url}}">
+                    {!!Str::of($poem->firstLine)->surround('span', function ($i) {
+                      return 'style="transition-delay:'.($i*20).'ms"';
+                    })!!}
+
+                    {{-- Original author metadata --}}
+                    <span class="text-gray-400 float-right item-poem-author {{$poetLabelMap[$poem->id]['author_id'] ? 'poemwiki-link' : ''}}">
+                      {{$poetLabelMap[$poem->id]['name']}}
+                    </span>
+                  </a>
+                </li>
+              @endforeach
+            </ul>
+
+            <a href="{{urlOrLoginRef(route('poems/create', ['translator_fake_id' => $author->fakeID], false))}}"
+               class="btn btn-wire mt-8">
+              @lang('Add translated work by', ['translator' => $label])
+            </a>
+          </div>
         @endif
 
-        <a href="{{urlOrLoginRef(route('poems/create', ['author_fake_id' => $author->fakeID], false))}}"
-           class="btn btn-wire mt-8">@lang('Add original work by', ['author' => $label])</a>
       </div>
-
-      @if($poemsAsTranslator->isNotEmpty())
-        <input type="radio" name="poem-tabs" id="tab-translator-poem">
-        <label class="text-lg"
-               for="tab-translator-poem">@lang("Translation Works", ['author' => $label])</label>
-
-        <div class="tab">
-          <ul>
-            @foreach($poemsAsTranslator as $poem)
-              <li class="title-list-item">
-                <a class="title font-song no-bg" href="{{$poem->url}}">{!!
-            Str::of(trim($poem->title) ? trim($poem->title) : '无题')
-                ->surround('span')!!}</a>
-                <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->firstLine)->surround('span', function ($i) {
-                    return 'style="transition-delay:'.($i*20).'ms"';
-            })!!}<span
-                    class="text-gray-400 float-right item-poem-author {{$poem->poetAuthor ? 'poemwiki-link' : ''}}">{{$poem->poetLabel}}</span></a>
-              </li>
-            @endforeach
-          </ul>
-
-          <a href="{{urlOrLoginRef(route('poems/create', ['translator_fake_id' => $author->fakeID], false))}}"
-             class="btn btn-wire mt-8">@lang('Add translated work by', ['translator' => $label])</a>
-        </div>
-      @endif
-
-    </div>
+    </section>
 
   </article>
 
@@ -181,14 +215,72 @@
 
 
 @push('scripts')
-  <script src="{{ asset('js/lib/color-hash.js') }}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      var colorHash = new ColorHash({lightness: 0.6, saturation: 0.86});
-      var $titles = document.getElementsByClassName('title');
-      for (var item of $titles) {
-        item.style.setProperty('--title-color', colorHash.hex(item.innerHTML));
+      // Simple toggle sort logic
+      var toggleBtn = document.querySelector('.toggle-sort');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function () {
+          var current = this.getAttribute('data-current');
+          var next = current === 'hottest' ? 'newest' : 'hottest';
+          var url = new URL(window.location.href);
+          url.searchParams.set('sort', next);
+          window.location.href = url.toString();
+        });
       }
+
+      // Tab hash handling: read hash on load, update hash on tab change
+      (function handlePoemTabsHash() {
+        var tabInputs = document.getElementsByName('poem-tabs');
+        if (!tabInputs || tabInputs.length === 0) return;
+
+        // Helper to set checked radio by id
+        function checkTabById(id) {
+          var el = document.getElementById(id);
+          if (el && el.name === 'poem-tabs') {
+            el.checked = true;
+            return true;
+          }
+          return false;
+        }
+
+        // If URL has hash, try to activate that tab
+        var hash = window.location.hash;
+        if (hash) {
+          var id = hash.replace('#', '');
+          if (checkTabById(id)) {
+            // ensure we don't scroll
+            history.replaceState(null, '', '#' + id);
+          }
+        } else {
+          // No hash: reflect current checked tab into URL (replace, don't add history)
+          for (var i = 0; i < tabInputs.length; i++) {
+            if (tabInputs[i].checked) {
+              history.replaceState(null, '', '#' + tabInputs[i].id);
+              break;
+            }
+          }
+        }
+
+        // When the tab changes, update the hash (replaceState to avoid polluting history)
+        for (var j = 0; j < tabInputs.length; j++) {
+          tabInputs[j].addEventListener('change', function (e) {
+            if (this.checked) {
+              history.replaceState(null, '', '#' + this.id);
+            }
+          });
+        }
+
+        // Also allow clicking tab labels to update hash (labels will toggle radio automatically)
+        var tabLabels = document.querySelectorAll('.tabs-poems label[for]');
+        tabLabels.forEach(function (lbl) {
+          lbl.addEventListener('click', function () {
+            var targetId = this.getAttribute('for');
+            // Delay to allow radio to change
+            setTimeout(function () { history.replaceState(null, '', '#' + targetId); }, 10);
+          });
+        });
+      })();
     })
 
   </script>

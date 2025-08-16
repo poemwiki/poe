@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Repositories\ScoreRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -31,9 +32,13 @@ class Score extends Model {
 
     protected $table = 'score';
 
-    protected static $logFillable             = true;
-    protected static $logOnlyDirty            = true;
-    protected static $ignoreChangedAttributes = ['created_at'];
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['created_at']);
+    }
+
     // public static $RATING = [1, 2, 3, 4, 5];
     public static $SCORE = [2, 4, 6, 8, 10];
 
@@ -63,26 +68,26 @@ class Score extends Model {
         parent::boot();
 
         self::created(function ($model) {
-            $poem = Poem::find($model->poem_id);
+            $poem             = Poem::find($model->poem_id);
             $poem->timestamps = false;
-            $score = ScoreRepository::calc($model->poem_id);
-            $poem->score = $score['score'] ?: null;
+            $score            = ScoreRepository::calc($model->poem_id);
+            $poem->score      = $score['score'] ?: null;
             $poem->save();
         });
 
         self::updated(function ($model) {
-            $poem = Poem::find($model->poem_id);
+            $poem             = Poem::find($model->poem_id);
             $poem->timestamps = false;
-            $score = ScoreRepository::calc($model->poem_id);
-            $poem->score = $score['score'] ?: null;
+            $score            = ScoreRepository::calc($model->poem_id);
+            $poem->score      = $score['score'] ?: null;
             $poem->save();
         });
 
         self::deleted(function ($model) {
-            $poem = Poem::find($model->poem_id);
+            $poem             = Poem::find($model->poem_id);
             $poem->timestamps = false;
-            $score = ScoreRepository::calc($model->poem_id);
-            $poem->score = $score['score'] ?: null;
+            $score            = ScoreRepository::calc($model->poem_id);
+            $poem->score      = $score['score'] ?: null;
             $poem->save();
         });
     }

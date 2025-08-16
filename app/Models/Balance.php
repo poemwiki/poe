@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -17,6 +18,12 @@ class Balance extends Model {
     protected $table       = 'balance';
     public const PRECISION = 27; // the maximum number of digits (the precision)
     public const DECIMAL   = 18; // the number of digits to the right of the decimal point (the scale). It has a range of 0 to 30 and must be no larger than PRECISION.
+
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty();
+    }
 
     protected $fillable = [
         'user_id',

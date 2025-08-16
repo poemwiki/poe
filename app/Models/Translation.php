@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -13,4 +14,11 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Translation extends \Brackets\AdminTranslations\Translation {
     use LogsActivity;
     protected $table = 'translations';
+
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['created_at', 'updated_at']);
+    }
 }

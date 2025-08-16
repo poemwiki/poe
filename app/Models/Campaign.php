@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTranslations;
 use App\User;
+use App\Repositories\CampaignRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -21,7 +22,7 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon      $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property array|null                      $settings          $settings['gameType']: 1: 三行诗 2：限定最长行数为$settings['maxLineNum']
+ * @property array|null                      $settings $settings['gameType']: 1: 限定行数（默认3行） 2：限定最长行数为$settings['maxLineNum']
  * @property mixed|null                      $weapp_url
  * @property mixed                           $image_url
  * @property mixed                           $master_i_ds
@@ -81,6 +82,23 @@ class Campaign extends Model {
         'describe_lang',
         'name_lang',
     ];
+
+    public static function boot() {
+        parent::boot();
+
+        // Clear campaign index cache when campaign is created, updated, or deleted
+        self::created(function ($model) {
+            CampaignRepository::clearCampaignIndexCache();
+        });
+
+        self::updated(function ($model) {
+            CampaignRepository::clearCampaignIndexCache();
+        });
+
+        self::deleted(function ($model) {
+            CampaignRepository::clearCampaignIndexCache();
+        });
+    }
 
     public $casts = [
         'settings' => 'json'
@@ -172,7 +190,7 @@ class Campaign extends Model {
                 continue;
             }
 
-            $masterUser = $user->only(['id', 'avatar', 'name', 'author_id']);
+            $masterUser           = $user->only(['id', 'avatar', 'name', 'author_id']);
             $masterUser['avatar'] = $user->avatarUrl;
             // 同时存在 masters和 masterInfos 的情况下，优先使用 masterInfos 内的 name 和 avatar
             if ($masterInfos && ($info = $masterInfos[$index])) {

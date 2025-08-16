@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /*
@@ -33,15 +32,23 @@ class Relatable extends MorphPivot {
     use LogsActivity;
     public $incrementing = true; // to avoid activity log subject_id null. see https://github.com/spatie/laravel-activitylog/issues/598#issuecomment-535009005
 
-    protected static $logFillable          = true;
-    protected static $logOnlyDirty         = true;
-    public static $ignoreChangedAttributes = ['created_at', 'updated_at'];
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['created_at', 'updated_at']);
+    }
 
     public const NODE_TYPE = [
         'poem'   => \App\Models\Poem::class,
         'author' => \App\Models\Author::class
     ];
     public const RELATION = [
+        // 'poet_is' relation is not using, 
+        // because only one poet for a poem,
+        // using poem.poet_id is enough,
+        // if we need support multiple poets, we need to
+        // start using this 'poet_is' relation
         'poet_is'                 => 0,
         'translator_is'           => 1,
         'merged_to_poem'          => 2,

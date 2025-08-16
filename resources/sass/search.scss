@@ -25,16 +25,8 @@
           padding-top: 0;
         }
 
-        .item-left {}
         .item-right {
-          display: flex;
-          flex-direction: column;
           width: 100%;
-        }
-        .item-pic {
-          width: 8rem;
-          object-fit: cover;
-          margin-right: 1rem;
         }
 
         .item-poem-author {

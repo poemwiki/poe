@@ -35,8 +35,8 @@
                         @endif
                         <form method="post" action="{{ url('/password/email') }}">
                             @csrf
-                            <h1>Reset Your Password</h1>
-                            <p class="text-muted">Enter Email to reset password</p>
+                            <h1>@lang('Reset Your Password')</h1>
+                            <p class="text-muted">@lang('Enter Email to reset password')</p>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">
@@ -55,7 +55,7 @@
                             <div class="row">
                                 <div class="col-6 offset-6">
                                     <button class="btn btn-block btn-primary" type="submit">
-                                        <i class="fa fa-btn fa-envelope"></i> Send Password Reset Link
+                                        <i class="fa fa-btn fa-envelope"></i>&nbsp;@lang('Send Password Reset Link')
                                     </button>
                                 </div>
                             </div>

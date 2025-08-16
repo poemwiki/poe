@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -20,9 +21,15 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @mixin \Eloquent
  */
 class Transaction extends Model {
-    use LogsActivity;
     protected $table        = 'transaction';
     public const UPDATED_AT = null;
+
+    use LogsActivity;
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty();
+    }
 
     public const TYPE = [
         'gold' => 0,

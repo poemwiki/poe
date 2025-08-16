@@ -35,7 +35,7 @@ class importLanguage extends Command {
      * ```SQL
      * SELECT distinct ?item ?code ?entity_id ?lang (MAX(?label) AS ?val) #?itemLabel_zh
      * WHERE {
-     * #BIND(wd:Q9067 AS ?item)
+     * #BIND(wd:Q9067 AS ?item) # uncomment this line to test Q9067
      * ?item wdt:P31 wd:Q34770.  # 选择所有语言的条目，这里假设Q34770是语言的类别
      *
      * OPTIONAL {
@@ -48,10 +48,6 @@ class importLanguage extends Command {
      * ?item wdt:P9060 ?code. # POSIX locale
      * }
      * FILTER(BOUND(?code))  # 仅选择具有至少一个非空code的条目
-     *
-     * #OPTIONAL {
-     * #  ?item rdfs:label ?itemLabel_zh filter (lang(?itemLabel_zh) = "zh").
-     * #}
      *
      * # 获取条目的各种语言写法
      * ?item rdfs:label ?label.

@@ -11,9 +11,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Laravel\Scout\Searchable;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Searchable\Searchable;
-use Spatie\Searchable\SearchResult;
 
 /**
  * Class Author.
@@ -88,21 +88,27 @@ use Spatie\Searchable\SearchResult;
  * @method static \Illuminate\Database\Query\Builder|Author withoutTrashed()
  * @mixin \Eloquent
  */
-class Author extends Model implements Searchable {
+class Author extends Model {
     use SoftDeletes;
     use HasTranslations;
     use HasFakeId;
     use LogsActivity;
     use RelatableNode;
+    use Searchable;
 
     /**DO NOT CHANGE FAKEID STATICS**/
     public static $FAKEID_KEY    = 'PoemWikikiWmeoP'; // Symmetric-key for xor
     public static $FAKEID_SPARSE = 96969696969;
     /**DO NOT CHANGE FAKEID STATICS**/
 
-    protected static $logFillable             = true;
-    protected static $logOnlyDirty            = true;
-    protected static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length'];
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->dontLogIfAttributesChangedOnly(['updated_at'])
+            ->logExcept(['created_at', 'need_confirm']);
+    }
 
     protected $table = 'author';
 
@@ -252,7 +258,7 @@ class Author extends Model implements Searchable {
         });
 
         self::saving(function ($model) {
-            $changes = $model->getDirty();
+            $changes  = $model->getDirty();
             $original = self::find($model->id);
 
             // TODO 如果前端可编辑别名列表，此处不应再有处理别名相关逻辑，应在controller处理
@@ -305,7 +311,6 @@ class Author extends Model implements Searchable {
     public function getUrlAttribute() {
         return route('author/show', ['fakeId' => $this->fakeId]);
     }
-
 
     /**
      * @return string
@@ -435,20 +440,12 @@ class Author extends Model implements Searchable {
         return $this->wiki_desc_lang;
     }
 
-    /**
-     * TODO move this to Query service
-     * search poems within this author's works.
-     */
-    public static function searchPoems() {
-    }
-
-    public function getSearchResult(): SearchResult {
-        $url = route('author/show', ['fakeId' => $this->fakeId]);
-
-        return new SearchResult(
-            $this,
-            $this->name_lang,
-            $url
-        );
+    public function toSearchableArray() {
+        return [
+            'id'             => $this->id,
+            'name_lang'      => $this->name_lang,
+            'describe_lang'  => $this->describe_lang,
+            'wiki_desc_lang' => $this->wiki_desc_lang,
+        ];
     }
 }

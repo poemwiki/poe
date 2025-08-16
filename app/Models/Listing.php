@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -19,7 +20,14 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Listing extends Model {
     use LogsActivity;
-    protected $table    = 'listing';
+    protected $table = 'listing';
+
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty();
+    }
+
     public const STATUS = [
         'inactive' => 0,
         'active'   => 1,

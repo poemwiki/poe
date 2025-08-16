@@ -4,7 +4,8 @@ namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
-class Kernel extends HttpKernel {
+class Kernel extends HttpKernel
+{
     /**
      * The application's global HTTP middleware stack.
      *
@@ -14,7 +15,7 @@ class Kernel extends HttpKernel {
      */
     protected $middleware = [
         \App\Http\Middleware\TrustProxies::class,
-        \Fruitcake\Cors\HandleCors::class,
+        \Illuminate\Http\Middleware\HandleCors::class,
         \App\Http\Middleware\CheckForMaintenanceMode::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
@@ -36,6 +37,18 @@ class Kernel extends HttpKernel {
      */
     protected $middlewareGroups = [
         'web' => [
+            'throttle:15|40,0.4', // 未登录用户每半分钟最多20次请求，已登录用户每半分钟最多25次
+            \App\Http\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            // \Illuminate\Session\Middleware\AuthenticateSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \App\Http\Middleware\VerifyCsrfToken::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\LastOnline::class,
+            \App\Http\Middleware\RemoveSpace::class,
+        ],
+        'admin' => [
             'throttle:15|40,0.4', // 未登录用户每半分钟最多20次请求，已登录用户每半分钟最多25次
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,

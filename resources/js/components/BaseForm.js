@@ -10,9 +10,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
 
-var _moment = require('moment');
+var _dayjs = require('dayjs');
 
-var _moment2 = _interopRequireDefault(_moment);
+var _dayjs2 = _interopRequireDefault(_dayjs);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {default: obj};
@@ -141,20 +141,20 @@ var BaseForm = {
     date: function date(date) {
       var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'YYYY-MM-DD';
 
-      var date = (0, _moment2.default)(date);
+      var date = (0, _dayjs2.default)(date);
       return date.isValid() ? date.format(format) : "";
     },
     datetime: function datetime(_datetime) {
       var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'YYYY-MM-DD HH:mm:ss';
 
-      var date = (0, _moment2.default)(_datetime);
+      var date = (0, _dayjs2.default)(_datetime);
       return date.isValid() ? date.format(format) : "";
     },
     time: function time(_time) {
       var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'HH:mm:ss';
 
-      // '2000-01-01' is here just because momentjs needs a date
-      var date = (0, _moment2.default)('2000-01-01 ' + _time);
+      // '2000-01-01' is here just because dayjs needs a date
+      var date = (0, _dayjs2.default)('2000-01-01 ' + _time);
       return date.isValid() ? date.format(format) : "";
     }
   },

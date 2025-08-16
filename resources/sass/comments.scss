@@ -164,8 +164,9 @@ section.reviews{
 
   >ol.review-list{
     >li {
-      padding: 1rem 1.6rem;
-      border-bottom: 1px solid $gray-lighter;
+      padding: 1.5rem 1.6rem .5rem;
+      border-top: .5px solid $gray-lighter;
+      border-bottom: .5px solid $gray-lighter;
       white-space: normal;
       line-break: normal;
       word-break: break-all;
@@ -176,8 +177,8 @@ section.reviews{
       >.review-h {
         justify-content: flex-start;
         .avatar {
-          width: 2em;
-          height: 2em;
+          width: 2.5em;
+          height: 2.5em;
           border-radius: 50%;
           margin-right: .6em;
         }
@@ -186,7 +187,6 @@ section.reviews{
           align-items: flex-start;
           flex-flow: column;
           font-size: $font-size-sm;
-          line-height: 1.4em;
           >.review-time{
             color: $gray;
           }
@@ -283,6 +283,9 @@ section.reviews{
       .medium-editor-element, #review-content{
         height: 60vh;
         overflow: auto;
+        &:focus-visible {
+          outline: none;
+        }
       }
       #review-content {
         visibility: hidden;

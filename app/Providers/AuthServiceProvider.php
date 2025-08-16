@@ -27,6 +27,10 @@ class AuthServiceProvider extends ServiceProvider {
     public function boot() {
         $this->registerPolicies();
 
+        // TODO handle admin role's permissions
+        // currently only the admin user who has record at model_has_roles table have related permissions, admin user's role actually doesn't matter
+        // so we need to handle permissions at model_has_roles + role_has_permissions tables
+
         Gate::define('web.poem.create', function (User $user) {
             return isset($user->id);
         });
@@ -43,7 +47,7 @@ class AuthServiceProvider extends ServiceProvider {
         });
         Gate::define('api.poem.delete', function (User $user, Poem $poem) {
             // 如果是用户上传的原创作品，只有作者账号或管理员可删除
-            if ($poem->is_owner_uploaded === Poem::$OWNER['uploader']
+            if ($poem->is_owner_uploaded    === Poem::$OWNER['uploader']
                 || $poem->is_owner_uploaded === Poem::$OWNER['translatorUploader']) {
                 return $user->id === $poem->upload_user_id or $user->is_admin;
             }
@@ -72,20 +76,20 @@ class AuthServiceProvider extends ServiceProvider {
             return isset($user->id);
         });
 
-        Passport::routes();
+        Passport::ignoreRoutes();
 
         Passport::tokensExpireIn(now()->addDays(90));
         Passport::refreshTokensExpireIn(now()->addDays(120));
         Passport::personalAccessTokensExpireIn(now()->addMonths(6));
 
-//        Gate::define('web.score.create', function ($user) {
-//            return isset($user->id);
-//        });
-//        Gate::define('web.score.update', function ($user, $score) {
-//            return $user->id === $score->user_id;
-//        });
-//        Gate::define('web.score.delete', function ($user, $score) {
-//            return $user->id === $score->user_id;
-//        });
+        //        Gate::define('web.score.create', function ($user) {
+        //            return isset($user->id);
+        //        });
+        //        Gate::define('web.score.update', function ($user, $score) {
+        //            return $user->id === $score->user_id;
+        //        });
+        //        Gate::define('web.score.delete', function ($user, $score) {
+        //            return $user->id === $score->user_id;
+        //        });
     }
 }

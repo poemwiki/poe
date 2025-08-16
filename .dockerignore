@@ -1,0 +1,18 @@
+node_modules
+vendor
+# .git
+.env
+.env.*
+*.log
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+*.swo
+*~
+.vscode
+.idea
+README.md
+docker-compose*.yml
+Dockerfile*
+.dockerignore

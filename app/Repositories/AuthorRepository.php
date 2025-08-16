@@ -118,7 +118,7 @@ class AuthorRepository extends BaseRepository {
      * @param int[]|null $authorId
      * @return Collection
      */
-    public static function searchLabel(string $name, array $authorId = null): Collection {
+    public static function searchLabel(string $name, ?array $authorId): Collection {
         $authorIds = collect($authorId)->toArray();
 
         $newAuthors = [];
@@ -136,7 +136,7 @@ class AuthorRepository extends BaseRepository {
                 ];
             }
         }
-        if (is_array($authorIds)) {
+        if (count($authorIds)) {
             $resById = Author::select(['id', 'name_lang', 'pic_url', 'describe_lang'])->whereIn('id', $authorIds)->get()
                 ->map->only(['id', 'label_en', 'label_cn', 'label', 'url', 'pic_url', 'describe_lang', 'avatar_url'])->map(function ($item) {
                     $item['source'] = 'PoemWiki';
@@ -146,6 +146,7 @@ class AuthorRepository extends BaseRepository {
                 })->concat($newAuthors);
         }
 
+        // TODO exclude wikidata_ids appeared in $resById
         $aliasRes = self::_searchAlias($name, [], $authorId);
 
         if (isset($resById)) {

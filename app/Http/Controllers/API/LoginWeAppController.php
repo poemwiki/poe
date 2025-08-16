@@ -10,21 +10,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use EasyWeChat\Factory;
 
 class LoginWeAppController extends Controller {
-    //    use RedirectsUsers;
-    private $weApp;
+    private \EasyWeChat\MiniProgram\Application $weApp;
 
     public function __construct() {
-        $this->weApp = \EasyWeChat\Factory::miniProgram([
-            'app_id' => config('wechat.mini_program.default.app_id'),
-            'secret' => config('wechat.mini_program.default.secret'),
-
-            // 指定 API 调用返回结果的类型：array(default)/collection/object/raw/自定义类名
-            'response_type' => 'array', ]);
+        $this->weApp = Factory::miniProgram([
+            'app_id'        => config('wechat.mini_program.default.app_id'),
+            'secret'        => config('wechat.mini_program.default.secret'),
+            'response_type' => 'array',
+        ]);
     }
 
     /**
+     * Login function for weapp user.
+     * 小程序端获取 code 后，传递到 server 端，server 端根据 code 获取 openid 和 session_key，
+     * 如果 openid 对应的 user 已经存在，则更新 user 的 openid 和 session_key，
+     * 如果 openid 对应的 user 不存在，则创建 user 并添加 userBind 记录。
+     * 最后返回 access_token 和 user 信息。
      * @param \Illuminate\Http\Request $request
      * @return array
      */
@@ -37,7 +41,13 @@ class LoginWeAppController extends Controller {
 
         $code = $request->code;
         // 根据 code 获取微信 openid 和 session_key
-        $data = $this->weApp->auth->session($code);
+        try {
+            $data = $this->weApp->auth->session($code);
+        } catch (\Exception $e) {
+            Log::error('try weApp login failed at getting openid: ' . $e->getMessage());
+
+            return $this->responseFail([], 'Failed to get openid, please try again later');
+        }
         if (isset($data['errcode'])) {
             Log::info('try weApp login failed:', $data);
 
@@ -55,7 +65,7 @@ class LoginWeAppController extends Controller {
         // 找到 openid 对应的用户
         // TODO 考虑同一unionid下不同openid的虚拟身份（欢乐马、神经蛙等）
         // TODO 考虑解绑情况
-	$userBind = $weappOpenid ? $this->getUserBindInfoByOpenID($weappOpenid, UserBind::BIND_REF['weapp'], 1) : null;
+        $userBind = $weappOpenid ? $this->getUserBindInfoByOpenID($weappOpenid, UserBind::BIND_REF['weapp'], 1) : null;
 
         if ($userBind) {
             // 由于小程序迁移主体，union_id 变更，需要将同一 user 的 weapp 和 wechat 的绑定记录的 union_id 同步变更
@@ -68,7 +78,7 @@ class LoginWeAppController extends Controller {
                     ])->update([
                         'union_id' => $data['unionid']
                     ]);
-	    }
+            }
 
             // 已经登录过小程序
             $attributes = [
@@ -82,7 +92,7 @@ class LoginWeAppController extends Controller {
             ];
             if (isset($data['unionid']) && !empty($data['unionid'])) {
                 $attributes['union_id'] = $data['unionid'];
-	    }
+            }
 
             // 更新用户数据
             $userBind->update($attributes);
@@ -151,7 +161,8 @@ class LoginWeAppController extends Controller {
             'bind_ref' => UserBind::BIND_REF['weapp'],
             'user_id'  => $request->user()->id
         ])->first();
-        $decrypted = $this->weApp->encryptor->decryptData($userBind->weapp_session_key, $detail['iv'], $detail['encryptedData']);
+        $decrypted = $this->weApp->encryptor->decryptData(
+            $userBind->weapp_session_key, $detail['iv'], $detail['encryptedData']);
 
         return $this->responseSuccess([
             'user'      => $userBind->user,
@@ -169,10 +180,10 @@ class LoginWeAppController extends Controller {
     }
 
     /**
-     * @param $openID
-     * @param $bindRef
-     * @param int $bindStatus
-     *                        TODO move it to BindInfoRepository
+     * @param          $openID
+     * @param          $bindRef
+     * @param int|null $bindStatus
+     *                             TODO move it to BindInfoRepository
      * @return UserBind|null
      */
     public function getUserBindInfoByOpenID($openID, $bindRef = UserBind::BIND_REF['weapp'], $bindStatus = null) {
@@ -193,12 +204,12 @@ class LoginWeAppController extends Controller {
     }
 
     /**
-     * @param $unionID
+     * @param          $unionID
      * @param int      $bindRef
      * @param int|null $bindStatus
      * @return UserBind|null
      */
-    public function getUserBindInfoByUnionID($unionID, int $bindRef = UserBind::BIND_REF['weapp'], int $bindStatus = null) {
+    public function getUserBindInfoByUnionID($unionID, int $bindRef = UserBind::BIND_REF['weapp'], ?int $bindStatus = null) {
         try {
             $q = UserBind::where([
                 'union_id_crc32' => Str::crc32($unionID),

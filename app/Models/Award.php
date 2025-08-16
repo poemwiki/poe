@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -21,9 +22,12 @@ class Award extends Model {
 
     protected $table = 'award';
 
-    protected static $logFillable          = true;
-    protected static $logOnlyDirty         = true;
-    public static $ignoreChangedAttributes = ['created_at', 'updated_at'];
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['created_at', 'updated_at']);
+    }
 
     protected $fillable = [
         'result_type',

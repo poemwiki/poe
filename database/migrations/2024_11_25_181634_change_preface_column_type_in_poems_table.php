@@ -26,7 +26,7 @@ class ChangePrefaceColumnTypeInPoemsTable extends Migration
     public function down()
     {
         Schema::table('poem', function (Blueprint $table) {
-            $table->string('preface', 300)->change(); 
+            $table->string('preface', 300)->change();
         });
     }
 }

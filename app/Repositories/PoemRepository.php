@@ -77,7 +77,7 @@ class PoemRepository extends BaseRepository {
      * @param string[]      $select
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public static function random(array $with = [], \Closure $callback = null, array $select = ['*']): \Illuminate\Database\Eloquent\Builder {
+    public static function random(array $with = [], ?\Closure $callback = null, array $select = ['*']): \Illuminate\Database\Eloquent\Builder {
         $builder = Poem::query()
             ->select($select)
             ->join(DB::raw('(SELECT CEIL( RAND() * ( SELECT MAX( id ) FROM `poem` WHERE poem.deleted_at is NOT NULL)) AS rand_id) AS rand'), 'poem.id', '>=', 'rand.rand_id')
@@ -98,7 +98,7 @@ class PoemRepository extends BaseRepository {
         return $builder->take(1);
     }
 
-    public function suggest($num = 1, $with = [], \Closure $callback = null, $select = ['*']) {
+    public function suggest($num = 1, $with = [], \Closure $callback, $select = ['*']) {
         // TODO 选取策略： 1. 优先选取 poem.bedtime_post_id 不为空的 poem
         // 2. 评分和评论数
         // 3. poem.length
@@ -393,7 +393,7 @@ class PoemRepository extends BaseRepository {
 
     public function getCampaignPoemsByTagId($tagId) {
         if (!is_numeric($tagId)) {
-            return $this->responseFail();
+            throw new \InvalidArgumentException('Invalid tag ID');
         }
 
         $campaign = Tag::find($tagId)->campaign;
@@ -465,5 +465,379 @@ class PoemRepository extends BaseRepository {
                 self::updateAllTranslatedPoemPoetId($p, $poetId);
             }
         }
+    }
+
+    /**
+     * Preload translator data for poems to avoid N+1 queries
+     */
+    public static function preloadTranslatorsForPoems($poems) {
+        if ($poems->isEmpty()) {
+            return;
+        }
+
+        $poemIds = $poems->pluck('id');
+
+        // Get translator data from translator_id field (direct relationship)
+        $translatorIds = $poems->whereNotNull('translator_id')->pluck('translator_id')->unique();
+        $directTranslatorsData = collect();
+
+        if ($translatorIds->isNotEmpty()) {
+            $directTranslatorsData = DB::table('author')
+                ->whereIn('id', $translatorIds)
+                ->select('id', 'name_lang')
+                ->get()
+                ->keyBy('id');
+        }
+
+        // Get translator data from relatable table (many-to-many relationship)
+        $relatableTranslatorsData = DB::table('relatable')
+            ->leftJoin('author', function($join) {
+                $join->on('relatable.end_id', '=', 'author.id')
+                     ->where('relatable.end_type', '=', \App\Models\Author::class);
+            })
+            ->leftJoin('entry', function($join) {
+                $join->on('relatable.end_id', '=', 'entry.id')
+                     ->where('relatable.end_type', '=', \App\Models\Entry::class);
+            })
+            ->whereIn('relatable.start_id', $poemIds)
+            ->where('relatable.relation', '=', Relatable::RELATION['translator_is'])
+            ->where('relatable.start_type', '=', Poem::class)
+            ->select('relatable.start_id as poem_id', 'relatable.end_type', 'relatable.end_id',
+                    'author.name_lang as author_name', 'entry.name as entry_name')
+            ->get()
+            ->groupBy('poem_id');
+
+        // Cache translator data for each poem
+        foreach ($poems as $poem) {
+            $translators = collect();
+
+            // First try translator_id (direct relationship)
+            if ($poem->translator_id && isset($directTranslatorsData[$poem->translator_id])) {
+                $authorData = $directTranslatorsData[$poem->translator_id];
+                $authorName = json_decode($authorData->name_lang, true);
+                $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $authorData->name_lang;
+
+                $translators->push([
+                    'id' => $poem->translator_id,
+                    'name' => $name
+                ]);
+            }
+
+            // Then add relatable translators (many-to-many relationship)
+            if (isset($relatableTranslatorsData[$poem->id])) {
+                $relatableTranslators = $relatableTranslatorsData[$poem->id]->map(function($item) {
+                    if ($item->end_type === \App\Models\Author::class) {
+                        $authorName = json_decode($item->author_name, true);
+                        $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $item->author_name;
+                    } else {
+                        $name = $item->entry_name;
+                    }
+                    return [
+                        'id' => $item->end_id,
+                        'name' => $name
+                    ];
+                });
+
+                $translators = $translators->concat($relatableTranslators);
+            }
+
+            // Always set cached_translators relation to indicate caching was attempted
+            $poem->setRelation('cached_translators', $translators);
+
+            if ($translators->isNotEmpty()) {
+                // Cache the translators string for direct access
+                $translatorsStr = $translators->pluck('name')->implode(', ');
+                $poem->setRelation('cached_translators_str', $translatorsStr);
+            } else {
+                // If no translators found in relations but poem has translator field, cache it
+                if (!empty($poem->translator)) {
+                    $poem->setRelation('cached_translators_str', $poem->translator);
+                } else {
+                    // Set empty string to indicate no translators
+                    $poem->setRelation('cached_translators_str', '');
+                }
+            }
+        }
+    }
+
+    /**
+     * Get poet labels for poems to avoid N+1 queries
+     */
+    public static function getPoetLabelsForPoems($poems) {
+        if ($poems->isEmpty()) {
+            return;
+        }
+
+        $poetLabelMap = collect();
+        $poemIds = $poems->pluck('id');
+
+        // Get poet data from poet_id field
+        $poetIds = $poems->whereNotNull('poet_id')->pluck('poet_id')->unique();
+        $poetsData = collect();
+
+        if ($poetIds->isNotEmpty()) {
+            $poetsData = DB::table('author')
+                ->whereIn('id', $poetIds)
+                ->select('id', 'name_lang')
+                ->get()
+                ->keyBy('id');
+        }
+
+        // Get poet data from relatable table
+        $relatablePoetsData = DB::table('relatable')
+            ->leftJoin('author', function($join) {
+                $join->on('relatable.end_id', '=', 'author.id')
+                     ->where('relatable.end_type', '=', \App\Models\Author::class);
+            })
+            ->leftJoin('entry', function($join) {
+                $join->on('relatable.end_id', '=', 'entry.id')
+                     ->where('relatable.end_type', '=', \App\Models\Entry::class);
+            })
+            ->whereIn('relatable.start_id', $poemIds)
+            ->where('relatable.relation', '=', Relatable::RELATION['poet_is'])
+            ->where('relatable.start_type', '=', Poem::class)
+            ->select('relatable.start_id as poem_id', 'relatable.end_type', 'relatable.end_id',
+                    'author.name_lang as author_name', 'entry.name as entry_name')
+            ->get()
+            ->groupBy('poem_id');
+
+        // Cache poet data for each poem
+        foreach ($poems as $poem) {
+            $cachedPoet = null;
+
+            // First try poet_id
+            if ($poem->poet_id && isset($poetsData[$poem->poet_id])) {
+                $authorData = $poetsData[$poem->poet_id];
+                $authorName = json_decode($authorData->name_lang, true);
+                $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $authorData->name_lang;
+
+                $cachedPoet = [
+                    'author_id' => $poem->poet_id,
+                    'name' => $name
+                ];
+            }
+            // Then try relatable poets
+            elseif (isset($relatablePoetsData[$poem->id])) {
+                $poetItem = $relatablePoetsData[$poem->id]->first();
+                if ($poetItem->end_type === \App\Models\Author::class) {
+                    $authorName = json_decode($poetItem->author_name, true);
+                    $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $poetItem->author_name;
+                } else {
+                    $name = $poetItem->entry_name;
+                }
+
+                $cachedPoet = [
+                    'author_id' => $poetItem->end_id,
+                    'name' => $name
+                ];
+            } else {
+                $cachedPoet = [
+                    'author_id' => null,
+                    'name' => $poem->poet
+                ];
+            }
+
+            if ($cachedPoet) {
+                $poetLabelMap[$poem->id] = $cachedPoet;
+            }
+        }
+
+        return $poetLabelMap;
+    }
+
+    /**
+     * Sort author poems with unified logic (only sorting, no content modification)
+     *
+     * @param \Illuminate\Support\Collection $poems Collection of poems
+     * @param string $sortType Either 'hottest' (default) or 'newest'
+     * @return \Illuminate\Support\Collection
+     */
+    public static function sortAuthorPoems(\Illuminate\Support\Collection $poems, string $sortType = 'hottest'): \Illuminate\Support\Collection {
+        if ($sortType === 'newest') {
+            // use poem writing time year / month / date, if 缺失部分按当年/当月的最后时间补齐，以便排序时更靠后（更新）
+            // 若缺少 year，则回退使用 created_at
+            return $poems->sortByDesc(function ($p) {
+                // 如果有 year，构造一个尽量“晚”的日期以体现“最新”排序
+                if (!empty($p->year)) {
+                    $year  = (int)$p->year;
+                    // 若 month 为空，用 12 代表当年末
+                    $month = !empty($p->month) ? (int)$p->month : 12;
+                    // 若 date 为空，用该月最后一天
+                    $day   = !empty($p->date) ? (int)$p->date : 1; // 先用 1 再 endOfMonth() 统一
+                    try {
+                        $dt = \Illuminate\Support\Carbon::create($year, $month, $day, 23, 59, 59);
+                        // 如果原本未给出具体日，调整到月底；若未给出月，前面已设为 12
+                        if (empty($p->date)) {
+                            $dt = $dt->endOfMonth();
+                        }
+                        return $dt->timestamp;
+                    } catch (\Exception $e) {
+                        // 回退 created_at
+                        return $p->created_at ? $p->created_at->timestamp : 0;
+                    }
+                }
+                return $p->created_at ? $p->created_at->timestamp : 0;
+            })->values();
+        } else {
+            // Default hottest sorting - need scores for comparison
+            $poemScores = ScoreRepository::batchCalc($poems->pluck('id')->values()->all());
+
+            return $poems->sort(function ($a, $b) use ($poemScores) {
+                $scoreA = isset($poemScores[$a->id]) ? $poemScores[$a->id] : Score::$DEFAULT_SCORE_ARR;
+                $scoreB = isset($poemScores[$b->id]) ? $poemScores[$b->id] : Score::$DEFAULT_SCORE_ARR;
+
+                // If both have null scores, sort by created_at desc (newer first)
+                if ($scoreA['score'] === null && $scoreB['score'] === null) {
+                    return $b->created_at->timestamp <=> $a->created_at->timestamp;
+                }
+
+                $scoreOrder = $scoreB['score'] <=> $scoreA['score'];
+                $countOrder = $scoreB['count'] <=> $scoreA['count'];
+
+                return $scoreOrder === 0
+                    ? ($countOrder === 0 ? $scoreB['weight'] <=> $scoreA['weight'] : $countOrder)
+                    : $scoreOrder;
+            })->values();
+        }
+    }
+
+    /**
+     * Prepare author poems for API output with sorting
+     *
+     * @param \Illuminate\Support\Collection $poems Collection of poems
+     * @param string $sortType Either 'hottest' (default) or 'newest'
+     * @param array $options Options for processing ['noAvatar' => false, 'noPoet' => false]
+     * @return \Illuminate\Support\Collection
+     */
+    public static function prepareAuthorPoemsForAPI(\Illuminate\Support\Collection $poems, string $sortType = 'hottest', array $options = []): \Illuminate\Support\Collection {
+        $defaultOptions = ['noAvatar' => false, 'noPoet' => false];
+        $opt = array_merge($defaultOptions, $options);
+        list('noAvatar' => $noAvatar, 'noPoet' => $noPoet) = $opt;
+
+        $columns = [
+            'id', 'created_at', 'date_ago', 'title',
+            'poem', 'poet', 'poet_id',
+            'score', 'score_count', 'score_weight'
+        ];
+
+        if (!$noAvatar) {
+            $columns[] = 'poet_avatar';
+        }
+
+        // First sort the poems
+        $sortedPoems = self::sortAuthorPoems($poems, $sortType);
+
+        // Then prepare the content for API
+        $poemScores = ScoreRepository::batchCalc($sortedPoems->pluck('id')->values()->all());
+
+        return $sortedPoems->map(function (Poem $item) use ($noPoet, $poemScores) {
+            $score = isset($poemScores[$item->id]) ? $poemScores[$item->id] : Score::$DEFAULT_SCORE_ARR;
+            $item['score'] = $score['score'];
+            $item['score_count'] = $score['count'];
+            $item['score_weight'] = $score['weight'];
+            $item['poem'] = $item->firstLine;
+
+            if (!$noPoet) {
+                $item['poet'] = $item->poetLabel;
+            }
+
+            return $item;
+        })->map->only($columns)->values();
+    }
+
+    /**
+     * Get hierarchical translated poems tree starting from top original poem
+     * Returns nested structure with each poem containing its direct translations
+     */
+    public function getTranslatedPoemsTree($poem) {
+        $cacheKey = "translated_poems_tree_{$poem->topOriginalPoem->id}";
+
+        return Cache::remember($cacheKey, 360000, function() use ($poem) {
+            $topOriginal = $poem->topOriginalPoem;
+
+            // Get ALL poems in the translation tree recursively
+            $allPoemsInTree = $this->collectAllPoemsInTranslationTree($topOriginal);
+
+            // Preload translator data for all poems
+            static::preloadTranslatorsForPoems($allPoemsInTree);
+            $poetLabelMap = self::getPoetLabelsForPoems($allPoemsInTree);
+
+            // Build hierarchical structure
+            return $this->buildTranslationTree($topOriginal, $allPoemsInTree, $poetLabelMap);
+        });
+    }
+
+    /**
+     * Clear translated poems tree cache for a poem and all poems in its translation tree
+     */
+    public static function clearTranslatedPoemsTreeCache($poem) {
+        $topOriginal = $poem->topOriginalPoem ?? $poem;
+        $cacheKey = "translated_poems_tree_{$topOriginal->id}";
+        Cache::forget($cacheKey);
+    }
+
+    /**
+     * Optimized method to collect all poems in a translation tree with minimal queries
+     */
+    private function collectAllPoemsInTranslationTree($topOriginal, $maxDepth = 4) {
+        // Use recursive CTE or find all poems that belong to this translation tree
+        // We'll use a breadth-first approach with batched queries
+
+        $allPoems = collect([$topOriginal]);
+        $currentLevelIds = collect([$topOriginal->id]);
+        $processedIds = collect([$topOriginal->id]);
+        $currentDepth = 1;
+
+        while ($currentLevelIds->isNotEmpty() && $currentDepth <= $maxDepth) {
+            // Get all direct translations for all poems in current level in one query
+            $nextLevelPoems = Poem::whereIn('original_id', $currentLevelIds->toArray())
+                ->whereRaw('original_id <> id')
+                ->whereNotIn('id', $processedIds->toArray())
+                ->get();
+
+            if ($nextLevelPoems->isEmpty()) {
+                break;
+            }
+
+            // Add to collections
+            $allPoems = $allPoems->concat($nextLevelPoems);
+            $currentLevelIds = $nextLevelPoems->pluck('id');
+            $processedIds = $processedIds->concat($currentLevelIds);
+            $currentDepth++;
+        }
+
+        return $allPoems;
+    }
+
+    /**
+     * Recursively build translation tree structure
+     */
+    private function buildTranslationTree($poem, $allPoems, $poetLabelMap) {
+        // Get direct translations of this poem
+        $directTranslations = $allPoems->filter(function($p) use ($poem) {
+            return $p->original_id == $poem->id && $p->id !== $poem->id;
+        })->sortBy('language_id');
+
+        // Build the poem structure
+        $poemData = [
+            'id' => $poem->id,
+            'fakeId' => $poem->fakeId,
+            'originalId' => $poem->original_id,
+            'languageId' => $poem->language_id,
+            'language' => $poem->lang->name_lang ?? 'Unknown',
+            'translatorStr' => $poem->translatorsStr ?? '',
+            'title' => $poem->title,
+            'url' => $poem->url,
+            'isOriginal' => $poem->is_original,
+            'poetLabel' => $poem->is_original ? $poetLabelMap[$poem->id]['name'] : '',
+            'translatedPoems' => []
+        ];
+
+        // Recursively add translated poems
+        foreach ($directTranslations as $translation) {
+            $poemData['translatedPoems'][] = $this->buildTranslationTree($translation, $allPoems, $poetLabelMap);
+        }
+
+        return $poemData;
     }
 }

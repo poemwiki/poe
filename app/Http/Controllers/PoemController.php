@@ -7,19 +7,18 @@ use App\Http\Requests\Admin\Poem\UpdatePoem;
 use App\Models\Author;
 use App\Models\Genre;
 use App\Models\Poem;
-use App\Models\Wikidata;
 use App\Repositories\AuthorRepository;
 use App\Repositories\GenreRepository;
 use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use App\Rules\NoDuplicatedPoem;
-use Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class PoemController extends Controller {
     /** @var PoemRepository */
@@ -33,21 +32,20 @@ class PoemController extends Controller {
         $this->authorRepository = $authorRepository;
     }
 
-    private function _poem(Poem $poem) {
+    private function _getRandomPoem() {
         $randomPoem = $this->poemRepository->randomOne();
-        if ($poem->mergedToPoem) {
-            return redirect($poem->mergedToPoem->url);
-        }
 
-        $logs = $poem->activityLogs;
+        return $randomPoem;
+    }
 
-        return view('poems.show')->with([
-            'poem'                => $poem,
-            'randomPoemUrl'       => $randomPoem->url,
-            'randomPoemTitle'     => $randomPoem->title,
-            'randomPoemFirstLine' => $randomPoem->firstLine,
-            'logs'                => $logs
-        ]);
+    /**
+     * Redirect to the poem's page for convenience in debug mode
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function showId($id) {
+        $poem = Poem::find($id);
+        return redirect($poem->url);
     }
 
     /**
@@ -58,16 +56,33 @@ class PoemController extends Controller {
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function show($fakeId) {
-        $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
+        $randomPoem = $this->_getRandomPoem();
+        
+        $poem = $this->poemRepository->getPoemFromFakeId($fakeId, [
+            'id', 'title', 'language_id', 'is_original', 'original_id',
+            'poet', 'poet_cn', 'poem', 'length', 'translator', 'from',
+            'year', 'month', 'date',
+            'flag', 'subtitle', 'genre_id', 'poet_id', 'translator_id',
+            'preface', 'location', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded', 'upload_user_id', 'weapp_url'
+        ]);
+        
+        if ($poem->mergedToPoem) {
+            return redirect($poem->mergedToPoem->url);
+        }
 
-        return $this->_poem($poem);
+        $translatedPoemsTree = $this->poemRepository->getTranslatedPoemsTree($poem);
+        $logs = $poem->activityLogs;
+        // $poem->load('translatorAuthor');
+
+        return view('poems.show')->with([
+            'poem'                => $poem,
+            'randomPoemUrl'       => $randomPoem->url,
+            'randomPoemTitle'     => $randomPoem->title,
+            'randomPoemFirstLine' => $randomPoem->firstLine,
+            'logs'                => $logs,
+            'translatedPoemsTree' => $translatedPoemsTree
+        ]);
     }
-
-    // route('poem'); for poemwiki.org/poem.id
-    // public function showPoem($id){
-    //     $poem = Poem::findOrFail($id);
-    //     return $this->_poem($poem);
-    // }
 
     public function showContributions($fakeId) {
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
@@ -382,21 +397,29 @@ class PoemController extends Controller {
             $compareLines[] = $compareLine;
         }
 
-        $randomPoem = $this->poemRepository->randomOne();
+        // Get translation tree for the first poem (all poems in compare should have same top original)
+        $translatedPoemsTree = $this->poemRepository->getTranslatedPoemsTree($poems[0]);
 
         return view('poems.compare', [
-            'poems'          => $poems,
-            'compareLines'   => $compareLines,
-            'ids'            => $ids,
-            'idArr'          => $idArr,
-            'url'            => route('compare', $ids),
-            // todo add translators to authors string
-            'authors' => implode(',', $poems->map(function (Poem $poem) {
-                return $poem->poetLabel;
-            })->toArray()),
-            'randomPoemUrl'       => $randomPoem->url,
-            'randomPoemTitle'     => $randomPoem->title,
-            'randomPoemFirstLine' => $randomPoem->firstLine,
+            'poems'               => $poems,
+            'compareLines'        => $compareLines,
+            'ids'                 => $ids,
+            'idArr'               => $idArr,
+            'url'                 => route('compare', $ids),
+            'translatedPoemsTree' => $translatedPoemsTree,
+            'authors' => $this->getOgAuthorFromTree($translatedPoemsTree)
         ]);
     }
+    
+    private function getOgAuthorFromTree($translatedPoemsTree) {
+        if ($translatedPoemsTree['isOriginal']) {
+            $translators = array_map(function ($child) {
+                return $this->getOgAuthorFromTree($child);
+            }, $translatedPoemsTree['translatedPoems']);
+            return $translatedPoemsTree['poetLabel'] . ',' . implode(',', $translators);
+        } else {
+            return $translatedPoemsTree['translatorStr'];
+        }
+    }
+
 }

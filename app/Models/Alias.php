@@ -3,19 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Searchable\Searchable;
-use Spatie\Searchable\SearchResult;
 
 /**
  * App\Models\Alias
  *
- * @property int $id
- * @property int $fid
- * @property string $name
- * @property string|null $locale
- * @property int|null $author_id
- * @property int|null $language_id
- * @property int|null $wikidata_id
+ * @property int                             $id
+ * @property int                             $fid
+ * @property string                          $name
+ * @property string|null                     $locale
+ * @property int|null                        $author_id
+ * @property int|null                        $language_id
+ * @property int|null                        $wikidata_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Author|null $author
@@ -39,7 +37,7 @@ use Spatie\Searchable\SearchResult;
  * @method static \Illuminate\Database\Eloquent\Builder|Alias whereWikidataId($value)
  * @mixin \Eloquent
  */
-class Alias extends Model implements Searchable {
+class Alias extends Model {
     protected $table = 'alias';
 
     protected $fillable = [
@@ -95,7 +93,7 @@ class Alias extends Model implements Searchable {
             : null;
     }
     public function getQIDAttribute() {
-        return $this->wikidata_id ? 'Q'.$this->wikidata_id : null;
+        return $this->wikidata_id ? 'Q' . $this->wikidata_id : null;
     }
 
     public function wikidata() {
@@ -103,30 +101,30 @@ class Alias extends Model implements Searchable {
     }
 
 
-    public function getSearchResult(): SearchResult {
-        $author = $this->author;
-        if($author) {
-            $url = route('author/show', ['fakeId' => $author->fakeId]);
-
-            return new SearchResult(
-                $author,
-                $this->name,
-                $url
-            );
-        }
-
-        if(!$this->wikidata) {
-            // 由于删除author时，会删除相关alias，所以$this->author和$this->wikidata必有一个不为空
-            // 此处返回 SearchResult 仅从逻辑完备考虑，正常情况下不会执行
-            return new SearchResult($this, $this->name, '');
-        }
-
-        $wikiData = $this->wikidata;
-        $url = route('author/create-from-wikidata', ['wikidata_id' => $wikiData->id]);
-        return new SearchResult(
-            $wikiData,
-            $this->name,
-            $url
-        );
-    }
+    // public function getSearchResult(): SearchResult {
+    //     $author = $this->author;
+    //     if($author) {
+    //         $url = route('author/show', ['fakeId' => $author->fakeId]);
+    //
+    //         return new SearchResult(
+    //             $author,
+    //             $this->name,
+    //             $url
+    //         );
+    //     }
+    //
+    //     if(!$this->wikidata) {
+    //         // 由于删除author时，会删除相关alias，所以$this->author和$this->wikidata必有一个不为空
+    //         // 此处返回 SearchResult 仅从逻辑完备考虑，正常情况下不会执行
+    //         return new SearchResult($this, $this->name, '');
+    //     }
+    //
+    //     $wikiData = $this->wikidata;
+    //     $url = route('author/create-from-wikidata', ['wikidata_id' => $wikiData->id]);
+    //     return new SearchResult(
+    //         $wikiData,
+    //         $this->name,
+    //         $url
+    //     );
+    // }
 }

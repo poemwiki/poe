@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Repositories\ScoreRepository;
+use App\Repositories\PoemRepository;
 use App\Traits\HasFakeId;
 use App\Traits\RelatableNode;
 use App\User;
@@ -13,9 +14,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Laravel\Scout\Searchable;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Searchable\Searchable;
-use Spatie\Searchable\SearchResult;
 
 /**
  * App\Models\Poem.
@@ -44,22 +45,37 @@ use Spatie\Searchable\SearchResult;
  * @property Date                                $updated_at
  * @property mixed                               $activityLogs
  * @property NFT                                 $nft
+ * @property int                                 $flag
+ * @property string                              $poem
+ * @property string                              $translatorsStr
+ * @property string                              $title
+ * @property string                              $subtitle
+ * @property string                              $preface
  */
-class Poem extends Model implements Searchable {
+class Poem extends Model {
     use SoftDeletes;
     use LogsActivity;
     use HasFakeId;
     use RelatableNode;
+    use Searchable;
 
     /**DO NOT CHANGE FAKEID STATICS**/
     public static $FAKEID_KEY    = 'PoemWikikiWmeoP'; // Symmetric-key for xor
     public static $FAKEID_SPARSE = 96969696969;
     /**DO NOT CHANGE FAKEID STATICS**/
 
-    protected static $logFillable          = true;
-    protected static $logOnlyDirty         = true;
-    public static $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id'];
-    public static $OWNER                   = [
+    public static array $ignoreChangedAttributes = ['created_at', 'need_confirm', 'length', 'score', 'share_pics', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id'];
+
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->dontLogIfAttributesChangedOnly(['updated_at'])
+            ->logExcept(self::$ignoreChangedAttributes);
+    }
+
+    public static $OWNER = [
         'none'                    => 0, // 上传时未标注原创，此时应以 poetAuthor 为作者 owner，以 translatorAuthor 为译者 owner
         'uploader'                => 1, // 作者用户上传原创原作，此时以 upload_user_id 代表作者 owner
         'translatorUploader'      => 2, // 译者用户上传原创译作，且为单译者情况，此时以 upload_user_id 代表译者 owner
@@ -248,15 +264,15 @@ class Poem extends Model implements Searchable {
         });
 
         self::updating(function ($model) {
-            $model->poem = Str::trimEmptyLines(Str::trimTailSpaces($model->poem));
+            $model->poem   = Str::trimEmptyLines(Str::trimTailSpaces($model->poem));
             $model->length = grapheme_strlen($model->poem);
 
             $fullHash = Str::contentFullHash($model->poem);
             if (!$model->content) {
-                $oldPoem = Poem::find($model->id);
+                $oldPoem     = Poem::find($model->id);
                 $oldFullHash = Str::contentFullHash($oldPoem->poem);
-                $oldHash = Str::contentHash($oldPoem->poem);
-                $oldContent = Content::create([
+                $oldHash     = Str::contentHash($oldPoem->poem);
+                $oldContent  = Content::create([
                     'entry_id'    => $oldPoem->id,
                     'type'        => 0,
                     'content'     => $oldPoem->poem,
@@ -270,7 +286,7 @@ class Poem extends Model implements Searchable {
                 $oldPoem->save();
             } else {
                 $oldFullHash = $model->content->full_hash ?: Str::contentFullHash($model->content->content);
-                $oldHash = $model->content->hash;
+                $oldHash     = $model->content->hash;
             }
 
             if ($fullHash !== $oldFullHash) {
@@ -285,7 +301,7 @@ class Poem extends Model implements Searchable {
                     'full_hash'   => $fullHash
                 ]);
                 // TODO WHY content_id modification not loged in activityLog?
-                $model->content_id = $content->id;
+                $model->content_id   = $content->id;
                 $model->need_confirm = 0;
             }
         });
@@ -302,10 +318,29 @@ class Poem extends Model implements Searchable {
                     $model->save();
                 }
             });
+
+            // Clear translated poems tree cache when poem is updated
+            $model->clearTranslatedPoemsTreeCache();
+        });
+
+        // Clear cache when poem is created or deleted
+        self::created(function ($model) {
+            $model->clearTranslatedPoemsTreeCache();
+        });
+
+        self::deleted(function ($model) {
+            $model->clearTranslatedPoemsTreeCache();
         });
 
         // TODO delete related scores?
         // TODO delete related relatable record
+    }
+
+    /**
+     * Clear translated poems tree cache for this poem
+     */
+    public function clearTranslatedPoemsTreeCache() {
+        PoemRepository::clearTranslatedPoemsTreeCache($this);
     }
 
     /**
@@ -314,6 +349,27 @@ class Poem extends Model implements Searchable {
      * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
      */
     public function getTranslatorsAttribute() {
+        // Use cached translators if available (performance optimized)
+        if ($this->relationLoaded('cached_translators')) {
+            return $this->cached_translators->map(function ($translator) {
+                // Create mock Author/Entry objects from cached data
+                if (isset($translator['id'])) {
+                    // This is an Author
+                    $author = new \App\Models\Author();
+                    $author->id = $translator['id'];
+                    $author->label = $translator['name'];
+                    return $author;
+                } else {
+                    // This is an Entry
+                    $entry = new \App\Models\Entry();
+                    $entry->name = $translator['name'];
+                    return $entry;
+                }
+            });
+        }
+
+        // Fallback to original implementation if not cached
+
         $translators = $this->relatedTranslators()->get();
 
         return $translators->map(function ($translator) {
@@ -349,6 +405,11 @@ class Poem extends Model implements Searchable {
     }
 
     public function getTranslatorsLabelArrAttribute() {
+        // Use cached translators if available (for performance optimization)
+        if ($this->relationLoaded('cached_translators')) {
+            return $this->cached_translators->toArray();
+        }
+        
         return $this->translators->map(function ($translator) {
             if ($translator instanceof Author) {
                 return ['id' => $translator->id, 'name' => $translator->label];
@@ -359,6 +420,11 @@ class Poem extends Model implements Searchable {
     }
 
     public function getTranslatorsStrAttribute() {
+        // Use cached translators string if available (for performance optimization)
+        if ($this->relationLoaded('cached_translators_str')) {
+            return $this->cached_translators_str;
+        }
+        
         $translators = implode(', ', array_map(function ($translator) {
             return $translator['name'];
         }, $this->translatorsLabelArr));
@@ -464,13 +530,14 @@ class Poem extends Model implements Searchable {
      * @return Poem|null
      */
     public function getTopOriginalPoemAttribute(): ?Poem {
-        $ids           = [];
+        $processedIds  = [];
         $translateFrom = $this;
 
         do {
-            $ids[] = $translateFrom->id; // 保险起见，用笨办法防止环形链引起无限循环
+            // exclude processed ids to prevent infinite loop
+            $processedIds[] = $translateFrom->id;
             if (!$translateFrom->original_id
-                or in_array($translateFrom->original_id, $ids)
+                or in_array($translateFrom->original_id, $processedIds)
                 or !$translateFrom->is_translated
             ) {
                 break;
@@ -493,9 +560,6 @@ class Poem extends Model implements Searchable {
     public function translatedPoems(): HasMany {
         return $this->_translatedPoems()->with(['lang'])->whereRaw('original_id <> poem.id');
     }
-
-    // public function allTranslatedPoems() {
-    // }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -722,9 +786,14 @@ class Poem extends Model implements Searchable {
 
     /**
      * TODO enable set locales while getting traslator name.
+     * TODO use relatable to get translators instead of translatorAuthor, after translator_id is removed.
      * @return string
      */
     public function getTranslatorLabelAttribute() {
+        // Use cached translators if available (for performance optimization)
+        if ($this->relationLoaded('cached_translators') && $this->cached_translators->isNotEmpty()) {
+            return $this->cached_translators->first()['name'];
+        }
         // TODO if is_owner_uploaded==Poem::OWNER['translator'] && $this->uploader
         if ($this->translatorAuthor) {
             return $this->translatorAuthor->label;
@@ -777,12 +846,12 @@ class Poem extends Model implements Searchable {
             // TODO: it's an ugly way to filter the redundant update log after create,
             // it should not be written to db at the poem creation
             if ($oldVal && array_key_exists('poem', $oldVal) && is_null($oldVal['poem'])
-                && array_key_exists('title', $oldVal) && is_null($oldVal['title'])) {
+                        && array_key_exists('title', $oldVal) && is_null($oldVal['title'])) {
                 return false;
             }
 
             if ($activity->description === 'updated') {
-                $diffs = $activity->diffs;
+                $diffs    = $activity->diffs;
                 $diffKeys = array_keys($activity->diffs);
                 foreach ($diffKeys as $key) {
                     if (in_array($key, self::$ignoreChangedAttributes)) {
@@ -821,12 +890,29 @@ class Poem extends Model implements Searchable {
         return $json;
     }
 
-    public function getSearchResult(): SearchResult {
-        return new SearchResult(
-            $this,
-            $this->title,
-            $this->url,
-            $this->poet_label
-        );
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array
+     */
+    public function toSearchableArray(): array {
+        return [
+            'id'         => $this->id,
+            'title'      => $this->title,
+            'preface'    => $this->preface,
+            'subtitle'   => $this->subtitle,
+            // 'uploader'   => $this->uploader->name,
+            // 'relatedTranslators' => $translatorsLabels,
+            'poet'               => $this->poetAuthor ? $this->poetAuthor->name_lang : $this->poet,
+            'poem'               => $this->poem,
+        ];
+    }
+    /**
+     * Determine if the model should be searchable.
+     *
+     * @return bool
+     */
+    public function shouldBeSearchable(): bool {
+        return in_array($this->flag, [self::$FLAG['none'], self::$FLAG['infoNeedConfirm']]);
     }
 }

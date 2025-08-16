@@ -176,6 +176,7 @@ $config = [
         App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Mews\Captcha\CaptchaServiceProvider::class,
+        Barryvdh\Debugbar\ServiceProvider::class,
     ],
 
     /*
@@ -228,8 +229,8 @@ $config = [
         'View'         => Illuminate\Support\Facades\View::class,
         'Form'         => Collective\Html\FormFacade::class,
         'Html'         => Collective\Html\HtmlFacade::class,
-        'Flash'        => Laracasts\Flash\Flash::class,
         'Captcha'      => Mews\Captcha\Facades\Captcha::class,
+        'Debugbar'     => Barryvdh\Debugbar\Facades\Debugbar::class,
     ],
 
     'invite_limited' => env('INVITE_LIMITED', false),
@@ -269,7 +270,7 @@ $config = [
     'lark' => [
         'app_id'     => env('LARK_APP_ID'),
         'app_secret' => env('LARK_APP_SECRET'),
-    ],
+    ]
 ];
 
 return $config;

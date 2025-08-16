@@ -6,11 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Campaign;
 use App\Repositories\CampaignRepository;
 use App\Repositories\PoemRepository;
-use Cache;
+use Illuminate\Support\Facades\Cache;
 
-/**
- * Class LanguageController.
- */
 class CampaignAPIController extends Controller {
     /** @var CampaignRepository */
     private $campaignRepository;
@@ -48,31 +45,14 @@ class CampaignAPIController extends Controller {
         ]);
     }
 
-    public function index() {
-        // TODO Cache::forget('api-campaign-index') if new campaign set
-        $campaigns = Cache::remember('api-campaign-index', 3*60, function () {
-            return $this->campaignRepository->allInUse()->slice(0, 15)
-                ->map(function ($campaign) {
-                    if (isset($campaign->settings['test']) && $campaign->settings['test']) {
-                        return null;
-                    }
-                    $ret = $campaign->toArray();
-                    $ret['settings'] = collect($campaign->settings)->except(['result']);
-                    $ret['poem_count'] = $campaign->poem_count;
-                    $ret['user_count'] = $campaign->user_count;
-
-                    return $ret;
-                })
-                ->filter(function ($campaign) {
-                    return $campaign;
-                })->values();
-        });
+    public function index($offset = 0, $limit = 15) {
+        $campaigns = $this->campaignRepository->paninatedIndex($offset, $limit);
 
         return $this->responseSuccess($campaigns);
     }
 
     // TODO get campaign app code image from cache or generate it
-    // (new Weapp())->fetchAppCodeImg('campaign-35', storage_path('app/public/campaign/'.'35'), 'pages/index/index', 0)
+    // (new Weapp())->fetchAppCodeImg('campaign-35', storage_path('app/public/campaign/'.'35'), 'pages/index/index')
 
     public function show($id) {
         // TODO Cache::forget('api-campaign-show-') if new campaign poem uploaded
@@ -82,14 +62,14 @@ class CampaignAPIController extends Controller {
             $campaign = $this->campaignRepository->find($id);
 
             if (empty($campaign)) {
-                return $this->responseFail([], '没有找到这个活动。', self::$CODE['no_entry']);
+                return null;
             }
             $ret = $campaign->toArray();
 
-            $poems = $this->poemRepository->getCampaignPoemsByTagId($campaign->tag_id);
-            $ret['poemData'] = $poems;
-            $ret['settings'] = collect($campaign->settings)->except(['result'])->toArray();
-	    $ret['settings']['inner_image_url'] = cosUrl($campaign->settings['inner_image_url'] ?? $campaign->image
+            $poems                              = $this->poemRepository->getCampaignPoemsByTagId($campaign->tag_id);
+            $ret['poemData']                    = $poems;
+            $ret['settings']                    = collect($campaign->settings)->except(['result'])->toArray();
+            $ret['settings']['inner_image_url'] = cosUrl($campaign->settings['inner_image_url'] ?? $campaign->image
             );
             $ret['settings']['share_image_url'] = cosUrl($campaign->settings['share_image_url'] ?? $campaign->image);
             if (isset($ret['settings']['sell']['picUrl'])) {

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -24,6 +25,11 @@ class NFT extends Model {
     use LogsActivity;
     protected $table = 'nft';
 
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty();
+    }
     // protected $with = ['poem:id,title', 'content:id,content'];
 
     public const TYPE = [

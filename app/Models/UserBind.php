@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Passport\HasApiTokens;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -46,14 +47,17 @@ class UserBind extends Model {
 
     protected $table      = 'user_bind_info';
     public const BIND_REF = [
-        'wechat'      => 0, // 微信内授权
+        'wechat'      => 0, // 微信内授权（微信内置浏览器打开时，使用微信登录）
         'wechat-scan' => 1, // 微信扫码登录
         'weapp'       => 2, // 微信小程序登录
     ];
 
-    protected static $logFillable             = true;
-    protected static $logOnlyDirty            = true;
-    protected static $ignoreChangedAttributes = ['created_at'];
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['created_at']);
+    }
 
     protected $dates = [
         'created_at',
@@ -80,12 +84,12 @@ class UserBind extends Model {
 
         // TODO check if created same poem by hash
         self::creating(function ($model) {
-            $model->open_id_crc32 = Str::of($model->open_id)->crc32();
+            $model->open_id_crc32  = Str::of($model->open_id)->crc32();
             $model->union_id_crc32 = Str::of($model->union_id)->crc32();
         });
 
         self::updating(function ($model) {
-            $model->open_id_crc32 = Str::of($model->open_id)->crc32();
+            $model->open_id_crc32  = Str::of($model->open_id)->crc32();
             $model->union_id_crc32 = Str::of($model->union_id)->crc32();
         });
     }

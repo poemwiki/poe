@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['api'])->group(static function () {
-    Route::prefix('v1')->name('api/')->group(static function () {
+    Route::prefix('v1')->name('api.')->group(static function () {
         Route::prefix('campaign')->name('campaign/')->group(static function () {
             Route::get('/', '\App\Http\Controllers\API\CampaignAPIController@index')->name('index');
             Route::get('/list/{page?}', [\App\Http\Controllers\API\CampaignAPIController::class, 'list'])->name('list');
@@ -51,7 +51,7 @@ Route::middleware(['api'])->group(static function () {
 // to the $middlewareGroups['api'] in app/Http/Kernel.php.
 // But it will add poemwiki_session cookie for api response
 Route::middleware(['auth:api,web', 'api'])->group(static function () {
-    Route::prefix('v1')->name('api/')->group(static function () {
+    Route::prefix('v1')->name('api.')->group(static function () {
         Route::prefix('user')->name('user/')->group(static function () {
             Route::post('/profile', [\App\Http\Controllers\API\UserAPIController::class, 'update'])->name('profile');
             Route::get('/data', [\App\Http\Controllers\API\UserAPIController::class, 'data'])->name('data');

@@ -6,6 +6,7 @@ use App\Traits\RelatableNode;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -20,6 +21,12 @@ class MediaFile extends Model {
     use LogsActivity;
     use RelatableNode;
     protected $table = 'file';
+
+    public function getActivitylogOptions(): LogOptions {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty();
+    }
 
     public const TYPE = [
         'image'      => 0,
@@ -87,7 +94,7 @@ class MediaFile extends Model {
 
     /**
      * @param string $name
-     * @param $value
+     * @param        $value
      * @return $this
      */
     public function setProp(string $name, $value): self {

@@ -2,17 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Poem;
-use App\Models\Relatable;
-use App\Query\AuthorAliasSearchAspect;
 use App\Repositories\AuthorRepository;
 use App\Repositories\NationRepository;
 use App\Repositories\PoemRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Spatie\Searchable\ModelSearchAspect;
-use Spatie\Searchable\Search;
 
 class QueryController extends Controller {
     // public function __construct() {
@@ -48,7 +42,7 @@ class QueryController extends Controller {
             ->replaceMatches('@\b[a-zA-Z]{1,2}\b@u', ' ')
             ->replaceMatches('@\s+@u', ' ')
             ->trim();
-        // dd($keyword4Query);
+
         if ($keyword4Query->length < 1) {
             return view('query.search')->with([
                 'authors' => [],
@@ -57,67 +51,22 @@ class QueryController extends Controller {
             ]);
         }
 
-        // DB::enableQueryLog();
-        $searchResults = (new Search())
-            ->registerAspect(AuthorAliasSearchAspect::class)
-            ->registerModel(Poem::class, function (ModelSearchAspect $modelSearchAspect) {
-                $modelSearchAspect
-                    ->addSearchableAttribute('title') // return results for partial matches
-                    ->addSearchableAttribute('poem')
-                    ->addSearchableAttribute('poet')
-                    ->addSearchableAttribute('poet_cn')
-                    ->addSearchableAttribute('translator')
-                    ->addSearchableAttribute('preface')
-                    ->addSearchableAttribute('subtitle')
-                    ->addSearchableAttribute('location')
-                    ->whereNotExists(function ($query) {
-                        $query->select(DB::raw(1))
-                            ->from('relatable')
-                            ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
-                    })
-                    ->with('poetAuthor')->limit(100);
-                // ->addExactSearchableAttribute('upload_user_name') // only return results that exactly match the e-mail address
+        // Eager load relations to avoid N+1 queries in the view
+        $authors = \App\Models\Author::search($keyword4Query)
+            // ->query(function ($query) {
+            //     $query->with(['user']);
+            // })
+            ->paginate(3, null, 1);
+
+        $poems = \App\Models\Poem::search($keyword4Query)
+            ->query(function ($query) {
+                $query->with(['poetAuthor', 'uploader']);
             })
-            // ->registerModel(Poem::class, 'title', 'poem', 'poet', 'poet_cn', 'translator')//, 'poet')
-            ->search($keyword4Query);
+            ->paginate();
 
-        // dd(DB::getQueryLog());
-        $results = $searchResults->groupByType();
-        $authors = $results->get('authorAlias') ?: collect();
-        $authors = $authors->filter(function ($author) {
-            // TODO show wikidata poet on search result page: $author->searchable instanceof \App\Models\Wikidata
-            return $author->searchable instanceof \App\Models\Author;
-        });
-
-        $poems = $results->get('poem') ?: [];
-
-        $shiftPoems = collect();
-
-        foreach ($poems as $p) {
-            $shiftPoems->push($p->searchable);
-        }
-
-        foreach ($authors as $key => $author) {
-            if ($key >= 5) {
-                break;
-            }
-
-            // in case of $author->searchable instanceof \App\Models\Wikidata
-            // after show wikidata poet on search result page
-            if ($author->searchable instanceof \App\Models\Author) {
-                foreach ($author->searchable->poems as $poem) {
-                    $shiftPoems->push($poem);
-                }
-            }
-        }
-
-        // TODO append translated poems
-        $mergedPoems = $shiftPoems->unique('id');
-
-        // dd($mergedPoems);
         return view('query.search')->with([
             'authors' => $authors,
-            'poems'   => $mergedPoems,
+            'poems'   => $poems,
             'keyword' => $keyword
         ]);
     }

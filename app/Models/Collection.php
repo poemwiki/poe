@@ -8,16 +8,14 @@ use App\Traits\RelatableNode;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Searchable\Searchable;
-use Spatie\Searchable\SearchResult;
 
 /**
- * Class List.
+ * Class Collection.
  *
  * @property int $id
  * @mixin \Eloquent
  */
-class Collection extends Model implements Searchable {
+class Collection extends Model {
     // use SoftDeletes;
     // use HasTranslations;
     // use HasFakeId;
@@ -71,15 +69,5 @@ class Collection extends Model implements Searchable {
      * search poems within this collection.
      */
     public static function searchPoems() {
-    }
-
-    public function getSearchResult(): SearchResult {
-        $url = route('collection/show', ['id' => $this->id]);
-
-        return new SearchResult(
-            $this,
-            $this->name,
-            $url
-        );
     }
 }

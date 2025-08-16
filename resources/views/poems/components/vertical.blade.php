@@ -1,20 +1,29 @@
 <?php
 
-/** @var \App\Models\Poem[] $poems */
-if ($poems[0]->poetAuthor) {
-    // dd($poem->poetAuthor->nation);
-    $nation = $poems[0]->poetAuthor->dynasty ? $poems[0]->poetAuthor->dynasty->name_lang
-    : '';
-} else {
-    $nation = $poems[0]->dynasty
-    ? "[$poems[0]->dynasty] "
-    : '';
-}
-
 $softWrap = true;
 
-$createPageUrl = $poems[0]->topOriginalPoem->is_original ? route('poems/create', ['original_fake_id' => $poems[0]->topOriginalPoem->fake_id], false) : null;
-
+/**
+ * Get the poet or translator from the translated poems tree,
+ * to avoid extra queries to the database.
+ * @param array $translatedPoemsTree
+ * @param int $poemId
+ * @return string|null
+ */
+function getPoetOrTranslatorFromTree($translatedPoemsTree, $poemId) {
+  //  return poet label if the poem is the root of the tree(top original poem)
+  if ($translatedPoemsTree['id'] === $poemId) {
+    return $translatedPoemsTree['isOriginal'] ? $translatedPoemsTree['poetLabel'] : $translatedPoemsTree['translatorStr'];
+  }
+  if (isset($translatedPoemsTree['translatedPoems'])) {
+    foreach ($translatedPoemsTree['translatedPoems'] as $translatedPoem) {
+      $result = getPoetOrTranslatorFromTree($translatedPoem, $poemId);
+      if ($result) {
+        return $result;
+      }
+    }
+  }
+  return null;
+}
 ?>
 <section class="poem" itemscope itemtype="https://schema.org/Article" itemid="{{ $ids }}">
   <article>
@@ -22,9 +31,9 @@ $createPageUrl = $poems[0]->topOriginalPoem->is_original ? route('poems/create',
       @foreach ($poems as $key => $poem)
         <h1 class="title font-hei compare-font-{{$key}}" itemprop="headline" id="title">{{ $poem->title }}<span class="title-version">
             @if($poem->isTranslated)
-              @include('poems.fields.translator-names', ['poem' => $poem]) 译
+              {{getPoetOrTranslatorFromTree($translatedPoemsTree, $poem->id)}} 译
             @else
-              {{$poem->poet}}
+              {{getPoetOrTranslatorFromTree($translatedPoemsTree, $poem->id)}}
             @endif
         </span></h1>
       @endforeach
@@ -67,9 +76,9 @@ $createPageUrl = $poems[0]->topOriginalPoem->is_original ? route('poems/create',
                 @continue
               @endif
               <?php
-              $translators = $poems[$key]->isTranslated ? $poems[$key]->translatorsStr : $poems[$key]->poet;
+              $translators = getPoetOrTranslatorFromTree($translatedPoemsTree, $poems[$key]->id);
               ?>
-              <div class="poem-line-wrapper compare-bg-{{$key}}" data-translators="{{$translators}}" title="{{$poems[$key]->from}}">
+              <div class="poem-line-wrapper compare-bg-{{$key}}" data-translators="{{$translators}}">
                 @if(trim($lineOfPoem))
                   <pre class="poem-line font-hei compare-bg-{{$key}}">{{$lineOfPoem}}</pre>
                 @else
@@ -101,18 +110,14 @@ $createPageUrl = $poems[0]->topOriginalPoem->is_original ? route('poems/create',
           @endif
         @endforeach
 
-{{--        @foreach($poems as $poem)--}}
-{{--          @include('poems.fields.from', ['poem' => $poem])--}}
-{{--        @endforeach--}}
-{{--        <a class="btn share" id="share"--}}
-{{--           href="{{ route('poems/share', ['fakeId' => $poem->fakeId]) }}">@lang('poem.Share')</a>--}}
+        <!-- TODO: add share button -->
 
         <dl class="poem-info poem-versions nested-tree compare">
           @include('poems.components.translated', [
-                    'poem' => $poems[0]->topOriginalPoem,
-                    'currentPageId' => $poems[0]->id,
-                    'currentPageOriginalId' => $poems[0]->original_id===$poems[0]->id ? null : $poems[0]->original_id
-                ])
+              'translatedPoemsTree' => $translatedPoemsTree,
+              'currentPageId' => $poems[0]->id,
+              'currentPageOriginalId' => null
+          ])
 
           @include('poems.fields.add-translation-button', ['poem' => $poems[0]])
         </dl>

@@ -28,7 +28,7 @@
   <meta property="twitter:description" content="{{$poem->firstLine}}" />
 @endsection
 
-@include('poems.components.poem', ['poem' => $poem])
+@include('poems.components.poem', ['poem' => $poem, 'activityLogs' => $logs, 'translatedPoemsTree' => $translatedPoemsTree])
 
 <div>
   @livewire('score', [

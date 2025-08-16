@@ -3,10 +3,12 @@
 namespace App\Repositories;
 
 use Illuminate\Container\Container as Application;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-
+/**
+ * Repository pattern for Eloquent models
+ * Repository is for business logic, provide business oriented or complex query methods.
+ */
 abstract class BaseRepository {
     /**
      * @var Model

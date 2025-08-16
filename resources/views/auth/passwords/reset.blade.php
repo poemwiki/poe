@@ -12,7 +12,7 @@
     <form method="post" action="{{ url('/password/reset') }}">
       @csrf
       <input type="hidden" name="token" value="{{ $token }}">
-      <p class="text-muted text-lg">@lang('auth.password.Please set your new password')</p>
+      <p class="text-lg">@lang('auth.password.Please set your new password')</p>
       <div class="input-group mb-3">
         <input type="email" class="form-control {{ $errors->has('email')?'is-invalid':'' }}" name="email"
                value="{{ $email }}" placeholder="Email">
@@ -29,7 +29,7 @@
                               </span>
         </div>
         <input type="password" class="form-control {{ $errors->has('password')?'is-invalid':''}}" name="password"
-               placeholder="Password">
+               placeholder="@lang('Password')">
         @if ($errors->has('password'))
           <span class="invalid-feedback ml-2">
               <strong>{{ $errors->first('password') }}</strong>
@@ -43,7 +43,7 @@
             </span>
         </div>
         <input type="password" name="password_confirmation" class="form-control"
-               placeholder="Confirm password">
+               placeholder="@lang('Confirm password')">
         @if ($errors->has('password_confirmation'))
           <span class="help-block">
               <strong>{{ $errors->first('password_confirmation') }}</strong>

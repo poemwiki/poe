@@ -31,7 +31,7 @@ class PoemController extends Controller {
     public function index(IndexPoem $request) {
         // create and AdminListing instance for a specific model and
         $data = Listing::create(Poem::class)->processRequestAndGet(
-        // pass the request with params
+            // pass the request with params
             $request,
 
             // set columns to query
@@ -64,7 +64,7 @@ class PoemController extends Controller {
             $poem['campaign_name'] = $poem->campaign ? $poem->campaign->name_lang : '';
             $poem['poet_label']    = $poem->poetLabel;
             $poem['line_num']      = substr_count($poem->poem, "\n") + 1;
-	    $poem['is_original']   = !$poem->isTranslated;
+            $poem['is_original']   = !$poem->isTranslated;
             if ($poem->poetAuthor) {
                 $poem['poet_url'] = $poem->poetAuthor->url;
             }

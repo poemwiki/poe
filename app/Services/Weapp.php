@@ -2,27 +2,18 @@
 
 namespace App\Services;
 
-use EasyWeChat\Factory;
 
 class Weapp {
+    /**
+     * @var \Illuminate\Contracts\Foundation\Application|mixed
+     */
+    private \EasyWeChat\MiniProgram\Application $app;
+
     public function __construct() {
-        $this->app = Factory::miniProgram([
-            'app_id' => config('wechat.mini_program.default.app_id'),
-            'secret' => config('wechat.mini_program.default.secret')
-        ]);
+        $this->app = \EasyWeChat::miniProgram();
     }
 
-    /**
-     * @param string $scene
-     * @param string $appCodeImgDir
-     * @param string $page
-     * @param bool   $force           TODO add cache for this
-     * @param string $appCodeFileName
-     * @return false|string
-     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
-     * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
-     */
-    public function fetchAppCodeImg(string $scene, string $appCodeImgDir, string $page = 'pages/detail/detail', bool $force = false, string $appCodeFileName = 'app-code.jpg') {
+    public function fetchAppCodeImg(string $scene, string $appCodeImgDir, string $page = 'pages/detail/detail', string $appCodeFileName = 'app-code.jpg'): bool|string {
         // 注意微信对此接口调用频率有限制
         $response = $this->app->app_code->getUnlimit($scene, [
             'page'       => $page,
@@ -41,5 +32,21 @@ class Weapp {
         }
 
         return false;
+    }
+
+    /**
+     * @param string $content
+     * @param int    $scene   1 资料；2 评论；3 论坛；4 社交日志
+     * @return bool
+     */
+    public function checkText(string $content, int $scene = 1): bool {
+        $result = $this->app->content_security->checkText($content, [
+            'scene' => $scene
+        ]);
+        if ($result['errcode'] !== 0 && $result['errcode'] !== -1) {
+            return false;
+        }
+
+        return true;
     }
 }
