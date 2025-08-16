@@ -41,37 +41,37 @@ class AuthorController extends Controller {
         // Get author with aliases in a single query using JOIN
         $authorData = Author::leftJoin('alias', 'author.id', '=', 'alias.author_id')
             ->where('author.id', $id)
-            ->select('author.*', 
+            ->select('author.*',
                      DB::raw('GROUP_CONCAT(DISTINCT alias.name) as alias_names'))
             ->groupBy('author.id')
             ->firstOrFail();
-        
+
         $author = $authorData;
-        
+
         // Process aliases from the joined data
-        $aliasNames = $authorData->alias_names ? 
+        $aliasNames = $authorData->alias_names ?
             collect(explode(',', $authorData->alias_names))
                 ->map(function($name) { return \Illuminate\Support\Str::trimSpaces($name); })
                 ->unique()
-                ->values() : 
+                ->values() :
             collect();
-        
+
         $sortType = $request->get('sort', 'hottest'); // 'hottest' or 'newest'
-        
+
         $poemsAsPoet = Poem::where(['poet_id' => $id])->whereNotExists(function ($query) {
             $query->select(DB::raw(1))
                 ->from('relatable')
                 ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem'])
             ;
         })->get();
-        
+
         PoemRepository::preloadTranslatorsForPoems($poemsAsPoet);
-        
+
         $allOriginalPoems = $poemsAsPoet;
         if ($author->user) {
             $allOriginalPoems = $allOriginalPoems->concat($author->user->originalPoemsOwned);
         }
-        
+
         $sortedOriginalPoems = PoemRepository::sortAuthorPoems($allOriginalPoems, $sortType);
 
         // TODO poem.translator_id should be deprecated
@@ -82,9 +82,9 @@ class AuthorController extends Controller {
         })->get();
         $poemsAsRelatedTranslator = $author->poemsAsTranslator()->get();
         $poemsAsTranslator        = $poemsAsTranslatorAuthor->concat($poemsAsRelatedTranslator)->unique('id');
-        
+
         $sortedTranslationPoems = PoemRepository::sortAuthorPoems($poemsAsTranslator, $sortType);
-        
+
         // Optimize poet data loading for translator poems (for fallback cases)
         $poetLabelMap = PoemRepository::getPoetLabelsForPoems($poemsAsTranslator);
 

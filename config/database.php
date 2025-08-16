@@ -63,7 +63,7 @@ return [
                 PDO::ATTR_PERSISTENT => true, // enable persistent connection
                 PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
                 // PDO::MYSQL_ATTR_INIT_COMMAND => "SET sql_mode='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'",
-                PDO::ATTR_EMULATE_PREPARES => false,
+                // PDO::ATTR_EMULATE_PREPARES => false,
                 // PDO::MYSQL_ATTR_COMPRESS => true, // disable compression for now, it's not supported
             ]) : [],
         ],

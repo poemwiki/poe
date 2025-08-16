@@ -12,6 +12,7 @@ use App\Models\Poem;
 use App\Models\Relatable;
 use App\Models\Tag;
 use App\Models\Transaction;
+use App\Models\NFT;
 use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
@@ -77,13 +78,13 @@ class PoemAPIController extends Controller {
                 ->where('score', '>=', 7);
         }, $select)
             ->get();
-        
+
         $noScorePoems = $this->poemRepository->suggest($noScoreNum, ['reviews'], function ($query) {
             $query->whereNull('campaign_id')
                 ->whereNull('score');
         }, $select)
             ->get();
-        
+
         // Use merge() to maintain Eloquent Collection type and avoid memory copy
         $poems = $scorePoems->merge($noScorePoems);
 
@@ -91,7 +92,7 @@ class PoemAPIController extends Controller {
         if ($poems->isNotEmpty()) {
             $poems = $this->loadPoemRelationships($poems);
         }
-        
+
         // Batch calculate scores to prevent N+1 queries
         $poemIds = $poems->pluck('id');
         $scores = $poemIds->isNotEmpty() ? \App\Repositories\ScoreRepository::batchCalc($poemIds->toArray()) : [];
@@ -865,7 +866,7 @@ class PoemAPIController extends Controller {
             }),
             'keyword' => $keyword
         ];
-        
+
         $data['poems'] = $mergedPoems;
 
         return $this->responseSuccess($data);
@@ -953,15 +954,15 @@ class PoemAPIController extends Controller {
         $poetIds = $poems->filter(function($poem) {
             return !empty($poem->poet_id) && $poem->poet_id !== '';
         })->pluck('poet_id')->unique();
-        
+
         $uploaderIds = $poems->filter(function($poem) {
             return !empty($poem->upload_user_id) && $poem->upload_user_id !== '';
         })->pluck('upload_user_id')->unique();
-        
+
         $translatorIds = $poems->filter(function($poem) {
             return !empty($poem->translator_id) && $poem->translator_id !== '';
         })->pluck('translator_id')->unique();
-        
+
         // Load relations conditionally - each relationship only if it has valid IDs
         if ($poetIds->isNotEmpty()) {
             $poems->loadMissing('poetAuthor.user');
@@ -972,10 +973,10 @@ class PoemAPIController extends Controller {
         if ($translatorIds->isNotEmpty()) {
             $poems->loadMissing('translatorAuthor.user');
         }
-        
+
         // Use existing repository methods to optimize translator N+1 queries
         \App\Repositories\PoemRepository::preloadTranslatorsForPoems($poems);
-        
+
         return $poems;
     }
 }
