@@ -476,11 +476,11 @@ class PoemRepository extends BaseRepository {
         }
 
         $poemIds = $poems->pluck('id');
-        
+
         // Get translator data from translator_id field (direct relationship)
         $translatorIds = $poems->whereNotNull('translator_id')->pluck('translator_id')->unique();
         $directTranslatorsData = collect();
-        
+
         if ($translatorIds->isNotEmpty()) {
             $directTranslatorsData = DB::table('author')
                 ->whereIn('id', $translatorIds)
@@ -488,7 +488,7 @@ class PoemRepository extends BaseRepository {
                 ->get()
                 ->keyBy('id');
         }
-        
+
         // Get translator data from relatable table (many-to-many relationship)
         $relatableTranslatorsData = DB::table('relatable')
             ->leftJoin('author', function($join) {
@@ -510,19 +510,19 @@ class PoemRepository extends BaseRepository {
         // Cache translator data for each poem
         foreach ($poems as $poem) {
             $translators = collect();
-            
+
             // First try translator_id (direct relationship)
             if ($poem->translator_id && isset($directTranslatorsData[$poem->translator_id])) {
                 $authorData = $directTranslatorsData[$poem->translator_id];
                 $authorName = json_decode($authorData->name_lang, true);
                 $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $authorData->name_lang;
-                
+
                 $translators->push([
                     'id' => $poem->translator_id,
                     'name' => $name
                 ]);
             }
-            
+
             // Then add relatable translators (many-to-many relationship)
             if (isset($relatableTranslatorsData[$poem->id])) {
                 $relatableTranslators = $relatableTranslatorsData[$poem->id]->map(function($item) {
@@ -537,13 +537,13 @@ class PoemRepository extends BaseRepository {
                         'name' => $name
                     ];
                 });
-                
+
                 $translators = $translators->concat($relatableTranslators);
             }
-            
+
             // Always set cached_translators relation to indicate caching was attempted
             $poem->setRelation('cached_translators', $translators);
-            
+
             if ($translators->isNotEmpty()) {
                 // Cache the translators string for direct access
                 $translatorsStr = $translators->pluck('name')->implode(', ');
@@ -570,11 +570,11 @@ class PoemRepository extends BaseRepository {
 
         $poetLabelMap = collect();
         $poemIds = $poems->pluck('id');
-        
+
         // Get poet data from poet_id field
         $poetIds = $poems->whereNotNull('poet_id')->pluck('poet_id')->unique();
         $poetsData = collect();
-        
+
         if ($poetIds->isNotEmpty()) {
             $poetsData = DB::table('author')
                 ->whereIn('id', $poetIds)
@@ -604,13 +604,13 @@ class PoemRepository extends BaseRepository {
         // Cache poet data for each poem
         foreach ($poems as $poem) {
             $cachedPoet = null;
-            
+
             // First try poet_id
             if ($poem->poet_id && isset($poetsData[$poem->poet_id])) {
                 $authorData = $poetsData[$poem->poet_id];
                 $authorName = json_decode($authorData->name_lang, true);
                 $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $authorData->name_lang;
-                
+
                 $cachedPoet = [
                     'author_id' => $poem->poet_id,
                     'name' => $name
@@ -625,7 +625,7 @@ class PoemRepository extends BaseRepository {
                 } else {
                     $name = $poetItem->entry_name;
                 }
-                
+
                 $cachedPoet = [
                     'author_id' => $poetItem->end_id,
                     'name' => $name
@@ -636,7 +636,7 @@ class PoemRepository extends BaseRepository {
                     'name' => $poem->poet
                 ];
             }
-            
+
             if ($cachedPoet) {
                 $poetLabelMap[$poem->id] = $cachedPoet;
             }
@@ -647,28 +647,50 @@ class PoemRepository extends BaseRepository {
 
     /**
      * Sort author poems with unified logic (only sorting, no content modification)
-     * 
+     *
      * @param \Illuminate\Support\Collection $poems Collection of poems
      * @param string $sortType Either 'hottest' (default) or 'newest'
      * @return \Illuminate\Support\Collection
      */
     public static function sortAuthorPoems(\Illuminate\Support\Collection $poems, string $sortType = 'hottest'): \Illuminate\Support\Collection {
         if ($sortType === 'newest') {
-            // Sort by created_at descending (newest first)
-            return $poems->sortByDesc('created_at')->values();
+            // use poem writing time year / month / date, if 缺失部分按当年/当月的最后时间补齐，以便排序时更靠后（更新）
+            // 若缺少 year，则回退使用 created_at
+            return $poems->sortByDesc(function ($p) {
+                // 如果有 year，构造一个尽量“晚”的日期以体现“最新”排序
+                if (!empty($p->year)) {
+                    $year  = (int)$p->year;
+                    // 若 month 为空，用 12 代表当年末
+                    $month = !empty($p->month) ? (int)$p->month : 12;
+                    // 若 date 为空，用该月最后一天
+                    $day   = !empty($p->date) ? (int)$p->date : 1; // 先用 1 再 endOfMonth() 统一
+                    try {
+                        $dt = \Illuminate\Support\Carbon::create($year, $month, $day, 23, 59, 59);
+                        // 如果原本未给出具体日，调整到月底；若未给出月，前面已设为 12
+                        if (empty($p->date)) {
+                            $dt = $dt->endOfMonth();
+                        }
+                        return $dt->timestamp;
+                    } catch (\Exception $e) {
+                        // 回退 created_at
+                        return $p->created_at ? $p->created_at->timestamp : 0;
+                    }
+                }
+                return $p->created_at ? $p->created_at->timestamp : 0;
+            })->values();
         } else {
             // Default hottest sorting - need scores for comparison
             $poemScores = ScoreRepository::batchCalc($poems->pluck('id')->values()->all());
-            
+
             return $poems->sort(function ($a, $b) use ($poemScores) {
                 $scoreA = isset($poemScores[$a->id]) ? $poemScores[$a->id] : Score::$DEFAULT_SCORE_ARR;
                 $scoreB = isset($poemScores[$b->id]) ? $poemScores[$b->id] : Score::$DEFAULT_SCORE_ARR;
-                
+
                 // If both have null scores, sort by created_at desc (newer first)
                 if ($scoreA['score'] === null && $scoreB['score'] === null) {
                     return $b->created_at->timestamp <=> $a->created_at->timestamp;
                 }
-                
+
                 $scoreOrder = $scoreB['score'] <=> $scoreA['score'];
                 $countOrder = $scoreB['count'] <=> $scoreA['count'];
 
@@ -681,7 +703,7 @@ class PoemRepository extends BaseRepository {
 
     /**
      * Prepare author poems for API output with sorting
-     * 
+     *
      * @param \Illuminate\Support\Collection $poems Collection of poems
      * @param string $sortType Either 'hottest' (default) or 'newest'
      * @param array $options Options for processing ['noAvatar' => false, 'noPoet' => false]
@@ -691,20 +713,20 @@ class PoemRepository extends BaseRepository {
         $defaultOptions = ['noAvatar' => false, 'noPoet' => false];
         $opt = array_merge($defaultOptions, $options);
         list('noAvatar' => $noAvatar, 'noPoet' => $noPoet) = $opt;
-        
+
         $columns = [
             'id', 'created_at', 'date_ago', 'title',
             'poem', 'poet', 'poet_id',
             'score', 'score_count', 'score_weight'
         ];
-        
+
         if (!$noAvatar) {
             $columns[] = 'poet_avatar';
         }
 
         // First sort the poems
         $sortedPoems = self::sortAuthorPoems($poems, $sortType);
-        
+
         // Then prepare the content for API
         $poemScores = ScoreRepository::batchCalc($sortedPoems->pluck('id')->values()->all());
 
@@ -729,17 +751,17 @@ class PoemRepository extends BaseRepository {
      */
     public function getTranslatedPoemsTree($poem) {
         $cacheKey = "translated_poems_tree_{$poem->topOriginalPoem->id}";
-        
+
         return Cache::remember($cacheKey, 360000, function() use ($poem) {
             $topOriginal = $poem->topOriginalPoem;
-            
+
             // Get ALL poems in the translation tree recursively
             $allPoemsInTree = $this->collectAllPoemsInTranslationTree($topOriginal);
 
             // Preload translator data for all poems
             static::preloadTranslatorsForPoems($allPoemsInTree);
             $poetLabelMap = self::getPoetLabelsForPoems($allPoemsInTree);
-            
+
             // Build hierarchical structure
             return $this->buildTranslationTree($topOriginal, $allPoemsInTree, $poetLabelMap);
         });
@@ -760,30 +782,30 @@ class PoemRepository extends BaseRepository {
     private function collectAllPoemsInTranslationTree($topOriginal, $maxDepth = 4) {
         // Use recursive CTE or find all poems that belong to this translation tree
         // We'll use a breadth-first approach with batched queries
-        
+
         $allPoems = collect([$topOriginal]);
         $currentLevelIds = collect([$topOriginal->id]);
         $processedIds = collect([$topOriginal->id]);
         $currentDepth = 1;
-        
+
         while ($currentLevelIds->isNotEmpty() && $currentDepth <= $maxDepth) {
             // Get all direct translations for all poems in current level in one query
             $nextLevelPoems = Poem::whereIn('original_id', $currentLevelIds->toArray())
                 ->whereRaw('original_id <> id')
                 ->whereNotIn('id', $processedIds->toArray())
                 ->get();
-            
+
             if ($nextLevelPoems->isEmpty()) {
                 break;
             }
-            
+
             // Add to collections
             $allPoems = $allPoems->concat($nextLevelPoems);
             $currentLevelIds = $nextLevelPoems->pluck('id');
             $processedIds = $processedIds->concat($currentLevelIds);
             $currentDepth++;
         }
-        
+
         return $allPoems;
     }
 
