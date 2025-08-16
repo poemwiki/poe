@@ -40,12 +40,6 @@ php artisan vendor:publish --force --tag=livewire:assets --ansi
 php artisan package:discover --ansi && php artisan vendor:publish --force --tag=livewire:assets --ansi
 ```
 
-### Initialize
-Import all searchable data to meilisearch
-```
-php artisan scout:import "App\Models\Author"
-php artisan scout:import "App\Models\Poem"
-```
 
 ### Front-end Watch & Build
 ```bash
