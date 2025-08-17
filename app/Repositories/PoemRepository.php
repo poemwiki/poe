@@ -98,7 +98,7 @@ class PoemRepository extends BaseRepository {
         return $builder->take(1);
     }
 
-    public function suggest($num = 1, $with = [], \Closure $callback, $select = ['*']) {
+    public function suggest($num = 1, $with = [], ?\Closure $callback = null, $select = ['*']) {
         // TODO 选取策略： 1. 优先选取 poem.bedtime_post_id 不为空的 poem
         // 2. 评分和评论数
         // 3. poem.length
@@ -357,7 +357,7 @@ class PoemRepository extends BaseRepository {
             });
         });
 
-        // TOOD pagination
+        // TODO pagination
         return $q->limit($limit)->with('reviews')->orderByDesc('created_at')->get()->map(function ($item) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet'] = $item->poet_label;
@@ -824,7 +824,7 @@ class PoemRepository extends BaseRepository {
             'fakeId' => $poem->fakeId,
             'originalId' => $poem->original_id,
             'languageId' => $poem->language_id,
-            'language' => $poem->lang->name_lang ?? 'Unknown',
+            'language' => $poem->lang->name_lang ?? '',
             'translatorStr' => $poem->translatorsStr ?? '',
             'title' => $poem->title,
             'url' => $poem->url,
