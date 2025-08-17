@@ -33,3 +33,4 @@ fields_sample.json
 !/storage/framework
 !/storage/logs
 public/index-cn.html
+storage/framework/maintenance.php
