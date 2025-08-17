@@ -16,7 +16,7 @@ WORKDIR /app
 
 # PHP性能优化配置
 COPY <<EOF /opt/docker/etc/php/php.ini
-; JIT优化  
+; JIT优化
 opcache.jit_buffer_size=128M
 opcache.jit=tracing
 opcache.enable=1
@@ -98,7 +98,7 @@ server {
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
         fastcgi_param PATH_INFO \$fastcgi_path_info;
-        
+
         # FastCGI优化
         fastcgi_read_timeout 30s;
         fastcgi_send_timeout 30s;
@@ -124,7 +124,8 @@ COPY --chown=application:application . /app
 USER application
 RUN if [ -f composer.json ]; then \
         composer config --no-plugins allow-plugins.easywechat-composer/easywechat-composer true && \
-        composer install --optimize-autoloader --classmap-authoritative --no-dev; \
+        composer install --optimize-autoloader --classmap-authoritative --no-dev; &&\
+        php artisan passport:install\
     fi
 
 RUN if [ -f package.json ]; then \
