@@ -1,3 +1,6 @@
 *
 !public/
+!public/poem-card/
+!public/tmp-author-weapp
 !.gitignore
+!.gitkeep
