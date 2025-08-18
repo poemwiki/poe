@@ -11,7 +11,6 @@ Redis
 
 ## Tech Stack
 Laravel 9  
-Meilisearch  
 
 
 ## Start

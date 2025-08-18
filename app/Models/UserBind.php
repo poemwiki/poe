@@ -100,8 +100,4 @@ class UserBind extends Model {
     public function user() {
         return $this->belongsTo(\App\User::class, 'user_id', 'id');
     }
-
-    public function findForPassport($openId) {
-        return $this->where('open_id', $openId)->first();
-    }
 }

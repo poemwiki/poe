@@ -80,7 +80,7 @@ class AuthServiceProvider extends ServiceProvider {
 
         Passport::tokensExpireIn(now()->addDays(90));
         Passport::refreshTokensExpireIn(now()->addDays(120));
-        Passport::personalAccessTokensExpireIn(now()->addMonths(6));
+        Passport::personalAccessTokensExpireIn(now()->addDays(90));
 
         //        Gate::define('web.score.create', function ($user) {
         //            return isset($user->id);

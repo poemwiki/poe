@@ -82,7 +82,6 @@ class LoginController extends Controller {
         /** @var \App\User $user */
         $user = $this->guard()->user();
 
-        Passport::personalAccessTokensExpireIn(now()->addDays(3));
         $createToken = $user->createToken('openapi');
         $createToken->token->save();
 
