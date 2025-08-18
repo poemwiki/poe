@@ -39,6 +39,34 @@ php artisan vendor:publish --force --tag=livewire:assets --ansi
 php artisan package:discover --ansi && php artisan vendor:publish --force --tag=livewire:assets --ansi
 ```
 
+### 首次部署（Passport 加密密钥 & 初始客户端）
+Laravel Passport 需要一对私钥/公钥文件用于签名访问令牌。它们只在第一次部署时生成一次：
+
+```bash
+# 仅第一次（数据库已迁移且 oauth_* 表存在）
+php artisan passport:install
+```
+
+该命令会：
+1. 生成 `storage/oauth-private.key` 与 `storage/oauth-public.key`（不要提交到仓库，多机需同步）。
+2. 创建 Personal Access Client（用于 `$user->createToken()`）。
+3. 创建 Password Grant Client（如果暂不使用密码授权可以忽略）。
+
+注意：
+* 之后不要在镜像构建阶段或每次发布重复执行 `passport:install`，否则会产生多余客户端记录，若覆盖密钥还会使旧 token 全部失效。
+* 如果只缺少 Personal Access Client，可用更安全的幂等命令：`php artisan passport:client --personal`。
+* 多机部署需要将生成的两个 key 文件安全分发到所有运行实例。
+* 若安全事件需要“强制全部失效”，才考虑重新生成密钥（`passport:keys --force`）。
+
+### 手动验证 Token 签发
+首次安装后可快速验证：
+```bash
+php artisan tinker
+>>> $u = \App\User::first();
+>>> $token = $u->createToken('smoke')->accessToken;
+>>> $token; # 得到字符串表示成功
+```
+
 
 ### Front-end Watch & Build
 ```bash
