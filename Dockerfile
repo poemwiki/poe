@@ -124,8 +124,8 @@ COPY --chown=application:application . /app
 USER application
 RUN if [ -f composer.json ]; then \
         composer config --no-plugins allow-plugins.easywechat-composer/easywechat-composer true && \
-        composer install --optimize-autoloader --classmap-authoritative --no-dev; &&\
-        php artisan passport:install\
+        composer install --optimize-autoloader --classmap-authoritative --no-dev && \
+        php artisan passport:install; \
     fi
 
 RUN if [ -f package.json ]; then \
