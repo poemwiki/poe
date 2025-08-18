@@ -357,7 +357,8 @@ class Poem extends Model {
                     // This is an Author
                     $author = new \App\Models\Author();
                     $author->id = $translator['id'];
-                    $author->label = $translator['name'];
+                    // Provide name_lang so Author::getLabelAttribute() works consistently
+                    $author->name_lang = json_encode(['zh-CN' => $translator['name']]);
                     return $author;
                 } else {
                     // This is an Entry
@@ -409,7 +410,7 @@ class Poem extends Model {
         if ($this->relationLoaded('cached_translators')) {
             return $this->cached_translators->toArray();
         }
-        
+
         return $this->translators->map(function ($translator) {
             if ($translator instanceof Author) {
                 return ['id' => $translator->id, 'name' => $translator->label];
@@ -424,7 +425,7 @@ class Poem extends Model {
         if ($this->relationLoaded('cached_translators_str')) {
             return $this->cached_translators_str;
         }
-        
+
         $translators = implode(', ', array_map(function ($translator) {
             return $translator['name'];
         }, $this->translatorsLabelArr));
@@ -495,10 +496,11 @@ class Poem extends Model {
      **/
     private function _originalPoem() {
         /*
-         * 早期版本使用 original_id 和 is_original 两个字段来表述 翻译自和原作译作属性，而不是：
-         *      只用 original_id 来表示，original_id 为0的为原作，不为0的为译作。
-         * 因为还有一种译作没有 original_id，只能将其 original_id 字段置空。
-         * 2021.6.10 更改 original_id 为非空(方便使用索引) unsigned int（此类型与 poem.id 相同） 字段，
+         * original_id 为 $this->id 的 poem 为原作，不为 0 的为有原作的译作， 为 0 的为无原作的译作。
+         *
+         * 2021.6.10 更改 original_id 为非空(为了方便使用索引) unsigned int（为了保持类型与 poem.id 相同） 字段。@see ChangeOriginalIdOfPoem
+         * 早期版本使用 original_id 和 is_original 两个字段来表述 翻译自和原作译作属性，
+         * 因为有一种译作没有 original_id，只能将其 original_id 字段置空。
          * TODO 删除 is_original 字段（由于 original_id 已经隐含了原作/译作信息，
          *  可以用 dynamic attribute 代替：original_id 为 $this->id 表示原作，为 0 表示无原作的译作）
          */
