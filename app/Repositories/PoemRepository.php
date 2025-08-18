@@ -538,7 +538,7 @@ class PoemRepository extends BaseRepository {
                     ];
                 });
 
-                $translators = $translators->concat($relatableTranslators);
+                $translators = $translators->concat($relatableTranslators)->unique('id')->unique('name');
             }
 
             // Always set cached_translators relation to indicate caching was attempted
