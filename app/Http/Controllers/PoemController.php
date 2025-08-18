@@ -57,7 +57,7 @@ class PoemController extends Controller {
      */
     public function show($fakeId) {
         $randomPoem = $this->_getRandomPoem();
-        
+
         $poem = $this->poemRepository->getPoemFromFakeId($fakeId, [
             'id', 'title', 'language_id', 'is_original', 'original_id',
             'poet', 'poet_cn', 'poem', 'length', 'translator', 'from',
@@ -65,11 +65,12 @@ class PoemController extends Controller {
             'flag', 'subtitle', 'genre_id', 'poet_id', 'translator_id',
             'preface', 'location', 'short_url', 'poet_wikidata_id', 'translator_wikidata_id', 'is_owner_uploaded', 'upload_user_id', 'weapp_url'
         ]);
-        
+
         if ($poem->mergedToPoem) {
             return redirect($poem->mergedToPoem->url);
         }
 
+        // will also sync cached translators onto $poem
         $translatedPoemsTree = $this->poemRepository->getTranslatedPoemsTree($poem);
         $logs = $poem->activityLogs;
         // $poem->load('translatorAuthor');
@@ -410,7 +411,7 @@ class PoemController extends Controller {
             'authors' => $this->getOgAuthorFromTree($translatedPoemsTree)
         ]);
     }
-    
+
     private function getOgAuthorFromTree($translatedPoemsTree) {
         if ($translatedPoemsTree['isOriginal']) {
             $translators = array_map(function ($child) {

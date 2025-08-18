@@ -1,7 +1,13 @@
-@if($poem->translators->count())
+@php
+  // translators relation might not be hydrated due to cache timing; provide a lazy fallback using translatorsStr
+  $translatorCollection = $poem->translators; // accessor will resolve and may use cached_translators
+  $translatorCount = $translatorCollection->count();
+@endphp
+
+@if($translatorCount)
   <dt>@lang('admin.poem.columns.translator')</dt>
   <dd itemprop="translator" class="poem-translator">
-    @foreach($poem->translators as $translator)
+    @foreach($translatorCollection as $translator)
       @if($translator instanceof \App\Models\Author)
         <a href="{{route('author/show', ['fakeId' => $translator->fakeId])}}" class="author-label poemwiki-link">{{$translator->label}}</a>
       @elseif($translator instanceof \App\Models\Entry)

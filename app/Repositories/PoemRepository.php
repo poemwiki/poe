@@ -471,8 +471,12 @@ class PoemRepository extends BaseRepository {
      * Preload translator data for poems to avoid N+1 queries
      */
     public static function preloadTranslatorsForPoems($poems) {
+        // Filter out poems already having cached translators to avoid redundant queries
+        $poems = $poems->filter(function ($p) {
+            return !$p->relationLoaded('cached_translators');
+        });
         if ($poems->isEmpty()) {
-            return;
+            return; // nothing new to preload
         }
 
         $poemIds = $poems->pluck('id');
