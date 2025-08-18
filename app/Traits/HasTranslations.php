@@ -52,21 +52,13 @@ trait HasTranslations {
         if (empty($translations)) {
             return '';
         }
-
-        $lastFallback = array_key_first($translations);
-        $zhFallback   = ['zh-hans', 'zh-cn', 'zh-Hans-CN', 'zh', 'zh-yue', 'zh-hant', 'zh-hk', 'zh-tw', 'zh-sg', 'wuu', 'yue', 'en', strtolower($lastFallback)];
-        $zhTFallback  = ['zh-hant', 'zh-hk', 'zh-tw', 'zh', 'zh-cn', 'zh-hans', 'zh-yue', 'zh-Hans-CN', 'zh-sg', 'wuu', 'yue', 'en', strtolower($lastFallback)];
-        // TODO in_array($lowerLocale, $zhCNLocales)
-        $lowerLocale = strtolower($locale);
-        if (in_array($lowerLocale, $zhFallback)) {
-            return $this->getFallbackTranslation($key, $zhFallback);
+        // Use global helper for unified fallback logic
+        if (function_exists('pick_translation_value')) {
+            return pick_translation_value($translations, $locale);
         }
-        // TODO in_array($lowerLocale, $zhHantLocales)
-        if (in_array($lowerLocale, $zhTFallback)) {
-            return $this->getFallbackTranslation($key, $zhTFallback);
-        }
-
-        return $translations[$lastFallback];
+        // Fallback to original first value if helper missing
+        $firstKey = array_key_first($translations);
+        return $translations[$firstKey];
     }
 
     public function getTranslated(string $key, string $locale) {

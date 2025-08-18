@@ -521,3 +521,56 @@ if (!function_exists('urlOrLoginRef')) {
         return \Illuminate\Support\Facades\Auth::check() ? $url : route('login', ['ref' => $url]);
     }
 }
+
+if (!function_exists('pick_translation_value')) {
+    /**
+     * Unified translation fallback picking logic (aligns with HasTranslations::fallback)
+     * Given an associative array locale => value, try locales in order depending on clusters.
+     * Priority groups (simplified vs traditional Chinese) then English, then first non-empty.
+     * @param array $translations
+     * @param string|null $preferredLocale Optional preferred locale to attempt first
+     * @return string
+     */
+    function pick_translation_value(array $translations, ?string $preferredLocale = null): string {
+        if (empty($translations)) { return ''; }
+
+        // Normalize keys to lowercase for lookup but keep original values
+        $normalized = [];
+        foreach ($translations as $k => $v) {
+            if ($v === null || $v === '') { continue; }
+            $normalized[strtolower($k)] = $v;
+        }
+        if (empty($normalized)) { return ''; }
+
+        $firstNonEmpty = reset($normalized);
+
+        $simplifiedCluster = ['zh-hans','zh-cn','zh-hans-cn','zh','zh-yue','zh-hant','zh-hk','zh-tw','zh-sg','wuu','yue','en'];
+        $traditionalCluster = ['zh-hant','zh-hk','zh-tw','zh','zh-cn','zh-hans','zh-yue','zh-hans-cn','zh-sg','wuu','yue','en'];
+
+        $tryOrder = [];
+        if ($preferredLocale) {
+            $tryOrder[] = strtolower($preferredLocale);
+        }
+
+        // Decide which cluster to prepend based on preferred locale membership
+        if ($preferredLocale && in_array(strtolower($preferredLocale), $simplifiedCluster)) {
+            $tryOrder = array_merge($tryOrder, $simplifiedCluster);
+        } elseif ($preferredLocale && in_array(strtolower($preferredLocale), $traditionalCluster)) {
+            $tryOrder = array_merge($tryOrder, $traditionalCluster);
+        } else {
+            // default: simplified cluster first then traditional (ensures both covered)
+            $tryOrder = array_merge($tryOrder, $simplifiedCluster, $traditionalCluster);
+        }
+
+        // Append all existing keys to ensure nothing missed
+        $tryOrder = array_unique(array_merge($tryOrder, array_keys($normalized)));
+
+        foreach ($tryOrder as $loc) {
+            if (isset($normalized[$loc]) && $normalized[$loc] !== '') {
+                return $normalized[$loc];
+            }
+        }
+
+        return (string) $firstNonEmpty;
+    }
+}

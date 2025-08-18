@@ -519,7 +519,9 @@ class PoemRepository extends BaseRepository {
             if ($poem->translator_id && isset($directTranslatorsData[$poem->translator_id])) {
                 $authorData = $directTranslatorsData[$poem->translator_id];
                 $authorName = json_decode($authorData->name_lang, true);
-                $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $authorData->name_lang;
+                $name = is_array($authorName)
+                    ? pick_translation_value($authorName, 'zh-CN')
+                    : $authorData->name_lang;
 
                 $translators->push([
                     'id' => $poem->translator_id,
@@ -532,7 +534,9 @@ class PoemRepository extends BaseRepository {
                 $relatableTranslators = $relatableTranslatorsData[$poem->id]->map(function($item) {
                     if ($item->end_type === \App\Models\Author::class) {
                         $authorName = json_decode($item->author_name, true);
-                        $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $item->author_name;
+                        $name = is_array($authorName)
+                            ? pick_translation_value($authorName, 'zh-CN')
+                            : $item->author_name;
                     } else {
                         $name = $item->entry_name;
                     }
@@ -613,7 +617,9 @@ class PoemRepository extends BaseRepository {
             if ($poem->poet_id && isset($poetsData[$poem->poet_id])) {
                 $authorData = $poetsData[$poem->poet_id];
                 $authorName = json_decode($authorData->name_lang, true);
-                $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $authorData->name_lang;
+                $name = is_array($authorName)
+                    ? pick_translation_value($authorName, 'zh-CN')
+                    : $authorData->name_lang;
 
                 $cachedPoet = [
                     'author_id' => $poem->poet_id,
@@ -625,7 +631,9 @@ class PoemRepository extends BaseRepository {
                 $poetItem = $relatablePoetsData[$poem->id]->first();
                 if ($poetItem->end_type === \App\Models\Author::class) {
                     $authorName = json_decode($poetItem->author_name, true);
-                    $name = is_array($authorName) ? ($authorName['zh-CN'] ?? $authorName['en'] ?? reset($authorName)) : $poetItem->author_name;
+                    $name = is_array($authorName)
+                        ? pick_translation_value($authorName, 'zh-CN')
+                        : $poetItem->author_name;
                 } else {
                     $name = $poetItem->entry_name;
                 }
