@@ -131,7 +131,7 @@
         @endphp
         <input type="radio" name="poem-tabs" id="tab-author-poem" {{ $authorTabChecked ? 'checked="checked"' : '' }}>
         <label class="text-lg" for="tab-author-poem">
-          @lang("Author's Poem", ['author' => $label]) ({{$poemsAsPoet->count()}})
+          @lang("Author's Poem", ['author' => $label])<span class="ml-3 text-sm font-normal text-gray-400">{{$poemsAsPoet->count()}}</span>
         </label>
         <div class="tab">
           @if($poemsAsPoet->isNotEmpty())
@@ -176,7 +176,7 @@
           @endphp
           <input type="radio" name="poem-tabs" id="tab-translator-poem" {{ $translatorTabChecked ? 'checked="checked"' : '' }}>
           <label class="text-lg" for="tab-translator-poem">
-            @lang("Translation Works", ['author' => $label]) ({{$poemsAsTranslator->count()}})
+            @lang("Translation Works", ['author' => $label])<span class="ml-3 text-sm font-normal text-gray-400">{{$poemsAsTranslator->count()}}</span>
           </label>
           <div class="tab">
             <ul class="poems-list">
