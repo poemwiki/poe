@@ -52,6 +52,7 @@ $config = [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+    'canonical_domain' => env('APP_CANONICAL_DOMAIN', 'poemwiki.org'),
 
     'asset_url' => env('ASSET_URL', null),
 

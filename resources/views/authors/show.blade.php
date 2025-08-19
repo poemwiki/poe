@@ -7,7 +7,7 @@
 @section('author', $label)
 
 @section('canonical')
-  <link rel="canonical" href="{{$author->url}}"/>
+  <link rel="canonical" href="{{canonicalUrl($author->url)}}"/>
 @endsection
 
 

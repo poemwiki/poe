@@ -5,9 +5,9 @@
   /** @var Poem $poem */
   $cover = cosUrl('/img/common/poemwiki-2x.png');
   ?>
-@section('canonical')<link rel="canonical" href="{{str_replace('://www.', '://', $poem->url)}}" />@endsection
+@section('canonical')<link rel="canonical" href="{{canonicalUrl($poem->url)}}" />@endsection
 {{--TODO 支持多语言版本UI，并且在 alternate section 列出诗歌对应语言版本的url 例如： <link rel="alternate" href="{{$poem->getAlternateUrl('en') ?: 'https://en.poemwiki.org/p/'.$poem->fake_id}}" hreflang="en" /> --}}
-@section('alternate')<link rel="alternate" href="{{$poem->url}}" hreflang="x-default" />@endsection
+@section('alternate')<link rel="alternate" href="{{canonicalUrl($poem->url)}}" hreflang="x-default" />@endsection
 @section('title'){{$poem->title}}@endsection
 @section('author'){{$poem->poet.($poem->poet ? ',' : '').$poem->poet_cn}}@endsection
 @section('meta-og')

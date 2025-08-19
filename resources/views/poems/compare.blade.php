@@ -5,7 +5,7 @@
   $cover = cosUrl('/img/common/poemwiki-2x.png');
   $poem = $poems[0];
   ?>
-@section('canonical')<link rel="canonical" href="{{$url}}" />@endsection
+@section('canonical')<link rel="canonical" href="{{canonicalUrl($url)}}" />@endsection
 @section('title'){{$poem->title}} 各译本对照阅读@endsection
 @section('author'){{$authors}}@endsection
 @section('meta-og')

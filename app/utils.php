@@ -481,6 +481,52 @@ if (!function_exists('isValidUrl')) {
     }
 }
 
+if (!function_exists('canonicalUrl')) {
+    /**
+     * Replace URL host with canonical domain from config('app.canonical_domain').
+     * Handles absolute and relative URLs. If URL is relative, build full URL using app URL then replace host.
+     *
+     * @param string $url
+     * @return string
+     */
+    function canonicalUrl(string $url): string {
+        $canonicalHost = config('app.canonical_domain');
+
+        // if no canonical domain configured, return original
+        if (empty($canonicalHost)) {
+            return $url;
+        }
+
+        // If relative URL, make absolute using app.url
+        if (!preg_match('#^https?://#i', $url)) {
+            $base = rtrim(config('app.url', ''), '/');
+            $url = $base . (str_starts_with($url, '/') ? $url : '/' . $url);
+        }
+
+        $parts = parse_url($url);
+        if ($parts === false) {
+            return $url;
+        }
+
+        $scheme = $parts['scheme'] ?? 'https';
+        $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+
+        // If canonicalHost includes scheme or port, prefer raw value
+        if (preg_match('#^https?://#i', $canonicalHost)) {
+            $hostWithScheme = rtrim($canonicalHost, '/');
+            $newBase = $hostWithScheme;
+        } else {
+            $newBase = $scheme . '://' . rtrim($canonicalHost, '/') . $port;
+        }
+
+        $path = $parts['path'] ?? '/';
+        $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+        $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
+
+        return $newBase . $path . $query . $fragment;
+    }
+}
+
 if (!function_exists('renderLink')) {
     /**
      * Replace http/https url to <a> tag.
