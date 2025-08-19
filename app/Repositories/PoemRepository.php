@@ -293,23 +293,52 @@ class PoemRepository extends BaseRepository {
         return self::newQuery()->where('upload_user_id', $userID)
             // TODO handle other $poem->is_owner_uploaded values, and fix api.poem.delete gate
             ->whereIn('is_owner_uploaded', [Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])
-            ->with('reviews')->orderByDesc('created_at');
+            ->with([
+                'uploader:id,name,is_v,avatar',
+                'poetAuthor.user:id,name,is_v,avatar'
+            ])
+            ->orderByDesc('created_at');
     }
 
-    public function getByOwner($userID, $page = null, $pageSize = 20) {
+    public function getByOwner($userID, $page = null, $pageSize = 20, $reviewsLimit = 2) {
         $query = $this->_getByOwner($userID);
 
+        // Apply pagination if requested (still returning collection for backward compatibility)
         if (is_numeric($page)) {
-            $query->paginate($pageSize, ['*'], 'page', $page);
+            $query->paginate($pageSize, ['*'], 'page', $page); // side-effect to set internal page; will still call get()
         }
 
-        return $query->get()->map(function (Poem $item) use ($userID) {
+        // Constrained eager loads
+        $query->with([
+            'reviews' => function ($q) use ($reviewsLimit) {
+                if ($reviewsLimit > 0) {
+                    $q->orderByDesc('created_at');
+                    if ($reviewsLimit !== -1) { // -1 means no limit (load all)
+                        $q->limit($reviewsLimit);
+                    }
+                }
+                $q->select(['id','poem_id','user_id','content','created_at'])
+                  ->with('user:id,name,avatar');
+            },
+            'nft:id,poem_id' // minimal nft columns
+        ]);
+
+        $poems = $query->get();
+
+        // Batch score counts
+        $scoreCounts = Score::query()
+            ->whereIn('poem_id', $poems->pluck('id'))
+            ->selectRaw('poem_id, COUNT(user_id) as c')
+            ->groupBy('poem_id')
+            ->pluck('c', 'poem_id');
+
+        return $poems->map(function (Poem $item) use ($userID, $scoreCounts) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet'] = $item->poetLabel;
-            $item['score_count'] = ScoreRepository::calcCount($item->id);
-            $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
+            $item['score_count'] = (int) ($scoreCounts[$item->id] ?? 0);
+            $item['reviews'] = $item->reviews->map->only(self::$relatedReviewColumns);
             $item['listable'] = (!$item->nft && NFT::isMintable($item, $userID))
-                    || ($item->nft && $item->nft->isListableByUser($userID));
+                || ($item->nft && $item->nft->isListableByUser($userID));
             $item['unlistable'] = $item->nft && $item->nft->isUnlistableByUser($userID);
             $item['nft_id'] = $item->nft ? $item->nft->id : null;
 
