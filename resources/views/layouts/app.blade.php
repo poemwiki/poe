@@ -29,7 +29,7 @@
                 {{ config('app.name', 'PoemWiki') }}
 
                 <a class="navbar-brand" href="#">
-                    <img class="navbar-brand-full" src="/icon.svg" width="30" height="30"
+                    <img class="navbar-brand-full" src="/icon/poem-bird.svg" width="30" height="30"
                          alt="PoemWiki Logo">
                 </a>
             </a>

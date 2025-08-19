@@ -2,7 +2,7 @@
 @section('content')
   <?php
   /** @var \App\Models\Poem[] $poems */
-  $cover = 'https://poemwiki.org/icon/apple-touch-icon.png';
+  $cover = cosUrl('/img/common/poemwiki-2x.png');
   $poem = $poems[0];
   ?>
 @section('canonical')<link rel="canonical" href="{{$url}}" />@endsection
