@@ -331,7 +331,7 @@ class PoemRepository extends BaseRepository {
      * @param bool $excludeSelf    exclude poem that upload_user_id=userId. ONLY for $isCampaignPoem == true
      * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
      */
-    public function getRelated($userId, $limit = 100, $isCampaignPoem = false, $excludeSelf = true) {
+    public function getRelated($userId, $limit = 60, $isCampaignPoem = false, $excludeSelf = true) {
         $q = self::newQuery();
 
         if ($isCampaignPoem) {
@@ -358,11 +358,33 @@ class PoemRepository extends BaseRepository {
         });
 
         // TODO pagination
-        return $q->limit($limit)->with('reviews')->orderByDesc('created_at')->get()->map(function ($item) {
+        $poems = $q->limit($limit)
+            ->with([
+                'uploader:id,name,is_v,avatar',
+                'reviews' => function ($q) {
+                $q->orderByDesc('created_at')
+                    ->select(['id', 'poem_id', 'user_id', 'content', 'created_at'])
+                    ->with('user:id,name,avatar');
+                }
+            ])
+            ->orderByDesc('created_at')
+            ->get();
+        // Batch score counts to avoid N+1 queries
+        $scoreCounts = Score::query()
+            ->whereIn('poem_id', $poems->pluck('id'))
+            ->selectRaw('poem_id, COUNT(user_id) as c')
+            ->groupBy('poem_id')
+            ->pluck('c', 'poem_id');
+
+        return $poems->map(function ($item) use ($scoreCounts) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
             $item['poet'] = $item->poet_label;
-            $item['score_count'] = ScoreRepository::calcCount($item->id);
-            $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
+            $item['score_count'] = (int)($scoreCounts[$item->id] ?? 0);
+            $item['reviews'] = $item->reviews->map->only(self::$relatedReviewColumns);
+            // poet_is_v derivation possibly involves uploader relation; ensure consistency
+            if (!isset($item['poet_is_v'])) {
+                $item['poet_is_v'] = ($item->is_owner_uploaded === Poem::$OWNER['uploader']) && $item->uploader && $item->uploader->is_v;
+            }
 
             return $item->only(self::$listColumns);
         });
