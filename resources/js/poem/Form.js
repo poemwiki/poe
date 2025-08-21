@@ -124,10 +124,17 @@ Vue.component('poem-form', {
       // detect language when pasting to empty textarea
       const trimed = newVal.trim();
       if(!trimed || trimed.length < 6 || old.trim()) return;
-
-      this.detectLanguage(newVal.trim()).then(lang => {
-        this.form.language_id = lang;
-      });
+      this.detectLanguage(newVal.trim()).then(resp => {
+        try {
+          // New standardized response: { data: { language_id: <int|null> }, success: true }
+          const langId = resp && resp.data ? (resp.data.language_id || (resp.data.data && resp.data.data.language_id)) : null;
+          if(typeof langId === 'number') {
+            this.form.language_id = langId;
+          }
+        } catch (e) {
+          console.warn('Failed to parse language detect response', e, resp);
+        }
+      }).catch(e => console.warn('detectLanguage request failed', e));
     }
 
     // 'form.translator_ids': function (newVal) {
@@ -413,15 +420,13 @@ Vue.component('poem-form', {
       const topLines = poem.trim().split('\n').slice(0, 3).reduce((accumulator, line) => {
         return accumulator + (accumulator.length ? '\n' : '') + line;
       }, '')
-      return axios(
-        `/api/v1/poem/detect`,
-        {
-          method: 'POST',
-          data: {
-            text: topLines
-          }
+      return axios.post(`/api/v1/poem/detect`, { text: topLines }).then(r => {
+        // Backward compat: old API returned raw value (integer/null). If so, adapt to object shape.
+        if(r && typeof r.data === 'number') {
+          return { data: { language_id: r.data }, success: true };
         }
-      );
+        return r;
+      });
     }
   },
   computed: {

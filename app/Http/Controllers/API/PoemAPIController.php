@@ -934,7 +934,8 @@ class PoemAPIController extends Controller {
         $text = $request->input('text', '');
 
         try {
-            return AliTranslate::detectLanguage($text);
+            $langId = AliTranslate::detectLanguage($text);
+            return $this->responseSuccess(['language_id' => $langId]);
         } catch (Exception $e) {
             return $this->responseFail([], $e->getMessage());
         } catch (Error $e) {

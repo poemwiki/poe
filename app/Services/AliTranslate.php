@@ -59,7 +59,7 @@ class AliTranslate {
      * @param string $text
      * @return string|null
      */
-    public static function detectLanguage(string $text): ?string {
+    public static function detectLanguage(string $text): ?int {
         $client = self::createClient();
         $params = self::params('GetDetectLanguage');
         // runtime options
