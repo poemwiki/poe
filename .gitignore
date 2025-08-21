@@ -34,3 +34,4 @@ fields_sample.json
 !/storage/logs
 public/index-cn.html
 storage/framework/maintenance.php
+.env.testing

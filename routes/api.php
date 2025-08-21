@@ -40,6 +40,7 @@ Route::middleware(['api'])->group(static function () {
         Route::prefix('author')->name('author/')->group(static function () {
             Route::get('/detail/{id}', [\App\Http\Controllers\API\AuthorAPIController::class, 'detail'])->name('detail');
             Route::get('/info/{id}', [\App\Http\Controllers\API\AuthorAPIController::class, 'info'])->name('info');
+            Route::post('/search', [\App\Http\Controllers\API\AuthorAPIController::class, 'search'])->name('search');
         });
         Route::get('/contribution', [\App\Http\Controllers\API\ContributionAPIController::class, 'query'])->name('contribution');
     });
@@ -91,6 +92,7 @@ Route::middleware(['auth:api,web', 'api'])->group(static function () {
         });
         Route::prefix('author')->name('author/')->group(static function () {
             Route::post('/create', [\App\Http\Controllers\API\AuthorAPIController::class, 'create'])->name('create');
+            Route::post('/import', [\App\Http\Controllers\API\AuthorAPIController::class, 'importSimple'])->name('import');
             Route::post('/update/{id}', [\App\Http\Controllers\API\AuthorAPIController::class, 'update'])->name('update');
         });
     });

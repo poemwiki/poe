@@ -3,7 +3,7 @@
 namespace Tests\Unit;
 
 use Illuminate\Support\Str;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class ContentHashTest extends TestCase {
     /**

@@ -7,8 +7,9 @@ use Faker\Generator as Faker;
 
 $factory->define(User::class, function (Faker $faker) {
     return [
-        'name'      => 'Test User',
-        'email'     => 'xx@g.com',
-        'password'  => 'xxx',
+        'name'        => 'Test User',
+        'email'       => 'xx@g.com',
+        'password'    => 'xxx',
+        'invite_code' => 'TEST123',
     ];
 });
