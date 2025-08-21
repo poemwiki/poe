@@ -5,8 +5,9 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Http\Request;
-use Laravel\Passport\Passport;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class LoginController extends Controller {
@@ -21,7 +22,7 @@ class LoginController extends Controller {
     |
     */
 
-    use AuthenticatesUsers;
+    use AuthenticatesUsers, ThrottlesLogins;
 
     /**
      * Where to redirect users after login.
@@ -36,7 +37,8 @@ class LoginController extends Controller {
      * @return void
      */
     public function __construct() {
-        $this->middleware('guest')->except('logout');
+        // Remove guest middleware for API - we want to allow repeated login requests
+        // The guest middleware would redirect authenticated users, which breaks API functionality
     }
 
     /**
@@ -48,6 +50,10 @@ class LoginController extends Controller {
      * @throws \Illuminate\Validation\ValidationException
      */
     public function login(Request $request) {
+        // For API: Allow authenticated users to login again for token refresh
+        // This is different from web apps where guest middleware prevents re-login
+        // API behavior: generate new token and revoke old ones (implemented in sendLoginResponse)
+        
         $this->validateLogin($request);
 
         // If the class is using the ThrottlesLogins trait, we can automatically throttle
@@ -81,18 +87,51 @@ class LoginController extends Controller {
     protected function sendLoginResponse(Request $request) {
         /** @var \App\User $user */
         $user = $this->guard()->user();
+        // Use DB transaction to ensure single active token invariant under concurrent logins
+        $tokenResult = null;
+        $oldTokenIds = [];
+        DB::transaction(function () use ($user, &$tokenResult, &$oldTokenIds) {
+            // Create new token first (Passport persists it)
+            $tokenResult = $user->createToken('openapi');
+            $newTokenId  = $tokenResult->token->id;
 
-        $createToken = $user->createToken('openapi');
-        $createToken->token->save();
+            // Collect currently active openapi tokens (excluding the freshly created one)
+            $oldTokenIds = $user->tokens()
+                ->where('name', 'openapi')
+                ->where('revoked', false)
+                ->where('id', '!=', $newTokenId)
+                ->pluck('id')
+                ->all();
 
-        $accessToken = $createToken->accessToken;
+            if ($oldTokenIds) {
+                try {
+                    $user->tokens()
+                        ->whereIn('id', $oldTokenIds)
+                        ->update(['revoked' => true]);
+                } catch (\Throwable $e) {
+                    // Report but do not rollback successful new token issuance
+                    report($e); // English comment: log revocation failure for investigation
+                }
+            }
+        });
+
+        if (!$tokenResult) {
+            // Defensive: should never happen, but avoid fatal error
+            return $this->responseError('Token creation failed', 500);
+        }
+        $accessToken = $tokenResult->accessToken;
+        $issuedAt    = now();
+        $expiresAt   = $tokenResult->token->expires_at; // may be null if no expiry configured
+        $expiresIn   = $expiresAt ? $expiresAt->diffInSeconds($issuedAt) : null;
 
         $this->clearLoginAttempts($request);
 
         return $this->responseSuccess([
             'access_token' => $accessToken,
             'token_type'   => 'Bearer',
-            'expires_in'   => $createToken->token->expires_at,
+            'issued_at'    => $issuedAt->toIso8601String(),
+            'expires_in'   => $expiresIn,
+            'expires_at'   => $expiresAt ? $expiresAt->toIso8601String() : null,
         ]);
     }
 
@@ -109,5 +148,67 @@ class LoginController extends Controller {
             $this->username() => 'required|string',
             'password'        => 'required|string'
         ]);
+    }
+
+    /**
+     * Get the login username to be used by the controller.
+     *
+     * @return string
+     */
+    public function username() {
+        return 'email';
+    }
+
+    /**
+     * Get the response for a failed login attempt.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function sendFailedLoginResponse(Request $request) {
+        return response()->json([
+            'message' => '用户名或密码错误。',
+            'errors'  => [
+                $this->username() => ['用户名或密码错误。']
+            ]
+        ], 422);
+    }
+
+    /**
+     * Redirect the user after determining they are locked out.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function sendLockoutResponse(Request $request) {
+        $seconds = $this->limiter()->availableIn(
+            $this->throttleKey($request)
+        );
+
+        return response()->json([
+            'message' => '登录尝试次数过多，请等待 ' . $seconds . ' 秒后重试。'
+        ], 429);
+    }
+
+    /**
+     * The user has been authenticated.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param mixed                    $user
+     * @return mixed
+     */
+    protected function authenticated(Request $request, $user) {
+        // Return null to continue with sendLoginResponse
+        return null;
+    }
+
+    /**
+     * Get the post-registration redirect path.
+     *
+     * @return string
+     */
+    public function redirectPath() {
+        // This should not be called in API context, but return a safe path
+        return '/';
     }
 }

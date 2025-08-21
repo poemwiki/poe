@@ -42,7 +42,11 @@ class importAllPoetry extends Command {
 
         // activity log need a causer, so we have to log in as self::$causerID first
         $causer = User::find(self::$causerID);
-        Auth::login($causer);
+        if ($causer) {
+            Auth::login($causer);
+        } else {
+            // In test / fresh DB this user may not exist; skip login to prevent null auth errors.
+        }
         // dd(date_default_timezone_get()); // UTC
     }
 

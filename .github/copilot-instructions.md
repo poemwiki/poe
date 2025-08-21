@@ -37,6 +37,8 @@ Keep responses concrete, reflect existing patterns—do not introduce speculativ
 - Respect boot logic: constructing `Poem` with partially cleaned text is fine; trimming & hashing handled automatically.
 - Avoid triggering infinite recursion when updating `Poem->content_id`: logic already guards by using `withoutEvents` or conditional content creation—follow existing pattern if adjusting.
 - Use model / repository public APIs over crafting manual JSON for responses to preserve versioned behaviors.
+- Use `php artisan test` to run tests
+- Use tinker for quick experimentation and debugging.
 
 ## Examples
 - Get random poem URL (used on landing): `PoemRepository::randomOne()->url`.
