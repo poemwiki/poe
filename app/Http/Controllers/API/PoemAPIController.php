@@ -17,6 +17,7 @@ use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
+use App\Repositories\AuthorRepository;
 use App\Rules\NoDuplicatedPoem;
 use App\Rules\ValidPoemContent;
 use App\Services\AliTranslate;
@@ -41,11 +42,14 @@ class PoemAPIController extends Controller {
     private $reviewRepository;
     /** @var ScoreRepository */
     private $scoreRepository;
+    /** @var AuthorRepository */
+    private $authorRepository;
 
-    public function __construct(PoemRepository $poemRepository, ReviewRepository $reviewRepository, ScoreRepository $scoreRepository) {
+    public function __construct(PoemRepository $poemRepository, ReviewRepository $reviewRepository, ScoreRepository $scoreRepository, AuthorRepository $authorRepository) {
         $this->poemRepository   = $poemRepository;
         $this->reviewRepository = $reviewRepository;
         $this->scoreRepository  = $scoreRepository;
+        $this->authorRepository = $authorRepository;
     }
 
     public function random($num = 5, $id = null) {
@@ -912,7 +916,7 @@ class PoemAPIController extends Controller {
                         // 3. any non-empty string -> raw translator name
                         if (is_string($tid) && Str::startsWith($tid, 'Q')) {
                             $wikidataId       = (int) ltrim($tid, 'Q');
-                            $translatorAuthor = \App\Models\Author::where('wikidata_id', $wikidataId)->first();
+                            $translatorAuthor = $this->authorRepository->getExistedAuthor($wikidataId);
                             if ($translatorAuthor) {
                                 $translatorIds[] = $translatorAuthor->id;
                             }

@@ -169,7 +169,7 @@ class AuthorRepository extends BaseRepository {
      * @param int|null $user_id
      * @return AuthorRepository|\Illuminate\Database\Eloquent\Model
      */
-    public function importFromWikidata(Wikidata $wiki, int $userID = null) {
+    public function importFromWikidata(Wikidata $wiki, ?int $userID = null) {
         $entity = json_decode($wiki->data);
 
         $authorNameLang = [];
@@ -230,6 +230,10 @@ class AuthorRepository extends BaseRepository {
 
         if (!$authorExisted) {
             $wiki          = Wikidata::find($wikidata_id);
+            if (!$wiki) {
+                Artisan::call('wiki:import', ['--id' => $wikidata_id]);
+                $wiki = Wikidata::find($wikidata_id);
+            }
             $authorExisted = $this->importFromWikidata($wiki, Auth::user()->id);
             // Does this necessary?
             // 以下一步对于在前端查询前已导入过 wikidata label&alias 的 author 来说是不必要的，

@@ -148,7 +148,7 @@ curl -X POST "$WIKI_API_BASE/poem/q?mode=poem-select" \
 ### 3.5 POST /poem/import
 控制器：`PoemAPIController@import`
 请求头：必须 `Content-Type: application/json`。
-请求 JSON（新增支持 `poet_id` 以及多译者 `translator_ids`）：
+请求 JSON（支持 `poet_id` 以及多译者 `translator_ids`）：
 ```json
 {
   "poems": [
@@ -183,11 +183,11 @@ curl -X POST "$WIKI_API_BASE/poem/q?mode=poem-select" \
 - `language_id`: required 且在 `LanguageRepository::idsInUse()` 集合内
 - `translator_ids`: nullable|array （元素允许：现有作者数值 ID；任意非空字符串作为译者名；`Q<wikidata_id>` 已存在的 wikidata 译者）
 
-`translator_ids` 解析逻辑：
-1. `Q123`：若存在 wikidata_id=123 的作者，转成其内部 id；不存在则忽略（不自动创建）。
-2. 纯数字：视为已存在的作者 id。
-3. 其他非空字符串：作为自由文本译者名（稍后建立 Entry 关联）。
-最终顺序写入 `poem.translator`（JSON 数组），并建立 `relatable` 关系。
+`translator_ids` 解析逻辑（已更新：支持按 Wikidata 自动创建缺失译者）：
+1. `Q123`：若存在 `wikidata_id=123` 的作者 => 使用其 author id；若不存在 => 自动根据 wikidata 的数据创建一个 Author，再把这个新建的 author 作为这个 poem 关联的 translator。
+2. 纯数字：视为已存在的作者 id（若不存在会触发校验失败）。
+3. 其他非空字符串：作为自由文本译者名（建立 Entry 关联，不创建 Author）。
+最终顺序写入 `poem.translator`（JSON 数组），并建立 `relatable` 关系；存在 id 的译者建立 Author 关系，自由文本保持原样以便后续人工归并。
 
 重复判定：`NoDuplicatedPoem` 触发时会记录日志并返回错误；客户端可捕获并决定跳过或重试（例如微调换行 / 标点）。
 
@@ -336,8 +336,9 @@ curl -X POST https://example.com/api/v1/poem/q?mode=poem-select \
 6. 预清洗：统一换行 `\n`，去 BOM，修正全角空格，便于服务器判重。
 7. 语言检测：使用 `/poem/detect` 预填 `language_id`，再做人工/模型校验（空结果时回退默认语言或重试）。
 8. 异常恢复：批处理失败时从首个失败索引继续；保持输入序列化（可保存 checkpoint JSON）。
-9. 歧义作者先收集再人工确认，避免误绑定导致后续大量诗歌错归属。
-10. 安全：妥善保管 Bearer Token，最小权限账号运行批量导入。
+9. 导入诗歌时 `translator_ids` 中的 `Q<wid>` 如果没有对应的 author，会在导入的过程中自动创建作者，可以免于通过 API 查询和创建 author。
+10. 歧义作者先收集再人工确认，避免误绑定导致后续大量诗歌错归属。
+11. 安全：妥善保管 Bearer Token，最小权限账号运行批量导入。
 
 ---
 ## 9. 附：字段快速参考
@@ -351,7 +352,7 @@ curl -X POST https://example.com/api/v1/poem/q?mode=poem-select \
 | poem | poem/import | 正文（\n 分行） |
 | from | poem/import | 来源或出处，可选 |
 | language_id | poem/import | 语言 ID，需在有效列表中 |
-| translator_ids | poem/import | 译者数组（作者ID / `new_名称` / `Q<wid>` / 文本），保持顺序 |
+| translator_ids | poem/import | 译者数组（作者ID / `Q<wid>` / 文本名称）；`Q<wid>` 不存在时会自动创建作者；保持顺序 |
 
 ---
 ## 10. 进一步扩展（可选）
