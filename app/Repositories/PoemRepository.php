@@ -421,7 +421,7 @@ class PoemRepository extends BaseRepository {
 
     /**
      * @param string $poem
-     * @return Poem|Poem[]|false
+     * @return Poem|false
      */
     public static function isDuplicated(string $poem) {
         // TODO poem soft deleted, but content not deleted???

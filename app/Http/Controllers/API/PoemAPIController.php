@@ -877,7 +877,6 @@ class PoemAPIController extends Controller {
         if ($request->getContentTypeFormat() !== 'json') {
             return $this->responseFail([], 'Request content type must be application/json');
         }
-
         if (!is_array($poems)) {
             return $this->responseFail([], 'Poems must be an array.');
         } elseif (count($poems) > 200) {
@@ -885,7 +884,6 @@ class PoemAPIController extends Controller {
         }
 
         $result = [];
-
         foreach ($poems as $poem) {
             try {
                 $poem['original_id']       = 0;
@@ -894,39 +892,56 @@ class PoemAPIController extends Controller {
                 $poem['flag']              = Poem::$FLAG['botContentNeedConfirm'];
 
                 $validator = Validator::make($poem, [
-                    'title'                  => 'required|string|max:255',
-                    'poet'                   => 'required|string|max:255',
-                    'poem'                   => ['required', new NoDuplicatedPoem(null), 'string', 'min:10', 'max:65500'],
-                    // 'poet_id'                => 'integer|exists:' . \App\Models\Author::class . ',id',
-                    // 'is_owner_uploaded'      => ['required', Rule::in([Poem::$OWNER['none'], Poem::$OWNER['uploader'], Poem::$OWNER['translatorUploader']])],
-                    'from'                   => 'nullable|string|max:255',
-                    'language_id'            => ['required', Rule::in(LanguageRepository::idsInUse())],
+                    'title'           => 'required|string|max:255',
+                    'poet'            => 'required_without:poet_id|string|max:255',
+                    'poem'            => ['required', new NoDuplicatedPoem(null), 'string', 'min:10', 'max:65500'],
+                    'poet_id'         => ['nullable', 'integer', 'exists:' . \App\Models\Author::class . ',id'],
+                    'from'            => 'nullable|string|max:255',
+                    'language_id'     => ['required', Rule::in(LanguageRepository::idsInUse())],
+                    'translator_ids'  => ['nullable', 'array'],
+                    'translator_ids.*'=> ['nullable'],
                 ]);
-
                 $validator->validate();
 
-                $inserted = Poem::create($poem);
-                $result[] = $inserted->url;
-            } catch (ValidationException $e) {
-                $failedRules = $e->validator->failed();
-                $errors      = $e->errors();
-                if (isset($failedRules['poem']['App\Rules\NoDuplicatedPoem'])) {
-                    logger()->info('duplicated with existed poem: ', $errors);
-                } else {
-                    logger()->info('failed to validate: ', $errors);
+                $translatorIds = [];
+                if (isset($poem['translator_ids']) && is_array($poem['translator_ids'])) {
+                    foreach ($poem['translator_ids'] as $tid) {
+                        // Accept formats:
+                        // 1. numeric author id
+                        // 2. Q<wikidata_id> (already existing author only)
+                        // 3. any non-empty string -> raw translator name
+                        if (is_string($tid) && Str::startsWith($tid, 'Q')) {
+                            $wikidataId       = (int) ltrim($tid, 'Q');
+                            $translatorAuthor = \App\Models\Author::where('wikidata_id', $wikidataId)->first();
+                            if ($translatorAuthor) {
+                                $translatorIds[] = $translatorAuthor->id;
+                            }
+                        } elseif (is_numeric($tid)) {
+                            $translatorIds[] = (int) $tid;
+                        } elseif (is_string($tid) && trim($tid) !== '') {
+                            $translatorIds[] = trim($tid);
+                        }
+                    }
+                    if (!empty($translatorIds)) {
+                        $poem['translator'] = json_encode($translatorIds, JSON_UNESCAPED_UNICODE);
+                    }
                 }
 
+                $inserted = Poem::create($poem);
+                if (!empty($translatorIds)) {
+                    $inserted->relateToTranslators($translatorIds);
+                }
+                $result[] = $inserted->url;
+            } catch (ValidationException $e) {
+                $errors = $e->errors();
                 $result[] = ['errors' => $errors];
-
                 continue;
             } catch (Error $e) {
                 logger()->error('Undefined error while import poem: ' . $e->getMessage() . $e->getTraceAsString());
                 $result[] = ['errors' => 'Undefined error'];
-
                 continue;
             }
         }
-
         return $this->responseSuccess($result, 'Thanks for your contribution!');
     }
 

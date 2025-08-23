@@ -12,7 +12,8 @@ class Authenticate extends Middleware {
      * @return string|null
      */
     protected function redirectTo($request) {
-        if ($request->expectsJson() && str_starts_with($request->path(), 'api')) {
+        if (str_starts_with($request->path(), 'api')) {
+            $request->headers->set('Accept', 'application/json');
             return route('api.user/login');
         }
 

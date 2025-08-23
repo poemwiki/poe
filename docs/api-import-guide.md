@@ -10,7 +10,7 @@
 本文面向需要自动化批量向 PoemWiki 导入（或同步）作者与诗歌数据的智能体（AI Agent）或脚本开发者，介绍端到端流程、字段、校验、去重策略与错误处理。
 
 > 快速使用提示：建议先在 shell 中设置环境变量，后续所有 curl 可直接复制：
-> 
+>
 > ```bash
 > WIKI_API_BASE="https://example.com/api/v1"   # 替换为实际域名
 > EMAIL="user@example.com"
@@ -124,7 +124,7 @@ curl -X POST "$WIKI_API_BASE/author/import" \
   -d '{"name":"李白"}'
 ```
 
-### 3.4 POST /poem/q 
+### 3.4 POST /poem/q
 控制器：`PoemAPIController@query`
 说明：当前对外仅开放 `poem-select` 用途（检索诗歌用于导入前查重）。作者搜索请使用 `POST /author/search`，不要依赖 `/poem/q` 返回作者结果。
 
@@ -148,16 +148,18 @@ curl -X POST "$WIKI_API_BASE/poem/q?mode=poem-select" \
 ### 3.5 POST /poem/import
 控制器：`PoemAPIController@import`
 请求头：必须 `Content-Type: application/json`。
-请求 JSON：
+请求 JSON（新增支持 `poet_id` 以及多译者 `translator_ids`）：
 ```json
 {
   "poems": [
     {
       "title": "静夜思",
-      "poet": "李白",
+  "poet": "李白",
+  "poet_id": 123,            // 可选：已知作者 id，则可直接绑定；仍建议同时带 poet 便于人工校验
       "poem": "床前明月光\n疑是地上霜\n举头望明月\n低头思故乡",
       "from": "唐诗三百首",
-      "language_id": 1
+  "language_id": 1,
+  "translator_ids": [456, "张三", "Q789"] // 可选：数组；元素含义见下文
     }
   ]
 }
@@ -174,18 +176,26 @@ curl -X POST "$WIKI_API_BASE/poem/q?mode=poem-select" \
 
 校验规则：
 - `title`: required|string|max:255
-- `poet`: required|string|max:255
-- `poem`: required|string|min:10|max:65500 且通过 `NoDuplicatedPoem` 规则（语义去重检测）
+- `poet`: required_without:poet_id|string|max:255 （提供 poet_id 时可不填，但推荐保留 poet 原始名称供比对）
+- `poet_id`: nullable|integer|exists:author,id （批量导入不支持 `new` 协议，避免重复作者）
+- `poem`: required|string|min:10|max:65500 且通过 `NoDuplicatedPoem`
 - `from`: nullable|string|max:255
-- `language_id`: required 且在 `LanguageRepository::idsInUse()` 返回集合内
+- `language_id`: required 且在 `LanguageRepository::idsInUse()` 集合内
+- `translator_ids`: nullable|array （元素允许：现有作者数值 ID；任意非空字符串作为译者名；`Q<wikidata_id>` 已存在的 wikidata 译者）
+
+`translator_ids` 解析逻辑：
+1. `Q123`：若存在 wikidata_id=123 的作者，转成其内部 id；不存在则忽略（不自动创建）。
+2. 纯数字：视为已存在的作者 id。
+3. 其他非空字符串：作为自由文本译者名（稍后建立 Entry 关联）。
+最终顺序写入 `poem.translator`（JSON 数组），并建立 `relatable` 关系。
 
 重复判定：`NoDuplicatedPoem` 触发时会记录日志并返回错误；客户端可捕获并决定跳过或重试（例如微调换行 / 标点）。
 
-示例 curl（单批导入）：
+示例 curl（单批导入，含作者/译者）：
 ```bash
 curl -X POST "$WIKI_API_BASE/poem/import" \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"poems":[{"title":"静夜思","poet":"李白","poem":"床前明月光\n疑是地上霜\n举头望明月\n低头思故乡","language_id":1}]}'
+  -d '{"poems":[{"title":"静夜思","poet":"李白","poet_id":123,"poem":"床前明月光\n疑是地上霜\n举头望明月\n低头思故乡","language_id":1,"translator_ids":[456,"张三","Q789"]}]}'
 ```
 
 ### 3.6 POST /poem/detect
@@ -336,10 +346,12 @@ curl -X POST https://example.com/api/v1/poem/q?mode=poem-select \
 | name | author/import | 作者名称（多语言初始只写默认 locale） |
 | wikidata_id | author/import | Wikidata 实体 ID，可触发自动富化 |
 | title | poem/import | 诗歌标题 |
-| poet | poem/import | 作者名（字符串，会在后续人工/系统归并到 author_id） |
+| poet | poem/import | 作者名（字符串，会在后续人工/系统归并到 author_id；与 poet_id 并存用于比对） |
+| poet_id | poem/import | 已存在作者 ID（选填，存在则直接绑定） |
 | poem | poem/import | 正文（\n 分行） |
 | from | poem/import | 来源或出处，可选 |
 | language_id | poem/import | 语言 ID，需在有效列表中 |
+| translator_ids | poem/import | 译者数组（作者ID / `new_名称` / `Q<wid>` / 文本），保持顺序 |
 
 ---
 ## 10. 进一步扩展（可选）
