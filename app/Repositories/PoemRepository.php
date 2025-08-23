@@ -588,13 +588,15 @@ class PoemRepository extends BaseRepository {
                         $name = is_array($authorName)
                             ? pick_translation_value($authorName, 'zh-CN')
                             : $item->author_name;
+                        return [
+                            'id'   => $item->end_id,
+                            'name' => $name
+                        ];
                     } else {
-                        $name = $item->entry_name;
+                        return [
+                            'name' => $item->entry_name
+                        ];
                     }
-                    return [
-                        'id' => $item->end_id,
-                        'name' => $name
-                    ];
                 });
 
                 $translators = $translators->concat($relatableTranslators)->unique('id')->unique('name');
