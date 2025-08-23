@@ -46,7 +46,7 @@ class CampaignAPIController extends Controller {
     }
 
     public function index($offset = 0, $limit = 15) {
-        $campaigns = $this->campaignRepository->paninatedIndex($offset, $limit);
+        $campaigns = $this->campaignRepository->paginatedIndex($offset, $limit);
 
         return $this->responseSuccess($campaigns);
     }

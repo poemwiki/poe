@@ -50,7 +50,7 @@ class CampaignRepository extends BaseRepository {
             ->orderBy('start', 'desc')->get();
     }
 
-    public function paninatedIndex($offset, $limit) {
+    public function paginatedIndex($offset, $limit) {
         $cacheKey = "api-campaign-index-{$offset}-{$limit}";
         return Cache::tags(['campaign-index'])->remember($cacheKey, 4600*72, function () use ($offset, $limit) {
             return $this->allInUse()->slice($offset, $limit)
@@ -70,7 +70,7 @@ class CampaignRepository extends BaseRepository {
                 })->values();
         });
     }
-    
+
     /**
      * Clear all campaign index cache entries using cache tags
      */
