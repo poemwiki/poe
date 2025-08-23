@@ -926,6 +926,9 @@ class PoemAPIController extends Controller {
                         $poem['translator'] = json_encode($translatorIds, JSON_UNESCAPED_UNICODE);
                     }
                 }
+                if (!empty($poem['translator'])) {
+                    $poem['is_original'] = 0;
+                }
 
                 $inserted = Poem::create($poem);
                 if (!empty($translatorIds)) {
