@@ -305,7 +305,7 @@ class AuthorAPIController extends Controller {
         $authorIds = [];
         // AuthorRepository::searchLabel accepts name and array of ids (per signature)
         $res = AuthorRepository::searchLabel($keyword, $authorIds)->take($limit)->map(function ($item) {
-            if ($item['source'] !== 'PoemWiki') {
+            if ($item['source'] !== 'PoemWiki' && $item['source'] !== 'Wikidata') {
                 return null;
             }
 
