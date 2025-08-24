@@ -895,6 +895,21 @@ class PoemAPIController extends Controller {
                 $poem['upload_user_id']    = $request->user()->id;
                 $poem['flag']              = Poem::$FLAG['botContentNeedConfirm'];
 
+                // Support poet_id in Q<wikidata_id> format: auto create / resolve author before validation
+                if (isset($poem['poet_id']) && is_string($poem['poet_id']) && Str::startsWith($poem['poet_id'], 'Q')) {
+                    $wikidataId = (int) ltrim($poem['poet_id'], 'Q');
+                    if ($wikidataId > 0) {
+                        try {
+                            $author = $this->authorRepository->getExistedAuthor($wikidataId);
+                            if ($author) {
+                                $poem['poet_id'] = $author->id; // replace with internal id for validation & insertion
+                            }
+                        } catch (\Throwable $e) {
+                            Log::warning('Failed to auto-create poet by wikidata in poem import: ' . $e->getMessage());
+                        }
+                    }
+                }
+
                 $validator = Validator::make($poem, [
                     'title'           => 'required|string|max:255',
                     'poet'            => 'required_without:poet_id|string|max:255',

@@ -1,11 +1,13 @@
-# 数据导入接口使用指南（面向 AI Agent / 开发者）
+API Documentation：[PoemWiki Open API Documentation](https://api-doc.poemwiki.org) (password: poemwiki)  
+
+这个文档站点由 Apifox 生成，包含 Testing 和 Production 两个环境，建议先在 Testing 环境测试你的导入脚本，再切换到 Testing 环境。
 
 适用接口（全部基于前缀 `/api/v1`）：
 - 用户登录：`POST /user/login`
 - 作者搜索：`POST /author/search`
-- 作者导入：`POST /author/import` （代码中对应 `AuthorAPIController@importSimple`）
+- 作者导入：`POST /author/import` （暂不对外公开，因为导入诗歌的时候可以根据 wikidata QID 自动创建作者）
 - 诗歌检索（仅支持 poem-select 模式）：`POST /poem/q` （`PoemAPIController@query`）
-- 诗歌批量导入：`ANY /poem/import` （推荐使用 `POST` 且 `Content-Type: application/json`）
+- 诗歌批量导入：`POST /poem/import` 
 
 本文面向需要自动化批量向 PoemWiki 导入（或同步）作者与诗歌数据的智能体（AI Agent）或脚本开发者，介绍端到端流程、字段、校验、去重策略与错误处理。
 
@@ -22,18 +24,21 @@
 > 需要 jq，如无请安装或改为手动复制 token。
 
 ---
-## 1. 总览流程
+## 1. 基础流程
+
 1. `POST /user/login` 获取访问令牌（Passport personal access token，`token_type=Bearer`）。
-2. 对每个待导入作者：
-   1. 先用 `POST /author/search` 按名称探测是否已存在；
-   2. 若不存在或需要 Wikidata 映射：调用 `POST /author/import` 以最小必要字段创建 / 关联；
-   3. 处理返回状态：`created | existed | ambiguous`。
-3. 为每个作者的诗歌集合准备批量 payload：
-  - 可选：使用 `POST /poem/q` (poem-select) 以标题 / 句子片段检索潜在重复。
-   - 过滤掉明显重复者。
-4. 聚合 ≤200 条诗歌为一批，`POST /poem/import`。
-5. 解析返回数组：成功元素为 URL，失败元素为 `{ errors: {...} }`。
-6. 必要时再次用 `POST /poem/q` 验证入库情况或做后续链路（如翻译关联）。
+2. （可选）对来源作者执行 `POST /author/search`：
+  - 若返回匹配（单一且可信）则记录其 author id 或 wikidata_id 用作后续导入诗歌时的 `poet_id`；
+  - 若没有搜索到匹配的作者：使用 /author/import（暂未开放）创建一个新的作者，或在 [poemwiki.org](https://poemwiki.org/author/create) 手动创建这个作者。
+3. 为每批诗歌构建 payload：
+  - 标题、正文、语言；
+  - `poet_id` 可为 数值 id 或 字符串 `Q<wid>`（自动解析/创建）；
+  - `translator_ids` 同样支持 `Q<wid>` 自动创建。
+  - 可选：先用 `POST /poem/q?mode=poem-select` 通过关键句片段做重复探测，过滤明显重复。
+4. 聚合 ≤200 条为一批调用 `POST /poem/import`。
+5. 解析响应数组：成功元素为 URL；失败元素为 `{ errors: {...} }`，按 payload 的索引定位。
+6. （可选）再次用 `POST /poem/q` 验证抽样入库情况。
+
 
 ---
 ## 2. 认证与请求头
@@ -92,6 +97,16 @@ curl -X POST "$WIKI_API_BASE/author/search" \
 ```
 
 ### 3.3 POST /author/import
+> 状态：暂不公开外部使用（internal / restricted）。
+>
+> 原因：
+> 1. 已支持在 `/poem/import` 中通过 `poet_id: "Q<wid>"` / `translator_ids` 自动创建缺失作者，常规导入无需显式调用；
+> 2. 避免脚本滥用导致短时间大量“空壳作者”占位；
+> 3. 后续可能补充更丰富的校验（别名冲突、来源可信度评分）后再考虑开放。
+>
+> 仍保留此文档，便于：
+> - 内部或受信任 Agent 在需要补充作者描述 / 手动歧义裁决时使用；
+> - 了解自动创建逻辑所依赖的最小字段结构。
 控制器：`AuthorAPIController@importSimple`
 请求 JSON 允许字段：
 - `name` (string, 1-50, 必填)：作者名称
@@ -177,11 +192,11 @@ curl -X POST "$WIKI_API_BASE/poem/q?mode=poem-select" \
 校验规则：
 - `title`: required|string|max:255
 - `poet`: required_without:poet_id|string|max:255 （提供 poet_id 时可不填，但推荐保留 poet 原始名称供比对）
-- `poet_id`: nullable|integer|exists:author,id （批量导入不支持 `new` 协议，避免重复作者）
+- `poet_id`: nullable|integer|exists:author,id （现在额外支持以字符串 `Q<wid>` 形式传递 Wikidata QID，服务端会在自动创建/解析为对应的 author，把 `Q<wid>` 替换为 对应的 author id）
 - `poem`: required|string|min:10|max:65500 且通过 `NoDuplicatedPoem`
 - `from`: nullable|string|max:255
 - `language_id`: required 且在 `LanguageRepository::idsInUse()` 集合内
-- `translator_ids`: nullable|array （元素允许：现有作者数值 ID；任意非空字符串作为译者名；`Q<wikidata_id>` 已存在的 wikidata 译者）
+- `translator_ids`: nullable|array （元素允许：现有作者数值 ID；任意非空字符串作为译者名；`Q<wikidata_id>` Wikidata ID——支持自动创建对应的 author）
 
 `translator_ids` 解析逻辑（已更新：支持按 Wikidata 自动创建缺失译者）：
 1. `Q123`：若存在 `wikidata_id=123` 的作者 => 使用其 author id；若不存在 => 自动根据 wikidata 的数据创建一个 Author，再把这个新建的 author 作为这个 poem 关联的 translator。
@@ -348,17 +363,10 @@ curl -X POST https://example.com/api/v1/poem/q?mode=poem-select \
 | wikidata_id | author/import | Wikidata 实体 ID，可触发自动富化 |
 | title | poem/import | 诗歌标题 |
 | poet | poem/import | 作者名（字符串，会在后续人工/系统归并到 author_id；与 poet_id 并存用于比对） |
-| poet_id | poem/import | 已存在作者 ID（选填，存在则直接绑定） |
+| poet_id | poem/import | 已存在作者 ID；现在也支持 `Q<wid>` 形式（自动解析/创建后绑定） |
 | poem | poem/import | 正文（\n 分行） |
 | from | poem/import | 来源或出处，可选 |
 | language_id | poem/import | 语言 ID，需在有效列表中 |
 | translator_ids | poem/import | 译者数组（作者ID / `Q<wid>` / 文本名称）；`Q<wid>` 不存在时会自动创建作者；保持顺序 |
 
----
-## 10. 进一步扩展（可选）
-- 当需要建立翻译/原文关系，可在导入完成后使用相关关系接口（当前未公开，需要参考 `Relatable` 模型及仓储方法扩展）。
-- 可为 AI Agent 增加“作者歧义判定”模型，自动选择最高置信候选；如得分差 <25 触发人工审阅。
 
----
-## 结语
-以上文档覆盖从登录、作者识别到诗歌批量导入的核心路径。AI Agent 可据此实现高可靠、可追踪的自动同步流程。若内部模型或仓储逻辑更新（如去重算法升级），需同步调整客户端判重策略。
