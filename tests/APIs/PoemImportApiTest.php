@@ -123,6 +123,60 @@ class PoemImportApiTest extends TestCase {
     }
 
     /** @test */
+    public function test_import_with_genre_id() {
+        $user = factory(User::class)->create();
+        $this->actingAs($user);
+
+        // Pick an existing genre id if present, else skip (test stays resilient)
+        $genreId = \App\Models\Genre::query()->value('id');
+
+        $payload = [
+            'poems' => [[
+                'title'       => '含体裁导入 ' . uniqid(),
+                'poet'        => '体裁作者',
+                'poem'        => str_repeat('体裁测试内容', 2),
+                'language_id' => $this->validLanguageId,
+                'genre_id'    => $genreId,
+            ]]
+        ];
+
+        $resp = $this->json('POST', '/api/v1/poem/import', $payload);
+        $resp->assertStatus(200);
+        $body = json_decode($resp->getContent(), true);
+        $this->assertEquals(0, $body['code']);
+        // If no genre data exists in DB, validation should still pass because genre_id nullable (we passed null)
+        if ($genreId) {
+            // success may still return URL or errors; ensure not genre_id validation error
+            if (isset($body['data'][0]['errors'])) {
+                $this->assertArrayNotHasKey('genre_id', $body['data'][0]['errors']);
+            }
+        }
+    }
+
+    /** @test */
+    public function test_import_invalid_genre_id() {
+        $user = factory(User::class)->create();
+        $this->actingAs($user);
+
+        $payload = [
+            'poems' => [[
+                'title'       => '体裁非法 ' . uniqid(),
+                'poet'        => '作者甲',
+                'poem'        => str_repeat('非法体裁测试', 2),
+                'language_id' => $this->validLanguageId,
+                'genre_id'    => 99999999, // assume invalid
+            ]]
+        ];
+
+        $resp = $this->json('POST', '/api/v1/poem/import', $payload);
+        $resp->assertStatus(200);
+        $body = json_decode($resp->getContent(), true);
+        $this->assertEquals(0, $body['code']);
+        $this->assertArrayHasKey('errors', $body['data'][0]);
+        $this->assertArrayHasKey('genre_id', $body['data'][0]['errors']);
+    }
+
+    /** @test */
     public function test_import_invalid_language_id() {
         $user = factory(User::class)->create();
         $this->actingAs($user);

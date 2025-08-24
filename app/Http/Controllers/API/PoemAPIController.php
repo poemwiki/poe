@@ -917,6 +917,7 @@ class PoemAPIController extends Controller {
                     'poet_id'         => ['nullable', 'integer', 'exists:' . \App\Models\Author::class . ',id'],
                     'from'            => 'nullable|string|max:255',
                     'language_id'     => ['required', Rule::in(LanguageRepository::idsInUse())],
+                    'genre_id'        => ['nullable', 'integer', 'exists:' . \App\Models\Genre::class . ',id'],
                     'translator_ids'  => ['nullable', 'array'],
                     'translator_ids.*'=> ['nullable'],
                 ]);

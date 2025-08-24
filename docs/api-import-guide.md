@@ -28,12 +28,12 @@ API Documentation：[PoemWiki Open API Documentation](https://api-doc.poemwiki.o
 
 1. `POST /user/login` 获取访问令牌（Passport personal access token，`token_type=Bearer`）。
 2. （可选）对来源作者执行 `POST /author/search`：
-  - 若返回匹配（单一且可信）则记录其 author id 或 wikidata_id 用作后续导入诗歌时的 `poet_id`；
+  - 若返回匹配（单一且可信）则记录其 author id 或 wikidata_id 用作后续导入诗歌时的 `poet_id` 或 translator id；
   - 若没有搜索到匹配的作者：使用 /author/import（暂未开放）创建一个新的作者，或在 [poemwiki.org](https://poemwiki.org/author/create) 手动创建这个作者。
 3. 为每批诗歌构建 payload：
   - 标题、正文、语言；
-  - `poet_id` 可为 数值 id 或 字符串 `Q<wid>`（自动解析/创建）；
-  - `translator_ids` 同样支持 `Q<wid>` 自动创建。
+  - `poet_id` 可为 数值类型的 author id 或 字符串 `Q<wikidata_id>`（自动解析/创建）；
+  - `translator_ids` 同样支持 `Q<wikidata_id>` 自动创建。
   - 可选：先用 `POST /poem/q?mode=poem-select` 通过关键句片段做重复探测，过滤明显重复。
 4. 聚合 ≤200 条为一批调用 `POST /poem/import`。
 5. 解析响应数组：成功元素为 URL；失败元素为 `{ errors: {...} }`，按 payload 的索引定位。
@@ -100,8 +100,8 @@ curl -X POST "$WIKI_API_BASE/author/search" \
 > 状态：暂不公开外部使用（internal / restricted）。
 >
 > 原因：
-> 1. 已支持在 `/poem/import` 中通过 `poet_id: "Q<wid>"` / `translator_ids` 自动创建缺失作者，常规导入无需显式调用；
-> 2. 避免脚本滥用导致短时间大量“空壳作者”占位；
+> 1. 已支持在 `/poem/import` 中通过 `poet_id: "Q<wikidata_id>"` / `translator_ids` 自动创建缺失作者，常规导入无需显式调用；
+> 2. 避免脚本滥用导致短时间大量重复的“空壳作者”占位；
 > 3. 后续可能补充更丰富的校验（别名冲突、来源可信度评分）后再考虑开放。
 >
 > 仍保留此文档，便于：
@@ -169,12 +169,13 @@ curl -X POST "$WIKI_API_BASE/poem/q?mode=poem-select" \
   "poems": [
     {
       "title": "静夜思",
-  "poet": "李白",
-  "poet_id": 123,            // 可选：已知作者 id，则可直接绑定；仍建议同时带 poet 便于人工校验
+      "poet": "李白",
+      "poet_id": 123,            // 可选：已知作者 id，则可直接绑定；仍建议同时带 poet 便于人工校验
       "poem": "床前明月光\n疑是地上霜\n举头望明月\n低头思故乡",
       "from": "唐诗三百首",
-  "language_id": 1,
-  "translator_ids": [456, "张三", "Q789"] // 可选：数组；元素含义见下文
+      "language_id": 1,
+      "genre_id": 13,              // 可选：体裁（参见 10.2 Genres 表）
+      "translator_ids": [456, "张三", "Q789"] // 可选：数组；元素含义见下文
     }
   ]
 }
@@ -192,10 +193,11 @@ curl -X POST "$WIKI_API_BASE/poem/q?mode=poem-select" \
 校验规则：
 - `title`: required|string|max:255
 - `poet`: required_without:poet_id|string|max:255 （提供 poet_id 时可不填，但推荐保留 poet 原始名称供比对）
-- `poet_id`: nullable|integer|exists:author,id （现在额外支持以字符串 `Q<wid>` 形式传递 Wikidata QID，服务端会在自动创建/解析为对应的 author，把 `Q<wid>` 替换为 对应的 author id）
+- `poet_id`: nullable|integer|exists:author,id （现在额外支持以字符串 `Q<wikidata_id>` 形式传递 Wikidata QID，服务端会在自动创建/解析为对应的 author，把 `Q<wikidata_id>` 替换为 对应的 author id）
 - `poem`: required|string|min:10|max:65500 且通过 `NoDuplicatedPoem`
 - `from`: nullable|string|max:255
 - `language_id`: required 且在 `LanguageRepository::idsInUse()` 集合内
+- `genre_id`: nullable|integer|exists:genre,id （参见附录 10.2）
 - `translator_ids`: nullable|array （元素允许：现有作者数值 ID；任意非空字符串作为译者名；`Q<wikidata_id>` Wikidata ID——支持自动创建对应的 author）
 
 `translator_ids` 解析逻辑（已更新：支持按 Wikidata 自动创建缺失译者）：
@@ -233,13 +235,10 @@ curl -X POST "$WIKI_API_BASE/poem/import" \
 { "success": false, "message": "<error>" }
 ```
 
-兼容性说明：早期版本曾直接返回裸整数或 null；现统一包装。旧客户端若仍假设裸值，请升级为读取 `data.language_id`。
-
 使用建议：
+- 如果有大批量同语言的诗歌导入，可人工从本文末尾的附录中查询，不要重复调用 /poem/detect
 - 不确定来源语言时先调用；
-- 返回 null：回退默认语言（如 zh-CN）或拼接更多上下文重试；
-- 批量性能：抽取前几行 + 中间一行组合检测；
-- 可在本地做缓存（同一文本 hash -> language_id）。
+- 返回 null：回退默认语言（如 zh-CN）或拼接更多上下文重试。
 
 示例 curl（检测单段）：
 ```bash
@@ -351,7 +350,7 @@ curl -X POST https://example.com/api/v1/poem/q?mode=poem-select \
 6. 预清洗：统一换行 `\n`，去 BOM，修正全角空格，便于服务器判重。
 7. 语言检测：使用 `/poem/detect` 预填 `language_id`，再做人工/模型校验（空结果时回退默认语言或重试）。
 8. 异常恢复：批处理失败时从首个失败索引继续；保持输入序列化（可保存 checkpoint JSON）。
-9. 导入诗歌时 `translator_ids` 中的 `Q<wid>` 如果没有对应的 author，会在导入的过程中自动创建作者，可以免于通过 API 查询和创建 author。
+9. 导入诗歌时 `translator_ids` 中的 `Q<wikidata_id>` 如果没有对应的 author，会在导入的过程中自动创建作者，可以免于通过 API 查询和创建 author。
 10. 歧义作者先收集再人工确认，避免误绑定导致后续大量诗歌错归属。
 11. 安全：妥善保管 Bearer Token，最小权限账号运行批量导入。
 
@@ -360,13 +359,73 @@ curl -X POST https://example.com/api/v1/poem/q?mode=poem-select \
 | 字段 | 位置 | 说明 |
 |------|------|------|
 | name | author/import | 作者名称（多语言初始只写默认 locale） |
-| wikidata_id | author/import | Wikidata 实体 ID，可触发自动富化 |
+| wikidata_id | author/import | Wikidata 实体 ID |
 | title | poem/import | 诗歌标题 |
 | poet | poem/import | 作者名（字符串，会在后续人工/系统归并到 author_id；与 poet_id 并存用于比对） |
-| poet_id | poem/import | 已存在作者 ID；现在也支持 `Q<wid>` 形式（自动解析/创建后绑定） |
+| poet_id | poem/import | 已存在作者 ID；也支持 `Q<wikidata_id>` 形式 |
 | poem | poem/import | 正文（\n 分行） |
 | from | poem/import | 来源或出处，可选 |
 | language_id | poem/import | 语言 ID，需在有效列表中 |
-| translator_ids | poem/import | 译者数组（作者ID / `Q<wid>` / 文本名称）；`Q<wid>` 不存在时会自动创建作者；保持顺序 |
+| genre_id | poem/import | 体裁 ID，可选（参见附录 10.2） |
+| translator_ids | poem/import | 译者数组（作者ID / `Q<wikidata_id>` / 文本名称）；`Q<wikidata_id>` 不存在时会自动创建作者；保持顺序 |
 
+---
+## 10. 附录：数据字典（Languages / Genres / …）
 
+### 10.1 Languages（Language ID / Locale）
+Supported Languages:
+
+|id |name                                   |name_cn|locale|
+|---|---------------------------------------|-------|------|
+|1  |简体中文                                   |简体中文   |zh-CN |
+|2  |English                                |英语     |en    |
+|3  |Deutsch                                |德语     |de    |
+|4  |français                               |法语     |fr    |
+|5  |Italiano                               |意大利语   |it    |
+|6  |Español                                |西班牙语   |es    |
+|7  |にほんご                                   |日语     |ja    |
+|8  |조선말                                    |朝鲜语    |kr    |
+|9  |Ελληνικά                               |希腊语    |el    |
+|10 |ру́сский язы́к                         |俄语     |ru    |
+|11 |Português                              |葡萄牙语   |pt    |
+|12 |Polski                                 |波兰语    |pl    |
+|13 |svenska                                |瑞典语    |sv    |
+|14 |हिन्दी                                 |印度语    |hi    |
+|15 |اَلْعَرَبِيَّةُ‎                       |阿拉伯语   |ar    |
+|16 |עִבְרִית                               |希伯来语   |he    |
+|46 |अवधी                                   |阿瓦德语   |awa   |
+|103|čeština                                |捷克语    |cs    |
+|108|dansk                                  |丹麦语    |da    |
+|128|eesti keel                             |爱沙尼亚语  |et    |
+|132|زبان فارسی                             |波斯語    |fa    |
+|160|Galego                                 |加利西亚语  |gl    |
+|178|hrvatski jezik                         |克罗地亚语  |hr    |
+|229|Latine                                 |拉丁语    |la    |
+|263|македонски јазик                       |马其顿语   |mk    |
+|292|Nederlands                             |荷兰语    |nl    |
+|294|norsk                                  |挪威语    |no    |
+|367|Sängö                                  |桑戈语    |sg    |
+|381|slovenščina                            |斯洛文尼亚语 |sl    |
+|391|Gjuha shqipe                           |阿尔巴尼亚语 |sq    |
+|421|Türkçe                                 |土耳其语   |tr    |
+|436|Українська мова                        |乌克兰语   |uk    |
+|487|ئەرەب ھەرپلىرى ئاساسىدىكى ئۇيغۇر يېزىقى|传统维文   |ug-arab|
+|491|繁體中文                                   |繁体中文   |zh-hant|
+
+### 10.2 Poem Genres（Genre ID & Name）
+Supported poem genres:
+
+|id |name|
+|---|----|
+|1  |五言绝句|
+|2  |七言绝句|
+|4  |古体诗|
+|5  |楚辞|
+|6  |赋|
+|7  |乐府|
+|8  |五言律诗|
+|9  |七言律诗|
+|10 |排律|
+|11 |词|
+|12 |曲|
+|13 |现代诗|
