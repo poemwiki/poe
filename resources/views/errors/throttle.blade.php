@@ -1,7 +1,7 @@
 @extends('layouts.common')
 
 @push('styles')
-  <link href="{{ mix('/css/search.css') }}" rel="stylesheet">
+  <link href="{{ mix('/css/base.css') }}" rel="stylesheet">
 @endpush
 @section('content')
 <div class="error-page page">

@@ -148,3 +148,17 @@ Route::get('/poem-card/{id}/{compositionId?}', function ($id, $compositionId = n
     return $response;
 })->name('poem-card');
 
+// Local-only temporary error test routes (remove after debugging)
+if (app()->environment('local')) {
+    Route::prefix('error')->group(function () {
+        Route::get('/404', fn() => abort(404));
+        Route::get('/500', function () { throw new Exception('Manual 500 test'); });
+        Route::get('/429', fn() => abort(429));
+        Route::get('/503', fn() => abort(503));
+        Route::get('/403', fn() => abort(403));
+        Route::get('/401', fn() => abort(401));
+        Route::get('/419', fn() => abort(419));
+        Route::middleware('throttle:1,1')->get('/throttle', fn() => 'OK'); // trigger 429 on rapid repeat
+    });
+}
+

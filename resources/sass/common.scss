@@ -256,9 +256,13 @@ body{
 
 .error-page{
   >.message{
-    line-height: calc(100vh - 12rem);
+    height: calc(100vh - 12rem);
     font-weight: bolder;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 }
 
