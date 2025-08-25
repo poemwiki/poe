@@ -184,6 +184,6 @@ if [ -f "$STORAGE_DIR/$PUB_KEY" ]; then chmod 644 "$STORAGE_DIR/$PUB_KEY"; fi
 chown application:application "$STORAGE_DIR/$PRIV_KEY" "$STORAGE_DIR/$PUB_KEY" 2>/dev/null || true
 EOF
 
-RUN chmod +x /opt/docker/bin/entrypoint.d/10-passport-keys.sh
+RUN chmod +x /opt/docker/provision/entrypoint.d/10-passport-keys.sh
 
 EXPOSE 8080
