@@ -75,7 +75,7 @@ pnpm install
 # dev watch
 pnpm run watch
 # build
-pnpm run prod
+pnpm run build
 ```
 
 ## Contribution

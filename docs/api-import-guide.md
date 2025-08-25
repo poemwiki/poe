@@ -1,6 +1,6 @@
 API Documentation：[PoemWiki Open API Documentation](https://api-doc.poemwiki.org) (password: poemwiki)  
 
-这个文档站点由 Apifox 生成，包含 Testing 和 Production 两个环境，建议先在 Testing 环境测试你的导入脚本，再切换到 Testing 环境。
+这个文档站点由 Apifox 生成，包含 Testing 和 Production 两个环境，建议先在 Testing 环境测试你的导入脚本，再切换到 Production 环境。
 
 适用接口（全部基于前缀 `/api/v1`）：
 - 用户登录：`POST /user/login`
