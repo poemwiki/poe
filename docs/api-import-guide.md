@@ -26,6 +26,7 @@ API Documentation：[PoemWiki Open API Documentation](https://api-doc.poemwiki.o
 ---
 ## 1. 基础流程
 
+0. 在 Testing/Production 环境的登录页面注册一个邮箱账号。
 1. `POST /user/login` 获取访问令牌（Passport personal access token，`token_type=Bearer`）。
 2. （可选）对来源作者执行 `POST /author/search`：
   - 若返回匹配（单一且可信）则记录其 author id 或 wikidata_id 用作后续导入诗歌时的 `poet_id` 或 translator id；

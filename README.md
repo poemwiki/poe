@@ -55,6 +55,7 @@ php artisan passport:install
 注意：
 * 之后不要在镜像构建阶段或每次发布重复执行 `passport:install`，否则会产生多余客户端记录，若覆盖密钥还会使旧 token 全部失效。
 * 如果只缺少 Personal Access Client，可用更安全的幂等命令：`php artisan passport:client --personal`。
+* 如果只缺少 oauth keys，可以执行 `php artisan passport:keys`
 * 多机部署需要将生成的两个 key 文件安全分发到所有运行实例。
 * 若安全事件需要“强制全部失效”，才考虑重新生成密钥（`passport:keys --force`）。
 
