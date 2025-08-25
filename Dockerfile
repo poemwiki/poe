@@ -135,4 +135,55 @@ RUN if [ -f package.json ]; then \
 
 USER root
 
+# Passport key persistence: script executed at container start (webdevops executes /opt/docker/bin/entrypoint.d/*)
+COPY <<'EOF' /opt/docker/bin/entrypoint.d/10-passport-keys.sh
+#!/bin/sh
+set -e
+
+APP_DIR="/app"
+STORAGE_DIR="$APP_DIR/storage"
+DATA_DIR="/data"
+PRIV_KEY="oauth-private.key"
+PUB_KEY="oauth-public.key"
+
+# Ensure storage dir exists
+# mkdir -p "$STORAGE_DIR"
+
+copy_from_data() {
+    echo "[passport] Found existing keys in $DATA_DIR, copying into app..." >&2
+    cp "$DATA_DIR/$PRIV_KEY" "$STORAGE_DIR/$PRIV_KEY"
+    cp "$DATA_DIR/$PUB_KEY" "$STORAGE_DIR/$PUB_KEY"
+}
+
+generate_and_persist() {
+    echo "[passport] Generating new Passport keys..." >&2
+    (cd "$APP_DIR" && php artisan passport:keys --force)
+    if [ -f "$STORAGE_DIR/$PRIV_KEY" ] && [ -f "$STORAGE_DIR/$PUB_KEY" ]; then
+        mkdir -p "$DATA_DIR"
+        cp "$STORAGE_DIR/$PRIV_KEY" "$DATA_DIR/$PRIV_KEY"
+        cp "$STORAGE_DIR/$PUB_KEY" "$DATA_DIR/$PUB_KEY"
+        echo "[passport] Keys generated and copied to $DATA_DIR" >&2
+    else
+        echo "[passport][warning] Keys not found after generation attempt" >&2
+    fi
+}
+
+if [ -f "$DATA_DIR/$PRIV_KEY" ] && [ -f "$DATA_DIR/$PUB_KEY" ]; then
+    # Only copy if app missing any
+    if [ ! -f "$STORAGE_DIR/$PRIV_KEY" ] || [ ! -f "$STORAGE_DIR/$PUB_KEY" ]; then
+        copy_from_data
+    fi
+else
+    # Need to generate
+    generate_and_persist
+fi
+
+# Set secure permissions & ownership inside container
+if [ -f "$STORAGE_DIR/$PRIV_KEY" ]; then chmod 600 "$STORAGE_DIR/$PRIV_KEY"; fi
+if [ -f "$STORAGE_DIR/$PUB_KEY" ]; then chmod 644 "$STORAGE_DIR/$PUB_KEY"; fi
+chown application:application "$STORAGE_DIR/$PRIV_KEY" "$STORAGE_DIR/$PUB_KEY" 2>/dev/null || true
+EOF
+
+RUN chmod +x /opt/docker/bin/entrypoint.d/10-passport-keys.sh
+
 EXPOSE 8080
