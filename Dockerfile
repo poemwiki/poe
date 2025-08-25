@@ -135,8 +135,8 @@ RUN if [ -f package.json ]; then \
 
 USER root
 
-# Passport key persistence: script executed at container start (webdevops executes /opt/docker/bin/entrypoint.d/*)
-COPY <<'EOF' /opt/docker/bin/entrypoint.d/10-passport-keys.sh
+# Passport key persistence: script executed at container start
+COPY <<'EOF' /opt/docker/provision/entrypoint.d/10-passport-keys.sh
 #!/bin/sh
 set -e
 
