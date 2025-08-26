@@ -1,9 +1,10 @@
 import '../bootstrap';
 import CalendarHeat from './CalendarHeat.vue';
+import LoadingBox from '../components/LoadingBox.vue';
 
 new Vue({
   el: '#app',
-  components: {CalendarHeat},
+  components: {CalendarHeat, LoadingBox},
   data: {
     firstLoaded: false,
     contributions: {},
@@ -13,12 +14,17 @@ new Vue({
     userID: '',
     originalPoemsTotal: null,
     loading: true,
+  fiveStarPoems: [],
+  fiveStarPage: 1,
+  fiveStarStop: false,
+  fiveStarLoading: false,
   },
   async mounted() {
     this.userID = this.$refs.userID.textContent;
     const response = await this.fetchPoems();
     this.originalPoems = response.data;
     this.originalPoemsTotal = response.total;
+  this.fetchFiveStarPoems();
   },
 
   watch: {
@@ -34,26 +40,27 @@ new Vue({
 
   methods: {
     onScroll: async function() {
-      if (this.stopFetchMorePoems) {
-        return
+      const container = document.getElementById('app');
+      if(!container) return;
+      const nearBottom = container.scrollTop + container.clientHeight > container.scrollHeight - 300;
+      if(!nearBottom) return;
+
+      // original poems infinite load
+      if(!this.stopFetchMorePoems) {
+        this.stopFetchMorePoems = true;
+        const res = await this.fetchPoems(this.currentPage+1);
+        this.originalPoems = this.originalPoems.concat(res.data);
+        this.currentPage++;
+        setTimeout(()=>{ this.stopFetchMorePoems = !res.has_more_pages; }, 800);
       }
-
-      const bottomOfWindow =
-        this.$refs.page.parentElement.scrollTop + window.innerHeight > this.$refs.page.offsetHeight;
-      if(!bottomOfWindow) {
-        return;
+      // five star poems infinite load
+      if(!this.fiveStarStop && !this.fiveStarLoading) {
+        const page = this.fiveStarPage + 1;
+        const res = await this.fetchFiveStarPoems(page);
+        if(res) {
+          this.fiveStarPage = page;
+        }
       }
-
-      this.stopFetchMorePoems = true;
-      const res = await this.fetchPoems(this.currentPage+1);
-      this.originalPoems = this.originalPoems.concat(res.data);
-
-      this.currentPage++;
-
-      // rate limit
-      setTimeout(() => {
-        this.stopFetchMorePoems = !res.has_more_pages;
-      }, 1000);
     },
 
     _fetchPoems: async function(page = 1) {
@@ -75,6 +82,26 @@ new Vue({
       this.loading = true;
       const res = await this._fetchPoems(page);
       this.loading = false;
+      return res;
+    },
+
+    _fetchFiveStarPoems: async function(page = 1) {
+      const url = `/api/v1/me/five-star-poems/${page}`;
+      try {
+        const resp = await axios.get(url);
+        if(resp.code !== 0) {
+          return [];
+        }
+        return resp.data;
+      } catch (e) { console.error(e); }
+    },
+    fetchFiveStarPoems: async function(page = 1) {
+      this.fiveStarLoading = true;
+      const res = await this._fetchFiveStarPoems(page);
+      this.fiveStarLoading = false;
+      if(!res || !res.data) return;
+      if(page === 1) this.fiveStarPoems = res.data; else this.fiveStarPoems = this.fiveStarPoems.concat(res.data);
+      this.fiveStarStop = !res.has_more_pages;
       return res;
     },
 
@@ -117,4 +144,15 @@ new Vue({
       });
     }
   }
+});
+
+// global scroll listener for infinite loading
+document.addEventListener('DOMContentLoaded', () => {
+  const app = document.getElementById('app');
+  if(!app) return;
+  app.addEventListener('scroll', () => {
+    if(app.__vue__ && app.__vue__.onScroll) {
+      app.__vue__.onScroll();
+    }
+  }, { passive: true });
 });

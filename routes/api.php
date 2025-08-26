@@ -85,6 +85,10 @@ Route::middleware(['auth:api,web', 'api'])->group(static function () {
             Route::post('/store', [\App\Http\Controllers\API\ScoreAPIController::class, 'store'])->name('store');
             Route::get('/mine', [\App\Http\Controllers\API\ScoreAPIController::class, 'mine'])->name('mine');
         });
+        Route::prefix('me')->name('me/')->group(static function () {
+            // List authenticated user's five-star poems (score=10) with pagination
+            Route::get('/five-star-poems/{page?}', [\App\Http\Controllers\API\MeAPIController::class, 'fiveStarPoems'])->name('five-star-poems');
+        });
         Route::prefix('message')->name('message/')->group(static function () {
             Route::get('/recent', [\App\Http\Controllers\API\MessageAPIController::class, 'recent'])->name('recent');
             Route::post('/read/{id}', [\App\Http\Controllers\API\MessageAPIController::class, 'read'])->name('read');

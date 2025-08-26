@@ -39,7 +39,7 @@ class ContributionAPIController extends Controller {
                     ->orWhere('subject_type', '=', \App\Models\Author::class);
             });
         if ($userID) {
-            $query->where('causer_id', $userID);
+            $query->where('causer_type', \App\User::class)->where('causer_id', $userID);
         }
         if ($dateFrom) {
             $query->where('created_at', '>=', $dateFrom);

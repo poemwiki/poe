@@ -44,23 +44,23 @@
           <a class="title title-bar font-song no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['title']}}</a>
           <a class="first-line no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['firstLine']}}</a>
         </li>
-        <li v-if="loading" class="w-full text-center loading-box self-center"></li>
+  <loading-box :visible="loading" mode="center" tag="div" />
       </ul>
     </section>
 
-    <section class="mb-16 hidden">
-      <h2 class="mt-5 text-lg font-bold">我收藏的</h2>
-      <ul>
-        @foreach($collectionPoems as $poem)
-          <li class="title-list-item">
-            <a class="title title-bar font-song no-bg" href="{{$poem->url}}">{{trim($poem->title) ? trim($poem->title) : '无题'}}</a>
-            <a class="first-line no-bg" href="{{$poem->url}}">{!!Str::of($poem->firstLine)->surround('span', function ($i) {
-                          return 'style="transition-delay:'.($i*20).'ms"';
-                  })!!}</a>
-          </li>
-        @endforeach
+
+    <section class="mb-16" id="five-star-section">
+      <h2 class="mt-5 text-lg font-bold">我的五星诗歌</h2>
+      <ul class="min-h-screen/4 flex flex-col" ref="fiveStarList">
+        <li class="title-list-item" v-for="poem in fiveStarPoems" :key="'fs-'+poem.id" v-cloak>
+          <a class="title title-bar font-song no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['title']}}</a>
+          <a class="first-line no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['firstLine']}}</a>
+        </li>
+        <loading-box :visible="fiveStarLoading" mode="tail" />
+        <li v-if="!fiveStarLoading && fiveStarPoems.length===0" class="text-sm text-gray-500 p-4" v-cloak>还没有评分为五星的诗歌。</li>
       </ul>
     </section>
+
   </div>
 
   <notifications position="bottom right" :duration="2000" />
