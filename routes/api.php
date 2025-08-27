@@ -19,7 +19,7 @@ Route::middleware(['api'])->group(static function () {
             Route::get('/', '\App\Http\Controllers\API\CampaignAPIController@index')->name('index');
             Route::get('/list/{page?}', [\App\Http\Controllers\API\CampaignAPIController::class, 'list'])->name('list');
 
-            Route::get('/show/{id}', '\App\Http\Controllers\API\CampaignAPIController@show')->name('index');
+            Route::get('/show/{id}', '\App\Http\Controllers\API\CampaignAPIController@show')->name('detail');
         });
         Route::prefix('poem')->name('poem/')->group(static function () {
             // Route::get('/campaign', '\App\Http\Controllers\API\PoemAPIController@campaignIndex')->name('index');
@@ -27,7 +27,7 @@ Route::middleware(['api'])->group(static function () {
             Route::get('/random-nft/{num?}/{id?}', '\App\Http\Controllers\API\PoemAPIController@randomNft')->name('randomNft');
 
             Route::get('/detail/{id}', '\App\Http\Controllers\API\PoemAPIController@detail')->name('detail');
-            Route::get('/nft-detail/{id}', '\App\Http\Controllers\API\PoemAPIController@nftDetail')->name('detail');
+            Route::get('/nft-detail/{id}', '\App\Http\Controllers\API\PoemAPIController@nftDetail')->name('nft-detail');
             Route::get('/share/{id}/{compositionID?}', '\App\Http\Controllers\API\PoemAPIController@share')->name('share');
             Route::post('/q', [\App\Http\Controllers\API\PoemAPIController::class, 'query'])->name('query');
             Route::post('/detect', [\App\Http\Controllers\API\PoemAPIController::class, 'detectLanguage'])->name('detect');
@@ -61,7 +61,6 @@ Route::middleware(['auth:api,web', 'api'])->group(static function () {
             Route::post('/txs', [\App\Http\Controllers\API\UserAPIController::class, 'txs'])->name('txs');
         });
         Route::prefix('poem')->name('poem/')->group(static function () {
-            Route::post('/detail/{id}', '\App\Http\Controllers\API\PoemAPIController@detail')->name('detail');
             Route::post('/store', [\App\Http\Controllers\API\PoemAPIController::class, 'store'])->name('store');
             Route::post('/create', [\App\Http\Controllers\API\PoemAPIController::class, 'create'])->name('create');
             Route::get('/mine', [\App\Http\Controllers\API\PoemAPIController::class, 'mine'])->name('mine');
@@ -78,7 +77,7 @@ Route::middleware(['auth:api,web', 'api'])->group(static function () {
         Route::prefix('review')->name('review/')->group(static function () {
             Route::post('/store', [\App\Http\Controllers\API\ReviewAPIController::class, 'store'])->name('store');
             Route::post('/like/{action}/{id}', [\App\Http\Controllers\API\ReviewAPIController::class, 'like'])->name('like');
-            Route::get('/delete/{id}', [\App\Http\Controllers\API\ReviewAPIController::class, 'delete'])->name('store');
+            Route::get('/delete/{id}', [\App\Http\Controllers\API\ReviewAPIController::class, 'delete'])->name('delete');
             // Route::get('/mine', [\App\Http\Controllers\API\ReviewAPIController::class, 'mine'])->name('mine');
         });
         Route::prefix('score')->name('score/')->group(static function () {
