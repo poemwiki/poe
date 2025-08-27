@@ -23,7 +23,7 @@
             <div class="card-group">
                 <div class="card p-2">
                     <div class="card-body">
-                        <form method="post" action="{{ route('login', ['ref' => request()->input('ref', '')]) }}">
+                        <form method="post" action="{{ route('login', ['ref' => request()->input('ref', '')], false) }}">
                             @csrf
                             <h1>@lang('Login')</h1>
                             <p class="text-muted">{{config('app.name')}}</p>
