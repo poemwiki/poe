@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
+use Illuminate\Support\Facades\URL;
 use Normalizer;
 
 class AppServiceProvider extends ServiceProvider {
@@ -22,6 +23,10 @@ class AppServiceProvider extends ServiceProvider {
      * @return void
      */
     public function boot() {
+        if (config('app.env') !== 'local') {
+            URL::forceScheme('https');
+        }
+
         Stringable::macro('surround', function ($tagName = 'span', $attrFn = null) {
             $i = 0;
 

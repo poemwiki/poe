@@ -13,7 +13,7 @@
                   @endif
                 </a>
             @else
-                <a href="{{ route('login', ['ref' => isset($poem) ? route('p/show', $poem->fake_id, false) : '']) }}" class="menu-button no-bg" alt="Menu button">@lang('Login')</a>
+                <a href="{{ route('login', ['ref' => isset($poem) ? route('p/show', $poem->fake_id, false) : ''], false) }}" class="menu-button no-bg" alt="Menu button">@lang('Login')</a>
             @endauth
         </li>
         @auth
