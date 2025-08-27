@@ -5,16 +5,12 @@
 
 @push('styles')
   <link href="{{ mix('/css/base.css') }}" rel="stylesheet">
-  <link href="{{ mix('/css/author.css') }}" rel="stylesheet">
-<style>
-#app {
-  height: 100vh;
-  overflow-y: auto;
-}
-/* #app::-webkit-scrollbar {
-  display: none;
-} */
-</style>
+  <style>
+  #app {
+    height: 100vh;
+    overflow-y: scroll;
+  }
+  </style>
 @endpush
 
 @section('content')

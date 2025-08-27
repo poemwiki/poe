@@ -13,18 +13,7 @@
     }
     #app {
       height: 100vh;
-      overflow-y: auto;
-    }
-    #app::-webkit-scrollbar {
-      display: none;
-    }
-    #app {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
-    }
-    button {
-      all: unset;
-    }
+      overflow-y: scroll;
   </style>
 @endpush
 

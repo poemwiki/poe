@@ -1,7 +1,9 @@
 import '../bootstrap';
+import LoadingBox from "../components/LoadingBox.vue";
 
 new Vue({
-  el: '#app',
+  el: "#app",
+  components: { LoadingBox },
   data: {
     firstLoaded: false,
     contributions: {},
@@ -9,30 +11,30 @@ new Vue({
     currentPage: 1,
     stopFetchMore: false,
     loading: false,
-    userID: '',
+    userID: "",
   },
 
   async mounted() {
     this.campaigns = (await this.fetchCampaigns()).data;
   },
 
-  watch: {
-  },
+  watch: {},
 
   methods: {
-    onScroll: async function() {
+    onScroll: async function () {
       if (this.stopFetchMore) {
-        return
+        return;
       }
 
       const bottomOfWindow =
-        this.$refs.page.parentElement.scrollTop + window.innerHeight * 1.7 > this.$refs.page.offsetHeight;
-      if(!bottomOfWindow) {
+        this.$refs.page.parentElement.scrollTop + window.innerHeight * 1.7 >
+        this.$refs.page.offsetHeight;
+      if (!bottomOfWindow) {
         return;
       }
 
       this.stopFetchMore = true;
-      const res = await this.fetchCampaigns(this.currentPage+1);
+      const res = await this.fetchCampaigns(this.currentPage + 1);
       this.campaigns = this.campaigns.concat(res.data);
 
       this.currentPage++;
@@ -42,12 +44,12 @@ new Vue({
       }, 1000);
     },
 
-    _fetchCampaigns: async function(page = 1) {
+    _fetchCampaigns: async function (page = 1) {
       const url = `/api/v1/campaign/list/${page}`;
       try {
         const resp = await axios.get(url);
 
-        if(resp.code !== 0) {
+        if (resp.code !== 0) {
           return [];
         }
 
@@ -57,12 +59,11 @@ new Vue({
       }
     },
 
-    fetchCampaigns: async function(page = 1) {
+    fetchCampaigns: async function (page = 1) {
       this.loading = true;
       const resp = await this._fetchCampaigns(page);
       this.loading = false;
       return resp;
     },
-
-  }
+  },
 });
