@@ -39,6 +39,7 @@ Keep responses concrete, reflect existing patterns—do not introduce speculativ
 - Use model / repository public APIs over crafting manual JSON for responses to preserve versioned behaviors.
 - Use `php artisan test` to run tests
 - Use tinker for quick experimentation and debugging.
+- *** Never *** run `pnpm run dev` or `pnpm run watch`
 
 ## Examples
 - Get random poem URL (used on landing): `PoemRepository::randomOne()->url`.

@@ -1,13 +1,13 @@
 const { fontFamily } = require('tailwindcss/defaultTheme')
 
 module.exports = {
-  mode: 'jit',
+  mode: "jit",
   purge: [
-    './resources/**/*.blade.php',
-    './resources/**/*.js',
-    './resources/**/*.vue',
+    "./resources/**/*.blade.php",
+    "./resources/**/*.js",
+    "./resources/**/*.vue",
   ],
-  darkMode: 'class', // or 'media' or 'class'
+  darkMode: "class", // or 'media' or 'class'
   theme: {
     container: {
       center: true,
@@ -17,35 +17,36 @@ module.exports = {
       },
     },
     minHeight: {
-      '0': '0',
-      '1/4': '25%',
-      '1/2': '50%',
-      '3/4': '75%',
-      'screen/2': '50vh',
-      'screen/4': '25vh',
+      0: "0",
+      "1/4": "25%",
+      "1/2": "50%",
+      "3/4": "75%",
+      "screen/2": "50vh",
+      "screen/4": "25vh",
     },
     fontSize: {
-      xs: '12px',
-      sm: '14px',
-      tiny: ['1.4rem', '2rem'],
-      base: ['1.6rem', '2.4rem'],
-      lg: ['1.8rem', '3.6rem'],
-      xl: ['2.2rem', '5.2rem'],
-      '2xl': ['3.1rem', '6rem'],
-      '3xl': ['3.84rem', '7.6rem'],
-      h2: ['1.71rem', '3.4rem'],
+      xs: "12px",
+      sm: "14px",
+      tiny: ["1.4rem", "2rem"],
+      base: ["1.6rem", "2.4rem"],
+      lg: ["1.8rem", "3.6rem"],
+      xl: ["2.2rem", "5.2rem"],
+      "2xl": ["3.1rem", "6rem"],
+      "3xl": ["3.84rem", "7.6rem"],
+      h2: ["1.71rem", "3.4rem"],
     },
     screens: {
-      'xs': {'min': '320px'},   // Mobile devices.
-      'sm': {'min': '480px'},   // iPads, Tablets.
-      'md': {'min': '768px'},  // Small screens, laptops.
-      'lg': {'min': '1024px'}, // Desktops, large screens.
-      'xl': {'min': '1281px'}                   // Extra large screens, TV.
+      xs: { min: "320px" }, // Mobile devices.
+      sm: { min: "480px" }, // iPads, Tablets.
+      md: { min: "768px" }, // Small screens, laptops.
+      lg: { min: "1024px" }, // Desktops, large screens.
+      xl: { min: "1281px" }, // Extra large screens, TV.
     },
     // colors: colors,
     // textColors: colors,
     extend: {
       colors: {
+        ui: "#23282c",
         link: "hsl(var(--link))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -64,6 +65,10 @@ module.exports = {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+        },
+        inactive: {
+          DEFAULT: "#9D9D9D",
+          foreground: "hsl(var(--muted-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -92,12 +97,12 @@ module.exports = {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: '0' },
+          from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: '0' },
+          to: { height: "0" },
         },
       },
       animation: {
@@ -106,16 +111,17 @@ module.exports = {
       },
 
       lineHeight: {
-        'unset': 'unset',
-      }
+        unset: "unset",
+      },
     },
   },
   variants: {
     extend: {
-      backgroundColor: ['odd', 'even'],
+      backgroundColor: ["odd", "even"],
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-  ],
-}
+  plugins: [require("@tailwindcss/forms")],
+  experiments: {
+    optimizeUniversalDefaults: true,
+  },
+};

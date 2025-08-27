@@ -1,6 +1,6 @@
 <template>
-  <component :is="tag" v-if="visible" :class="containerClass">
-    <span class="loading-box"></span>
+  <component :is="tag" :class="containerClass">
+    <div class="loading-box"></div>
   </component>
 </template>
 
@@ -8,16 +8,12 @@
 export default {
   name: 'LoadingBox',
   props: {
-    visible: { type: Boolean, default: false },
-    mode: { type: String, default: 'tail' }, // 'tail' | 'center'
-    tag: { type: String, default: 'li' }
+    tag: { type: String, default: 'div' },
+    className: { type: String, default: '' }
   },
   computed: {
     containerClass() {
-      if (this.mode === 'center') {
-        return 'flex justify-center items-center py-10 relative';
-      }
-      return 'w-full text-center self-center py-4';
+      return 'w-full h-full flex justify-center items-center py-10 relative ' + this.className;
     }
   }
 }

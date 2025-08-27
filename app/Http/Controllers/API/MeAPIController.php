@@ -18,7 +18,6 @@ class MeAPIController extends Controller {
 
     /**
      * List poems that current user rated 5 stars (score=10 in score table).
-     * Pagination size fixed to 10 for now.
      */
     public function fiveStarPoems($page = 1) {
         $user = Auth::user();
@@ -27,7 +26,7 @@ class MeAPIController extends Controller {
         }
 
         $page = max(1, (int)$page);
-        $pageSize = 10; // could be parameterized later
+        $pageSize = 20; // could be parameterized later
 
         // Get poem ids user scored 10
         $scoreQuery = Score::query()->where('user_id', $user->id)->where('score', 10);

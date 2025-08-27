@@ -22,7 +22,10 @@ function d() {
 export default {
   name: 'CalendarHeatmap',
   props: {
-    dataFetch: Function
+    data: { // preferred direct data array [[date, count]]
+      type: Array,
+      default: () => []
+    }
   },
   mounted() {
     this.initChart();
@@ -60,6 +63,12 @@ export default {
       // a year ago
       const startDay = d(d().setDate(endDay - 365));
       const startDayString = startDay.toISOString().slice(0, 10);
+
+      // obtain raw data
+      let rawData = [];
+      if (this.data && this.data.length) {
+        rawData = this.data;
+      }
 
       const options = {
         tooltip: {
@@ -139,9 +148,7 @@ export default {
         series: [{
           type: 'heatmap',
           coordinateSystem: 'calendar',
-          data: (await this.dataFetch()).filter(data => {
-            return d(data[0]) >= minDate;
-          }),
+          data: (rawData || []).filter(item => item && d(item[0]) >= minDate),
           xAxisIndex: 0,
           calendarIndex: 0,
           emphasis: {
@@ -160,6 +167,27 @@ export default {
     disposeChart() {
       const chart = this.$refs.chart && this.$refs.chart.echartsInstance;
       chart && chart.dispose();
+    },
+    updateData() {
+      if (!this.chart) return;
+      // const series = this.chart.getOption().series || [];
+      const minCellSize = 12;
+      const containerWidth = this.$refs.chart.getBoundingClientRect().width;
+      const containWeeks = Math.floor(containerWidth / minCellSize);
+      const today = d(yMd(d()));
+      let minDate = d(d(today).setDate(today.getDate() - containWeeks * 7 - 1));
+      minDate = d(d(minDate.setMonth(minDate.getMonth() + 1)).setDate(1));
+      const filtered = (this.data || []).filter(item => item && d(item[0]) >= minDate);
+      this.chart.setOption({
+        series: [{
+          data: filtered
+        }]
+      });
+    }
+  },
+  watch: {
+    data() {
+      this.updateData();
     }
   }
 };

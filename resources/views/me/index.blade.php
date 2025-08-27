@@ -11,13 +11,9 @@
   height: 100vh;
   overflow-y: auto;
 }
-/*#app::-webkit-scrollbar {*/
-/*  display: none;*/
-/*}*/
-/*#app {*/
-/*  -ms-overflow-style: none;  !* IE and Edge *!*/
-/*  scrollbar-width: none;  !* Firefox *!*/
-/*}*/
+/* #app::-webkit-scrollbar {
+  display: none;
+} */
 </style>
 @endpush
 
@@ -25,41 +21,65 @@
 <div>
   <div class="page">
     <span class="hidden" ref="userID">{{$user->id}}</span>
-    <div class="flex justify-between">
-      <h1 class="text-xl font-bold">{{$user->name}}</h1>
-      <a class="no-bg h-10 border rounded-lg px-2 py-0 flex items-center text-sm" href="{{route('logout')}}">@lang('Logout')</a>
-    </div>
+      <div class="flex justify-between mb-4 items-center">
+        <h1 class="text-xl font-bold">{{$user->name}}</h1>
+        <a class="no-bg h-10 border rounded-lg px-2 py-0 flex items-center text-sm" href="{{route('logout')}}">@lang('Logout')</a>
+      </div>
 
-    <section class="mb-16">
-      <h2 class="text-lg font-bold mb-4"><span ref="contributionCount"></span>&nbsp;次贡献（过去一年）</h2>
-      <calendar-heat class="calendar"
-                     :data-fetch="() => fetchContributions({{$user->id}})"
-      ></calendar-heat>
-    </section>
-
-    <section class="mb-16">
-      <h2 class="mt-5 text-lg font-bold">我的原创&nbsp;<span v-cloak>共 @{{originalPoemsTotal}} 首</span></h2>
-      <ul class="min-h-screen/4 flex flex-col justify-center">
-        <li class="title-list-item" v-for="poem in originalPoems" v-cloak>
-          <a class="title title-bar font-song no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['title']}}</a>
-          <a class="first-line no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['firstLine']}}</a>
+      <!-- Tabs Nav -->
+      <ul class="flex border-b mb-8 text-sm select-none">
+        <li @click="switchTab('original')" :class="['cursor-pointer text-lg px-4 py-2 -mb-px border-b-2', activeTab==='original' ? 'border-ui text-ui font-bold' : 'border-transparent text-inactive']">
+          我的原创
         </li>
-  <loading-box :visible="loading" mode="center" tag="div" />
-      </ul>
-    </section>
-
-
-    <section class="mb-16" id="five-star-section">
-      <h2 class="mt-5 text-lg font-bold">我的五星诗歌</h2>
-      <ul class="min-h-screen/4 flex flex-col" ref="fiveStarList">
-        <li class="title-list-item" v-for="poem in fiveStarPoems" :key="'fs-'+poem.id" v-cloak>
-          <a class="title title-bar font-song no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['title']}}</a>
-          <a class="first-line no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['firstLine']}}</a>
+        <li @click="switchTab('fiveStar')" :class="['cursor-pointer text-lg px-4 py-2 -mb-px border-b-2', activeTab==='fiveStar' ? 'border-ui text-ui font-bold' : 'border-transparent text-inactive']">
+          我的五星
         </li>
-        <loading-box :visible="fiveStarLoading" mode="tail" />
-        <li v-if="!fiveStarLoading && fiveStarPoems.length===0" class="text-sm text-gray-500 p-4" v-cloak>还没有评分为五星的诗歌。</li>
+        <li @click="switchTab('contribution')" :class="['cursor-pointer text-lg px-4 py-2 -mb-px border-b-2', activeTab==='contribution' ? 'border-ui text-ui font-bold' : 'border-transparent text-inactive']">
+          我的贡献
+        </li>
       </ul>
-    </section>
+
+      <!-- Original Poems Tab -->
+      <section v-show="activeTab==='original'">
+        <h2 class="mt-2 mb-4 text-ui"><span v-if="originalPoemsTotal!==null" v-cloak>共 @{{originalPoemsTotal}} 首</span></h2>
+        <ul class="min-h-[200px] flex flex-col justify-start">
+          <li class="title-list-item" v-for="poem in originalPoems" :key="'op-'+poem.id" v-cloak>
+            <a class="title font-song no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['title']}}</a>
+            <a class="first-line no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['firstLine']}}</a>
+          </li>
+          <loading-box v-if="loading" class-name="h-[200px]" />
+          <li v-if="!loading && originalPoems.length===0" class="text-sm text-gray-500 p-4" v-cloak>暂无原创诗歌。</li>
+        </ul>
+      </section>
+
+      <!-- Five Star Poems Tab -->
+      <section v-show="activeTab==='fiveStar'" id="five-star-section">
+        <h2 class="mt-2 mb-4 text-ui"><span v-if="fiveStarPoemsTotal!==null" v-cloak>共 @{{fiveStarPoemsTotal}} 首</span></h2>
+        <ul class="min-h-[200px] flex flex-col show-first-line" ref="fiveStarList">
+          <li class="title-list-item" v-for="poem in fiveStarPoems" :key="'fs-'+poem.id" v-cloak>
+            <a class="title font-song no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['title']}}</a>
+            <a class="first-line no-bg" target="_blank" :href="'/p/'+poem['fake_id']">
+              @{{poem['firstLine']}}
+              <span class="text-gray-400 float-right item-poem-author">
+                @{{poem['poet']}}
+              </span>
+            </a>
+          </li>
+          <loading-box v-if="fiveStarLoading" tag="li" :class-name="fiveStarPoems.length ? 'pb-0' : 'pb-0 min-h-[inherit]'" />
+          <li v-if="!fiveStarLoading && fiveStarPoems.length===0" class="text-sm text-gray-500 p-4" v-cloak>还没有评分为五星的诗歌。</li>
+        </ul>
+      </section>
+
+      <!-- Contribution Tab -->
+      <section v-show="activeTab==='contribution'">
+        <h2 class="mt-2 mb-4 text-ui">
+          <span v-if="contributionTotal!==null" v-cloak>@{{contributionTotal}} 次贡献（过去一年）</span>
+        </h2>
+        <div class="relative min-h-[200px] flex flex-col">
+          <loading-box v-if="contributionLoading" class-name="h-[200px]" ></loading-box>
+          <calendar-heat v-else class="calendar" :data="contributionChartData" />
+        </div>
+      </section>
 
   </div>
 
