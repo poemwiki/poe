@@ -77,11 +77,31 @@ class PoemRepository extends BaseRepository {
      * @param string[]      $select
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public static function random(array $with = [], ?\Closure $callback = null, array $select = ['*']): \Illuminate\Database\Eloquent\Builder {
+    public static function random(array $with = [], ?\Closure $callback = null, array $select = ['*'], $maxId = null): \Illuminate\Database\Eloquent\Builder {
+        // Determine max & min existing poem IDs (excluding soft-deleted)
+        $dbMaxId = Cache::remember('poems:max_id', 3600, function () {
+            return Poem::query()->whereNull('poem.deleted_at')->max('id');
+        });
+        $effectiveMaxId = $maxId ? $maxId : $dbMaxId;
+        $minId = Cache::remember('poems:min_id', 3600, function () {
+            return Poem::query()->whereNull('poem.deleted_at')->min('id');
+        });
+
+        if (!$effectiveMaxId || !$minId) {
+            // No data: return an empty builder keeping API contract
+            return Poem::query()->whereRaw('1=0');
+        }
+
+        // Generate random id in [1, effectiveMaxId]; adjust upward if it falls below current min id
+        $randId = random_int(1, (int)$effectiveMaxId);
+        if ($randId < $minId) {
+            $randId = $minId; // guarantee at least one row matches
+        }
+
         $builder = Poem::query()
             ->select($select)
-            ->join(DB::raw('(SELECT CEIL( RAND() * ( SELECT MAX( id ) FROM `poem` WHERE poem.deleted_at is NOT NULL)) AS rand_id) AS rand'), 'poem.id', '>=', 'rand.rand_id')
-            ->orderBy('poem.id', 'ASC')
+            ->where('poem.id', '<=', $randId)
+            ->orderByDesc('poem.id')
             ->whereNotExists(function ($query) {
                 $query->select(DB::raw(1))
                     ->from('relatable')
@@ -98,7 +118,7 @@ class PoemRepository extends BaseRepository {
         return $builder->take(1);
     }
 
-    public function suggest($num = 1, $with = [], ?\Closure $callback = null, $select = ['*']) {
+    public function suggest($num = 1, $with = [], ?\Closure $callback = null, $select = ['*'], $maxId = null) {
         // TODO 选取策略： 1. 优先选取 poem.bedtime_post_id 不为空的 poem
         // 2. 评分和评论数
         // 3. poem.length
@@ -112,9 +132,9 @@ class PoemRepository extends BaseRepository {
         //     $builder->with($with);
         // }
 
-        $builder = self::random($with, $callback, $select);
+        $builder = self::random($with, $callback, $select, $maxId);
         for ($i = 1; $i < $num; ++$i) {
-            $builder->union(self::random($with, $callback, $select));
+            $builder->union(self::random($with, $callback, $select, $maxId));
         }
 
         return $builder; // TODO 1. 如果显示声明原创的诗歌，是否需要跟普通诗歌区分开？ 2. 对声明原创的诗歌，gate 中定义只允许上传用户编辑

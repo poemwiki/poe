@@ -52,8 +52,8 @@ class PoemAPIController extends Controller {
         $this->authorRepository = $authorRepository;
     }
 
-    public function random($num = 5, $id = null) {
-        $num = min(10, $num);
+    public function random($num = 8, $id = null) {
+        $num = max(5, min(10, $num));
 
         $columns = [
             'id', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
@@ -77,7 +77,8 @@ class PoemAPIController extends Controller {
         ];
 
         $noScoreNum = 2;
-        $scorePoems = $this->poemRepository->suggest($num - $noScoreNum, ['reviews'], function ($query) {
+        $earlyPoemNum = rand(0, 1) <= 0.2 ? 1 : 0; // chance to include one early poem
+        $scorePoems = $this->poemRepository->suggest($num - $noScoreNum - $earlyPoemNum, ['reviews'], function ($query) {
             $query->whereNull('campaign_id')
                 ->where('score', '>=', 7);
         }, $select)
@@ -89,8 +90,14 @@ class PoemAPIController extends Controller {
         }, $select)
             ->get();
 
+        $earlyPoems = $earlyPoemNum ?
+            $this->poemRepository->suggest($earlyPoemNum, ['reviews'], function () {
+                }, $select, 3100)
+                    ->get()
+            : collect();
+
         // Use merge() to maintain Eloquent Collection type and avoid memory copy
-        $poems = $scorePoems->merge($noScorePoems);
+        $poems = $scorePoems->merge($noScorePoems)->merge($earlyPoems)->unique('id');
 
         // Optimize relationships and translators to prevent N+1 queries
         if ($poems->isNotEmpty()) {

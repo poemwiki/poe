@@ -23,6 +23,7 @@ $isWeappWebview = App\User::isWeAppWebview();
   <div class="changelog" style="width:100%; max-width:900px;">
     <h3>2025 年</h3>
     <ul>
+      <li>修复推荐诗歌过于集中，容易重复的问题。</li>
       <li>用户页新增“我的五星”诗单：可查看评过五星的诗歌。</li>
       <li>更新 PoemWiki Open API 及其文档。</li>
       <li>体验：诗歌页与作者页加载速度提升。</li>
