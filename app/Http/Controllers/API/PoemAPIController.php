@@ -13,6 +13,7 @@ use App\Models\Relatable;
 use App\Models\Tag;
 use App\Models\Transaction;
 use App\Models\NFT;
+use App\Models\Language;
 use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
@@ -118,21 +119,24 @@ class PoemAPIController extends Controller {
         $noScoreNum = 2;
         $earlyPoemNum = rand(0, 1) <= 0.2 ? 1 : 0; // chance to include one early poem
         $scorePoems = $this->poemRepository->suggest($num - $noScoreNum - $earlyPoemNum, ['reviews'], function ($query) {
-            $query->whereNull('campaign_id')
-                ->where('score', '>=', 7);
-        }, $select, null, $userIdentifier)
+                $query->whereNull('campaign_id')
+                    ->where('score', '>=', 7)
+                    ->where('language_id', Language::LANGUAGE_ID['ZH']);
+            }, $select, null, $userIdentifier)
             ->get();
 
         $noScorePoems = $this->poemRepository->suggest($noScoreNum, ['reviews'], function ($query) {
-            $query->whereNull('campaign_id')
-                ->whereNull('score');
-        }, $select, null, $userIdentifier)
+                $query->whereNull('campaign_id')
+                    ->whereNull('score')
+                    ->where('language_id', Language::LANGUAGE_ID['ZH']);
+            }, $select, null, $userIdentifier)
             ->get();
 
         $earlyPoems = $earlyPoemNum ?
-            $this->poemRepository->suggest($earlyPoemNum, ['reviews'], function () {
+            $this->poemRepository->suggest($earlyPoemNum, ['reviews'], function ($query) {
+                    $query->where('language_id', Language::LANGUAGE_ID['ZH']);
                 }, $select, 3100, $userIdentifier)
-                    ->get()
+                ->get()
             : collect();
 
         // Use merge() to maintain Eloquent Collection type and avoid memory copy

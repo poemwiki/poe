@@ -56,6 +56,11 @@ class Language extends Model {
     use HasTranslations;
     use LogsActivity;
 
+    const LANGUAGE_ID = [
+        'ZH' => 1, // zh_CN
+        'EN' => 2,
+    ];
+
     public function getActivitylogOptions(): LogOptions {
         return LogOptions::defaults()
             ->logFillable()
