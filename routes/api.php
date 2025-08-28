@@ -61,8 +61,9 @@ Route::middleware(['auth:api,web', 'api'])->group(static function () {
             Route::post('/txs', [\App\Http\Controllers\API\UserAPIController::class, 'txs'])->name('txs');
         });
         Route::prefix('poem')->name('poem/')->group(static function () {
-            // this is not redundant with the above /poem/detail/{id},
-            // authenticated user will go this way
+            // same as above poem/random Route::get('/random/{num?}/{id?}') but method is POST and under auth:api middleware
+            Route::post('/random/{num?}/{id?}', '\App\Http\Controllers\API\PoemAPIController@random')->name('random-authed');
+            // same as above Route::get('/detail/{id}', ...) but method is POST and under auth:api middleware
             Route::post('/detail/{id}', '\App\Http\Controllers\API\PoemAPIController@detail')->name('detail-authed');
             Route::post('/store', [\App\Http\Controllers\API\PoemAPIController::class, 'store'])->name('store');
             Route::post('/create', [\App\Http\Controllers\API\PoemAPIController::class, 'create'])->name('create');

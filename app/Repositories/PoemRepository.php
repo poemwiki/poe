@@ -118,7 +118,48 @@ class PoemRepository extends BaseRepository {
         return $builder->take(1);
     }
 
-    public function suggest($num = 1, $with = [], ?\Closure $callback = null, $select = ['*'], $maxId = null) {
+    /**
+     * Get user's recently suggested poem IDs from cache
+     * Supports logged-in users (user:123), anonymous web users (session:abc123),
+     * and WeChat mini-program users (weapp:client123)
+     */
+    public static function getUserSuggestedIds($userIdentifier) {
+        if (!$userIdentifier) return [];
+
+        $cacheKey = "suggested_poems:{$userIdentifier}";
+        return Cache::get($cacheKey, []);
+    }
+
+    /**
+     * Add poem IDs to user's suggested history cache
+     * Supports logged-in users (user:123), anonymous web users (session:abc123),
+     * and WeChat mini-program users (weapp:client123)
+     */
+    public static function addUserSuggestedIds($userIdentifier, array $poemIds) {
+        if (!$userIdentifier || empty($poemIds)) return;
+
+        $cacheKey = "suggested_poems:{$userIdentifier}";
+        $existing = Cache::get($cacheKey, []);
+
+        // Add new IDs and keep only the latest 500
+        $updated = array_unique(array_merge($poemIds, $existing));
+        $updated = array_slice($updated, 0, 500);
+
+        // Different cache durations for different user types
+        if (str_starts_with($userIdentifier, 'user:')) {
+            $cacheDuration = 60 * 24 * 15;
+        } elseif (str_starts_with($userIdentifier, 'weapp:')) {
+            $cacheDuration = 60 * 24 * 7;
+        } elseif (str_starts_with($userIdentifier, 'web:cf_')) {
+            $cacheDuration = 60 * 24 * 1;    // 3 days for web users with CF IP (stable IP)
+        } else {
+            $cacheDuration = 60 * 15;        // 15 min for session-based users (less stable)
+        }
+
+        Cache::put($cacheKey, $updated, $cacheDuration);
+    }
+
+    public function suggest($num = 1, $with = [], ?\Closure $callback = null, $select = ['*'], $maxId = null, $userIdentifier = null) {
         // TODO 选取策略： 1. 优先选取 poem.bedtime_post_id 不为空的 poem
         // 2. 评分和评论数
         // 3. poem.length
@@ -132,9 +173,22 @@ class PoemRepository extends BaseRepository {
         //     $builder->with($with);
         // }
 
-        $builder = self::random($with, $callback, $select, $maxId);
+        // Get user's recently suggested poem IDs to exclude (supports both logged-in and anonymous users)
+        $excludeIds = self::getUserSuggestedIds($userIdentifier);
+
+        // Create a callback that combines user callback with exclusion logic
+        $combinedCallback = function($query) use ($callback, $excludeIds) {
+            if (is_callable($callback)) {
+                call_user_func($callback, $query);
+            }
+            if (!empty($excludeIds)) {
+                $query->whereNotIn('poem.id', $excludeIds);
+            }
+        };
+
+        $builder = self::random($with, $combinedCallback, $select, $maxId);
         for ($i = 1; $i < $num; ++$i) {
-            $builder->union(self::random($with, $callback, $select, $maxId));
+            $builder->union(self::random($with, $combinedCallback, $select, $maxId));
         }
 
         return $builder; // TODO 1. 如果显示声明原创的诗歌，是否需要跟普通诗歌区分开？ 2. 对声明原创的诗歌，gate 中定义只允许上传用户编辑

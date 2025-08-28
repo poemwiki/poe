@@ -52,9 +52,48 @@ class PoemAPIController extends Controller {
         $this->authorRepository = $authorRepository;
     }
 
+    /**
+     * Get user identifier for personalized recommendations
+     * Handles logged-in users, web anonymous users, and WeChat mini-program users
+     */
+    private function getUserIdentifier() {
+        // For logged-in users: use user ID
+        if (request()->user()) {
+            return 'user:' . request()->user()->id;
+        }
+
+        // For WeChat mini-program users: use client ID from header
+        if (\App\User::isWeApp() || \App\User::isWeAppWebview()) {
+            $clientId = request()->header('POEMWIKI-Client-ID') ?: request()->header('Client-ID');
+            if ($clientId) {
+                return 'weapp:' . $clientId;
+            }
+
+            // Fallback: use Cloudflare's real IP for mini-program users without client ID
+            $cfConnectingIp = request()->header('CF-Connecting-IP');
+            if ($cfConnectingIp) {
+                return 'weapp:cf_' . md5($cfConnectingIp);
+            }
+
+            // Final fallback: don't cache to avoid excessive cache usage
+            return null;
+        }
+
+        // For web anonymous users: prefer CF-Connecting-IP, fallback to session ID
+        $cfConnectingIp = request()->header('CF-Connecting-IP');
+        if ($cfConnectingIp) {
+            return 'web:cf_' . md5($cfConnectingIp);
+        }
+
+        // Fallback to session ID for non-Cloudflare environments
+        return 'session:' . request()->session()->getId();
+    }
+
     public function random($num = 8, $id = null) {
         $num = max(5, min(10, $num));
 
+        // Get current user identifier for personalized recommendations
+        $userIdentifier = $this->getUserIdentifier();
         $columns = [
             'id', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
             'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
@@ -81,23 +120,28 @@ class PoemAPIController extends Controller {
         $scorePoems = $this->poemRepository->suggest($num - $noScoreNum - $earlyPoemNum, ['reviews'], function ($query) {
             $query->whereNull('campaign_id')
                 ->where('score', '>=', 7);
-        }, $select)
+        }, $select, null, $userIdentifier)
             ->get();
 
         $noScorePoems = $this->poemRepository->suggest($noScoreNum, ['reviews'], function ($query) {
             $query->whereNull('campaign_id')
                 ->whereNull('score');
-        }, $select)
+        }, $select, null, $userIdentifier)
             ->get();
 
         $earlyPoems = $earlyPoemNum ?
             $this->poemRepository->suggest($earlyPoemNum, ['reviews'], function () {
-                }, $select, 3100)
+                }, $select, 3100, $userIdentifier)
                     ->get()
             : collect();
 
         // Use merge() to maintain Eloquent Collection type and avoid memory copy
         $poems = $scorePoems->merge($noScorePoems)->merge($earlyPoems)->unique('id');
+
+        // Cache suggested poem IDs to user's history for future exclusion
+        if ($userIdentifier && $poems->isNotEmpty()) {
+            PoemRepository::addUserSuggestedIds($userIdentifier, $poems->pluck('id')->toArray());
+        }
 
         // Optimize relationships and translators to prevent N+1 queries
         if ($poems->isNotEmpty()) {
