@@ -56,9 +56,11 @@ class Language extends Model {
     use HasTranslations;
     use LogsActivity;
 
+    // locale to id mapping
     const LANGUAGE_ID = [
-        'ZH' => 1, // zh_CN
-        'EN' => 2,
+        'zh-CN' => 1,
+        'en' => 2,
+        'zh-hant' => 491,
     ];
 
     public function getActivitylogOptions(): LogOptions {
