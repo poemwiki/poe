@@ -121,20 +121,20 @@ class PoemAPIController extends Controller {
         $scorePoems = $this->poemRepository->suggest($num - $noScoreNum - $earlyPoemNum, ['reviews'], function ($query) {
                 $query->whereNull('campaign_id')
                     ->where('score', '>=', 7)
-                    ->where('language_id', Language::LANGUAGE_ID['ZH']);
+                    ->where('language_id', Language::LANGUAGE_ID['zh-CN']);
             }, $select, null, $userIdentifier)
             ->get();
 
         $noScorePoems = $this->poemRepository->suggest($noScoreNum, ['reviews'], function ($query) {
                 $query->whereNull('campaign_id')
                     ->whereNull('score')
-                    ->where('language_id', Language::LANGUAGE_ID['ZH']);
+                    ->where('language_id', Language::LANGUAGE_ID['zh-CN']);
             }, $select, null, $userIdentifier)
             ->get();
 
         $earlyPoems = $earlyPoemNum ?
             $this->poemRepository->suggest($earlyPoemNum, ['reviews'], function ($query) {
-                    $query->where('language_id', Language::LANGUAGE_ID['ZH']);
+                    $query->where('language_id', Language::LANGUAGE_ID['zh-CN']);
                 }, $select, 3100, $userIdentifier)
                 ->get()
             : collect();
@@ -664,14 +664,37 @@ class PoemAPIController extends Controller {
             'compositionId' => $compositionID
         ]);
 
+        $notZhLang = !in_array($poem->language_id, [Language::LANGUAGE_ID['zh-CN'], Language::LANGUAGE_ID['zh-hant']]);
+
+        // Get poet name in appropriate language
+        $poetName = $poem->poetLabel; // default fallback
+        if ($notZhLang && $poem->poetAuthor) {
+            // Load poem's language relationship to get the locale
+            $poem->loadMissing('lang');
+            if ($poem->lang && $poem->lang->locale) {
+                $localizedPoetName = $poem->poetAuthor->getTranslated('name_lang', $poem->lang->locale);
+                if ($localizedPoetName) {
+                    $poetName = $localizedPoetName;
+                } else {
+                    // Fallback to English name if no localized name found
+                    $englishPoetName = $poem->poetAuthor->getTranslated('name_lang', 'en');
+                    if ($englishPoetName) {
+                        $poetName = $englishPoetName;
+                    }
+                }
+            }
+        }
+
         $postData = [
             'compositionId' => $compositionID,
             'config'        => [
-                'wrap' => true
+                'wrap' => true,
+                'noAuthorLabel' => $notZhLang,
             ],
             'id'            => $poem->id,
             'poem'          => $poem->poem,
-            'poet'          => $poem->poetLabel,
+            'poet'          => $poetName,
+            'translators'    => $poem->translatorsStr,
             'title'         => $poem->title
         ];
         if ($compositionID === 'nft') {
@@ -727,6 +750,11 @@ class PoemAPIController extends Controller {
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
 
+            // Clean up the created directory and files on error
+            if (is_dir($dir)) {
+                $this->removeDirectory($dir);
+            }
+
             return $this->responseFail();
         }
     }
@@ -739,13 +767,13 @@ class PoemAPIController extends Controller {
      * @return string
      * @throws Exception
      */
-    private function fetchPoemImg($postData, string $dir, string $poemImgFileName, bool $force = false) {
+    private function fetchPoemImg(array $postData, string $dir, string $poemImgFileName, bool $force = false) {
         $poemImgPath = $dir . '/' . $poemImgFileName;
         if (!$force && file_exists($poemImgPath)) {
             return $poemImgPath;
         }
 
-        $poemImg = file_get_contents_post(config('app.render_server'), $postData, 'application/x-www-form-urlencoded', 30);
+        $poemImg = file_get_contents_post(config('app.render_server'), $postData, 'application/json', 30);
         if (file_put_contents($poemImgPath, $poemImg)) {
             if (File::mimeType($poemImgPath) == 'text/plain') {
                 unlink($poemImgPath);
@@ -1072,5 +1100,29 @@ class PoemAPIController extends Controller {
         \App\Repositories\PoemRepository::preloadTranslatorsForPoems($poems);
 
         return $poems;
+    }
+
+    /**
+     * Recursively remove directory and all its contents
+     *
+     * @param string $dir Directory path to remove
+     * @return bool
+     */
+    private function removeDirectory(string $dir): bool {
+        if (!is_dir($dir)) {
+            return false;
+        }
+
+        $files = array_diff(scandir($dir), ['.', '..']);
+        foreach ($files as $file) {
+            $path = $dir . DIRECTORY_SEPARATOR . $file;
+            if (is_dir($path)) {
+                $this->removeDirectory($path);
+            } else {
+                unlink($path);
+            }
+        }
+
+        return rmdir($dir);
     }
 }
