@@ -8,17 +8,17 @@ use App\Http\Requests\API\StorePoem;
 use App\Models\Author;
 use App\Models\Balance;
 use App\Models\Entry;
+use App\Models\Language;
+use App\Models\NFT;
 use App\Models\Poem;
 use App\Models\Relatable;
 use App\Models\Tag;
 use App\Models\Transaction;
-use App\Models\NFT;
-use App\Models\Language;
+use App\Repositories\AuthorRepository;
 use App\Repositories\LanguageRepository;
 use App\Repositories\PoemRepository;
 use App\Repositories\ReviewRepository;
 use App\Repositories\ScoreRepository;
-use App\Repositories\AuthorRepository;
 use App\Rules\NoDuplicatedPoem;
 use App\Rules\ValidPoemContent;
 use App\Services\AliTranslate;
@@ -26,10 +26,10 @@ use App\Services\Weapp;
 use EasyWeChat\Factory;
 use Error;
 use Exception;
-use Illuminate\Support\Facades\File;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -95,7 +95,7 @@ class PoemAPIController extends Controller {
 
         // Get current user identifier for personalized recommendations
         $userIdentifier = $this->getUserIdentifier();
-        $columns = [
+        $columns        = [
             'id', 'title', 'subtitle', 'preface', 'poem', 'poet', 'poet_cn', 'poet_id',
             'dynasty_id', 'nation_id', 'language_id', 'is_original', 'original_id', 'created_at',
             'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded',
@@ -116,9 +116,9 @@ class PoemAPIController extends Controller {
             'poem.id', 'title', 'poem', 'poet', 'poet_cn', 'poet_id', 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded'
         ];
 
-        $noScoreNum = 2;
+        $noScoreNum   = 2;
         $earlyPoemNum = rand(0, 1) <= 0.2 ? 1 : 0; // chance to include one early poem
-        $scorePoems = $this->poemRepository->suggest($num - $noScoreNum - $earlyPoemNum, ['reviews'], function ($query) {
+        $scorePoems   = $this->poemRepository->suggest($num - $noScoreNum - $earlyPoemNum, ['reviews'], function ($query) {
                 $query->whereNull('campaign_id')
                     ->where('score', '>=', 7)
                     ->where('language_id', Language::LANGUAGE_ID['zh-CN']);
@@ -154,7 +154,7 @@ class PoemAPIController extends Controller {
 
         // Batch calculate scores to prevent N+1 queries
         $poemIds = $poems->pluck('id');
-        $scores = $poemIds->isNotEmpty() ? \App\Repositories\ScoreRepository::batchCalc($poemIds->toArray()) : [];
+        $scores  = $poemIds->isNotEmpty() ? \App\Repositories\ScoreRepository::batchCalc($poemIds->toArray()) : [];
 
         $res = [];
         foreach ($poems as $poem) {
@@ -688,14 +688,18 @@ class PoemAPIController extends Controller {
         $postData = [
             'compositionId' => $compositionID,
             'config'        => [
-                'wrap' => true,
+                'wrap'          => true,
                 'noAuthorLabel' => $notZhLang,
             ],
             'id'            => $poem->id,
             'poem'          => $poem->poem,
             'poet'          => $poetName,
-            'translators'    => $poem->translatorsStr,
-            'title'         => $poem->title
+            'translators'   => $poem->translatorsStr,
+            'title'         => $poem->title,
+            'subtitle'      => $poem->subtitle,
+            'preface'       => $poem->preface,
+            'date'          => $poem->dateStr,
+            'location'      => $poem->location
         ];
         if ($compositionID === 'nft') {
             $postData['hash']      = $poem->nft->shortedHash;
@@ -867,7 +871,7 @@ class PoemAPIController extends Controller {
         $authors = collect();
         if ($mode !== 'poem-select') {
             $authorLimit = $mode !== 'author-select' ? 5 : 50;
-            $authors = \App\Models\Author::search($keyword4Query)
+            $authors     = \App\Models\Author::search($keyword4Query)
                 ->query(function ($query) {
                     $query->with('user');
                 })
@@ -942,7 +946,7 @@ class PoemAPIController extends Controller {
 
         $data = [
             'authors' => $authors->map(function ($author) {
-                $arr = $author->only(['id', 'avatar_url', 'label', 'describe_lang', 'user']);
+                $arr           = $author->only(['id', 'avatar_url', 'label', 'describe_lang', 'user']);
                 $arr['#label'] = $author->label;
                 if ($author->user) {
                     $arr['user'] = $author->user->only(['id', 'avatar_url', 'name']);
@@ -994,15 +998,15 @@ class PoemAPIController extends Controller {
                 }
 
                 $validator = Validator::make($poem, [
-                    'title'           => 'required|string|max:255',
-                    'poet'            => 'required_without:poet_id|string|max:255',
-                    'poem'            => ['required', new NoDuplicatedPoem(null), 'string', 'min:10', 'max:65500'],
-                    'poet_id'         => ['nullable', 'integer', 'exists:' . \App\Models\Author::class . ',id'],
-                    'from'            => 'nullable|string|max:255',
-                    'language_id'     => ['required', Rule::in(LanguageRepository::idsInUse())],
-                    'genre_id'        => ['nullable', 'integer', 'exists:' . \App\Models\Genre::class . ',id'],
-                    'translator_ids'  => ['nullable', 'array'],
-                    'translator_ids.*'=> ['nullable'],
+                    'title'            => 'required|string|max:255',
+                    'poet'             => 'required_without:poet_id|string|max:255',
+                    'poem'             => ['required', new NoDuplicatedPoem(null), 'string', 'min:10', 'max:65500'],
+                    'poet_id'          => ['nullable', 'integer', 'exists:' . \App\Models\Author::class . ',id'],
+                    'from'             => 'nullable|string|max:255',
+                    'language_id'      => ['required', Rule::in(LanguageRepository::idsInUse())],
+                    'genre_id'         => ['nullable', 'integer', 'exists:' . \App\Models\Genre::class . ',id'],
+                    'translator_ids'   => ['nullable', 'array'],
+                    'translator_ids.*' => ['nullable'],
                 ]);
                 $validator->validate();
 
@@ -1039,15 +1043,18 @@ class PoemAPIController extends Controller {
                 }
                 $result[] = $inserted->url;
             } catch (ValidationException $e) {
-                $errors = $e->errors();
+                $errors   = $e->errors();
                 $result[] = ['errors' => $errors];
+
                 continue;
             } catch (Error $e) {
                 logger()->error('Undefined error while import poem: ' . $e->getMessage() . $e->getTraceAsString());
                 $result[] = ['errors' => 'Undefined error'];
+
                 continue;
             }
         }
+
         return $this->responseSuccess($result, 'Thanks for your contribution!');
     }
 
@@ -1056,6 +1063,7 @@ class PoemAPIController extends Controller {
 
         try {
             $langId = AliTranslate::detectLanguage($text);
+
             return $this->responseSuccess(['language_id' => $langId]);
         } catch (Exception $e) {
             return $this->responseFail([], $e->getMessage());

@@ -66,9 +66,14 @@ return (new PhpCsFixer\Config())
                 'param', 'throws', 'type', 'var', 'property'
             ]
         ],
-        'braces' => [
-            'position_after_functions_and_oop_constructs' => 'same',
-            'allow_single_line_closure'                    => true
+        'braces_position' => [
+            'functions_opening_brace'                 => 'same_line',
+            'classes_opening_brace'                   => 'same_line',
+            'anonymous_classes_opening_brace'         => 'same_line',
+            'control_structures_opening_brace'        => 'same_line',
+            'anonymous_functions_opening_brace'       => 'same_line',
+            'allow_single_line_empty_anonymous_classes' => true,
+            'allow_single_line_anonymous_functions'   => true,
         ],
         'yoda_style' => [
             'equal'            => null,

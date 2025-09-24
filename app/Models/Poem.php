@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Repositories\ScoreRepository;
 use App\Repositories\PoemRepository;
+use App\Repositories\ScoreRepository;
 use App\Traits\HasFakeId;
 use App\Traits\RelatableNode;
 use App\User;
@@ -223,6 +223,32 @@ class Poem extends Model {
         return Str::firstLine($this->poem, 20);
     }
 
+    /**
+     * Get formatted date string for poem based on available date fields
+     * Follows the same logic as date.blade.php view
+     *
+     * @return string|null
+     */
+    public function getDateStrAttribute() {
+        // Return null if no date information is available
+        if (!$this->year && !$this->month) {
+            return null;
+        }
+
+        // Format date based on available fields (following date.blade.php logic)
+        if ($this->year && $this->month && $this->date) {
+            return $this->year . '.' . $this->month . '.' . $this->date;
+        } elseif ($this->year && $this->month) {
+            return $this->year . '.' . $this->month;
+        } elseif ($this->month && $this->date) {
+            return $this->month . '.' . $this->date;
+        } elseif ($this->year) {
+            return $this->year;
+        }
+
+        return null;
+    }
+
     public static function boot() {
         parent::boot();
 
@@ -355,17 +381,19 @@ class Poem extends Model {
                 // Create mock Author/Entry objects from cached data
                 if (isset($translator['id'])) {
                     // This is an Author
-                    $author = new \App\Models\Author();
+                    $author     = new \App\Models\Author();
                     $author->id = $translator['id'];
                     // Provide name_lang so Author::getLabelAttribute() works consistently
                     $author->name_lang = json_encode(['zh-CN' => $translator['name']]);
+
                     return $author;
-                } else {
-                    // This is an Entry
-                    $entry = new \App\Models\Entry();
-                    $entry->name = $translator['name'];
-                    return $entry;
                 }
+                // This is an Entry
+                $entry       = new \App\Models\Entry();
+                $entry->name = $translator['name'];
+
+                return $entry;
+
             });
         }
 
