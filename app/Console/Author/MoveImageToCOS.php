@@ -88,7 +88,7 @@ class MoveImageToCOS extends Command {
             logger()->info('fetching url:' . $url);
 
             try {
-                $response = \Illuminate\Support\Facades\Http::timeout(10)->retry(3, 1)->get($url);
+                $response = \Illuminate\Support\Facades\Http::timeout(10)->withHeaders(['User-Agent' => 'PoemWiki-bot/0.1 (https://poemwiki.org; poemwiki@126.com) PHP/' . PHP_VERSION])->retry(3, 1)->get($url);
                 if ($response->status() !== 200) {
                     continue;
                 }
@@ -165,12 +165,11 @@ class MoveImageToCOS extends Command {
      * @param string $imgContent
      * @param string $ext
      * @param string $toFormat
-     * @param array  $urls
-     * @param $index
-     * @param $pathInfo
+     * @param int    $index
+     * @param string $name
      * @return MediaFile
      */
-    protected function upload(Author $author, string $imgContent, string $ext, string $toFormat, $index, $name): MediaFile {
+    protected function upload(Author $author, string $imgContent, string $ext, string $toFormat, int $index, string $name): MediaFile {
         $result                    = $this->uploadImage($imgContent, $ext, $toFormat);
         list($fileID, $compressed) = $result;
         $this->client->deleteObject($fileID);
