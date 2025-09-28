@@ -56,6 +56,8 @@ Route::prefix('author')->name('author/')->group(static function () {
     Route::get('/create-from-wikidata/{wikidata_id}', 'AuthorController@createFromWikidata')->name('create-from-wikidata');
     Route::get('/edit/{fakeId}', 'AuthorController@edit')->name('edit');
     Route::post('/update/{fakeId}', 'AuthorController@update')->name('update');
+    Route::get('/{fakeId}/alias/edit', 'AuthorController@editAlias')->name('alias/edit');
+    Route::post('/{fakeId}/alias/update', 'AuthorController@updateAlias')->name('alias/update');
     Route::post('/store', 'AuthorController@store')->name('store');
     Route::get('/{fakeId}', 'AuthorController@show')->name('show');
     Route::post('/{avatar}', 'AuthorController@avatar')->name('avatar');

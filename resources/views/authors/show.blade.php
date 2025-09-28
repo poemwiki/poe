@@ -67,6 +67,10 @@
             <a class="poet-alias-item" href="{{route('search', $aliaName)}}">{{$aliaName}}</a>
           @endforeach
         </p>
+        <a class="font-bold border-dotted border ml-4 w-10 h-10 leading-10 p-0 text-gray-400 text-center self-auto flex items-center justify-center"
+           href="{{ urlOrLoginRef(route('author/alias/edit', $author->fakeId, false)) }}">
+          &#xFF0B;
+        </a>
       </div>
     @endif
 

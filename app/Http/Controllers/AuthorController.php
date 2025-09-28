@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Admin\Author\StoreAuthor;
 use App\Http\Requests\Admin\Author\UpdateAuthor;
 use App\Models\Author;
-use App\Models\Entry;
 use App\Models\MediaFile;
 use App\Models\Nation;
 use App\Models\Poem;
@@ -17,9 +16,9 @@ use App\Repositories\LanguageRepository;
 use App\Repositories\NationRepository;
 use App\Repositories\PoemRepository;
 use App\Services\Tx;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AuthorController extends Controller {
@@ -37,7 +36,7 @@ class AuthorController extends Controller {
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function show($fakeId, Request $request) {
-        $id          = Author::getIdFromFakeId($fakeId);
+        $id = Author::getIdFromFakeId($fakeId);
         // Get author with aliases in a single query using JOIN
         $authorData = Author::leftJoin('alias', 'author.id', '=', 'alias.author_id')
             ->where('author.id', $id)
@@ -122,6 +121,7 @@ class AuthorController extends Controller {
 
         $author->name_lang     = $author->name_lang ?: $author->getTranslated('name_lang', 'zh-CN');
         $author->describe_lang = $author->describe_lang ?: $author->getTranslated('describe_lang', 'zh-CN');
+
         // dd(Nation::where('id', $author->nation_id)->orWhere('id', '>', 0)->limit(10)->get()->toArray());
         return view('authors.edit', [
             'author'     => $author,
@@ -267,6 +267,156 @@ class AuthorController extends Controller {
         $author = Author::create($sanitized);
 
         return $this->responseSuccess(route('author/show', $author->fakeId));
+    }
+
+    /**
+     * Show the form for editing author aliases
+     * @param string $fakeId
+     * @return \Illuminate\View\View
+     */
+    public function editAlias($fakeId) {
+        $id     = Author::getIdFromFakeId($fakeId);
+        $author = Author::findOrFail($id);
+
+        // Simplified: only consider enabled (in-use) languages
+        $allInUseLanguages = LanguageRepository::allInUse(['id', 'name_lang', 'name', 'locale', 'sort_order']);
+        $inUseLocaleSet    = $allInUseLanguages->pluck('locale')->map(function ($l) { return strtolower($l); })->unique()->values();
+
+        // build lowercase locale -> id map for O(1) lookups
+        $localeToIdMap = $allInUseLanguages->pluck('id', 'locale')->mapWithKeys(function($v, $k) { return [strtolower($k) => $v]; })->toArray();
+
+        // Fetch aliases only for in-use language ids
+        $inUseIds = $allInUseLanguages->pluck('id')->toArray();
+        $aliases  = \App\Models\Alias::where('author_id', $id)
+            ->whereIn('language_id', $inUseIds)
+            ->get()
+            ->map(function ($a) {
+                return (object)[
+                    'name'        => $a->name,
+                    'locale'      => $a->locale,
+                    'author_id'   => $a->author_id,
+                    'language_id' => $a->language_id,
+                ];
+            });
+
+        // Merge name_lang entries but only for enabled locales and avoid duplicates
+        $nameLangs = $author->getTranslations('name_lang') ?? [];
+        // existSet maps key -> language_id for quick duplicate detection and fast id lookup
+        $existSet = [];
+        foreach ($aliases as $a) {
+            $k            = strtolower($a->locale . '|' . trim($a->name));
+            $existSet[$k] = true;
+        }
+        foreach ((array)$nameLangs as $locale => $name) {
+            if (empty($name)) {
+                continue;
+            }
+            $lc = strtolower($locale);
+            if (! $inUseLocaleSet->contains($lc)) {
+                continue;
+            }
+
+            $key = strtolower($locale . '|' . trim($name));
+            if (isset($existSet[$key])) {
+                continue;
+            }
+
+            $lid = $localeToIdMap[$lc] ?? null;
+            $aliases->push((object)[
+                'name'        => $name,
+                'locale'      => $locale,
+                'author_id'   => $id,
+                'language_id' => $lid,
+            ]);
+            $existSet[$key] = true;
+        }
+
+        // Sort aliases by language sort_order
+        $langSortMap = $allInUseLanguages->pluck('sort_order', 'id')->toArray();
+        $aliases     = $aliases->sortBy(function ($a) use ($langSortMap) {
+            return empty($a->language_id) ? PHP_INT_MAX : ($langSortMap[$a->language_id] ?? PHP_INT_MAX - 1);
+        })->values();
+
+        return view('authors.edit-alias', [
+            'author'    => $author,
+            'aliases'   => $aliases,
+            'languages' => $allInUseLanguages
+        ]);
+    }
+
+    /**
+     * Update author aliases
+     * @param string  $fakeId
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function updateAlias($fakeId, Request $request) {
+        $id         = Author::getIdFromFakeId($fakeId);
+        $author     = Author::findOrFail($id);
+        $wikidataId = $author->wikidata_id;
+
+        // Validate input
+        $request->validate([
+            'aliases'          => 'nullable|array',
+            'aliases.*.name'   => 'required|string|max:255',
+            'aliases.*.locale' => 'required|string|exists:language,locale',
+        ]);
+        // Prepare for upsert: only keep aliases for enabled languages and deduplicate
+        $aliasesInput = $request->input('aliases', []);
+
+        // Fetch enabled languages and build lowercase locale -> id map
+        $enabledLocales = LanguageRepository::allInUse()->pluck('locale')
+            ->map(function ($l) { return strtolower($l); })->unique()->values()->toArray();
+
+        $localeToId = \App\Models\Language::whereIn('locale', $enabledLocales)
+            ->pluck('id', 'locale')
+            ->mapWithKeys(function ($v, $k) { return [strtolower($k) => $v]; })
+            ->toArray();
+
+        $rows = [];
+        $seen = [];
+
+        foreach ($aliasesInput as $aliasData) {
+            $name   = isset($aliasData['name']) ? trim($aliasData['name']) : '';
+            $locale = isset($aliasData['locale']) ? $aliasData['locale'] : '';
+            if ($name === '' || $locale === '') {
+                continue;
+            }
+
+            $lowercaseLocale = strtolower($locale);
+            // ignore locales that are not enabled
+            if (!in_array($lowercaseLocale, $enabledLocales, true)) {
+                continue;
+            }
+
+            $key = $lowercaseLocale . '|' . $name;
+            if (isset($seen[$key])) {
+                continue; // deduplicate
+            }
+
+            $rows[] = [
+                'author_id'   => $id,
+                'name'        => $name,
+                'locale'      => $locale,
+                'language_id' => $localeToId[$lowercaseLocale] ?? null,
+                'wikidata_id' => $wikidataId                   ?? null,
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ];
+
+            $seen[$key] = true;
+        }
+
+        // Perform delete + bulk insert inside a transaction for consistency
+        DB::transaction(function () use ($id, $rows) {
+            \App\Models\Alias::where('author_id', $id)->delete();
+            if (!empty($rows)) {
+                \App\Models\Alias::insert($rows);
+            }
+        });
+
+        return redirect()->route('author/show', $author->fakeId)
+            ->with('success', __('Aliases updated successfully!'));
     }
 
 }

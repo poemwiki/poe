@@ -16,9 +16,9 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Auth;
 
 class PoemController extends Controller {
     /** @var PoemRepository */
@@ -45,6 +45,7 @@ class PoemController extends Controller {
      */
     public function showId($id) {
         $poem = Poem::find($id);
+
         return redirect($poem->url);
     }
 
@@ -72,7 +73,7 @@ class PoemController extends Controller {
 
         // will also sync cached translators onto $poem
         $translatedPoemsTree = $this->poemRepository->getTranslatedPoemsTree($poem);
-        $logs = $poem->activityLogs;
+        $logs                = $poem->activityLogs;
         // $poem->load('translatorAuthor');
 
         return view('poems.show')->with([
@@ -164,7 +165,7 @@ class PoemController extends Controller {
         $poem['#user_name'] = Auth::user()->name;
         $poem['poem']       = "\n\n\n\n\n\n";
 
-        $deftaultAuthors = ($preset && $preset->poetLabel)
+        $defaultAuthors = ($preset && $preset->poetLabel)
             ? AuthorRepository::searchLabel($preset->poetLabel, [$preset->poet_id])
             : [];
         $defaultTranslators = $mode === 'create poem by translator'
@@ -177,8 +178,8 @@ class PoemController extends Controller {
             'languageList'       => LanguageRepository::allInUse(),
             'genreList'          => Genre::select('name_lang', 'id')->get(),
             'translatedPoem'     => $translatedPoem ?? null, // TODO don't pass translatedPoem
-            'originalPoem'       => $originalPoem ?? null, // TODO don't pass originalPoem
-            'defaultAuthors'     => $deftaultAuthors, //Author::select('name_lang', 'id')->limit(10)->get()->toArray(),
+            'originalPoem'       => $originalPoem   ?? null, // TODO don't pass originalPoem
+            'defaultAuthors'     => $defaultAuthors,
             'defaultTranslators' => $defaultTranslators,
             'mode'               => $mode
         ]);
@@ -408,7 +409,7 @@ class PoemController extends Controller {
             'idArr'               => $idArr,
             'url'                 => route('compare', $ids),
             'translatedPoemsTree' => $translatedPoemsTree,
-            'authors' => $this->getOgAuthorFromTree($translatedPoemsTree)
+            'authors'             => $this->getOgAuthorFromTree($translatedPoemsTree)
         ]);
     }
 
@@ -417,10 +418,11 @@ class PoemController extends Controller {
             $translators = array_map(function ($child) {
                 return $this->getOgAuthorFromTree($child);
             }, $translatedPoemsTree['translatedPoems']);
+
             return $translatedPoemsTree['poetLabel'] . ',' . implode(',', $translators);
-        } else {
-            return $translatedPoemsTree['translatorStr'];
         }
+
+        return $translatedPoemsTree['translatorStr'];
     }
 
 }
