@@ -10,23 +10,22 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 
 
-class ImportCountry extends Command {
-    const CHUNK_SIZE = 10;
+class ImportPoet extends Command {
+    public const CHUNK_SIZE = 46;
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'wiki:importCountry {fromId?} {--id=}';
+    protected $signature = 'wiki:importPoet {fromId?} {--id=}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description  = 'Retrieve newest country data from wikidata entity API, and update wikidata table.';
-    protected $entityApiUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=';
+    protected $description = 'Retrieve newest poet data from wikidata entity API, and update wikidata table.';
 
     /**
      * Create a new command instance.
@@ -46,7 +45,7 @@ class ImportCountry extends Command {
         // YOU NEED TO IMPORT wikidata_poet from JSON file
         // then run wiki:translate to initial wikidata
 
-        $fromId = $this->argument('fromId') ?: 0;
+        $fromId = $this->argument('fromId') ?: 87902;
 
         $wikidataId = $this->option('id');
         if (App::runningInConsole() && !$this->option('id')) {
@@ -66,7 +65,7 @@ class ImportCountry extends Command {
 
             DB::table('wikidata')->updateOrInsert(
                 ['id' => $id],
-                ['type' => Wikidata::TYPE['country'], 'data' => json_encode($entities[$id], JSON_UNESCAPED_UNICODE)]
+                ['type' => Wikidata::TYPE['poet'], 'data' => json_encode($entities[$id], JSON_UNESCAPED_UNICODE)]
             );
 
             $this->info("Imported Q{$id}.");
@@ -80,20 +79,21 @@ class ImportCountry extends Command {
     }
 
     public function import(int $fromId = 0) {
-        $countries = Wikidata::query()->where([
+        $poets = Wikidata::query()->where([
             ['id', '>=', $fromId],
-            ['type', '=', Wikidata::TYPE['country']]
+            ['type', '=', Wikidata::TYPE['poet']],
         ])->orderBy('id');
 
-        $bar = $this->output->createProgressBar($countries->count());
+        $bar = $this->output->createProgressBar($poets->count());
         $bar->start();
 
-        $countries->chunk(self::CHUNK_SIZE, function (Collection $countries) use ($bar) {
-            $ids      = $countries->pluck('id')->all();
+        $poets->chunk(self::CHUNK_SIZE, function (Collection $poets) use ($bar) {
+            $ids      = $poets->pluck('id')->all();
             $entities = WikiDataFetcher::fetchEntities($ids);
 
             foreach ($ids as $id) {
                 if (!isset($entities[$id])) {
+                    // If any id missing from fetch result treat as failure to stop import.
                     $bar->finish();
 
                     return false;
@@ -101,7 +101,7 @@ class ImportCountry extends Command {
 
                 DB::table('wikidata')->updateOrInsert(
                     ['id' => $id],
-                    ['type' => Wikidata::TYPE['country'], 'data' => json_encode($entities[$id], JSON_UNESCAPED_UNICODE)]
+                    ['type' => Wikidata::TYPE['poet'], 'data' => json_encode($entities[$id], JSON_UNESCAPED_UNICODE)]
                 );
             }
 
@@ -112,5 +112,4 @@ class ImportCountry extends Command {
 
         $bar->finish();
     }
-
 }

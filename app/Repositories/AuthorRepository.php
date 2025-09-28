@@ -59,10 +59,10 @@ class AuthorRepository extends BaseRepository {
             ->limit(self::SEARCH_LIMIT)->get()
             ->map->only(['QID', 'label_en', 'label_cn', 'label', 'url', 'author_id', 'wikidata_id'])->map(function ($item) {
                 // don't replace this with select concat('Q', wikidata_id) as id, because it will be casted into integer
-                $item['id'] = $item['author_id'] ?? $item['QID'];
+                $item['id']     = $item['author_id'] ?? $item['QID'];
                 $item['source'] = $item['author_id'] ? 'PoemWiki' : 'Wikidata';
 
-                $author = Author::find($item['author_id']);
+                $author   = Author::find($item['author_id']);
                 $wikidata = Wikidata::find($item['wikidata_id']);
 
                 $item['avatar_url'] = $item['author_id'] && $author
@@ -140,7 +140,7 @@ class AuthorRepository extends BaseRepository {
             $resById = Author::select(['id', 'name_lang', 'pic_url', 'describe_lang'])->whereIn('id', $authorIds)->get()
                 ->map->only(['id', 'label_en', 'label_cn', 'label', 'url', 'pic_url', 'describe_lang', 'avatar_url'])->map(function ($item) {
                     $item['source'] = 'PoemWiki';
-                    $item['desc'] = $item['describe_lang'];
+                    $item['desc']   = $item['describe_lang'];
 
                     return $item;
                 })->concat($newAuthors);
@@ -172,8 +172,13 @@ class AuthorRepository extends BaseRepository {
     public function importFromWikidata(Wikidata $wiki, ?int $userID = null) {
         $entity = json_decode($wiki->data);
 
-        $authorNameLang = [];
+        $authorNameLang  = [];
+        $allInUseLocales = LanguageRepository::allInUse('locale')->pluck('locale')->map(function($l){ return strtolower($l); })->unique()->values();
         foreach ($entity->labels as $locale => $label) {
+            // if the language is not in use, skip it (case-insensitive)
+            if (!$allInUseLocales->contains(strtolower($locale))) {
+                continue;
+            }
             $authorNameLang[$locale] = $label->value;
         }
 
@@ -229,7 +234,7 @@ class AuthorRepository extends BaseRepository {
         $authorExisted = Author::where('wikidata_id', '=', $wikidata_id)->first();
 
         if (!$authorExisted) {
-            $wiki          = Wikidata::find($wikidata_id);
+            $wiki = Wikidata::find($wikidata_id);
             if (!$wiki) {
                 Artisan::call('wiki:import', ['--id' => $wikidata_id]);
                 $wiki = Wikidata::find($wikidata_id);

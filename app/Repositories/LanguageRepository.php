@@ -43,8 +43,8 @@ class LanguageRepository extends BaseRepository {
         return Language::class;
     }
 
-    public static function allInUse() {
-        return Language::where('name', '<>', '')->get();
+    public static function allInUse($selectFields = ['*']) {
+        return Language::select($selectFields)->where('name', '<>', '')->get();
     }
 
     public static function idsInUse() {
