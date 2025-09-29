@@ -23,6 +23,7 @@ use App\Rules\NoDuplicatedPoem;
 use App\Rules\ValidPoemContent;
 use App\Services\AliTranslate;
 use App\Services\Weapp;
+use App\Services\PosterGenerator;
 use EasyWeChat\Factory;
 use Error;
 use Exception;
@@ -725,20 +726,17 @@ class PoemAPIController extends Controller {
         }
 
         // img file name will change if postData change
-        $posterStorePath = "{$relativeStoreDir}/poster_{$compositionID}_{$hash}.png";
+        // poster is stored as JPEG for better metadata support
+        $posterStorePath = "{$relativeStoreDir}/poster_{$compositionID}_{$hash}.jpg";
         $posterPath      = storage_path($posterStorePath); // posterImg = poemImg + appCodeImg
-        $poemImgFileName = "poem_{$compositionID}_{$hash}.png"; // main part of poster
+        $poemImgFileName = "poem_{$compositionID}_{$hash}.png"; // main part of poster (render server returns PNG)
 
         $postData['force'] = $force;
 
         try {
-            $poemImgPath = $this->fetchPoemImg($postData, $dir, $poemImgFileName, $force);
-
-            $scene          = $poem->is_campaign ? ($poem->campaign_id . '-' . $poem->id) : $poem->id;
-            $page           = $poem->is_campaign ? 'pages/campaign/campaign' : 'pages/poems/index';
-            $appCodeImgPath = (new Weapp())->fetchAppCodeImg($scene, $dir, $page);
-
-            if (!$this->composite($poemImgPath, $appCodeImgPath, $posterPath, $compositionID)) {
+            $posterGen = new PosterGenerator();
+            $ok = $posterGen->generatePosterFromData($postData, $dir, $poemImgFileName, $posterPath, $compositionID, $force, $poem);
+            if (!$ok) {
                 return $this->responseFail();
             }
 
@@ -761,80 +759,6 @@ class PoemAPIController extends Controller {
 
             return $this->responseFail();
         }
-    }
-
-    /**
-     * @param      $postData
-     * @param      $dir
-     * @param      $poemImgFileName
-     * @param bool $force
-     * @return string
-     * @throws Exception
-     */
-    private function fetchPoemImg(array $postData, string $dir, string $poemImgFileName, bool $force = false) {
-        $poemImgPath = $dir . '/' . $poemImgFileName;
-        if (!$force && file_exists($poemImgPath)) {
-            return $poemImgPath;
-        }
-
-        $poemImg = file_get_contents_post(config('app.render_server'), $postData, 'application/json', 30);
-        if (file_put_contents($poemImgPath, $poemImg)) {
-            if (File::mimeType($poemImgPath) == 'text/plain') {
-                unlink($poemImgPath);
-
-                throw new Exception('生成图片失败，请稍后再试。');
-            }
-
-            return $poemImgPath;
-        }
-
-        throw new Exception('图片写入失败，请稍后再试。');
-    }
-
-    /**
-     * composite poem image and appCode image.
-     * @param string $poemImgPath
-     * @param string $appCodeImgPath
-     * @param string $posterPath
-     * @param int    $quality
-     * @return bool
-     * @throws Exception
-     */
-    private function composite(string $poemImgPath, string $appCodeImgPath, string $posterPath, string $compositionID = 'pure', int $quality = 100): bool {
-        // 绘制小程序码
-        // 覆盖海报右下角小程序码区域
-        $params = [
-            'pure' => [
-                'x'      => 220,
-                'y'      => 160,
-                'width'  => 120,
-                'height' => 120,
-            ],
-            'nft' => [
-                'x'      => 220,
-                'y'      => 250,
-                'width'  => 166,
-                'height' => 166,
-            ],
-        ];
-        $param     = $params[$compositionID];
-        $posterImg = img_overlay($poemImgPath, $appCodeImgPath, $param['x'], $param['y'], $param['width'], $param['height']);
-
-        $imgType = exif_imagetype($poemImgPath);
-        if ($imgType === IMAGETYPE_JPEG) {
-            $res = imagejpeg($posterImg, $posterPath, $quality);
-        } elseif ($imgType === IMAGETYPE_PNG) {
-            //see: http://stackoverflow.com/a/7878801/1596547
-            $res = imagepng($posterImg, $posterPath, $quality * 9 / 100);
-        } elseif ($imgType === IMAGETYPE_GIF) {
-            $res = imagegif($posterImg, $posterPath);
-        } else {
-            throw new Exception('image type not supported');
-        }
-
-        imagedestroy($posterImg);
-
-        return $res;
     }
 
     public function query(Request $request) {
