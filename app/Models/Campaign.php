@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Repositories\CampaignRepository;
 use App\Traits\HasTranslations;
 use App\User;
-use App\Repositories\CampaignRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -22,7 +22,7 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon      $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property array|null                      $settings $settings['gameType']: 1: 限定行数（默认3行） 2：限定最长行数为$settings['maxLineNum']
+ * @property array|null                      $settings          $settings['gameType']: 1: 限定行数（默认3行） 2：限定最长行数为$settings['maxLineNum']
  * @property mixed|null                      $weapp_url
  * @property mixed                           $image_url
  * @property mixed                           $master_i_ds
@@ -140,9 +140,14 @@ class Campaign extends Model {
             return [];
         }
 
-        return array_map(function ($master) {
-            return $master['id'];
-        }, $masterInfos);
+        return array_values(array_filter(
+            array_map(function ($master) {
+                return $master['id'] ?? null;
+            }, $masterInfos),
+            function ($v) {
+                return $v !== null; // keep 0 if ever possible, drop only null
+            }
+        ));
     }
 
     public function isMaster(int $userID) {
