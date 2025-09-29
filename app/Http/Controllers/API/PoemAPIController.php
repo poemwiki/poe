@@ -492,6 +492,7 @@ class PoemAPIController extends Controller {
             'poem'                   => $poem->poem,
             'poet_is_v'              => $poem->poet_is_v,
             'poet_label'             => $poem->poet_label,
+            'poet_label_native'      => $poem->poet_label_native,
             'poet_avatar'            => $poem->poet_avatar,
             'poet_avatar_true'       => $poem->poet_avatar !== config('app.avatar.default'),
             'translators_str'        => $poem->translatorsStr,
@@ -508,19 +509,20 @@ class PoemAPIController extends Controller {
                 $topOriginal->loadMissing(['poetAuthor', 'translatorAuthor']);
 
                 $original = [
-                    'fake_id'                => $topOriginal->fake_id,
-                    'title'                  => $topOriginal->title,
-                    'subtitle'               => $poem->subtitle,
-                    'preface'                => $poem->preface,
-                    'date_str'               => $poem->dateStr,
-                    'location'               => $poem->location,
-                    'url'                    => $topOriginal->url,
-                    'poem'                   => $topOriginal->poem,
-                    'poet_is_v'              => $topOriginal->poet_is_v,
-                    'poet_label'             => $topOriginal->poet_label,
-                    'translator_str'         => $topOriginal->translatorsStr,
-                    'poet_author_url'        => $topOriginal->poetAuthor ? $topOriginal->poetAuthor->url : null,
-                    'translator_author_url'  => $topOriginal->translatorAuthor ? $topOriginal->translatorAuthor->url : null,
+                    'fake_id'                    => $topOriginal->fake_id,
+                    'title'                      => $topOriginal->title,
+                    'subtitle'                   => $poem->subtitle,
+                    'preface'                    => $poem->preface,
+                    'date_str'                   => $poem->dateStr,
+                    'location'                   => $poem->location,
+                    'url'                        => $topOriginal->url,
+                    'poem'                       => $topOriginal->poem,
+                    'poet_is_v'                  => $topOriginal->poet_is_v,
+                    'poet_label'                 => $topOriginal->poet_label,
+                    'poet_label_native'          => $topOriginal->poet_label_native,
+                    'translator_str'             => $topOriginal->translatorsStr,
+                    'poet_author_url'            => $topOriginal->poetAuthor ? $topOriginal->poetAuthor->url : null,
+                    'translator_author_url'      => $topOriginal->translatorAuthor ? $topOriginal->translatorAuthor->url : null,
                 ];
             }
         }
@@ -668,25 +670,7 @@ class PoemAPIController extends Controller {
         ]);
 
         $notZhLang = !in_array($poem->language_id, [Language::LANGUAGE_ID['zh-CN'], Language::LANGUAGE_ID['zh-hant']]);
-
-        // Get poet name in appropriate language
-        $poetName = $poem->poetLabel; // default fallback
-        if ($notZhLang && $poem->poetAuthor) {
-            // Load poem's language relationship to get the locale
-            $poem->loadMissing('lang');
-            if ($poem->lang && $poem->lang->locale) {
-                $localizedPoetName = $poem->poetAuthor->getTranslated('name_lang', $poem->lang->locale);
-                if ($localizedPoetName) {
-                    $poetName = $localizedPoetName;
-                } else {
-                    // Fallback to English name if no localized name found
-                    $englishPoetName = $poem->poetAuthor->getTranslated('name_lang', 'en');
-                    if ($englishPoetName) {
-                        $poetName = $englishPoetName;
-                    }
-                }
-            }
-        }
+        $poetName  = $poem->poet_label_native;
 
         $postData = [
             'compositionId' => $compositionID,

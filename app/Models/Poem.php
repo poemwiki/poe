@@ -26,6 +26,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property mixed                               $id
  * @property string                              $poetLabel
  * @property string                              $poet_label
+ * @property string                              $poet_label_native
  * @property string                              $poet_label_cn
  * @property string                              $translator          For poems have related translator(relatable record), poem.translator is a json string just for indicating translator $order
  * @property int                                 $is_owner_uploaded
@@ -831,6 +832,40 @@ class Poem extends Model {
         }
 
         return ($this->poet === $this->poet_cn or is_null($this->poet_cn)) ? $this->poet : $this->poet_cn . '（' . $this->poet . '）';
+    }
+
+    /**
+     * Poet name localized to poem's language when applicable.
+     * Default to existing poetLabel; for non-Chinese languages, try language locale,
+     * then fallback to English.
+     *
+     * @return string
+     */
+    public function getPoetLabelNativeAttribute(): string {
+        $label = $this->poetLabel;
+
+        // Only attempt for non-Chinese languages with linked Author
+        $notZhLang = !in_array($this->language_id, [Language::LANGUAGE_ID['zh-CN'], Language::LANGUAGE_ID['zh-hant']]);
+        if ($notZhLang && $this->poetAuthor) {
+            // ensure lang relation available for locale detection
+            if (!$this->relationLoaded('lang')) {
+                $this->load('lang');
+            }
+            if ($this->lang && $this->lang->locale) {
+                $localized = $this->poetAuthor->getTranslated('name_lang', $this->lang->locale);
+                if ($localized) {
+                    return $localized;
+                }
+                // fallback to English if locale not available
+                $en = $this->poetAuthor->getTranslated('name_lang', 'en');
+                if ($en) {
+                    return $en;
+                }
+            }
+        }
+
+        // fallback to existing poetLabel
+        return $label;
     }
 
     public function getPoetLabelCnAttribute() {
