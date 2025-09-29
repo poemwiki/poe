@@ -21,7 +21,7 @@
       </a>
     </div>
 
-    <div class="flex items-end justify-start mb-6">
+    <div class="flex items-end justify-start mb-12">
       @if($author->avatarUrl)
         <img class="w-1/12 mr-2" style="max-width: unset" src="{{$author->avatarUrl}}"
              alt="avatar of {{$author->name_lang}}">
@@ -32,14 +32,15 @@
       </div>
     </div>
 
+
     @if (session('success'))
-      <div class="alert alert-success mb-4 p-4 bg-green-100 border border-green-400 text-green-700">
+      <div class="alert alert-success mb-4 p-4 border border-green-400 text-green-600">
         {{ session('success') }}
       </div>
     @endif
 
     @if ($errors->any())
-      <div class="alert alert-danger mb-4 p-4 bg-red-100 border border-red-400 text-red-700">
+      <div class="alert alert-danger mb-4 p-4 bg-red-100 border !border-red-400 text-red-700">
         <ul class="mb-0">
           @foreach ($errors->all() as $error)
             <li>{{ $error }}</li>
@@ -52,26 +53,26 @@
       @csrf
 
       <div class="mb-6">
-        <p class="text-gray-400 mb-4">
+        <p class="text-gray-400 mb-8">
           编辑/添加作者别名
         </p>
 
         <div id="aliases-container">
           @foreach ($aliases as $index => $alias)
-            <div class="alias-row flex items-center gap-4 mb-3">
+            <div class="alias-row flex items-center gap-6 mb-8">
               <div class="flex-1">
                 <input type="text"
                        name="aliases[{{ $index }}][name]"
                        value="{{ old('aliases.' . $index . '.name', $alias->name) }}"
-                       class="form-input w-full px-4 py-4 border border-gray-300 text-sm"
+                       class="form-input w-full text-sm"
                        autocomplete="off" data-1p-ignore
                        placeholder="@lang('Alias Name')">
               </div>
 
               <div class="w-80">
                 <select name="aliases[{{ $index }}][locale]"
-                        class="form-select w-full px-4 py-4 border border-gray-300 text-sm">
-                  <option value="">@lang('Language')</option>
+                        class="form-select w-full text-sm">
+                  <option value="" disabled selected>@lang('Select Language')</option>
                   @foreach($languages as $language)
                     <option value="{{ $language->locale }}"
                             {{ old('aliases.' . $index . '.locale', $alias->locale) == $language->locale ? 'selected' : '' }}>
@@ -95,10 +96,10 @@
 
       <div class="flex justify-end items-center gap-8">
         <a href="{{ route('author/show', $author->fakeId) }}"
-           class="btn">
+           class="btn" id="cancel-btn">
           @lang('Cancel')
         </a>
-        <button type="submit" class="btn btn-wire">
+        <button type="submit" class="btn btn-wire" id="submit-btn">
           @lang('Save')
         </button>
       </div>
@@ -112,33 +113,50 @@
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('aliases-container');
     const addButton = document.getElementById('add-alias');
+    const form = document.querySelector('form.wiki-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
     let aliasIndex = {{ $aliases->count() }};
+    let submitting = false;
 
     // 语言选项模板
     const languageOptions = `
-        <option value="">@lang('Language')</option>
+        <option value="" disabled selected>@lang('Select Language')</option>
         @foreach($languages as $language)
             <option value="{{ $language->locale }}">{{ $language->name_lang }} ({{ $language->locale }})</option>
         @endforeach
     `;
 
-    // 创建新别名行的函数
+    function markInvalid(el, invalid = true) {
+        if (invalid) {
+            el.classList.remove('border-gray-300');
+            el.classList.add('!border-red-400');
+            el.dataset.invalid = 'true';
+        } else {
+            el.classList.remove('!border-red-400');
+            delete el.dataset.invalid;
+            if (!el.classList.contains('border-gray-300')) {
+                el.classList.add('border-gray-300');
+            }
+        }
+    }
+
     function createAliasRow(index, nameValue = '', localeValue = '') {
         const newRow = document.createElement('div');
-        newRow.className = 'alias-row flex items-center gap-4 mb-3';
+        newRow.className = 'alias-row flex items-center gap-6 mb-8';
         newRow.innerHTML = `
             <div class="flex-1">
               <input type="text"
                       name="aliases[${index}][name]"
                       value="${nameValue}"
-                      class="form-input w-full px-4 py-4 border border-gray-300 text-sm"
+                      class="form-input w-full text-sm"
                       autocomplete="off" data-1p-ignore
                       placeholder="@lang('Alias Name')">
             </div>
 
             <div class="w-80">
               <select name="aliases[${index}][locale]"
-                      class="form-select w-full px-4 py-4 border border-gray-300 text-sm">
+                      class="form-select w-full text-sm">
                   ${languageOptions}
               </select>
             </div>
@@ -147,36 +165,91 @@ document.addEventListener('DOMContentLoaded', function() {
               -
             </button>
         `;
-
-        // 设置选中的语言
         if (localeValue) {
-            const select = newRow.querySelector('select');
-            select.value = localeValue;
+            newRow.querySelector('select').value = localeValue;
         }
-
         return newRow;
     }
 
-    // 如果没有现有别名，添加一个空行
     if (aliasIndex === 0) {
         const emptyRow = createAliasRow(0, '{{ old('aliases.0.name') }}', '{{ old('aliases.0.locale') }}');
         container.appendChild(emptyRow);
         aliasIndex = 1;
     }
 
-    // 添加新别名行
     addButton.addEventListener('click', function() {
-        const newRow = createAliasRow(aliasIndex);
-        container.appendChild(newRow);
+        if (submitting) return;
+        container.appendChild(createAliasRow(aliasIndex));
         aliasIndex++;
     });
 
-    // 删除别名行
     container.addEventListener('click', function(e) {
         if (e.target.classList.contains('remove-alias')) {
+            if (submitting) return;
             e.target.closest('.alias-row').remove();
         }
     });
+
+    container.addEventListener('input', function(e) {
+        if (e.target.matches('input[name*="[name]"], select[name*="[locale]"]')) {
+            markInvalid(e.target, false);
+        }
+    });
+
+    function validateAliases() {
+        let valid = true;
+        const rows = container.querySelectorAll('.alias-row');
+        rows.forEach(row => {
+            const nameInput = row.querySelector('input[name*="[name]"]');
+            const localeSelect = row.querySelector('select[name*="[locale]"]');
+            const nameEmpty = !nameInput.value.trim();
+            const localeEmpty = !localeSelect.value;
+            markInvalid(nameInput, nameEmpty);
+            markInvalid(localeSelect, localeEmpty);
+            if (nameEmpty || localeEmpty) valid = false;
+        });
+        return valid;
+    }
+
+    form.addEventListener('submit', function(e) {
+        if (submitting) {
+            e.preventDefault();
+            return;
+        }
+
+        // clean up empty rows
+        container.querySelectorAll('.alias-row').forEach(row => {
+            const nameInput = row.querySelector('input[name*="[name]"]');
+            const localeSelect = row.querySelector('select[name*="[locale]"]');
+            if (!nameInput.value.trim() && !localeSelect.value) row.remove();
+        });
+
+        if (!validateAliases()) {
+            e.preventDefault();
+            const firstInvalid = form.querySelector('[data-invalid="true"]');
+            if (firstInvalid) firstInvalid.scrollIntoView({behavior: 'smooth', block: 'center'});
+            return;
+        }
+
+        // enter submitting state
+        submitting = true;
+        submitBtn.disabled = true;
+        submitBtn.classList.add('pointer-events-none');
+        cancelBtn.classList.add('pointer-events-none', 'opacity-50');
+        submitBtn.dataset.originalText = submitBtn.innerHTML;
+        // Use double quotes to avoid breaking by nested single quotes
+        submitBtn.innerHTML = "@lang('Saving')";
+    });
+
+    if (document.querySelector('.alert-success')) {
+        // Reset state if page loaded after success
+        submitting = false;
+        if (submitBtn.dataset.originalText) {
+            submitBtn.innerHTML = submitBtn.dataset.originalText;
+        }
+        submitBtn.disabled = false;
+        cancelBtn.classList.remove('pointer-events-none','opacity-50');
+    }
 });
 </script>
 @endpush

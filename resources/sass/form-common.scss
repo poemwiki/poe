@@ -5,6 +5,10 @@ input[type],select {
   @apply text-base;
 }
 
+.alert {
+  animation: fadein 1s ease-out;
+}
+
 .wiki-form{
   @apply text-base;
   label {
@@ -17,7 +21,7 @@ input[type],select {
     }
   }
   input[type=text],select {
-    @apply mt-0 block w-full px-0.5 border-0 border-b border-gray-200 focus:ring-0 focus:border-black text-base placeholder-gray-300;
+    @apply mt-0 block w-full pl-0.5 pr-12 border-0 border-b border-gray-200 focus:ring-0 focus:border-black text-base placeholder-gray-300;
   }
   input[type=radio], input[type=checkbox]{
     width: .8em;

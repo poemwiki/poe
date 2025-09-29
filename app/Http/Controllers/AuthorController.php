@@ -415,7 +415,9 @@ class AuthorController extends Controller {
             }
         });
 
-        return redirect()->route('author/show', $author->fakeId)
+        // Redirect back to alias edit page (stay on current page) with success flash
+        return redirect()
+            ->route('author/alias/edit', $author->fakeId) // was: author/show
             ->with('success', __('Aliases updated successfully!'));
     }
 
