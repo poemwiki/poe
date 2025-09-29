@@ -7,7 +7,6 @@ use App\Http\Requests\API\StoreOwnerUploaderPoem;
 use App\Http\Requests\API\StorePoem;
 use App\Models\Author;
 use App\Models\Balance;
-use App\Models\Entry;
 use App\Models\Language;
 use App\Models\NFT;
 use App\Models\Poem;
@@ -22,8 +21,8 @@ use App\Repositories\ScoreRepository;
 use App\Rules\NoDuplicatedPoem;
 use App\Rules\ValidPoemContent;
 use App\Services\AliTranslate;
-use App\Services\Weapp;
 use App\Services\PosterGenerator;
+use App\Services\Weapp;
 use EasyWeChat\Factory;
 use Error;
 use Exception;
@@ -171,26 +170,9 @@ class PoemAPIController extends Controller {
             $item['translator_avatar_true'] = $poem->translator_avatar !== config('app.avatar.default');
             $item['poet_is_v']              = $poem->poet_is_v;
 
-            $item['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
-            $translatorLabels        = [];
-            $item['translators']     = $poem->translators->map(function ($translator) use (&$translatorLabels) {
-                if ($translator instanceof Author) {
-                    $translatorLabels[] = $translator->label;
-
-                    return [
-                        'name'        => $translator->label,
-                        'id'          => $translator->id,
-                        'avatar'      => $translator->avatar_url,
-                        'avatar_true' => $translator->avatar_url !== config('app.avatar.default')
-                    ];
-                } elseif ($translator instanceof Entry) {
-                    $translatorLabels[] = $translator->name;
-
-                    return ['name' => $translator->name];
-                }
-            });
-
-            $item['translator_label'] = count($translatorLabels) ? join(', ', $translatorLabels) : $poem->translator_label;
+            $item['translator_is_v']  = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
+            $item['translators']      = $poem->translatorsApiArr;
+            $item['translator_label'] = $poem->translatorStr;
 
             $res[] = $item;
         }
@@ -228,25 +210,9 @@ class PoemAPIController extends Controller {
             $item['price']            = number_format($poem->nft->listing->price, 2, '.', '');
 
             $item['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
-            $translatorLabels        = [];
-            $item['translators']     = $poem->translators->map(function ($translator) use (&$translatorLabels) {
-                if ($translator instanceof Author) {
-                    $translatorLabels[] = $translator->label;
+            $item['translators']     = $poem->translatorsApiArr;
 
-                    return [
-                        'name'        => $translator->label,
-                        'id'          => $translator->id,
-                        'avatar'      => $translator->avatar_url,
-                        'avatar_true' => $translator->avatar_url !== config('app.avatar.default')
-                    ];
-                } elseif ($translator instanceof Entry) {
-                    $translatorLabels[] = $translator->name;
-
-                    return ['name' => $translator->name];
-                }
-            });
-
-            $item['translator_label'] = count($translatorLabels) ? join(', ', $translatorLabels) : $poem->translator_label;
+            $item['translator_label'] = $poem->translatorStr;
 
             $res[] = $item;
         }
@@ -322,8 +288,6 @@ class PoemAPIController extends Controller {
         /** @var Poem $poem */
         $poem = Poem::where('id', '=', $nft['poem_id'])->first();
         if (!$poem) {
-            abort(404);
-
             return $this->responseFail([], 'not found', Controller::$CODE['no_entry']);
         }
         $res = $poem->only($columns);
@@ -335,25 +299,11 @@ class PoemAPIController extends Controller {
 
         $res['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
 
-        $translatorLabels   = [];
-        $res['translators'] = $poem->translators->map(function ($translator) use (&$translatorLabels) {
-            if ($translator instanceof Author) {
-                $translatorLabels[] = $translator->label;
 
-                return [
-                    'name'        => $translator->label,
-                    'id'          => $translator->id,
-                    'avatar'      => $translator->avatar_url,
-                    'avatar_true' => $translator->avatar_url !== config('app.avatar.default')
-                ];
-            } elseif ($translator instanceof Entry) {
-                $translatorLabels[] = $translator->name;
+            $res['translators'] = $poem->translatorsApiArr;
 
-                return ['name' => $translator->name];
-            }
-        });
 
-        $res['translator_label'] = count($translatorLabels) ? join(', ', $translatorLabels) : $poem->translator_label;
+        $res['translator_label'] = $poem->translatorStr;
 
         $res['date_ago'] = date_ago($poem->created_at);
 
@@ -417,8 +367,6 @@ class PoemAPIController extends Controller {
         /** @var Poem $poem */
         $poem = Poem::where('id', '=', $id)->first();
         if (!$poem) {
-            abort(404);
-
             return $this->responseFail([], 'not found', Controller::$CODE['no_entry']);
         }
         $res = $poem->only($columns);
@@ -439,25 +387,9 @@ class PoemAPIController extends Controller {
 
         $res['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
 
-        $translatorLabels   = [];
-        $res['translators'] = $poem->translators->map(function ($translator) use (&$translatorLabels) {
-            if ($translator instanceof Author) {
-                $translatorLabels[] = $translator->label;
+        $res['translators'] = $poem->translatorsApiArr;
 
-                return [
-                    'name'        => $translator->label,
-                    'id'          => $translator->id,
-                    'avatar'      => $translator->avatar_url,
-                    'avatar_true' => $translator->avatar_url !== config('app.avatar.default')
-                ];
-            } elseif ($translator instanceof Entry) {
-                $translatorLabels[] = $translator->name;
-
-                return ['name' => $translator->name];
-            }
-        });
-
-        $res['translator_label'] = count($translatorLabels) ? join(', ', $translatorLabels) : $poem->translator_label;
+        $res['translator_label'] = $poem->translatorStr;
 
         $res['date_ago'] = date_ago($poem->created_at);
 
@@ -525,6 +457,76 @@ class PoemAPIController extends Controller {
         $res['nft_price']      = ($poem->nft && $poem->nft->listing) ? $poem->nft->listing->price : null;
 
         return $this->responseSuccess($res);
+    }
+
+    /**
+     * Get poem info by fakeId. Fields align with query() output shape
+     * where applicable.
+     *
+     * @param string $fakeId
+     * @return array
+     */
+    public function infoByFakeId($fakeId) {
+        try {
+            /** @var Poem $poem */
+            $poem = $this->poemRepository->getPoemFromFakeId($fakeId);
+        } catch (\Throwable $e) {
+            return $this->responseFail([], 'not found', Controller::$CODE['no_entry']);
+        }
+
+        // Keep fields consistent with items returned by query(); include original poem if exists
+        // Load author relations to provide their profile URLs when available
+        $poem->loadMissing(['poetAuthor', 'translatorAuthor']);
+        $poetAuthorUrl       = $poem->poetAuthor ? $poem->poetAuthor->url : null;
+        $translatorAuthorUrl = $poem->translatorAuthor ? $poem->translatorAuthor->url : null;
+
+        $translatorsArr = $poem->translatorsApiArr;
+        $item           = [
+            'fake_id'                => $poem->fake_id,
+            'title'                  => $poem->title,
+            'subtitle'               => $poem->subtitle,
+            'preface'                => $poem->preface,
+            'date_str'               => $poem->dateStr,
+            'location'               => $poem->location,
+            'url'                    => $poem->url,
+            'poem'                   => $poem->poem,
+            'poet_is_v'              => $poem->poet_is_v,
+            'poet_label'             => $poem->poet_label,
+            'poet_avatar'            => $poem->poet_avatar,
+            'poet_avatar_true'       => $poem->poet_avatar !== config('app.avatar.default'),
+            'translators_str'        => $poem->translatorsStr,
+            'translators'            => $translatorsArr,
+            'poet_author_url'        => $poetAuthorUrl,
+            'translator_author_url'  => $translatorAuthorUrl,
+        ];
+
+        // Attach original poem info when this is a translation with a valid original_id
+        $original = null;
+        if (!empty($poem->original_id) && $poem->is_translated) {
+            $topOriginal = $poem->topOriginalPoem; // climb to root original if chained
+            if ($topOriginal && $topOriginal->id !== $poem->id) {
+                $topOriginal->loadMissing(['poetAuthor', 'translatorAuthor']);
+
+                $original = [
+                    'fake_id'                => $topOriginal->fake_id,
+                    'title'                  => $topOriginal->title,
+                    'subtitle'               => $poem->subtitle,
+                    'preface'                => $poem->preface,
+                    'date_str'               => $poem->dateStr,
+                    'location'               => $poem->location,
+                    'url'                    => $topOriginal->url,
+                    'poem'                   => $topOriginal->poem,
+                    'poet_is_v'              => $topOriginal->poet_is_v,
+                    'poet_label'             => $topOriginal->poet_label,
+                    'translator_str'         => $topOriginal->translatorsStr,
+                    'poet_author_url'        => $topOriginal->poetAuthor ? $topOriginal->poetAuthor->url : null,
+                    'translator_author_url'  => $topOriginal->translatorAuthor ? $topOriginal->translatorAuthor->url : null,
+                ];
+            }
+        }
+        $item['original_poem'] = $original;
+
+        return $this->responseSuccess($item);
     }
 
     private function _relatedPoems($poem, $num = 2) {
@@ -735,7 +737,7 @@ class PoemAPIController extends Controller {
 
         try {
             $posterGen = new PosterGenerator();
-            $ok = $posterGen->generatePosterFromData($postData, $dir, $poemImgFileName, $posterPath, $compositionID, $force, $poem);
+            $ok        = $posterGen->generatePosterFromData($postData, $dir, $poemImgFileName, $posterPath, $compositionID, $force, $poem);
             if (!$ok) {
                 return $this->responseFail();
             }
@@ -840,7 +842,8 @@ class PoemAPIController extends Controller {
         $mergedPoems = $shiftPoems->unique('id')->map(function ($poem) use ($keywordArr) {
             $columns = ['poet_label', '#poet_label', 'poet_id', 'poet_is_v', 'translator', 'id', 'title', 'url', 'poet_contains_keyword', 'poem'];
 
-            $item = $poem->only($columns);
+            $item                          = $poem->only($columns);
+            $item['poet_contains_keyword'] = $item['poet_contains_keyword'] ?? false;
 
             // TODO str_pos_one_of should support case insensitive mode
             $posOnPoem = str_pos_one_of($poem->poem, $keywordArr, 1);
@@ -856,12 +859,12 @@ class PoemAPIController extends Controller {
 
             $item['poet_is_v']        = $poem->poet_is_v;
             $item['poet_label']       = $poem->poet_label;
-            $item['translator_label'] = $poem->translator_label;
+            $item['translator_label'] = $poem->translatorsStr;
 
             if ($poem->poet_label && str_pos_one_of($poem->poet_label, $keywordArr)) {
                 $item['poet_contains_keyword'] = true;
             }
-            if ($poem->translator_label && str_pos_one_of($poem->translator_label, $keywordArr)) {
+            if ($poem->translatorsStr && str_pos_one_of($poem->translatorsStr, $keywordArr)) {
                 $item['translator_contains_keyword'] = true;
             }
 

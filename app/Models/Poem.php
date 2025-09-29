@@ -448,6 +448,12 @@ class Poem extends Model {
         })->toArray();
     }
 
+    /**
+     * Get translators as a comma-separated string.
+     * If no related translators, fallback to poem.translator field.
+     *
+     * @return string
+     */
     public function getTranslatorsStrAttribute() {
         // Use cached translators string if available (for performance optimization)
         if ($this->relationLoaded('cached_translators_str')) {
@@ -459,6 +465,29 @@ class Poem extends Model {
         }, $this->translatorsLabelArr));
 
         return strlen($translators) ? $translators : $this->translator;
+    }
+
+    /**
+     * Build translators array for API responses.
+     * Each author translator includes name, id, avatar, avatar_true, url.
+     * Each entry translator includes only name.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getTranslatorsApiArrAttribute() {
+        return $this->translators->map(function ($translator) {
+            if ($translator instanceof Author) {
+                return [
+                    'name'        => $translator->label,
+                    'id'          => $translator->id,
+                    'avatar'      => $translator->avatar_url,
+                    'avatar_true' => $translator->avatar_url !== config('app.avatar.default'),
+                    'url'         => $translator->url,
+                ];
+            } elseif ($translator instanceof Entry) {
+                return ['name' => $translator->name];
+            }
+        });
     }
 
     /**

@@ -27,6 +27,7 @@ Route::middleware(['api'])->group(static function () {
             Route::get('/random-nft/{num?}/{id?}', '\App\Http\Controllers\API\PoemAPIController@randomNft')->name('randomNft');
 
             Route::get('/detail/{id}', '\App\Http\Controllers\API\PoemAPIController@detail')->name('detail');
+            Route::get('/info/{fakeId}', [\App\Http\Controllers\API\PoemAPIController::class, 'infoByFakeId'])->name('info');
             Route::get('/nft-detail/{id}', '\App\Http\Controllers\API\PoemAPIController@nftDetail')->name('nft-detail');
             Route::get('/share/{id}/{compositionID?}', '\App\Http\Controllers\API\PoemAPIController@share')->name('share');
             Route::post('/q', [\App\Http\Controllers\API\PoemAPIController::class, 'query'])->name('query');
@@ -65,6 +66,7 @@ Route::middleware(['auth:api,web', 'api'])->group(static function () {
             Route::post('/random/{num?}/{id?}', '\App\Http\Controllers\API\PoemAPIController@random')->name('random-authed');
             // same as above Route::get('/detail/{id}', ...) but method is POST and under auth:api middleware
             Route::post('/detail/{id}', '\App\Http\Controllers\API\PoemAPIController@detail')->name('detail-authed');
+            Route::post('/info/{fakeId}', [\App\Http\Controllers\API\PoemAPIController::class, 'infoByFakeId'])->name('info-authed');
             Route::post('/store', [\App\Http\Controllers\API\PoemAPIController::class, 'store'])->name('store');
             Route::post('/create', [\App\Http\Controllers\API\PoemAPIController::class, 'create'])->name('create');
             Route::get('/mine', [\App\Http\Controllers\API\PoemAPIController::class, 'mine'])->name('mine');
