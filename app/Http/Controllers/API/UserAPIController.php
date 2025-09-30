@@ -75,7 +75,7 @@ class UserAPIController extends Controller {
             $result = $client->scropAndUpload($fileID, $toFileName, $file->getContent(), $format, $corpSize, $corpSize);
             // Tencent cos client has set default timezone to PRC
             date_default_timezone_set(config('app.timezone', 'UTC'));
-            logger()->info('scropAndUpload finished:', $result);
+            // logger()->info('scropAndUpload finished:', $result);
         } catch (\Exception $e) {
             logger()->error('scropAndUpload Error:' . $e->getMessage());
 
@@ -128,11 +128,11 @@ class UserAPIController extends Controller {
             ->paginate($pageSize, null, '', $page)->toArray();
 
         $data['data'] = array_map(function ($item) {
-            $ret = [];
+            $ret         = [];
             $ret['type'] = array_search($item->subject_type, ActivityLog::SUBJECT);
-            $ret['id'] = $item->subject_id;
+            $ret['id']   = $item->subject_id;
             $ret['time'] = date_ago($item->created_at);
-            $log = ActivityLog::find($item->id);
+            $log         = ActivityLog::find($item->id);
 
             switch ($ret['type']) {
                 case 'poem':
@@ -141,7 +141,7 @@ class UserAPIController extends Controller {
                     break;
                 case 'review':
                     if ($log->review) {
-                        $ret['subject'] = $log->review->only(['id', 'title', 'content', 'poem_id']);
+                        $ret['subject']         = $log->review->only(['id', 'title', 'content', 'poem_id']);
                         $ret['subject']['poem'] = $log->review->poem ? $log->review->poem->only(['id', 'poet', 'title', 'first_line', 'is_owner_uploaded']) : null;
                     } else {
                         $ret['subject'] = null;
@@ -184,6 +184,7 @@ class UserAPIController extends Controller {
         ]);
 
         $user->relateToAvatar($mediaFile->id);
+
         /* @var MediaFile $mediaFile */
         return $mediaFile;
     }
@@ -248,7 +249,7 @@ class UserAPIController extends Controller {
         return $this->responseSuccess([
             'balance' => $user->getGoldBalance(),
             'txs'     => $txs->map(function (Transaction $tx) {
-                $res = $tx->only(['action', 'amount', 'created_at', 'f_id', 'from_user_id', 'from_user_name', 'id', 'memo', 'nft_id', 'to_user_id', 'to_user_name']);
+                $res             = $tx->only(['action', 'amount', 'created_at', 'f_id', 'from_user_id', 'from_user_name', 'id', 'memo', 'nft_id', 'to_user_id', 'to_user_name']);
                 $res['date_ago'] = date_ago($tx->created_at);
 
                 if (in_array($tx->action, [Transaction::ACTION['sell'], Transaction::ACTION['listing'], Transaction::ACTION['unlisting']]) || ($tx->action === Transaction::ACTION['mint'] && $tx->nft_id)) {

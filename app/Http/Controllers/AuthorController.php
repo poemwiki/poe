@@ -170,7 +170,7 @@ class AuthorController extends Controller {
 
         try {
             $result = $client->scropAndUpload($tmpFileID, $toFileName, $file->getContent(), $format, $corpSize, $corpSize);
-            logger()->info('scropAndUpload finished:', $result);
+            // logger()->info('scropAndUpload finished:', $result);
         } catch (\Exception $e) {
             logger()->error('scropAndUpload Error:' . $e->getMessage());
 
@@ -373,8 +373,9 @@ class AuthorController extends Controller {
             ->mapWithKeys(function ($v, $k) { return [strtolower($k) => $v]; })
             ->toArray();
 
-        $rows = [];
-        $seen = [];
+        $rows            = [];
+        $seen            = [];
+        $nameLangChanged = false;
 
         foreach ($aliasesInput as $aliasData) {
             $name   = isset($aliasData['name']) ? trim($aliasData['name']) : '';
@@ -405,6 +406,13 @@ class AuthorController extends Controller {
             ];
 
             $seen[$key] = true;
+
+            // If author's name_lang missing for this locale, set it from alias
+            $existingLocaleName = $author->getTranslated('name_lang', $locale);
+            if (empty($existingLocaleName)) {
+                $author->setTranslation('name_lang', $locale, $name);
+                $nameLangChanged = true;
+            }
         }
 
         // Perform delete + bulk insert inside a transaction for consistency
@@ -414,6 +422,13 @@ class AuthorController extends Controller {
                 \App\Models\Alias::insert($rows);
             }
         });
+
+        // Persist name_lang changes without triggering Author model events
+        if ($nameLangChanged) {
+            \App\Models\Author::withoutEvents(function () use ($author) {
+                $author->save();
+            });
+        }
 
         // Redirect back to alias edit page (stay on current page) with success flash
         return redirect()
