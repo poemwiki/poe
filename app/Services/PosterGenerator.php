@@ -57,12 +57,6 @@ class PosterGenerator {
                 throw new Exception('PosterGenerator: Composite failed');
             }
 
-            Log::info('PosterGenerator: Poster generated successfully', [
-                'poem_id'     => $poem->id,
-                'poster_path' => $posterPath,
-                'file_size'   => @filesize($posterPath),
-            ]);
-
             return true;
 
         } catch (Exception $e) {
