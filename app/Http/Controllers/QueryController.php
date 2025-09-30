@@ -39,15 +39,26 @@ class QueryController extends Controller {
         $keyword4Query = Str::of($keyword)
             // ->replace('·', ' ')
             // ->replaceMatches('@[[:punct:]]+@u', ' ')
+            // remove short words to avoid too many meaningless matches
             ->replaceMatches('@\b[a-zA-Z]{1,2}\b@u', ' ')
             ->replaceMatches('@\s+@u', ' ')
             ->trim();
 
         if ($keyword4Query->length < 1) {
+            // Return empty paginator to keep view logic consistent (view expects paginator objects)
+            $emptyAuthors = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 3, 1, [
+                'path'  => request()->url(),
+                'query' => request()->query(),
+            ]);
+            $emptyPoems = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15, 1, [
+                'path'  => request()->url(),
+                'query' => request()->query(),
+            ]);
+
             return view('query.search')->with([
-                'authors' => [],
-                'poems'   => [],
-                'keyword' => $keyword
+                'authors' => $emptyAuthors,
+                'poems'   => $emptyPoems,
+                'keyword' => $keyword,
             ]);
         }
 
