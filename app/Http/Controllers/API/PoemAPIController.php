@@ -172,7 +172,7 @@ class PoemAPIController extends Controller {
 
             $item['translator_is_v']  = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
             $item['translators']      = $poem->translatorsApiArr;
-            $item['translator_label'] = $poem->translatorStr;
+            $item['translator_label'] = $poem->translatorsStr;
 
             $res[] = $item;
         }
@@ -212,7 +212,7 @@ class PoemAPIController extends Controller {
             $item['translator_is_v'] = ($poem->translatorAuthor && $poem->translatorAuthor->user && $poem->translatorAuthor->user->is_v);
             $item['translators']     = $poem->translatorsApiArr;
 
-            $item['translator_label'] = $poem->translatorStr;
+            $item['translator_label'] = $poem->translatorsStr;
 
             $res[] = $item;
         }
@@ -303,7 +303,7 @@ class PoemAPIController extends Controller {
             $res['translators'] = $poem->translatorsApiArr;
 
 
-        $res['translator_label'] = $poem->translatorStr;
+        $res['translator_label'] = $poem->translatorsStr;
 
         $res['date_ago'] = date_ago($poem->created_at);
 
@@ -389,7 +389,7 @@ class PoemAPIController extends Controller {
 
         $res['translators'] = $poem->translatorsApiArr;
 
-        $res['translator_label'] = $poem->translatorStr;
+        $res['translator_label'] = $poem->translatorsStr;
 
         $res['date_ago'] = date_ago($poem->created_at);
 
