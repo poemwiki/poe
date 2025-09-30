@@ -39,12 +39,14 @@ return [
             'driver'            => 'stack',
             'channels'          => ['single'],
             'ignore_exceptions' => false,
+            'tap'               => [App\Logging\CustomizeFormatter::class],
         ],
 
         'single' => [
             'driver' => 'single',
             'path'   => storage_path('logs/laravel.log'),
             'level'  => 'debug',
+            'tap'    => [App\Logging\CustomizeFormatter::class],
         ],
 
         'daily' => [
@@ -89,6 +91,7 @@ return [
                 'stream' => 'php://stdout',
             ],
             'level' => 'info',
+            'tap'   => [App\Logging\CustomizeFormatter::class],
         ],
 
         'syslog' => [
