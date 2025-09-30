@@ -780,7 +780,7 @@ class PoemAPIController extends Controller {
         // Authors
         $authors = collect();
         if ($mode !== 'poem-select') {
-            $authorLimit = $mode !== 'author-select' ? 5 : 50;
+            $authorLimit = $mode !== 'author-select' ? 3 : 50;
             $authors     = \App\Models\Author::search($keyword4Query)
                 ->query(function ($query) {
                     $query->with(['user', 'alias']);
