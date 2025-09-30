@@ -40,6 +40,7 @@ class QueryController extends Controller {
             // ->replace('·', ' ')
             // ->replaceMatches('@[[:punct:]]+@u', ' ')
             // remove short words to avoid too many meaningless matches
+
             ->replaceMatches('@\b[a-zA-Z]{1,2}\b@u', ' ')
             ->replaceMatches('@\s+@u', ' ')
             ->trim();
@@ -63,11 +64,48 @@ class QueryController extends Controller {
         }
 
         // Eager load relations to avoid N+1 queries in the view
+        // Get more results initially to allow proper sorting before pagination
         $authors = \App\Models\Author::search($keyword4Query)
-            // ->query(function ($query) {
-            //     $query->with(['user']);
-            // })
-            ->paginate(3, null, 1);
+            ->query(function ($query) {
+                $query->with(['user', 'alias']);
+            })
+            ->take(20)
+            ->get();
+
+        // Sort authors: name/alias matches first, then description matches
+        $keywordArr = $keyword4Query->split('#\s+#');
+        $authors    = $authors->sortByDesc(function ($author) use ($keywordArr) {
+            // Check if author's label (from name_lang) matches keyword
+            if ($author->label && str_pos_one_of($author->label, $keywordArr)) {
+                return 100; // High priority for name match
+            }
+
+            // Check if any alias matches keyword
+            if ($author->alias && $author->alias->isNotEmpty()) {
+                foreach ($author->alias as $alias) {
+                    if ($alias->name && str_pos_one_of($alias->name, $keywordArr)) {
+                        return 100; // High priority for alias match
+                    }
+                }
+            }
+
+            // Description match gets lower priority
+            return 1;
+        })->values();
+
+        // Manually paginate after sorting
+        $currentPage = 1;
+        $perPage     = 3;
+        $authors     = new \Illuminate\Pagination\LengthAwarePaginator(
+            $authors->slice(0, $perPage),
+            $authors->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path'  => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
 
         $poems = \App\Models\Poem::search($keyword4Query)
             ->query(function ($query) {

@@ -787,15 +787,15 @@ class PoemAPIController extends Controller {
                 })
                 ->take($authorLimit)
                 ->get();
-            
+
             // Sort authors: name/alias matches first, then description matches
             $keywordArr = $keyword4Query->split('#\s+#');
-            $authors = $authors->sortByDesc(function ($author) use ($keywordArr) {
+            $authors    = $authors->sortByDesc(function ($author) use ($keywordArr) {
                 // Check if author's label (from name_lang) matches keyword
                 if ($author->label && str_pos_one_of($author->label, $keywordArr)) {
                     return 100; // High priority for name match
                 }
-                
+
                 // Check if any alias matches keyword
                 if ($author->alias && $author->alias->isNotEmpty()) {
                     foreach ($author->alias as $alias) {
@@ -804,7 +804,7 @@ class PoemAPIController extends Controller {
                         }
                     }
                 }
-                
+
                 // Description match gets lower priority
                 return 1;
             })->values();
@@ -822,7 +822,7 @@ class PoemAPIController extends Controller {
                     });
                     $query->with(['poetAuthor.user', 'uploader']);
                 })
-                ->take(150)
+                ->take(50)
                 ->get();
 
             $shiftPoems = $poems->collect();
