@@ -34,12 +34,6 @@ class PosterGenerator {
             throw new Exception('PosterGenerator: Incomplete poster generation parameters');
         }
 
-        Log::debug('PosterGenerator: Starting poster generation', [
-            'poem_id'        => $poem->id,
-            'composition_id' => $compositionID,
-            'force'          => $force,
-        ]);
-
         try {
             // Ensure directory exists
             if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
@@ -89,15 +83,8 @@ class PosterGenerator {
         $poemImgPath = $dir . '/' . $poemImgFileName;
 
         if (!$force && file_exists($poemImgPath)) {
-            Log::debug('PosterGenerator: Using cached poem image', ['path' => $poemImgPath]);
-
             return $poemImgPath;
         }
-
-        Log::debug('PosterGenerator: Fetching poem image from render server', [
-            'url'   => config('app.render_server'),
-            'force' => $force,
-        ]);
 
         $poemImg = file_get_contents_post(config('app.render_server'), $postData, 'application/json', 15);
 
@@ -122,12 +109,6 @@ class PosterGenerator {
 
             throw new Exception('PosterGenerator: Generated file is not a valid image format: ' . $mimeType);
         }
-
-        Log::debug('PosterGenerator: Poem image saved', [
-            'path'      => $poemImgPath,
-            'size'      => filesize($poemImgPath),
-            'mime_type' => $mimeType,
-        ]);
 
         return $poemImgPath;
     }
@@ -158,11 +139,6 @@ class PosterGenerator {
         }
 
         $param = $params[$compositionID];
-
-        Log::debug('PosterGenerator: Starting image composition', [
-            'composition_id' => $compositionID,
-            'params'         => $param,
-        ]);
 
         $posterImg = null;
 
@@ -204,15 +180,6 @@ class PosterGenerator {
 
                 return false;
             }
-
-            $w = imagesx($posterImg);
-            $h = imagesy($posterImg);
-
-            Log::debug('PosterGenerator: Image composition completed', [
-                'poster_path' => $posterPath,
-                'dimensions'  => "{$w}x{$h}",
-                'format'      => $format,
-            ]);
 
             return true;
 
