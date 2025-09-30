@@ -12,7 +12,7 @@ class CustomizeFormatter {
     /**
      * Customize the given logger instance.
      *
-     * @param \Illuminate\Log\Logger $logger Laravel's logger wrapper
+     * @param \Illuminate\Log\Logger|\Monolog\Logger $logger Laravel's logger wrapper or Monolog logger
      */
     public function __invoke($logger): void {
         // Get the underlying Monolog logger instance
@@ -20,8 +20,13 @@ class CustomizeFormatter {
             ? $logger->getLogger()
             : $logger;
 
+        // Ensure we have a Monolog logger
+        if (!$monolog instanceof \Monolog\Logger) {
+            return;
+        }
+
         foreach ($monolog->getHandlers() as $handler) {
-            if (method_exists($handler, 'setFormatter')) {
+            if ($handler instanceof \Monolog\Handler\FormattableHandlerInterface) {
                 $handler->setFormatter(new CustomLineFormatter(
                     null, // format
                     null, // dateFormat
