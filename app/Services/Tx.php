@@ -152,7 +152,7 @@ class Tx {
             'PicOperations'  => $picOperationsTemplate->queryString(),
         ]);
 
-        logger()->info('scropAndUpload:', $result->toArray());
+        // logger()->info('scropAndUpload:', $result->toArray());
 
         return $result->toArray();
     }
@@ -177,7 +177,7 @@ class Tx {
     }
 
     /**
-     * @param $fileID
+     * @param      $fileID
      * @param null $versionID
      * @return mixed
      */
@@ -196,7 +196,7 @@ class Tx {
     /**
      * @param string $fileID
      * @param string $fileName
-     * @param $content
+     * @param        $content
      * @param string $format
      * @param int    $w
      * @param int    $h
