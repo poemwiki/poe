@@ -386,6 +386,10 @@ class Poem extends Model {
                     $author->id = $translator['id'];
                     // Provide name_lang so Author::getLabelAttribute() works consistently
                     $author->name_lang = json_encode(['zh-CN' => $translator['name']]);
+                    // Include avatar fields so Author::getAvatarUrlAttribute() works
+                    $author->avatar  = $translator['avatar'] ?? null;
+                    $author->pic_url = $translator['pic_url'] ?? null;
+                    $author->user_id = $translator['user_id'] ?? null;
 
                     return $author;
                 }

@@ -613,7 +613,7 @@ class PoemRepository extends BaseRepository {
         if ($translatorIds->isNotEmpty()) {
             $directTranslatorsData = DB::table('author')
                 ->whereIn('id', $translatorIds)
-                ->select('id', 'name_lang')
+                ->select('id', 'name_lang', 'avatar', 'pic_url', 'user_id')
                 ->get()
                 ->keyBy('id');
         }
@@ -632,7 +632,9 @@ class PoemRepository extends BaseRepository {
             ->where('relatable.relation', '=', Relatable::RELATION['translator_is'])
             ->where('relatable.start_type', '=', Poem::class)
             ->select('relatable.start_id as poem_id', 'relatable.end_type', 'relatable.end_id',
-                    'author.name_lang as author_name', 'entry.name as entry_name')
+                    'author.name_lang as author_name', 'author.avatar as author_avatar', 
+                    'author.pic_url as author_pic_url', 'author.user_id as author_user_id', 
+                    'entry.name as entry_name')
             ->get()
             ->groupBy('poem_id');
 
@@ -649,8 +651,11 @@ class PoemRepository extends BaseRepository {
                     : $authorData->name_lang;
 
                 $translators->push([
-                    'id' => $poem->translator_id,
-                    'name' => $name
+                    'id'      => $poem->translator_id,
+                    'name'    => $name,
+                    'avatar'  => $authorData->avatar,
+                    'pic_url' => json_decode($authorData->pic_url, true),
+                    'user_id' => $authorData->user_id,
                 ]);
             }
 
@@ -663,8 +668,11 @@ class PoemRepository extends BaseRepository {
                             ? pick_translation_value($authorName, 'zh-CN')
                             : $item->author_name;
                         return [
-                            'id'   => $item->end_id,
-                            'name' => $name
+                            'id'      => $item->end_id,
+                            'name'    => $name,
+                            'avatar'  => $item->author_avatar,
+                            'pic_url' => json_decode($item->author_pic_url, true),
+                            'user_id' => $item->author_user_id,
                         ];
                     } else {
                         return [
