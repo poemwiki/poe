@@ -783,10 +783,31 @@ class PoemAPIController extends Controller {
             $authorLimit = $mode !== 'author-select' ? 5 : 50;
             $authors     = \App\Models\Author::search($keyword4Query)
                 ->query(function ($query) {
-                    $query->with('user');
+                    $query->with(['user', 'alias']);
                 })
                 ->take($authorLimit)
                 ->get();
+            
+            // Sort authors: name/alias matches first, then description matches
+            $keywordArr = $keyword4Query->split('#\s+#');
+            $authors = $authors->sortByDesc(function ($author) use ($keywordArr) {
+                // Check if author's label (from name_lang) matches keyword
+                if ($author->label && str_pos_one_of($author->label, $keywordArr)) {
+                    return 100; // High priority for name match
+                }
+                
+                // Check if any alias matches keyword
+                if ($author->alias && $author->alias->isNotEmpty()) {
+                    foreach ($author->alias as $alias) {
+                        if ($alias->name && str_pos_one_of($alias->name, $keywordArr)) {
+                            return 100; // High priority for alias match
+                        }
+                    }
+                }
+                
+                // Description match gets lower priority
+                return 1;
+            })->values();
         }
 
         // Poems
@@ -807,11 +828,51 @@ class PoemAPIController extends Controller {
             $shiftPoems = $poems->collect();
         }
 
-        // Append poems from matched authors
+        // Append poems from matched authors (limit to prevent timeout for prolific poets)
         if ($mode !== 'author-select' && $authors->isNotEmpty()) {
-            $authors->loadMissing('poems');
-            foreach ($authors as $author) {
-                foreach ($author->poems as $poem) {
+            $keywordArr     = $keyword4Query->split('#\s+#');
+            $poemsPerAuthor = 30; // Limit poems per author to prevent timeout
+
+            // Filter authors whose name_lang or alias actually contains the keyword
+            // Note: alias is already loaded in the author search query above
+            $matchedAuthorIds = $authors->filter(function ($author) use ($keywordArr) {
+                // Check if author's label (from name_lang) matches keyword
+                if ($author->label && str_pos_one_of($author->label, $keywordArr)) {
+                    return true;
+                }
+
+                // Check if any alias matches keyword
+                if ($author->alias && $author->alias->isNotEmpty()) {
+                    foreach ($author->alias as $alias) {
+                        if ($alias->name && str_pos_one_of($alias->name, $keywordArr)) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            })->pluck('id')->toArray();
+
+            // Only query poems if we have authors that actually match the keyword
+            if (!empty($matchedAuthorIds)) {
+                // Use efficient query instead of loading all poems for each author
+                $authorPoems = Poem::query()
+                    ->whereIn('poet_id', $matchedAuthorIds)
+                    ->whereNotExists(function ($q) {
+                        $q->select(DB::raw(1))
+                            ->from('relatable')
+                            ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
+                    })
+                    ->with(['poetAuthor.user', 'uploader'])
+                    ->select(['id', 'title', 'poem', 'poet', 'poet_cn', 'poet_id', 'upload_user_id', 'translator', 'translator_id', 'is_owner_uploaded', 'language_id'])
+                    ->get()
+                    ->groupBy('poet_id')
+                    ->map(function ($poems) use ($poemsPerAuthor) {
+                        return $poems->take($poemsPerAuthor);
+                    })
+                    ->flatten();
+
+                foreach ($authorPoems as $poem) {
                     $item                          = $poem;
                     $item['poet_contains_keyword'] = true;
                     $item['#poet_label']           = $poem->poet_label;

@@ -23,6 +23,7 @@ $isWeappWebview = App\User::isWeAppWebview();
   <div class="changelog" style="width:100%; max-width:900px;">
     <h3>2025 年</h3>
     <ul>
+      <li>🐞 修复：修复搜索功能中的排序和超时问题。</li>
       <li>✨ 新功能：支持添加与编辑作者别名。</li>
       <li>🖼️ 更新：诗歌分享图片显示更完整的信息，包含副标题、题记、译者、日期、地点。</li>
       <li>🐞 修复：修复推荐诗歌过于集中，容易重复的问题。</li>
