@@ -21,6 +21,8 @@
   "Alias Name": "别名",
   "Please fill in all alias names and select languages.": "请填写所有别名并选择语言。",
   "Aliases updated successfully!": "别名已更新成功！",
+  "At least one alias is required": "至少保留一个别名",
+  "At least one primary name is required": "至少保留一个主名",
   "Introduction": "简介",
   "Back to Author Page": "返回作者页面"
 }

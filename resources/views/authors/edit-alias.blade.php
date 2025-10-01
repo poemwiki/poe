@@ -23,7 +23,7 @@
 
     <div class="flex items-end justify-start mb-12">
       @if($author->avatarUrl)
-        <img class="w-1/12 mr-2" style="max-width: unset" src="{{$author->avatarUrl}}"
+        <img class="w-24 mr-2" style="max-width: unset" src="{{$author->avatarUrl}}"
              alt="avatar of {{$author->name_lang}}">
       @endif
       <div class="flex flex-col justify-between">
