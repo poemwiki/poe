@@ -86,3 +86,7 @@ The [PHP CS Fixer](https://cs.symfony.com/) is located at tools/php-cs-fixer/ven
 The style config file is located at root directory .php-cs-fixer.dist.php.  
 See [Config PHP CS Fixer for PHPStorm](https://www.jetbrains.com/help/phpstorm/using-php-cs-fixer.html#installing-configuring-php-cs-fixer) and 
 [php-cs-fixer-configurator](https://mlocati.github.io/php-cs-fixer-configurator/#version:3.0).
+
+### Domain Docs
+
+- See `docs/author-names.md` for the relationship between primary names (`name_lang`) and aliases, and the update flow.

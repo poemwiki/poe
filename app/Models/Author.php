@@ -18,6 +18,16 @@ use Spatie\Activitylog\Traits\LogsActivity;
 /**
  * Class Author.
  *
+ * name_lang vs alias semantics:
+ * - name_lang (translatable JSON): stores at most one primary name per locale for display.
+ * - alias (table): stores zero or more alternative names per locale.
+ *
+ * Synchronization rules are handled by AuthorController::updateAlias:
+ * - When submitting aliases, if a locale in use has no primary name, one of its aliases is used to fill name_lang.
+ * - If a deleted alias equals name_lang[locale], the primary name for that locale is removed.
+ * - At least one alias and at least one non-empty name_lang entry must remain after an update.
+ * - Alias replacement and name_lang changes are committed in a single transaction to ensure consistency.
+ *
  * @property int    $id
  * @property string $created_at
  * @property string $updated_at
@@ -255,34 +265,6 @@ class Author extends Model {
 
         self::created(function ($model) {
             Artisan::call('alias:importFromAuthor', ['--id' => $model->id]);
-        });
-
-        self::saving(function ($model) {
-            $changes  = $model->getDirty();
-            $original = self::find($model->id);
-
-            // TODO 如果前端可编辑别名列表，此处不应再有处理别名相关逻辑，应在controller处理
-            if (isset($changes['name_lang']) && $original) {
-                // if author name changed, delete old name from alias
-                $names = json_decode($changes['name_lang']);
-                foreach ($names as $locale => $name) {
-                    Alias::where([
-                        ['author_id', $model->id],
-                        ['name', $original->getTranslated('name_lang', $locale)],
-                        ['locale', $locale]
-                    ])->delete();
-                }
-            }
-        });
-
-        self::updated(function ($model) {
-            $changes = $model->getDirty();
-
-            // TODO 如果前端可编辑别名列表，此处不应再有处理别名相关逻辑，应在controller处理
-            // do importFromAuthor if name_lang changed
-            if (isset($changes['name_lang'])) {
-                Artisan::call('alias:importFromAuthor', ['--id' => $model->id]);
-            }
         });
 
         self::deleting(function ($model) {

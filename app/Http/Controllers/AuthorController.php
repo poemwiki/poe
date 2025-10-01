@@ -279,7 +279,7 @@ class AuthorController extends Controller {
         $author = Author::findOrFail($id);
 
         // Simplified: only consider enabled (in-use) languages
-        $allInUseLanguages = LanguageRepository::allInUse(['id', 'name_lang', 'name', 'locale', 'sort_order']);
+        $allInUseLanguages = LanguageRepository::allInUse(['id', 'name_lang', 'name', 'locale', 'sort_order'])->sortBy('sort_order');
         $inUseLocaleSet    = $allInUseLanguages->pluck('locale')->map(function ($l) { return strtolower($l); })->unique()->values();
 
         // build lowercase locale -> id map for O(1) lookups
@@ -345,7 +345,16 @@ class AuthorController extends Controller {
     }
 
     /**
-     * Update author aliases
+     * Update author aliases for enabled locales and keep name_lang consistent.
+     *
+     * Behavior and constraints:
+     * - Only locales from enabled languages are processed.
+     * - Aliases are replaced in full: existing aliases for the author are deleted, then new aliases inserted.
+     * - If a locale has no primary name in name_lang, the submitted alias for that locale is used to fill it.
+     * - If a deleted alias equals the current name_lang[locale], that locale's primary name is removed.
+     * - Must keep at least one alias and at least one non-empty name_lang entry; otherwise returns with validation error.
+     * - Alias write and author save run inside a single DB transaction to ensure consistency.
+     *
      * @param string  $fakeId
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
@@ -376,6 +385,8 @@ class AuthorController extends Controller {
         $rows            = [];
         $seen            = [];
         $nameLangChanged = false;
+        // Capture current aliases for deletion detection
+        $existingAliases = \App\Models\Alias::where('author_id', $id)->get();
 
         foreach ($aliasesInput as $aliasData) {
             $name   = isset($aliasData['name']) ? trim($aliasData['name']) : '';
@@ -407,28 +418,53 @@ class AuthorController extends Controller {
 
             $seen[$key] = true;
 
-            // If author's name_lang missing for this locale, set it from alias
-            $existingLocaleName = $author->getTranslated('name_lang', $locale);
-            if (empty($existingLocaleName)) {
+            // If author's name_lang missing for this locale, set it from alias (no fallback)
+            $existingLocaleName = $author->getTranslation('name_lang', $locale, false);
+            if ($existingLocaleName === null || $existingLocaleName === '') {
                 $author->setTranslation('name_lang', $locale, $name);
                 $nameLangChanged = true;
             }
         }
 
-        // Perform delete + bulk insert inside a transaction for consistency
-        DB::transaction(function () use ($id, $rows) {
+        // For any alias deleted by user, if it equals the current name_lang for that locale, remove that translation
+        foreach ($existingAliases as $ea) {
+            $lc = strtolower($ea->locale);
+            if (!in_array($lc, $enabledLocales, true)) {
+                continue; // only consider enabled locales
+            }
+
+            $key = $lc . '|' . trim($ea->name);
+            // var_dump('\nisset', $key, $seen, isset($seen[$key]));
+            if (!isset($seen[$key])) {
+                // Compare without fallback; if translation equals deleted alias, forget this locale
+                $existingLocaleName = $author->getTranslation('name_lang', $ea->locale, false);
+                if ($existingLocaleName !== null && $existingLocaleName !== '' && trim($existingLocaleName) === trim($ea->name)) {
+                    $author->forgetTranslation('name_lang', $ea->locale);
+                    $nameLangChanged = true;
+                }
+            }
+        }
+        // dd();
+
+        // Validate constraints before committing changes
+        if (empty($rows)) {
+            return redirect()
+                ->back()
+                ->withErrors(['aliases' => __('At least one alias is required')])
+                ->withInput();
+        }
+
+        // Perform alias update and name_lang save in a single transaction
+        DB::transaction(function () use ($id, $rows, $author, $nameLangChanged) {
             \App\Models\Alias::where('author_id', $id)->delete();
             if (!empty($rows)) {
                 \App\Models\Alias::insert($rows);
             }
-        });
 
-        // Persist name_lang changes without triggering Author model events
-        if ($nameLangChanged) {
-            \App\Models\Author::withoutEvents(function () use ($author) {
+            if ($nameLangChanged) {
                 $author->save();
-            });
-        }
+            }
+        });
 
         // Redirect back to alias edit page (stay on current page) with success flash
         return redirect()

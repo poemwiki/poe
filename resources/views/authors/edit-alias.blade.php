@@ -119,11 +119,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let aliasIndex = {{ $aliases->count() }};
     let submitting = false;
 
-    // 语言选项模板
+    // language options HTML snippet
     const languageOptions = `
         <option value="" disabled selected>@lang('Select Language')</option>
         @foreach($languages as $language)
-            <option value="{{ $language->locale }}">{{ $language->name_lang }} ({{ $language->locale }})</option>
+            <option value="{{ $language->locale }}">{{ $language->name_lang }} ({{ $language->name }})</option>
         @endforeach
     `;
 
