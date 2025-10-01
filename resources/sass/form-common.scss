@@ -20,7 +20,10 @@ input[type],select {
       @apply text-red-500;
     }
   }
-  input[type=text],select {
+  input[type=text] {
+    @apply mt-0 block w-full px-0.5 border-0 border-b border-gray-200 focus:ring-0 focus:border-black text-base placeholder-gray-300;
+  }
+  select {
     @apply mt-0 block w-full pl-0.5 pr-12 border-0 border-b border-gray-200 focus:ring-0 focus:border-black text-base placeholder-gray-300;
   }
   input[type=radio], input[type=checkbox]{

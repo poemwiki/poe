@@ -69,7 +69,7 @@
                        placeholder="@lang('Alias Name')">
               </div>
 
-              <div class="w-80">
+              <div class="w-56">
                 <select name="aliases[{{ $index }}][locale]"
                         class="form-select w-full text-sm">
                   <option value="" disabled selected>@lang('Select Language')</option>
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
                       placeholder="@lang('Alias Name')">
             </div>
 
-            <div class="w-80">
+            <div class="w-56">
               <select name="aliases[${index}][locale]"
                       class="form-select w-full text-sm">
                   ${languageOptions}
