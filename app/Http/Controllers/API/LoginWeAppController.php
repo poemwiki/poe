@@ -5,12 +5,12 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\UserBind;
 use App\User;
+use EasyWeChat\Factory;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use EasyWeChat\Factory;
 
 class LoginWeAppController extends Controller {
     private \EasyWeChat\MiniProgram\Application $weApp;
@@ -33,13 +33,14 @@ class LoginWeAppController extends Controller {
      * @return array
      */
     public function login(Request $request) {
-        Log::info('try weApp login', $request->toArray());
+        // Log::info('try weApp login', $request->toArray());
 
         if (!isset($request->code) or is_null($request->code)) {
             return $this->responseFail([], 'need code');
         }
 
         $code = $request->code;
+
         // 根据 code 获取微信 openid 和 session_key
         try {
             $data = $this->weApp->auth->session($code);
@@ -49,11 +50,11 @@ class LoginWeAppController extends Controller {
             return $this->responseFail([], 'Failed to get openid, please try again later');
         }
         if (isset($data['errcode'])) {
-            Log::info('try weApp login failed:', $data);
+            // Log::info('try weApp login failed:', $data);
 
             return $this->responseFail([], 'code已过期或不正确');
         }
-        Log::info('wechat server reply:', $data);
+        // Log::info('wechat server reply:', $data);
         $weappOpenid      = $data['openid'];
         $weixinSessionKey = $data['session_key']; // 用于 this->decrypt 获取加密的用户信息
         $avatar           = $request->avatar   ?? '';
@@ -135,7 +136,7 @@ class LoginWeAppController extends Controller {
                 'info'              => json_encode($data),
                 'weapp_session_key' => $weixinSessionKey
             ]);
-            Log::info('new userBind from weapp:', $userBind->toArray());
+            // Log::info('new userBind from weapp:', $userBind->toArray());
         }
 
         // 直接创建token并设置有效期
@@ -153,8 +154,8 @@ class LoginWeAppController extends Controller {
     }
 
     public function decrypt(Request $request) {
-        Log::info('weApp request for decrypt', $request->toArray());
-        Log::info('from user:' . $request->user()->name . ' id=' . $request->user()->id);
+        // Log::info('weApp request for decrypt', $request->toArray());
+        // Log::info('from user:' . $request->user()->name . ' id=' . $request->user()->id);
         $detail = $request['detail'];
 
         $userBind = UserBind::where([

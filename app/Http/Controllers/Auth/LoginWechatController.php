@@ -25,10 +25,10 @@ class LoginWechatController extends Controller {
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
     public function login() {
-        Log::info('Login from wechat webview, weixin server invoke login function.');
+        // Log::info('Login from wechat webview, weixin server invoke login function.');
         $wechatUser = session('wechat.oauth_user.default'); // 拿到授权用户资料
 
-        Log::info('wechat webview user info' . json_encode($wechatUser));
+        // Log::info('wechat webview user info' . json_encode($wechatUser));
         if ($userBind = $this->getUserBindInfoByOpenID($wechatUser->raw['openid'])) {
             // 如果小程序绑定的开放平台账号变更，union_id 也会变更，所以需要将同一 user 的 weapp 和 wechat 的绑定记录的 union_id 同步变更
             if ($wechatUser->raw['unionid'] && $userBind->union_id !== $wechatUser->raw['unionid']) {
@@ -93,7 +93,7 @@ class LoginWechatController extends Controller {
     /**
      * @param $openID
      * @param $bindRef
-     *                  TODO move it to BindInfoRepository
+     * @TODO move it to BindInfoRepository
      * @return UserBind|null
      */
     public function getUserBindInfoByOpenID($openID, $bindRef = UserBind::BIND_REF['wechat']) {
