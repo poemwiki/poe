@@ -636,13 +636,17 @@ class PoemAPIController extends Controller {
     }
 
     public function delete($poemId) {
-        try {
-            $this->authorize('api.poem.delete', Poem::find($poemId));
-        } catch (AuthorizationException $e) {
-            return $this->responseFail();
+        $poem = Poem::find($poemId);
+        if (empty($poem)) {
+            return $this->responseFail([], 'Poem not found', Controller::$CODE['not_found']);
         }
 
-        $poem = Poem::find($poemId);
+        try {
+            $this->authorize('api.poem.delete', $poem);
+        } catch (AuthorizationException $e) {
+            return $this->responseFail([], 'Not Allowed');
+        }
+
         $poem->delete();
 
         return $this->responseSuccess();
