@@ -56,7 +56,7 @@ class CampaignAPIController extends Controller {
 
     public function show($id) {
         // TODO Cache::forget('api-campaign-show-') if new campaign poem uploaded
-        $ttl = 60;
+        $ttl          = 60;
         $campaignData = Cache::remember('api-campaign-show-' . $id, $ttl, function () use ($id) {
             /** @var Campaign $campaign */
             $campaign = $this->campaignRepository->find($id);
@@ -88,13 +88,18 @@ class CampaignAPIController extends Controller {
             return $ret;
         });
 
+        // handle not found or empty campaign data
+        if (empty($campaignData)) {
+            return $this->responseFail([], 'Campaign not found', self::$CODE['not_found']);
+        }
+
         $isHidden = (isset($campaignData['settings']['test']) && $campaignData['settings']['test']);
         if (!$isHidden) {
-            $this->flushCampaignIndexCache($campaignData['id']);
+            $this->flushCampaignIndexCache($campaignData['id'] ?? 0);
         }
 
         return $this->responseSuccess($campaignData);
-    }
+        }
 
     private function flushCampaignIndexCache($id) {
         // clear campaign index cache if current campaign id bigger than the latest cached one
