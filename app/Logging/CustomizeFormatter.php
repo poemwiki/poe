@@ -25,6 +25,14 @@ class CustomizeFormatter {
             return;
         }
 
+        // Add processors for richer context
+        // Adds file and line of the logging call
+        $monolog->pushProcessor(new \Monolog\Processor\IntrospectionProcessor());
+        // Adds request URI, method, and IP when in HTTP context
+        $monolog->pushProcessor(new \Monolog\Processor\WebProcessor());
+        // Adds authenticated user id and request id if available
+        $monolog->pushProcessor(new \App\Logging\UserRequestProcessor());
+
         foreach ($monolog->getHandlers() as $handler) {
             if ($handler instanceof \Monolog\Handler\FormattableHandlerInterface) {
                 $handler->setFormatter(new CustomLineFormatter(
