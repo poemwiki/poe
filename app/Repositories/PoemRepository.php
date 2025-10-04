@@ -897,11 +897,12 @@ class PoemRepository extends BaseRepository {
      * Returns nested structure with each poem containing its direct translations
      */
     public function getTranslatedPoemsTree($poem) {
-        $cacheKey = "translated_poems_tree_{$poem->topOriginalPoem->id}";
+        // topOriginalPoem can be null if original_id chain is broken; fall back to current poem
+        $topOriginal = $poem->topOriginalPoem ?? $poem;
+        $cacheKey = "translated_poems_tree_{$topOriginal->id}";
 
-        return Cache::remember($cacheKey, 360000, function() use ($poem) {
-            $topOriginal = $poem->topOriginalPoem;
-
+        return Cache::remember($cacheKey, 360000, function() use ($topOriginal) {
+            
             // Get ALL poems in the translation tree recursively
             $allPoemsInTree = $this->collectAllPoemsInTranslationTree($topOriginal);
 
@@ -919,6 +920,9 @@ class PoemRepository extends BaseRepository {
      */
     public static function clearTranslatedPoemsTreeCache($poem) {
         $topOriginal = $poem->topOriginalPoem ?? $poem;
+        if (!$topOriginal) {
+            return;
+        }
         $cacheKey = "translated_poems_tree_{$topOriginal->id}";
         Cache::forget($cacheKey);
     }
