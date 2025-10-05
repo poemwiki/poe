@@ -39,7 +39,7 @@ class Import extends Command {
      * @return int
      */
     public function handle() {
-        // YOU NEED TO execute php artisan wiki:import to import wikidata.org's poet data to wikidata table
+        // YOU NEED TO execute php artisan wiki:importPoet to import wikidata.org's poet data to wikidata table
 
         $fromId = $this->argument('fromId') ?: 101247956;
         $toId   = $this->argument('toId') ?: 101247956;

@@ -173,7 +173,7 @@ class AuthorRepository extends BaseRepository {
         $entity = json_decode($wiki->data);
 
         $authorNameLang  = [];
-        $allInUseLocales = LanguageRepository::allInUse('locale')->pluck('locale')->map(function($l){ return strtolower($l); })->unique()->values();
+        $allInUseLocales = LanguageRepository::allInUse('locale')->pluck('locale')->map(function($l) { return strtolower($l); })->unique()->values();
         foreach ($entity->labels as $locale => $label) {
             // if the language is not in use, skip it (case-insensitive)
             if (!$allInUseLocales->contains(strtolower($locale))) {
@@ -236,7 +236,7 @@ class AuthorRepository extends BaseRepository {
         if (!$authorExisted) {
             $wiki = Wikidata::find($wikidata_id);
             if (!$wiki) {
-                Artisan::call('wiki:import', ['--id' => $wikidata_id]);
+                Artisan::call('wiki:importPoet', ['--id' => $wikidata_id]);
                 $wiki = Wikidata::find($wikidata_id);
             }
             $authorExisted = $this->importFromWikidata($wiki, Auth::user()->id);
