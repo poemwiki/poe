@@ -298,7 +298,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return string
      */
     public function getAvatarUrlAttribute() {
-        return cosUrl($this->avatar ?? config('app.avatar.default'));
+        return cosUrl(empty($this->avatar) ? config('app.avatar.default') : $this->avatar);
     }
 
     public function getVerifiedAvatarHtml() {
