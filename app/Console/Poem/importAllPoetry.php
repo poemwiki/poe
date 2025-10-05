@@ -33,21 +33,8 @@ class importAllPoetry extends Command {
 
     public function __construct() {
         parent::__construct();
-
-        if (!App::runningInConsole()) {
-            Log::error('This command can only be used in console mode.');
-
-            return;
-        }
-
-        // activity log need a causer, so we have to log in as self::$causerID first
-        $causer = User::find(self::$causerID);
-        if ($causer) {
-            Auth::login($causer);
-        } else {
-            // In test / fresh DB this user may not exist; skip login to prevent null auth errors.
-        }
-        // dd(date_default_timezone_get()); // UTC
+        // Do not perform any side-effects in the constructor.
+        // Commands may be instantiated during HTTP requests while being discovered/loaded.
     }
 
     /**
@@ -55,6 +42,19 @@ class importAllPoetry extends Command {
      * @return int
      */
     public function handle(): int {
+        // Ensure this command only runs in console context
+        if (!App::runningInConsole()) {
+            // Quietly abort if somehow invoked outside console (e.g., via Artisan::call in HTTP)
+            $this->error('This command is console-only.');
+            return 1;
+        }
+
+        // activity log need a causer, so we have to log in as self::$causerID first
+        $causer = User::find(self::$causerID);
+        if ($causer) {
+            Auth::login($causer);
+        }
+
         // dd(date_default_timezone_get()); // @TODO Why the timezone changed to PRC?
         $poetCrawls = Crawl::select(['id', 'name', 'export_setting', 'result'])->where([
             'source' => self::$source,
