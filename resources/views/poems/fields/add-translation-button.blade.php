@@ -1,5 +1,8 @@
 <?php
-$createPageUrl = route('poems/create', ['original_fake_id' => $poem->topOriginalPoem->fake_id], false);
+// Safely resolve top original poem; fall back to current poem when null
+/** @var \App\Models\Poem $poem */
+$topOriginal = $poem->topOriginalPoem ?: $poem;
+$createPageUrl = route('poems/create', ['original_fake_id' => $topOriginal->fake_id], false);
 ?>
 @if($poem->is_translated && !$poem->originalPoem)
   <dt>@lang('poem.no original work related')</dt>
