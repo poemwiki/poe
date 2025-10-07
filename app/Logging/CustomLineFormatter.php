@@ -18,12 +18,30 @@ class CustomLineFormatter extends LineFormatter {
         if (isset($record['context']['exception']) && $record['context']['exception'] instanceof Throwable) {
             $e = $record['context']['exception'];
 
+            // Try to locate the first application frame to improve usefulness
+            $appFile = $e->getFile();
+            $appLine = $e->getLine();
+            foreach ($e->getTrace() as $frame) {
+                if (!isset($frame['file'], $frame['line'])) {
+                    continue;
+                }
+                $file = (string)$frame['file'];
+                // Prefer frames within app/, routes/, or database/ of this project
+                if (strpos($file, DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR) !== false
+                    || strpos($file, DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR) !== false
+                    || strpos($file, DIRECTORY_SEPARATOR . 'database' . DIRECTORY_SEPARATOR) !== false) {
+                    $appFile = $file;
+                    $appLine = (int)$frame['line'];
+                    break;
+                }
+            }
+
             // Replace the exception object with a clean array to prevent stacktrace serialization
             $record['context'] = [
                 'exception_class' => get_class($e),
                 'message'         => $e->getMessage(),
-                'file'            => $e->getFile(),
-                'line'            => $e->getLine(),
+                'file'            => $appFile,
+                'line'            => $appLine,
                 'user_id'         => auth()->id() ?? null,
             ];
         }
