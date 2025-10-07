@@ -66,7 +66,6 @@ class Score extends Component {
     }
 
     public function remove() {
-        \Illuminate\Support\Facades\Log::info('score removed: poem_id=' . $this->poem->id);
         $res = \App\Models\Score::where(['poem_id' => $this->poem->id, 'user_id' => Auth::user()->id])->first();
         if ($res) {
             $res->delete();

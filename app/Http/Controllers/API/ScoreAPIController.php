@@ -4,10 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateScoreRequest;
-use App\Models\Poem;
-use App\Models\Score;
 use App\Repositories\ScoreRepository;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -15,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
  * @package App\Http\Controllers\API
  */
 class ScoreAPIController extends Controller {
-    /** @var  ScoreRepository */
+    /** @var ScoreRepository */
     private $repository;
 
     public function __construct(ScoreRepository $itemRepository) {
@@ -24,11 +21,11 @@ class ScoreAPIController extends Controller {
 
     public function store(CreateScoreRequest $request) {
         $sanitized = $request->getSanitized();
-
+        // Upsert user score per poem; tolerate races by repository fallback
         $res = $this->repository->updateOrCreate(
             ['poem_id' => $sanitized['poem_id'], 'user_id' => $sanitized['user_id']],
             [
-                'score' => $sanitized['score'],
+                'score'  => $sanitized['score'],
                 'weight' => $sanitized['weight']
             ]
         );
@@ -36,6 +33,7 @@ class ScoreAPIController extends Controller {
         if($res) {
             return $this->responseSuccess(ScoreRepository::calc($sanitized['poem_id']));
         }
+
         return $this->responseFail();
     }
 
@@ -45,7 +43,6 @@ class ScoreAPIController extends Controller {
                 return $item['score'];
             });
 
-        // dd($scores);
         if($scores)
             return $this->responseSuccess($scores);
 

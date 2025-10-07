@@ -109,7 +109,7 @@ class ScoreRepository extends BaseRepository {
     }
 
     /**
-     * @param $poemId
+     * @param      $poemId
      * @param null $start
      * @param null $end
      * @return array
@@ -160,7 +160,7 @@ class ScoreRepository extends BaseRepository {
     }
 
     /**
-     * @param $poemIds
+     * @param      $poemIds
      * @param bool $withGroupCount
      * @param null $start
      * @param null $end
