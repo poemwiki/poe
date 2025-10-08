@@ -499,6 +499,7 @@ class PoemAPIController extends Controller {
             'translators'            => $translatorsArr,
             'poet_author_url'        => $poetAuthorUrl,
             'translator_author_url'  => $translatorAuthorUrl,
+            'source'                 => $poem->from,
         ];
 
         // Attach original poem info when this is a translation with a valid original_id
@@ -523,6 +524,7 @@ class PoemAPIController extends Controller {
                     'translator_str'             => $topOriginal->translatorsStr,
                     'poet_author_url'            => $topOriginal->poetAuthor ? $topOriginal->poetAuthor->url : null,
                     'translator_author_url'      => $topOriginal->translatorAuthor ? $topOriginal->translatorAuthor->url : null,
+                    'source'                     => $topOriginal->from,
                 ];
             }
         }

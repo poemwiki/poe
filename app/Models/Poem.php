@@ -52,6 +52,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property string                              $title
  * @property string                              $subtitle
  * @property string                              $preface
+ * @property string                              $from                source of the poem
  */
 class Poem extends Model {
     use SoftDeletes;
