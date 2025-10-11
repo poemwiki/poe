@@ -358,6 +358,13 @@ class Poem extends Model {
 
         self::deleted(function ($model) {
             $model->clearTranslatedPoemsTreeCache();
+            // Hard-delete related content records to avoid duplicate detection conflicts
+            Content::withTrashed()->where(['entry_id' => $model->id, 'type' => 0])->forceDelete();
+        });
+
+        self::forceDeleted(function ($model) {
+            // Ensure hard-deleted poems also hard-delete corresponding content
+            Content::withTrashed()->where(['entry_id' => $model->id, 'type' => 0])->forceDelete();
         });
 
         // TODO delete related scores?
