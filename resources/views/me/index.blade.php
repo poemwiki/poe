@@ -39,9 +39,17 @@
       <section v-show="activeTab==='original'">
         <h2 class="mt-2 mb-4 text-ui"><span v-if="originalPoemsTotal!==null" v-cloak>共 @{{originalPoemsTotal}} 首</span></h2>
         <ul class="min-h-[200px] flex flex-col justify-start">
-          <li class="title-list-item" v-for="poem in originalPoems" :key="'op-'+poem.id" v-cloak>
-            <a class="title font-song no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['title']}}</a>
-            <a class="first-line no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['firstLine']}}</a>
+          <li class="group flex items-center justify-between" v-for="poem in originalPoems" :key="'op-'+poem.id" v-cloak>
+            <div class="title-list-item">
+              <a class="title font-song no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['title']}}</a>
+              <a class="first-line no-bg" target="_blank" :href="'/p/'+poem['fake_id']">@{{poem['firstLine']}}</a>
+            </div>
+            <button type="button"
+                    class="no-bg w-16 text-center text-gray-500 hover:text-red-500 text-xs border border-gray-400 hover:border-red-400 rounded px-2 py-0.5 hidden group-hover:inline-block"
+                    title="删除"
+                    @click.prevent="confirmDelete(poem)">
+              删除
+            </button>
           </li>
           <loading-box v-if="loading" class-name="h-[200px]" />
           <li v-if="!loading && originalPoems.length===0" class="text-sm text-gray-500 p-4" v-cloak>暂无原创诗歌。</li>

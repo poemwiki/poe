@@ -25,6 +25,7 @@ new Vue({
     contributionChartData: [], // [[date, count], ...]
     // ui state
     activeTab: "original",
+    deleting: false,
   },
   async mounted() {
     // safer ref access with fallback to global variable injected by backend (optional)
@@ -197,6 +198,34 @@ new Vue({
       this.contributionTotal = mapArr.reduce((a, b) => a + b[1], 0);
       this.contributionLoading = false;
       return mapArr;
+    },
+    async deletePoem(poem) {
+      if (this.deleting) return;
+      this.deleting = true;
+      try {
+        const url = `/api/v1/poem/delete/${poem.id}`;
+        const res = await axios.get(url);
+        if (res && res.code === 0) {
+          // remove from list and update total count
+          this.originalPoems = this.originalPoems.filter(p => p.id !== poem.id);
+          if (typeof this.originalPoemsTotal === 'number') {
+            this.originalPoemsTotal = Math.max(0, this.originalPoemsTotal - 1);
+          }
+          Vue.notify({ type: 'success', text: '删除成功' });
+        } else {
+          Vue.notify({ type: 'error', text: (res && res.message) || '删除失败' });
+        }
+      } catch (e) {
+        Vue.notify({ type: 'error', text: '删除失败' });
+        console.error(e);
+      }
+      this.deleting = false;
+    },
+
+    confirmDelete(poem) {
+      const ok = window.confirm(`确认删除《${poem.title}》吗？`);
+      if (!ok) return;
+      this.deletePoem(poem);
     },
   },
 });
