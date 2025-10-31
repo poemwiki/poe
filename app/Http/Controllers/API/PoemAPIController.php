@@ -683,6 +683,7 @@ class PoemAPIController extends Controller {
             'config'        => [
                 'wrap'          => true,
                 'noAuthorLabel' => $notZhLang,
+                'scale'         => 2
             ],
             'id'            => $poem->id,
             'poem'          => $poem->poem,

@@ -157,7 +157,7 @@ class PosterGenerator {
                 // PNG quality: 0 (no compression) to 9 (max compression)
                 // Convert JPEG quality (0-100) to PNG quality (0-9)
                 $pngQuality = (int) ($quality * 9 / 100);
-                $res        = imagepng($posterImg, $posterPath, $pngQuality);
+                $res        = imagepng($posterImg, $posterPath, 0);
                 $format     = 'PNG';
             } elseif ($imgType === IMAGETYPE_GIF) {
                 $res    = imagegif($posterImg, $posterPath);
