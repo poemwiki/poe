@@ -158,17 +158,16 @@ class PosterGenerator {
 
             // Detect poem image type and save poster in the same format
             // Default quality for different formats
-            $quality = 100; // for JPEG (0-100)
+            $quality = 70; // for JPEG (0-100)
 
             $imgType = exif_imagetype($poemImgPath);
             if ($imgType === IMAGETYPE_JPEG) {
                 $res    = imagejpeg($posterImg, $posterPath, $quality);
                 $format = 'JPEG';
             } elseif ($imgType === IMAGETYPE_PNG) {
-                // PNG quality: 0 (no compression) to 9 (max compression)
-                // Convert JPEG quality (0-100) to PNG quality (0-9)
-                $pngQuality = (int) ($quality * 9 / 100);
-                $res        = imagepng($posterImg, $posterPath, 0);
+                // PNG quality: 0 (no compression) to 9 (max compression
+                $pngQuality = 7;
+                $res        = imagepng($posterImg, $posterPath, $pngQuality);
                 $format     = 'PNG';
             } elseif ($imgType === IMAGETYPE_GIF) {
                 $res    = imagegif($posterImg, $posterPath);
