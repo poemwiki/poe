@@ -5,8 +5,8 @@ use App\Services\Tx;
 if (!function_exists('file_get_contents_post')) {
     /**
      * post $data to $url.
-     * @param $url
-     * @param $data
+     * @param        $url
+     * @param        $data
      * @param string $contentType
      * @param int    $timeout
      * @return false|string
@@ -65,7 +65,7 @@ if (!function_exists('curl_post')) {
 if (!function_exists('short_url')) {
     /**
      * get a short url from api.xiaomark.com started with https://sourl.cn.
-     * @param $origin string Origin url should under these 3 domains: mp.weixin.qq.com, poemwiki.com, poemwiki.org
+     * @param      $origin string Origin url should under these 3 domains: mp.weixin.qq.com, poemwiki.com, poemwiki.org
      * @param null $cb
      * @return mixed
      */
@@ -131,7 +131,7 @@ if (!function_exists('img_overlay')) {
      * @param $front
      * @param $dist_x
      * @param $dist_y
-     * @return false|resource
+     * @return \GdImage|false
      * @throws Exception
      */
     function img_overlay($bg, $front, $dist_x, $dist_y, $dist_w, $dist_h) {
@@ -166,8 +166,9 @@ if (!function_exists('date_ago')) {
 if (!function_exists('get_causer_name')) {
     function get_causer_name($log) {
         if ($log->causer_type === "App\User") {
-            $causerName = \Illuminate\Support\Facades\Cache::remember('causer-name-'.$log->causer_id, 60, function () use ($log) {
+            $causerName = \Illuminate\Support\Facades\Cache::remember('causer-name-' . $log->causer_id, 60, function () use ($log) {
                 $user = \App\User::find($log->causer_id);
+
                 return $user ? $user->name : "User[{$log->causer_id}]";
             });
 
@@ -218,6 +219,7 @@ if (!function_exists('get_wikipedia_summary')) {
 
         $endPoint = 'https://' . $titleLocale['locale'] . '.wikipedia.org/api/rest_v1/page/summary/';
         $url      = $endPoint . urlencode(str_replace(' ', '_', $title));
+
         // dd($url);
         try {
             $str = fuckGWF($url);
@@ -446,7 +448,7 @@ if (!function_exists('getLineStat')) {
 
 if (!function_exists('textClean')) {
     /**
-     * @param $str
+     * @param     $str
      * @param int $longTextLineLength you should set it to 0 if you don't want to remove redundant empty lines
      * @return string
      */
@@ -500,7 +502,7 @@ if (!function_exists('canonicalUrl')) {
         // If relative URL, make absolute using app.url
         if (!preg_match('#^https?://#i', $url)) {
             $base = rtrim(config('app.url', ''), '/');
-            $url = $base . (str_starts_with($url, '/') ? $url : '/' . $url);
+            $url  = $base . (str_starts_with($url, '/') ? $url : '/' . $url);
         }
 
         $parts = parse_url($url);
@@ -509,18 +511,18 @@ if (!function_exists('canonicalUrl')) {
         }
 
         $scheme = $parts['scheme'] ?? 'https';
-        $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+        $port   = isset($parts['port']) ? ':' . $parts['port'] : '';
 
         // If canonicalHost includes scheme or port, prefer raw value
         if (preg_match('#^https?://#i', $canonicalHost)) {
             $hostWithScheme = rtrim($canonicalHost, '/');
-            $newBase = $hostWithScheme;
+            $newBase        = $hostWithScheme;
         } else {
             $newBase = $scheme . '://' . rtrim($canonicalHost, '/') . $port;
         }
 
-        $path = $parts['path'] ?? '/';
-        $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+        $path     = $parts['path'] ?? '/';
+        $query    = isset($parts['query']) ? '?' . $parts['query'] : '';
         $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
 
         return $newBase . $path . $query . $fragment;
@@ -544,6 +546,7 @@ if (!function_exists('renderLink')) {
             // go through e(htmlspecialchars) then nl2br so that we can use <br> in the text
             nl2br(e($text))
         );
+
         // replace spaces outside <a> tag
         return preg_replace('@(\s)(?![^<]*>|[^<>]*</)@', '&nbsp;', $text);
     }
@@ -573,24 +576,30 @@ if (!function_exists('pick_translation_value')) {
      * Unified translation fallback picking logic (aligns with HasTranslations::fallback)
      * Given an associative array locale => value, try locales in order depending on clusters.
      * Priority groups (simplified vs traditional Chinese) then English, then first non-empty.
-     * @param array $translations
+     * @param array       $translations
      * @param string|null $preferredLocale Optional preferred locale to attempt first
      * @return string
      */
     function pick_translation_value(array $translations, ?string $preferredLocale = null): string {
-        if (empty($translations)) { return ''; }
+        if (empty($translations)) {
+        return '';
+        }
 
         // Normalize keys to lowercase for lookup but keep original values
         $normalized = [];
         foreach ($translations as $k => $v) {
-            if ($v === null || $v === '') { continue; }
+            if ($v === null || $v === '') {
+            continue;
+            }
             $normalized[strtolower($k)] = $v;
         }
-        if (empty($normalized)) { return ''; }
+        if (empty($normalized)) {
+        return '';
+        }
 
         $firstNonEmpty = reset($normalized);
 
-        $simplifiedCluster = ['zh-hans','zh-cn','zh-hans-cn','zh','zh-yue','zh-hant','zh-hk','zh-tw','zh-sg','wuu','yue','en'];
+        $simplifiedCluster  = ['zh-hans','zh-cn','zh-hans-cn','zh','zh-yue','zh-hant','zh-hk','zh-tw','zh-sg','wuu','yue','en'];
         $traditionalCluster = ['zh-hant','zh-hk','zh-tw','zh','zh-cn','zh-hans','zh-yue','zh-hans-cn','zh-sg','wuu','yue','en'];
 
         $tryOrder = [];

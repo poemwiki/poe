@@ -669,6 +669,7 @@ class PoemAPIController extends Controller {
     public function share(int $poemID, string $compositionID = 'pure'): array {
         $poem  = Poem::find($poemID);
         $force = isset($_GET['force']) || config('app.env') === 'local';
+        $scale = 2;
 
         $posterUrl = route('poem-card', [
             'id'            => $poemID,
@@ -683,7 +684,7 @@ class PoemAPIController extends Controller {
             'config'        => [
                 'wrap'          => true,
                 'noAuthorLabel' => $notZhLang,
-                'scale'         => 2
+                'scale'         => $scale
             ],
             'id'            => $poem->id,
             'poem'          => $poem->poem,

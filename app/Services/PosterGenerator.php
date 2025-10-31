@@ -42,11 +42,19 @@ class PosterGenerator {
 
             $poemImgPath = $this->fetchPoemImg($postData, $dir, $poemImgFileName, $force);
 
+            $scale = 1.0;
+            if (isset($postData['config']['scale']) && is_numeric($postData['config']['scale'])) {
+                $candidate = (float) $postData['config']['scale'];
+                if ($candidate > 0) {
+                    $scale = $candidate;
+                }
+            }
+
             $scene          = $poem->is_campaign ? ($poem->campaign_id . '-' . $poem->id) : $poem->id;
             $page           = $poem->is_campaign ? 'pages/campaign/campaign' : 'pages/poems/index';
             $appCodeImgPath = (new Weapp())->fetchAppCodeImg($scene, $dir, $page);
 
-            if (!$this->composite($poemImgPath, $appCodeImgPath, $posterPath, $compositionID)) {
+            if (!$this->composite($poemImgPath, $appCodeImgPath, $posterPath, $compositionID, $scale)) {
                 Log::error('PosterGenerator: Composite failed', [
                     'poem_id'           => $poem->id,
                     'poem_img_path'     => $poemImgPath,
@@ -108,9 +116,11 @@ class PosterGenerator {
     }
 
     /**
-     * Composite poem image with app code image
+     * Composite poem image with app code image.
+     *
+     * @param float $scale Render scale factor applied to the poem image
      */
-    private function composite(string $poemImgPath, string $appCodeImgPath, string $posterPath, string $compositionID = 'pure'): bool {
+    private function composite(string $poemImgPath, string $appCodeImgPath, string $posterPath, string $compositionID = 'pure', float $scale = 1.0): bool {
         // Validate input files exist
         if (!file_exists($poemImgPath)) {
             Log::error('PosterGenerator: Poem image not found', ['path' => $poemImgPath]);
@@ -132,11 +142,12 @@ class PosterGenerator {
             return false;
         }
 
-        $param = $params[$compositionID];
+        $param = $this->applyScaleToParams($params[$compositionID], $scale);
 
         $posterImg = null;
 
         try {
+            /** @var \GdImage|false $posterImg */
             $posterImg = img_overlay($poemImgPath, $appCodeImgPath, $param['x'], $param['y'], $param['width'], $param['height']);
 
             if (!$posterImg) {
@@ -202,6 +213,24 @@ class PosterGenerator {
                 'width'  => 166,
                 'height' => 166,
             ],
+        ];
+    }
+
+    /**
+     * Adjust composition parameters based on render scale factor.
+     */
+    private function applyScaleToParams(array $params, float $scale): array {
+        $normalizedScale = $scale > 0 ? $scale : 1.0;
+
+        if ($normalizedScale === 1.0) {
+            return $params;
+        }
+
+        return [
+            'x'      => max(0, (int) round($params['x'] * $normalizedScale)),
+            'y'      => max(0, (int) round($params['y'] * $normalizedScale)),
+            'width'  => max(1, (int) round($params['width'] * $normalizedScale)),
+            'height' => max(1, (int) round($params['height'] * $normalizedScale)),
         ];
     }
 }
