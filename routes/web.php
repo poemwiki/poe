@@ -19,9 +19,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome', [
-        'poemUrl' => PoemRepository::randomOne()->url
-    ]);
+    return view('welcome');
 });
 
 Auth::routes(['verify' => true]);

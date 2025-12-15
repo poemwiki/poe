@@ -19,7 +19,7 @@
 <div class="flex-center relative full-height">
 
   <div class="brand-logo flex-center flex-col">
-    <a class="block site-name no-bg" href="{{ $poemUrl }}">诗歌维基</a>
+    <a class="block site-name no-bg" href="/poems/random">诗歌维基</a>
     <img class="block qr" src="<?=cosUrl('/img/common/weapp-qr-50.jpg') ?>" alt="">
   </div>
 
