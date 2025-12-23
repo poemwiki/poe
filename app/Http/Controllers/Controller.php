@@ -46,4 +46,11 @@ class Controller extends BaseController {
         return $this->response(
             $data, $message ?? trans('fail'), $code);
     }
+
+    public function responseError($message = null, int $httpCode = 500, $data = []) {
+        return response()->json([
+            'message' => $message ?? 'An error occurred',
+            'data' => $data
+        ], $httpCode);
+    }
 }
