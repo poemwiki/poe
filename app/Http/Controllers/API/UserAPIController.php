@@ -56,8 +56,8 @@ class UserAPIController extends Controller {
         }
 
         $size = $file->getSize();
-        if ($size > 3 * 1024 * 1024) {
-            return $this->responseFail([], '上传的图片不能超过3M', Controller::$CODE['upload_img_size_limit']);
+        if ($size > 10 * 1024 * 1024) {
+            return $this->responseFail([], '上传的图片不能超过10M', Controller::$CODE['upload_img_size_limit']);
         }
 
         $user     = $request->user();

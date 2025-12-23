@@ -99,7 +99,7 @@ class CampaignAPIController extends Controller {
         }
 
         return $this->responseSuccess($campaignData);
-        }
+    }
 
     private function flushCampaignIndexCache($id) {
         // clear campaign index cache if current campaign id bigger than the latest cached one
