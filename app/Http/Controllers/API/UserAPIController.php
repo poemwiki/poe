@@ -52,11 +52,13 @@ class UserAPIController extends Controller {
         $ext   = $file->getClientOriginalExtension();
         $allow = ['jpg', 'webp', 'png', 'jpeg', 'bmp']; // 支持的类型
         if (!in_array($ext, $allow)) {
+            logger()->error('user avatar upload Error: invalid file type ' . $ext);
             return $this->responseFail([], '不支持的图片类型，请上传 jpg/jpeg/png/webp/bmp 格式图片。', Controller::$CODE['img_format_invalid']);
         }
 
         $size = $file->getSize();
         if ($size > 10 * 1024 * 1024) {
+            logger()->error('user avatar upload Error: file size exceed limit ' . $size);
             return $this->responseFail([], '上传的图片不能超过10M', Controller::$CODE['upload_img_size_limit']);
         }
 
