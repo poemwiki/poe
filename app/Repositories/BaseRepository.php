@@ -20,7 +20,7 @@ abstract class BaseRepository {
      */
     protected $app;
 
-    const SEARCH_LIMIT = 10;
+    const SEARCH_LIMIT = 20;
 
     /**
      * @param Application $app
@@ -88,7 +88,7 @@ abstract class BaseRepository {
      * Find multiple models by their primary keys.
      *
      * @param \Illuminate\Contracts\Support\Arrayable|array $ids
-     * @param array $columns
+     * @param array                                         $columns
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function findMany($ids, $columns = ['*']) {
@@ -156,7 +156,7 @@ abstract class BaseRepository {
      * Execute the query and get the first result or throw an exception.
      *
      * @param array $columns
-     * @param  $criteria
+     * @param       $criteria
      * @return \Illuminate\Database\Eloquent\Model|static
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
@@ -263,7 +263,7 @@ abstract class BaseRepository {
     /**
      * Execute the query as a "select" statement.
      *
-     * @param  $criteria
+     * @param       $criteria
      * @param array $columns
      * @return \Illuminate\Support\Collection
      */
@@ -274,8 +274,8 @@ abstract class BaseRepository {
     /**
      * Chunk the results of the query.
      *
-     * @param  $criteria
-     * @param int $count
+     * @param          $criteria
+     * @param int      $count
      * @param callable $callback
      * @return bool
      */
@@ -286,9 +286,9 @@ abstract class BaseRepository {
     /**
      * Execute a callback over each item while chunking.
      *
-     * @param  $criteria
+     * @param          $criteria
      * @param callable $callback
-     * @param int $count
+     * @param int      $count
      * @return bool
      */
     public function each($criteria, callable $callback, $count = 1000) {
@@ -298,7 +298,7 @@ abstract class BaseRepository {
     /**
      * Execute the query and get the first result.
      *
-     * @param  $criteria
+     * @param       $criteria
      * @param array $columns
      * @return \Illuminate\Database\Eloquent\Model|static|null
      */
@@ -309,10 +309,10 @@ abstract class BaseRepository {
     /**
      * Paginate the given query.
      *
-     * @param  $criteria
-     * @param int $perPage
-     * @param array $columns
-     * @param string $pageName
+     * @param          $criteria
+     * @param int      $perPage
+     * @param array    $columns
+     * @param string   $pageName
      * @param int|null $page
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      *
@@ -325,10 +325,10 @@ abstract class BaseRepository {
     /**
      * Paginate the given query into a simple paginator.
      *
-     * @param  $criteria
-     * @param int $perPage
-     * @param array $columns
-     * @param string $pageName
+     * @param          $criteria
+     * @param int      $perPage
+     * @param array    $columns
+     * @param string   $pageName
      * @param int|null $page
      * @return \Illuminate\Contracts\Pagination\Paginator
      */
@@ -339,7 +339,7 @@ abstract class BaseRepository {
     /**
      * Retrieve the "count" result of the query.
      *
-     * @param  $criteria
+     * @param        $criteria
      * @param string $columns
      * @return int
      */
@@ -350,7 +350,7 @@ abstract class BaseRepository {
     /**
      * Retrieve the minimum value of a given column.
      *
-     * @param  $criteria
+     * @param        $criteria
      * @param string $column
      * @return mixed
      */
@@ -361,7 +361,7 @@ abstract class BaseRepository {
     /**
      * Retrieve the maximum value of a given column.
      *
-     * @param  $criteria
+     * @param        $criteria
      * @param string $column
      * @return mixed
      */
@@ -372,7 +372,7 @@ abstract class BaseRepository {
     /**
      * Retrieve the sum of the values of a given column.
      *
-     * @param  $criteria
+     * @param        $criteria
      * @param string $column
      * @return mixed
      */
@@ -385,7 +385,7 @@ abstract class BaseRepository {
     /**
      * Retrieve the average of the values of a given column.
      *
-     * @param  $criteria
+     * @param        $criteria
      * @param string $column
      * @return mixed
      */
@@ -424,7 +424,7 @@ abstract class BaseRepository {
     /**
      * getQuery.
      *
-     * @param  $criteria
+     * @param $criteria
      * @return \Illuminate\Database\Query\Builder
      */
     public function getQuery($criteria = []) {
@@ -445,7 +445,7 @@ abstract class BaseRepository {
     /**
      * Build a query for retrieving all records.
      *
-     * @param array $search
+     * @param array    $search
      * @param int|null $skip
      * @param int|null $limit
      * @return \Illuminate\Database\Eloquent\Builder
@@ -475,10 +475,10 @@ abstract class BaseRepository {
     /**
      * Retrieve all records with given filter criteria
      *
-     * @param array $search
+     * @param array    $search
      * @param int|null $skip
      * @param int|null $limit
-     * @param array $columns
+     * @param array    $columns
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
      */
