@@ -684,8 +684,9 @@ class PoemAPIController extends Controller {
             'config'        => [
                 'wrap'          => true,
                 'noAuthorLabel' => $notZhLang,
-                'mainFont'      => 'Cardo, \'Source Han Serif VF\', "Twitter Color Emoji", serif',
-                'titleFont'     => 'Cardo, \'Source Han Serif VF\', "Twitter Color Emoji", serif',
+                // TODO don't add 'Source Han Serif CN' before VF font for non-zh-CN language
+                'mainFont'      => 'Cardo, \'Source Han Serif CN\', \'Source Han Serif VF\', "Twitter Color Emoji", serif',
+                'titleFont'     => 'Cardo, \'Source Han Serif CN\', \'Source Han Serif VF\', "Twitter Color Emoji", serif',
                 'scale'         => $scale
             ],
             'id'            => $poem->id,
