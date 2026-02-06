@@ -119,11 +119,7 @@ class BotController extends Controller {
      */
     public function getUrl(Poem $poem) {
         if (!$poem->short_url) {
-            $longUrl = 'https://poemwiki.org/p/' . Poem::getFakeId($poem->id);
-            $url     = short_url($longUrl);
-            if ($url === $longUrl) {
-                return $url;
-            }
+            $url = 'https://poemwiki.org/p/' . Poem::getFakeId($poem->id);
             Poem::withoutEvents(function () use ($poem, $url) {
                 $poem->timestamps = false;
                 $poem->short_url  = $url;

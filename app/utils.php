@@ -62,44 +62,6 @@ if (!function_exists('curl_post')) {
     }
 }
 
-if (!function_exists('short_url')) {
-    /**
-     * get a short url from api.xiaomark.com started with https://sourl.cn.
-     * @param      $origin string Origin url should under these 3 domains: mp.weixin.qq.com, poemwiki.com, poemwiki.org
-     * @param null $cb
-     * @return mixed
-     */
-    function short_url(string $origin, ?callable $cb = null) {
-        // TODO check redis if n_links_today <= 0, return $origin
-
-        $request_url = 'https://api.xiaomark.com/v1/link/create';
-        $data        = [
-            'apikey'     => 'fccab0cf923086937191cb3d7a523772',
-            'origin_url' => $origin,
-        ];
-
-        $result_str = curl_post($request_url, $data, 'application/json');
-
-        if (!$result_str) {
-            return $origin;
-        }
-
-        $result = json_decode($result_str, true);
-
-        if ($result && $result['code'] == '0' && isset($result['data']['link'])) {
-            $url = $result['data']['link']['url'];
-            // TODO save $result['data']['n_links_today'] to redis
-            if (is_callable($cb)) {
-                $cb($url, $result['data']['n_links_today'] ?? 0);
-            }
-
-            return $url;
-        }
-
-        return $origin;
-    }
-}
-
 if (!function_exists('create_image')) {
     /**
      * @param $imgPath
