@@ -103,7 +103,7 @@ if (!function_exists('short_url')) {
 if (!function_exists('create_image')) {
     /**
      * @param $imgPath
-     * @return false|resource
+     * @return \GdImage
      * @throws Exception
      */
     function create_image($imgPath) {
@@ -135,15 +135,19 @@ if (!function_exists('img_overlay')) {
      * @throws Exception
      */
     function img_overlay($bg, $front, $dist_x, $dist_y, $dist_w, $dist_h) {
-        // TODO use image type from getimagesize
-        $bgImg    = create_image($bg);
-        $frontImg = create_image($front);
-
         list($width, $height)           = getimagesize($bg);
         list($frontWidth, $frontHeight) = getimagesize($front);
         $out                            = imagecreatetruecolor($width, $height);
+        imagealphablending($out, false);
+        imagesavealpha($out, true);
+
+        $bgImg = create_image($bg);
         imagecopyresampled($out, $bgImg, 0, 0, 0, 0, $width, $height, $width, $height);
+        unset($bgImg);
+
+        $frontImg = create_image($front);
         imagecopyresampled($out, $frontImg, $width - $dist_x, $height - $dist_y, 0, 0, $dist_w, $dist_h, $frontWidth, $frontHeight);
+        unset($frontImg);
 
         return $out;
     }
