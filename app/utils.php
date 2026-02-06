@@ -275,9 +275,9 @@ if (!function_exists('t2s')) {
         if (!function_exists('opencc_open')) {
             return $str;
         }
-        $od      = opencc_open('t2s.json');
-        $content = opencc_convert($str, $od);
-        opencc_close($od);
+        $od      = call_user_func('opencc_open', 't2s.json');
+        $content = call_user_func('opencc_convert', $str, $od);
+        call_user_func('opencc_close', $od);
 
         return $content;
     }
