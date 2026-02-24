@@ -142,8 +142,17 @@ Route::get('/poem-card/{id}/{compositionId?}', function ($id, $compositionId = n
     $file = File::get($path);
     $type = File::mimeType($path);
 
+    $extension = match ($type) {
+        'image/png' => '.png',
+        'image/jpeg' => '.jpg',
+        'image/webp' => '.webp',
+        default => '',
+    };
+
     $response = Response::make($file, 200);
     $response->header('Content-Type', $type);
+    $filename = $poem->title . '-' . $poem->poetLabel . $extension;
+    $response->header('Content-Disposition', 'inline; filename="' . $filename . '"');
 
     return $response;
 })->name('poem-card');
