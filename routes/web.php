@@ -2,7 +2,6 @@
 
 use App\Http\Controllers;
 use App\Models\Poem;
-use App\Repositories\PoemRepository;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -143,16 +142,16 @@ Route::get('/poem-card/{id}/{compositionId?}', function ($id, $compositionId = n
     $type = File::mimeType($path);
 
     $extension = match ($type) {
-        'image/png' => '.png',
+        'image/png'  => '.png',
         'image/jpeg' => '.jpg',
         'image/webp' => '.webp',
-        default => '',
+        default      => '',
     };
 
     $response = Response::make($file, 200);
     $response->header('Content-Type', $type);
     $filename = $poem->title . '-' . $poem->poetLabel . $extension;
-    $response->header('Content-Disposition', 'inline; filename="' . $filename . '"');
+    $response->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
 
     return $response;
 })->name('poem-card');
