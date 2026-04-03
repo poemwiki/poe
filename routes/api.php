@@ -102,6 +102,7 @@ Route::middleware(['auth:api,web', 'api'])->group(static function () {
             Route::post('/create', [\App\Http\Controllers\API\AuthorAPIController::class, 'create'])->name('create');
             Route::post('/search', [\App\Http\Controllers\API\AuthorAPIController::class, 'search'])->name('search');
             Route::post('/import', [\App\Http\Controllers\API\AuthorAPIController::class, 'importSimple'])->name('import');
+            Route::post('/import-wikidata-alias', [\App\Http\Controllers\API\AuthorAPIController::class, 'importWikidataAlias'])->name('import-wikidata-alias');
             Route::post('/update/{id}', [\App\Http\Controllers\API\AuthorAPIController::class, 'update'])->name('update');
         });
     });

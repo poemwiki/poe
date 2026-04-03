@@ -8,6 +8,8 @@ use App\Models\Wikidata;
 use App\Repositories\AuthorRepository;
 use App\Repositories\PoemRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -135,7 +137,7 @@ class AuthorAPIController extends Controller {
         }
 
         $describe       = $input['describe']              ?? null;
-        $describeLocale = $input['describe_locale'] ?? config('app.locale', 'zh-CN');
+        $describeLocale = $input['describe_locale']       ?? config('app.locale', 'zh-CN');
 
         // 1. wikidata branch
         if (!empty($input['wikidata_id'])) {
@@ -204,7 +206,7 @@ class AuthorAPIController extends Controller {
         $second = $scored->skip(1)->first();
 
         $firstScore  = $first['score']   ?? 0;
-        $secondScore = $second['score'] ?? 0;
+        $secondScore = $second['score']  ?? 0;
 
         if ($firstScore >= $secondScore + 25) {
             $author = Author::find($first['author_id']);
@@ -320,5 +322,41 @@ class AuthorAPIController extends Controller {
         })->filter()->values();
 
         return $this->responseSuccess(['authors' => $res]);
+    }
+
+    /**
+     * Import a Wikidata poet entity and its aliases by wikidata ID.
+     * Equivalent to running wiki:importPoet --id=xxx then alias:import --id=xxx.
+     * Returns the list of alias entries that were successfully imported.
+     */
+    public function importWikidataAlias(Request $request): array {
+        $input = $request->only(['wikidata_id']);
+
+        $validator = Validator::make($input, [
+            'wikidata_id' => 'required|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->responseFail($validator->errors()->toArray(), 'invalid', Controller::$CODE['invalid'] ?? 422);
+        }
+
+        $wikidataId = (int)$input['wikidata_id'];
+
+        $exitCode = Artisan::call('wiki:importPoet', ['--id' => $wikidataId]);
+        if ($exitCode !== 0) {
+            return $this->responseFail([], "Failed to fetch Wikidata entity Q{$wikidataId}.");
+        }
+
+        Artisan::call('alias:import', ['--id' => $wikidataId]);
+
+        $aliases = DB::table('alias')
+            ->where('wikidata_id', $wikidataId)
+            ->get(['locale', 'name'])
+            ->toArray();
+
+        return $this->responseSuccess([
+            'wikidata_id' => $wikidataId,
+            'aliases'     => $aliases,
+        ]);
     }
 }
