@@ -68,7 +68,8 @@ class Import extends Command {
         foreach ($poets as $poet) {
             $entity = json_decode($poet->data);
 
-            DB::table('alias')->where('wikidata_id', $poet->id)->delete();
+            // Do not delete existing aliases — manually added aliases must be preserved.
+            // Wikidata-sourced entries are kept in sync via updateOrInsert below.
             $author = Author::select('id')->where('wikidata_id', $poet->id)->first(); // use Author instead of DB::table('author') here, because author is soft-delete
 
             $all = collect(isset($entity->labels) ? $entity->labels : []);
@@ -77,7 +78,9 @@ class Import extends Command {
                 $all = $all->concat(collect($entity->aliases)->flatten());
             }
 
-            $all->unique('value')->each(function ($item) use ($poet, $author) {
+            $all->unique(function ($item) {
+                return trim((string)($item->language ?? '')) . '|' . trim((string)($item->value ?? ''));
+            })->each(function ($item) use ($poet, $author) {
                 $language = Language::where('locale', '=', $item->language)->first();
                 // insert alias data into alias
                 $insert = [
@@ -91,6 +94,7 @@ class Import extends Command {
                 ];
                 DB::table('alias')->updateOrInsert([
                     'wikidata_id' => $poet->id,
+                    'locale'      => $item->language,
                     'name'        => $item->value
                 ], $insert);
 
