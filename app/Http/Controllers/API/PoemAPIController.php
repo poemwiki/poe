@@ -960,7 +960,7 @@ class PoemAPIController extends Controller {
         $result = [];
         foreach ($poems as $poem) {
             try {
-                $poem['original_id']       = 0;
+                $poem['original_id']       = isset($poem['original_id']) ? $poem['original_id'] : 0;
                 $poem['is_owner_uploaded'] = Poem::$OWNER['none'];
                 $poem['upload_user_id']    = $request->user()->id;
                 $poem['flag']              = Poem::$FLAG['botContentNeedConfirm'];
@@ -985,6 +985,7 @@ class PoemAPIController extends Controller {
                     'poet'             => 'required_without:poet_id|string|max:255',
                     'poem'             => ['required', new NoDuplicatedPoem(null), 'string', 'min:10', 'max:65500'],
                     'poet_id'          => ['nullable', 'integer', 'exists:' . \App\Models\Author::class . ',id'],
+                    'original_id'      => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
                     'from'             => 'nullable|string|max:255',
                     'language_id'      => ['required', Rule::in(LanguageRepository::idsInUse())],
                     'genre_id'         => ['nullable', 'integer', 'exists:' . \App\Models\Genre::class . ',id'],
@@ -1016,7 +1017,7 @@ class PoemAPIController extends Controller {
                         $poem['translator'] = json_encode($translatorIds, JSON_UNESCAPED_UNICODE);
                     }
                 }
-                if (!empty($poem['translator'])) {
+                if (!empty($poem['translator']) || !empty($poem['original_id'])) {
                     $poem['is_original'] = 0;
                 }
 
@@ -1024,7 +1025,10 @@ class PoemAPIController extends Controller {
                 if (!empty($translatorIds)) {
                     $inserted->relateToTranslators($translatorIds);
                 }
-                $result[] = $inserted->url;
+                $result[] = [
+                    'id'  => $inserted->id,
+                    'url' => $inserted->url,
+                ];
             } catch (ValidationException $e) {
                 $errors   = $e->errors();
                 $result[] = ['errors' => $errors];

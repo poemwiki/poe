@@ -1,6 +1,7 @@
 <?php namespace Tests\APIs;
 
 use App\Models\Author;
+use App\Models\Poem;
 use App\User;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Tests\ApiTestTrait;
@@ -83,10 +84,11 @@ class PoemImportApiTest extends TestCase {
         $this->assertIsArray($body['data']);
         $this->assertNotEmpty($body['data'][0]);
 
-        // The result could be either a URL string (success) or error array (validation failed)
-        if (is_string($body['data'][0])) {
-            // Success case - result is URL string
-            $this->assertIsString($body['data'][0]);
+        // The result could be either a success object or error array
+        if (isset($body['data'][0]['id'])) {
+            $this->assertIsArray($body['data'][0]);
+            $this->assertArrayHasKey('id', $body['data'][0]);
+            $this->assertArrayHasKey('url', $body['data'][0]);
         } else {
             // If validation failed, it should be an errors array
             $this->assertIsArray($body['data'][0]);
@@ -112,9 +114,11 @@ class PoemImportApiTest extends TestCase {
         $body = json_decode($resp->getContent(), true);
         $this->assertEquals(0, $body['code']); // Success code
 
-        // The result could be either a URL string (success) or error array (validation failed)
-        if (is_string($body['data'][0])) {
-            $this->assertIsString($body['data'][0]);
+        // The result could be either a success object or error array
+        if (isset($body['data'][0]['id'])) {
+            $this->assertIsArray($body['data'][0]);
+            $this->assertArrayHasKey('id', $body['data'][0]);
+            $this->assertArrayHasKey('url', $body['data'][0]);
         } else {
             // If validation failed, it should be an errors array
             $this->assertIsArray($body['data'][0]);
@@ -151,6 +155,73 @@ class PoemImportApiTest extends TestCase {
                 $this->assertArrayNotHasKey('genre_id', $body['data'][0]['errors']);
             }
         }
+    }
+
+    /** @test */
+    public function test_import_with_original_id_marks_poem_as_translation() {
+        $user = factory(User::class)->create();
+        $this->actingAs($user);
+
+        $originalPoem = Poem::create([
+            'title'             => '原作 ' . uniqid(),
+            'poet'              => '原作者',
+            'poem'              => "原作第一行内容\n原作第二行内容",
+            'language_id'       => $this->validLanguageId,
+            'original_id'       => 0,
+            'is_owner_uploaded' => Poem::$OWNER['none'],
+            'upload_user_id'    => $user->id,
+            'flag'              => Poem::$FLAG['none'],
+        ]);
+
+        $payload = [
+            'poems' => [[
+                'title'       => '译作导入 ' . uniqid(),
+                'poet'        => '译作者',
+                'poem'        => "译作第一行内容\n译作第二行内容",
+                'language_id' => $this->validLanguageId,
+                'original_id' => $originalPoem->id,
+            ]]
+        ];
+
+        $resp = $this->json('POST', '/api/v1/poem/import', $payload);
+        $resp->assertStatus(200);
+        $body = json_decode($resp->getContent(), true);
+
+        $this->assertEquals(0, $body['code']);
+        $this->assertIsArray($body['data'][0]);
+        $this->assertArrayHasKey('id', $body['data'][0]);
+        $this->assertArrayHasKey('url', $body['data'][0]);
+
+        $importedPoem = Poem::query()->where('title', $payload['poems'][0]['title'])->latest('id')->first();
+        $this->assertNotNull($importedPoem);
+        $this->assertEquals($importedPoem->id, $body['data'][0]['id']);
+        $this->assertEquals($importedPoem->url, $body['data'][0]['url']);
+        $this->assertEquals($originalPoem->id, $importedPoem->original_id);
+        $this->assertEquals(0, $importedPoem->is_original);
+    }
+
+    /** @test */
+    public function test_import_invalid_original_id() {
+        $user = factory(User::class)->create();
+        $this->actingAs($user);
+
+        $payload = [
+            'poems' => [[
+                'title'       => '原作非法 ' . uniqid(),
+                'poet'        => '作者乙',
+                'poem'        => str_repeat('原作校验测试', 2),
+                'language_id' => $this->validLanguageId,
+                'original_id' => 99999999,
+            ]]
+        ];
+
+        $resp = $this->json('POST', '/api/v1/poem/import', $payload);
+        $resp->assertStatus(200);
+        $body = json_decode($resp->getContent(), true);
+
+        $this->assertEquals(0, $body['code']);
+        $this->assertArrayHasKey('errors', $body['data'][0]);
+        $this->assertArrayHasKey('original_id', $body['data'][0]['errors']);
     }
 
     /** @test */
