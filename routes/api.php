@@ -60,6 +60,14 @@ Route::middleware(['auth:api,web', 'api'])->group(static function () {
             Route::post('/avatar', [\App\Http\Controllers\API\UserAPIController::class, 'avatar'])->name('avatar');
             Route::post('/activate-wallet', [\App\Http\Controllers\API\UserAPIController::class, 'activateWallet'])->name('activate-wallet');
             Route::post('/txs', [\App\Http\Controllers\API\UserAPIController::class, 'txs'])->name('txs');
+            Route::post('/email/resend', function (\Illuminate\Http\Request $request) {
+                $user = $request->user();
+                if ($user->hasVerifiedEmail()) {
+                    return response()->json(['message' => 'already_verified']);
+                }
+                $user->sendEmailVerificationNotification();
+                return response()->json(['message' => 'verification_link_sent']);
+            })->name('email-resend');
         });
         Route::prefix('poem')->name('poem/')->group(static function () {
             // same as above poem/random Route::get('/random/{num?}/{id?}') but method is POST and under auth:api middleware
