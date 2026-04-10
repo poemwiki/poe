@@ -960,7 +960,6 @@ class PoemAPIController extends Controller {
         $result = [];
         foreach ($poems as $poem) {
             try {
-                $poem['original_id']       = isset($poem['original_id']) ? $poem['original_id'] : 0;
                 $poem['is_owner_uploaded'] = Poem::$OWNER['none'];
                 $poem['upload_user_id']    = $request->user()->id;
                 $poem['flag']              = Poem::$FLAG['botContentNeedConfirm'];
@@ -993,6 +992,10 @@ class PoemAPIController extends Controller {
                     'translator_ids.*' => ['nullable'],
                 ]);
                 $validator->validate();
+
+                if (!isset($poem['original_id'])) {
+                    $poem['original_id'] = 0;
+                }
 
                 $translatorIds = [];
                 if (isset($poem['translator_ids']) && is_array($poem['translator_ids'])) {
