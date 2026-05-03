@@ -8,7 +8,6 @@ use App\Http\Requests\Admin\Poem\BulkDestroyPoem;
 use App\Http\Requests\Admin\Poem\DestroyPoem;
 use App\Http\Requests\Admin\Poem\IndexPoem;
 use App\Http\Requests\Admin\Poem\StorePoem;
-use App\Http\Requests\Admin\Poem\UpdatePoem;
 use App\Models\Poem;
 use Carbon\Carbon;
 use Exception;
@@ -149,29 +148,7 @@ class PoemController extends Controller {
         // ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param UpdatePoem $request
-     * @param Poem       $poem
-     * @return array|RedirectResponse|Redirector
-     */
-    public function update(UpdatePoem $request, Poem $poem) {
-        // Sanitize input
-        $sanitized = $request->getSanitized();
-
-        // Update changed values Poem
-        $poem->update($sanitized);
-
-        if ($request->ajax()) {
-            return [
-                'redirect' => url('admin/poems'),
-                'message'  => trans('brackets/admin-ui::admin.operation.succeeded'),
-            ];
-        }
-
-        return redirect('admin/poems');
-    }
+    // no poem update in admin, redirect to web edit page instead
 
     /**
      * Remove the specified resource from storage.

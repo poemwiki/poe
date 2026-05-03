@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Admin\Poem\StorePoem;
-use App\Http\Requests\Admin\Poem\UpdatePoem;
+use App\Http\Requests\WebUpdatePoemRequest;
 use App\Models\Author;
 use App\Models\Genre;
 use App\Models\Poem;
@@ -294,11 +294,11 @@ class PoemController extends Controller {
     /**
      * Update the specified resource in storage.
      *
-     * @param UpdatePoem $request
-     * @param Poem       $poem
+     * @param WebUpdatePoemRequest $request
+     * @param Poem                 $poem
      * @return array
      */
-    public function update($fakeId, UpdatePoem $request) {
+    public function update($fakeId, WebUpdatePoemRequest $request) {
         $id   = intval(Poem::getIdFromFakeId($fakeId));
         $poem = Poem::find($id);
         // Sanitize input
@@ -312,8 +312,8 @@ class PoemController extends Controller {
             $pattern = '@^' . str_replace('.', '\.', config('app.url')) . '/p/(.*)$@';
             $fakeId  = Str::of($sanitized['original_link'])->match($pattern)->__toString();
 
-            $orginalPoem              = Poem::find(Poem::getIdFromFakeId($fakeId));
-            $sanitized['original_id'] = $orginalPoem->id;
+            $originalPoem             = Poem::find(Poem::getIdFromFakeId($fakeId));
+            $sanitized['original_id'] = $originalPoem->id;
         }
 
         // if wikidata_id valid and not null, create a author by wikidata_id
@@ -325,41 +325,9 @@ class PoemController extends Controller {
         }
         // TODO translator_wikidata_id and translator_id is deprecated
 
-        if ($sanitized['translator_ids']) {
-            if ($poem->translators->count()) {
-                $translatorsArr = collect($poem->translatorsLabelArr)->map(function ($label) {
-                    return isset($label['id']) ? $label['id'] : $label['name'];
-                })->toArray();
+        $updatedPoem = $this->poemRepository->updatePoemWithRelations($poem, $sanitized);
 
-                // check if translators are not changed
-                if ($translatorsArr !== $sanitized['translator_ids']) {
-                    // TODO update relatable records instead of delete and insert
-                    // TODO add order property for "translator is" relation
-                    $poem->relatedTranslators()->delete();
-                    $poem->relateToTranslators($sanitized['translator_ids']);
-                }
-            } else {
-                $poem->relateToTranslators($sanitized['translator_ids']);
-            }
-        }
-
-        $topOriginalPoem = $poem->topOriginalPoem;
-
-        // TODO test this
-        // if ($topOriginalPoem->is_owner_uploaded === Poem::$OWNER['uploader']) {
-        //     $poem->poet    = $topOriginalPoem->poet;
-        //     $poem->poet_id = $topOriginalPoem->poet_id;
-        // }
-
-        // Update changed values Poem
-        $poem   = $this->poemRepository->update($sanitized, $id);
-        $poetId = $topOriginalPoem->poet_id ?: $poem->poet_id;
-        // 修改原作作者时，同步修改所有译作作者(仅当顶层原作 poet_id 或当前作品 poet_id 不为空，且 is_owner_uploaded=0)
-        if ($poetId && $topOriginalPoem->is_owner_uploaded === Poem::$OWNER['none']) {
-            $this->poemRepository->updateAllTranslatedPoemPoetId($topOriginalPoem, $poetId);
-        }
-
-        return $this->responseSuccess(route('p/show', Poem::getFakeId($poem->id)));
+        return $this->responseSuccess(route('p/show', Poem::getFakeId($updatedPoem->id)));
     }
 
     public function compare($ids) {

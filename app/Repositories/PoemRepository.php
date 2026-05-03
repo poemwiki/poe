@@ -83,7 +83,7 @@ class PoemRepository extends BaseRepository {
             return Poem::query()->whereNull('poem.deleted_at')->max('id');
         });
         $effectiveMaxId = $maxId ? $maxId : $dbMaxId;
-        $minId = Cache::remember('poems:min_id', 3600, function () {
+        $minId          = Cache::remember('poems:min_id', 3600, function () {
             return Poem::query()->whereNull('poem.deleted_at')->min('id');
         });
 
@@ -127,6 +127,7 @@ class PoemRepository extends BaseRepository {
         if (!$userIdentifier) return [];
 
         $cacheKey = "suggested_poems:{$userIdentifier}";
+
         return Cache::get($cacheKey, []);
     }
 
@@ -232,6 +233,32 @@ class PoemRepository extends BaseRepository {
         return $this->newQuery()->findOrFail($id);
     }
 
+    public function findPoemByIdOrFakeId($identifier, $select = null): ?Poem {
+        $query = $this->newQuery();
+        if ($select) {
+            $query->select($select);
+        }
+
+        if (is_numeric($identifier)) {
+            $poem = $query->find((int) $identifier);
+            if ($poem) {
+                return $poem;
+            }
+        }
+
+        $id = Poem::getIdFromFakeId((string) $identifier);
+        if (!$id) {
+            return null;
+        }
+
+        $query = $this->newQuery();
+        if ($select) {
+            $query->select($select);
+        }
+
+        return $query->find($id);
+    }
+
     private function _processTagPoems($poems, $orderBy, $poemScores, $startTime, $endTime) {
         // if ($poems->get()->count()) {
         //     dump($poems->get());
@@ -239,20 +266,20 @@ class PoemRepository extends BaseRepository {
 
         return $poems->with(['reviews', 'reviews.user', 'uploader'])->orderByDesc($orderBy)->get()->map(function (Poem $poem) use ($poemScores) {
             // dd($poem->created_at);
-            $item = $poem->only(self::$listColumns);
+            $item             = $poem->only(self::$listColumns);
             $item['date_ago'] = date_ago($poem->created_at);
-            $item['poet'] = $poem->poetLabel;
+            $item['poet']     = $poem->poetLabel;
             if (!(config('app.env') === 'production')) {
                 $item['poet'] = $item['poet'] . '-' . $poem->id;
             }
-            $item['poet_is_v'] = $poem->is_owner_uploaded === Poem::$OWNER['uploader'] && $poem->uploader && $poem->uploader->is_v;
+            $item['poet_is_v']     = $poem->is_owner_uploaded === Poem::$OWNER['uploader'] && $poem->uploader && $poem->uploader->is_v;
             $item['reviews_count'] = $poem->reviews->count();
-            $item['reviews'] = $poem->reviews->take(2)->map->only(self::$relatedReviewColumns);
+            $item['reviews']       = $poem->reviews->take(2)->map->only(self::$relatedReviewColumns);
 
-            $score = isset($poemScores[$poem->id]) ? $poemScores[$poem->id] : ['score' => null, 'count' => 0, 'weight' => 0];
-            $item['score'] = $score['score'];
+            $score                = isset($poemScores[$poem->id]) ? $poemScores[$poem->id] : ['score' => null, 'count' => 0, 'weight' => 0];
+            $item['score']        = $score['score'];
             $item['score_weight'] = $score['weight'];
-            $item['score_count'] = $score['count'];
+            $item['score_count']  = $score['count'];
 
             return $item;
         });
@@ -277,7 +304,7 @@ class PoemRepository extends BaseRepository {
 
     /**
      * 选取最赞列表的诗歌.
-     * @param $tagId
+     * @param      $tagId
      * @param null $startTime
      * @param null $endTime
      * @param int  $scoreMin
@@ -320,13 +347,13 @@ class PoemRepository extends BaseRepository {
             ->whereIn('genre_id', [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12])
             ->with('reviews')->orderByDesc('created_at')
             ->get()->map(function (Poem $item) use ($userID) {
-                $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
-                $item['poet'] = $item->poetLabel;
+                $item['date_ago']    = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
+                $item['poet']        = $item->poetLabel;
                 $item['score_count'] = ScoreRepository::calcCount($item->id);
-                $item['reviews'] = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
-                $item['listable'] = 1;
-                $item['unlistable'] = $item->nft && $item->nft->isUnlistableByUser($userID);
-                $item['nft_id'] = $item->nft ? $item->nft->id : null;
+                $item['reviews']     = $item->reviews->take(2)->map->only(self::$relatedReviewColumns);
+                $item['listable']    = 1;
+                $item['unlistable']  = $item->nft && $item->nft->isUnlistableByUser($userID);
+                $item['nft_id']      = $item->nft ? $item->nft->id : null;
 
                 return $item->only(self::$listColumns);
             });
@@ -339,7 +366,7 @@ class PoemRepository extends BaseRepository {
 
         $data = $paginator->map(function (Poem $item) use ($extraFieldsMap) {
             $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
-            $item['poet'] = $item->poetLabel;
+            $item['poet']     = $item->poetLabel;
 
             if ($extraFieldsMap) {
                 foreach ($extraFieldsMap as $field => $func) {
@@ -407,14 +434,14 @@ class PoemRepository extends BaseRepository {
             ->pluck('c', 'poem_id');
 
         return $poems->map(function (Poem $item) use ($userID, $scoreCounts) {
-            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
-            $item['poet'] = $item->poetLabel;
+            $item['date_ago']    = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
+            $item['poet']        = $item->poetLabel;
             $item['score_count'] = (int) ($scoreCounts[$item->id] ?? 0);
-            $item['reviews'] = $item->reviews->map->only(self::$relatedReviewColumns);
-            $item['listable'] = (!$item->nft && NFT::isMintable($item, $userID))
+            $item['reviews']     = $item->reviews->map->only(self::$relatedReviewColumns);
+            $item['listable']    = (!$item->nft && NFT::isMintable($item, $userID))
                 || ($item->nft && $item->nft->isListableByUser($userID));
             $item['unlistable'] = $item->nft && $item->nft->isUnlistableByUser($userID);
-            $item['nft_id'] = $item->nft ? $item->nft->id : null;
+            $item['nft_id']     = $item->nft ? $item->nft->id : null;
 
             return $item->only(self::$listColumns);
         });
@@ -429,7 +456,7 @@ class PoemRepository extends BaseRepository {
     public static $relatedReviewColumns = ['id', 'avatar', 'content', 'pure_content', 'created_at', 'name', 'user_id'];
 
     /**
-     * @param $userId
+     * @param      $userId
      * @param bool $isCampaignPoem
      * @param bool $excludeSelf    exclude poem that upload_user_id=userId. ONLY for $isCampaignPoem == true
      * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
@@ -480,10 +507,10 @@ class PoemRepository extends BaseRepository {
             ->pluck('c', 'poem_id');
 
         return $poems->map(function ($item) use ($scoreCounts) {
-            $item['date_ago'] = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
-            $item['poet'] = $item->poet_label;
+            $item['date_ago']    = \Illuminate\Support\Carbon::parse($item->created_at)->diffForHumans(now());
+            $item['poet']        = $item->poet_label;
             $item['score_count'] = (int)($scoreCounts[$item->id] ?? 0);
-            $item['reviews'] = $item->reviews->map->only(self::$relatedReviewColumns);
+            $item['reviews']     = $item->reviews->map->only(self::$relatedReviewColumns);
             // poet_is_v derivation possibly involves uploader relation; ensure consistency
             if (!isset($item['poet_is_v'])) {
                 $item['poet_is_v'] = ($item->is_owner_uploaded === Poem::$OWNER['uploader']) && $item->uploader && $item->uploader->is_v;
@@ -554,7 +581,7 @@ class PoemRepository extends BaseRepository {
 
                 return $item;
             })->sort(function ($a, $b) {
-                $scoreOrder = $b['score'] <=> $a['score'];
+                $scoreOrder = $b['score']       <=> $a['score'];
                 $countOrder = $b['score_count'] <=> $a['score_count'];
 
                 return $scoreOrder === 0
@@ -592,6 +619,40 @@ class PoemRepository extends BaseRepository {
         }
     }
 
+    public function updatePoemWithRelations(Poem $poem, array $sanitized): Poem {
+        if (!empty($sanitized['translator_ids'])) {
+            if ($poem->translators->count()) {
+                $translatorsArr = collect($poem->translatorsLabelArr)->map(function ($label) {
+                    return isset($label['id']) ? $label['id'] : $label['name'];
+                })->toArray();
+
+                // check if translators are not changed
+                if ($translatorsArr !== $sanitized['translator_ids']) {
+                    // TODO update relatable records instead fo delete and insert
+                    //TODO add order property for "translator is" relation
+                    $poem->relatedTranslators()->delete();
+                    $poem->relateToTranslators($sanitized['translator_ids']);
+                }
+            } else {
+                $poem->relateToTranslators($sanitized['translator_ids']);
+            }
+        }
+
+        // If the original chain is broken, fall back to the current poem so any
+        // poet propagation stays within the existing subtree instead of assuming
+        // a missing root still exists.
+        $topOriginalPoem = $poem->topOriginalPoem ?? $poem;
+
+        $updatedPoem = $this->update($sanitized, $poem->id);
+        $poetId      = $topOriginalPoem->poet_id ?: $updatedPoem->poet_id;
+        // 修改原作作者时,同步修改所有译作作者（仅当顶层原作 poet_id 或当前作品 poet_id 不为空, 且 is_owner_uploaded=0）
+        if ($poetId && $topOriginalPoem->is_owner_uploaded === Poem::$OWNER['none']) {
+            self::updateAllTranslatedPoemPoetId($topOriginalPoem, $poetId);
+        }
+
+        return $updatedPoem;
+    }
+
     /**
      * Preload translator data for poems to avoid N+1 queries
      */
@@ -607,7 +668,7 @@ class PoemRepository extends BaseRepository {
         $poemIds = $poems->pluck('id');
 
         // Get translator data from translator_id field (direct relationship)
-        $translatorIds = $poems->whereNotNull('translator_id')->pluck('translator_id')->unique();
+        $translatorIds         = $poems->whereNotNull('translator_id')->pluck('translator_id')->unique();
         $directTranslatorsData = collect();
 
         if ($translatorIds->isNotEmpty()) {
@@ -646,7 +707,7 @@ class PoemRepository extends BaseRepository {
             if ($poem->translator_id && isset($directTranslatorsData[$poem->translator_id])) {
                 $authorData = $directTranslatorsData[$poem->translator_id];
                 $authorName = json_decode($authorData->name_lang, true);
-                $name = is_array($authorName)
+                $name       = is_array($authorName)
                     ? pick_translation_value($authorName, 'zh-CN')
                     : $authorData->name_lang;
 
@@ -664,9 +725,10 @@ class PoemRepository extends BaseRepository {
                 $relatableTranslators = $relatableTranslatorsData[$poem->id]->map(function($item) {
                     if ($item->end_type === \App\Models\Author::class) {
                         $authorName = json_decode($item->author_name, true);
-                        $name = is_array($authorName)
+                        $name       = is_array($authorName)
                             ? pick_translation_value($authorName, 'zh-CN')
                             : $item->author_name;
+
                         return [
                             'id'      => $item->end_id,
                             'name'    => $name,
@@ -674,11 +736,11 @@ class PoemRepository extends BaseRepository {
                             'pic_url' => json_decode($item->author_pic_url, true),
                             'user_id' => $item->author_user_id,
                         ];
-                    } else {
-                        return [
-                            'name' => $item->entry_name
-                        ];
                     }
+
+                    return [
+                        'name' => $item->entry_name
+                    ];
                 });
 
                 $translators = $translators->concat($relatableTranslators)->unique('id')->unique('name');
@@ -712,10 +774,10 @@ class PoemRepository extends BaseRepository {
         }
 
         $poetLabelMap = collect();
-        $poemIds = $poems->pluck('id');
+        $poemIds      = $poems->pluck('id');
 
         // Get poet data from poet_id field
-        $poetIds = $poems->whereNotNull('poet_id')->pluck('poet_id')->unique();
+        $poetIds   = $poems->whereNotNull('poet_id')->pluck('poet_id')->unique();
         $poetsData = collect();
 
         if ($poetIds->isNotEmpty()) {
@@ -752,13 +814,13 @@ class PoemRepository extends BaseRepository {
             if ($poem->poet_id && isset($poetsData[$poem->poet_id])) {
                 $authorData = $poetsData[$poem->poet_id];
                 $authorName = json_decode($authorData->name_lang, true);
-                $name = is_array($authorName)
+                $name       = is_array($authorName)
                     ? pick_translation_value($authorName, 'zh-CN')
                     : $authorData->name_lang;
 
                 $cachedPoet = [
                     'author_id' => $poem->poet_id,
-                    'name' => $name
+                    'name'      => $name
                 ];
             }
             // Then try relatable poets
@@ -766,7 +828,7 @@ class PoemRepository extends BaseRepository {
                 $poetItem = $relatablePoetsData[$poem->id]->first();
                 if ($poetItem->end_type === \App\Models\Author::class) {
                     $authorName = json_decode($poetItem->author_name, true);
-                    $name = is_array($authorName)
+                    $name       = is_array($authorName)
                         ? pick_translation_value($authorName, 'zh-CN')
                         : $poetItem->author_name;
                 } else {
@@ -775,12 +837,12 @@ class PoemRepository extends BaseRepository {
 
                 $cachedPoet = [
                     'author_id' => $poetItem->end_id,
-                    'name' => $name
+                    'name'      => $name
                 ];
             } else {
                 $cachedPoet = [
                     'author_id' => null,
-                    'name' => $poem->poet
+                    'name'      => $poem->poet
                 ];
             }
 
@@ -795,8 +857,8 @@ class PoemRepository extends BaseRepository {
     /**
      * Sort author poems with unified logic (only sorting, no content modification)
      *
-     * @param \Illuminate\Support\Collection $poems Collection of poems
-     * @param string $sortType Either 'hottest' (default) or 'newest'
+     * @param \Illuminate\Support\Collection $poems    Collection of poems
+     * @param string                         $sortType Either 'hottest' (default) or 'newest'
      * @return \Illuminate\Support\Collection
      */
     public static function sortAuthorPoems(\Illuminate\Support\Collection $poems, string $sortType = 'hottest'): \Illuminate\Support\Collection {
@@ -806,23 +868,26 @@ class PoemRepository extends BaseRepository {
             return $poems->sortByDesc(function ($p) {
                 // 如果有 year，构造一个尽量“晚”的日期以体现“最新”排序
                 if (!empty($p->year)) {
-                    $year  = (int)$p->year;
+                    $year = (int)$p->year;
                     // 若 month 为空，用 12 代表当年末
                     $month = !empty($p->month) ? (int)$p->month : 12;
                     // 若 date 为空，用该月最后一天
-                    $day   = !empty($p->date) ? (int)$p->date : 1; // 先用 1 再 endOfMonth() 统一
+                    $day = !empty($p->date) ? (int)$p->date : 1; // 先用 1 再 endOfMonth() 统一
+
                     try {
                         $dt = \Illuminate\Support\Carbon::create($year, $month, $day, 23, 59, 59);
                         // 如果原本未给出具体日，调整到月底；若未给出月，前面已设为 12
                         if (empty($p->date)) {
                             $dt = $dt->endOfMonth();
                         }
+
                         return $dt->timestamp;
                     } catch (\Exception $e) {
                         // 回退 created_at
                         return $p->created_at ? $p->created_at->timestamp : 0;
                     }
                 }
+
                 return $p->created_at ? $p->created_at->timestamp : 0;
             })->values();
         } else {
@@ -851,14 +916,14 @@ class PoemRepository extends BaseRepository {
     /**
      * Prepare author poems for API output with sorting
      *
-     * @param \Illuminate\Support\Collection $poems Collection of poems
-     * @param string $sortType Either 'hottest' (default) or 'newest'
-     * @param array $options Options for processing ['noAvatar' => false, 'noPoet' => false]
+     * @param \Illuminate\Support\Collection $poems    Collection of poems
+     * @param string                         $sortType Either 'hottest' (default) or 'newest'
+     * @param array                          $options  Options for processing ['noAvatar' => false, 'noPoet' => false]
      * @return \Illuminate\Support\Collection
      */
     public static function prepareAuthorPoemsForAPI(\Illuminate\Support\Collection $poems, string $sortType = 'hottest', array $options = []): \Illuminate\Support\Collection {
-        $defaultOptions = ['noAvatar' => false, 'noPoet' => false];
-        $opt = array_merge($defaultOptions, $options);
+        $defaultOptions                                    = ['noAvatar' => false, 'noPoet' => false];
+        $opt                                               = array_merge($defaultOptions, $options);
         list('noAvatar' => $noAvatar, 'noPoet' => $noPoet) = $opt;
 
         $columns = [
@@ -878,11 +943,11 @@ class PoemRepository extends BaseRepository {
         $poemScores = ScoreRepository::batchCalc($sortedPoems->pluck('id')->values()->all());
 
         return $sortedPoems->map(function (Poem $item) use ($noPoet, $poemScores) {
-            $score = isset($poemScores[$item->id]) ? $poemScores[$item->id] : Score::$DEFAULT_SCORE_ARR;
-            $item['score'] = $score['score'];
-            $item['score_count'] = $score['count'];
+            $score                = isset($poemScores[$item->id]) ? $poemScores[$item->id] : Score::$DEFAULT_SCORE_ARR;
+            $item['score']        = $score['score'];
+            $item['score_count']  = $score['count'];
             $item['score_weight'] = $score['weight'];
-            $item['poem'] = $item->firstLine;
+            $item['poem']         = $item->firstLine;
 
             if (!$noPoet) {
                 $item['poet'] = $item->poetLabel;
@@ -899,10 +964,10 @@ class PoemRepository extends BaseRepository {
     public function getTranslatedPoemsTree($poem) {
         // topOriginalPoem can be null if original_id chain is broken; fall back to current poem
         $topOriginal = $poem->topOriginalPoem ?? $poem;
-        $cacheKey = "translated_poems_tree_{$topOriginal->id}";
+        $cacheKey    = "translated_poems_tree_{$topOriginal->id}";
 
         return Cache::remember($cacheKey, 360000, function() use ($topOriginal) {
-            
+
             // Get ALL poems in the translation tree recursively
             $allPoemsInTree = $this->collectAllPoemsInTranslationTree($topOriginal);
 
@@ -934,10 +999,10 @@ class PoemRepository extends BaseRepository {
         // Use recursive CTE or find all poems that belong to this translation tree
         // We'll use a breadth-first approach with batched queries
 
-        $allPoems = collect([$topOriginal]);
+        $allPoems        = collect([$topOriginal]);
         $currentLevelIds = collect([$topOriginal->id]);
-        $processedIds = collect([$topOriginal->id]);
-        $currentDepth = 1;
+        $processedIds    = collect([$topOriginal->id]);
+        $currentDepth    = 1;
 
         while ($currentLevelIds->isNotEmpty() && $currentDepth <= $maxDepth) {
             // Get all direct translations for all poems in current level in one query
@@ -951,9 +1016,9 @@ class PoemRepository extends BaseRepository {
             }
 
             // Add to collections
-            $allPoems = $allPoems->concat($nextLevelPoems);
+            $allPoems        = $allPoems->concat($nextLevelPoems);
             $currentLevelIds = $nextLevelPoems->pluck('id');
-            $processedIds = $processedIds->concat($currentLevelIds);
+            $processedIds    = $processedIds->concat($currentLevelIds);
             $currentDepth++;
         }
 
@@ -971,16 +1036,16 @@ class PoemRepository extends BaseRepository {
 
         // Build the poem structure
         $poemData = [
-            'id' => $poem->id,
-            'fakeId' => $poem->fakeId,
-            'originalId' => $poem->original_id,
-            'languageId' => $poem->language_id,
-            'language' => $poem->lang->name_lang ?? '',
-            'translatorStr' => $poem->translatorsStr ?? '',
-            'title' => $poem->title,
-            'url' => $poem->url,
-            'isOriginal' => $poem->is_original,
-            'poetLabel' => $poem->is_original ? $poetLabelMap[$poem->id]['name'] : '',
+            'id'              => $poem->id,
+            'fakeId'          => $poem->fakeId,
+            'originalId'      => $poem->original_id,
+            'languageId'      => $poem->language_id,
+            'language'        => $poem->lang->name_lang ?? '',
+            'translatorStr'   => $poem->translatorsStr  ?? '',
+            'title'           => $poem->title,
+            'url'             => $poem->url,
+            'isOriginal'      => $poem->is_original,
+            'poetLabel'       => $poem->is_original ? $poetLabelMap[$poem->id]['name'] : '',
             'translatedPoems' => []
         ];
 

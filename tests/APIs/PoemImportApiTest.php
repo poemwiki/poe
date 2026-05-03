@@ -100,12 +100,13 @@ class PoemImportApiTest extends TestCase {
     public function test_import_minimal_fields_without_poet_id() {
         $user = factory(User::class)->create();
         $this->actingAs($user);
+        $suffix = uniqid();
 
         $payload = [
             'poems' => [[
-                'title'       => '最小导入 ' . uniqid(),
+                'title'       => '最小导入 ' . $suffix,
                 'poet'        => '匿名作者',
-                'poem'        => str_repeat('字', 10),
+                'poem'        => "最小导入内容 {$suffix}",
                 'language_id' => $this->validLanguageId
             ]]
         ];
@@ -114,16 +115,14 @@ class PoemImportApiTest extends TestCase {
         $body = json_decode($resp->getContent(), true);
         $this->assertEquals(0, $body['code']); // Success code
 
-        // The result could be either a success object or error array
-        if (isset($body['data'][0]['id'])) {
-            $this->assertIsArray($body['data'][0]);
-            $this->assertArrayHasKey('id', $body['data'][0]);
-            $this->assertArrayHasKey('url', $body['data'][0]);
-        } else {
-            // If validation failed, it should be an errors array
-            $this->assertIsArray($body['data'][0]);
-            $this->assertArrayHasKey('errors', $body['data'][0]);
-        }
+        $this->assertIsArray($body['data'][0]);
+        $this->assertArrayHasKey('id', $body['data'][0]);
+        $this->assertArrayHasKey('url', $body['data'][0]);
+        $this->assertArrayNotHasKey('errors', $body['data'][0]);
+
+        $importedPoem = Poem::query()->find($body['data'][0]['id']);
+        $this->assertNotNull($importedPoem);
+        $this->assertEquals(0, $importedPoem->original_id);
     }
 
     /** @test */
@@ -161,11 +160,12 @@ class PoemImportApiTest extends TestCase {
     public function test_import_with_original_id_marks_poem_as_translation() {
         $user = factory(User::class)->create();
         $this->actingAs($user);
+        $suffix = uniqid();
 
         $originalPoem = Poem::create([
-            'title'             => '原作 ' . uniqid(),
+            'title'             => '原作 ' . $suffix,
             'poet'              => '原作者',
-            'poem'              => "原作第一行内容\n原作第二行内容",
+            'poem'              => "原作第一行内容 {$suffix}\n原作第二行内容 {$suffix}",
             'language_id'       => $this->validLanguageId,
             'original_id'       => 0,
             'is_owner_uploaded' => Poem::$OWNER['none'],
@@ -175,9 +175,9 @@ class PoemImportApiTest extends TestCase {
 
         $payload = [
             'poems' => [[
-                'title'       => '译作导入 ' . uniqid(),
+                'title'       => '译作导入 ' . $suffix,
                 'poet'        => '译作者',
-                'poem'        => "译作第一行内容\n译作第二行内容",
+                'poem'        => "译作第一行内容 {$suffix}\n译作第二行内容 {$suffix}",
                 'language_id' => $this->validLanguageId,
                 'original_id' => $originalPoem->id,
             ]]

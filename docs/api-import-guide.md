@@ -261,7 +261,82 @@ curl -X POST "$WIKI_API_BASE/poem/import" \
   -d '{"poems":[{"title":"静夜思","poet":"李白","poet_id":123,"poem":"床前明月光\n疑是地上霜\n举头望明月\n低头思故乡","language_id":1,"translator_ids":[456,"张三","Q789"]}]}'
 ```
 
-### 3.6 POST /poem/detect
+### 3.6 POST /poem/update/{idOrFakeId}
+
+用途：更新一首已存在的诗歌。该接口复用站内 poem update 的主要校验与更新逻辑，包括：重复诗歌校验、译者关系更新、原作链路更新、以及在修改顶层原作作者时同步更新译作作者。
+
+控制器：`PoemAPIController@update`
+
+路径参数：
+
+- `idOrFakeId`: 支持两种形式
+- 已存在的内部 `poem.id`
+- poem 的公开 `fakeId`
+
+请求头：建议 `Content-Type: application/json`。
+
+请求 JSON：支持部分字段更新；未提交字段保持不变。常用字段示例：
+
+```json
+{
+  "title": "新的标题",
+  "poem": "更新后的正文第一行\n更新后的正文第二行",
+  "from": "新的来源",
+  "original_id": 321,
+  "is_original": false,
+  "translator_ids": [456, "张三", "Q789"]
+}
+```
+
+校验与行为说明：
+
+- 需要登录认证
+- 路由中的 `idOrFakeId` 找不到对应 poem 时，返回 `Poem not found`
+- `poem` 若提交，会按更新场景执行 `NoDuplicatedPoem($currentPoemId)` 去重校验
+- `original_id` 若提交，必须是已存在的 `poem.id`
+- `translator_ids` 复用现有更新逻辑：Author ID / `Q<wikidata_id>` / 文本名称 都可用
+- `translator_ids` 未提交时保持原有译者关系不变；若显式传 `[]`，当前也不会清空现有译者关系，仍沿用站内既有更新逻辑
+- 若提交 `poet_wikidata_id` 且未提供 `poet_id`，服务端会尝试复用现有作者解析逻辑自动绑定作者
+
+成功返回：
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "fakeId": "abc123",
+    "url": "https://example.com/p/abc123"
+  }
+}
+```
+
+失败返回（示例）：
+
+```json
+{
+  "success": false,
+  "message": "Poem not found"
+}
+```
+
+示例 curl：
+
+```bash
+curl -X POST "$WIKI_API_BASE/poem/update/123" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"title":"新的标题","from":"新的来源"}'
+```
+
+也可以用 `fakeId` 调用：
+
+```bash
+curl -X POST "$WIKI_API_BASE/poem/update/abc123" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"title":"新的标题","from":"新的来源"}'
+```
+
+### 3.7 POST /poem/detect
 
 用途：根据提供文本自动检测语言，返回可直接用于 `poem/import` 的 `language_id`（如果系统支持且已启用）。
 
@@ -461,23 +536,24 @@ Supported Languages:
 
 | id  | name                                    | name_cn      | locale  |
 | --- | --------------------------------------- | ------------ | ------- |
-| 1   | 简体中文                                | 简体中文     | zh-CN   |
+| 1   | 简体中文                                 | 简体中文     | zh-CN   |
 | 2   | English                                 | 英语         | en      |
 | 3   | Deutsch                                 | 德语         | de      |
 | 4   | français                                | 法语         | fr      |
 | 5   | Italiano                                | 意大利语     | it      |
 | 6   | Español                                 | 西班牙语     | es      |
-| 7   | にほんご                                | 日语         | ja      |
-| 8   | 조선말                                  | 朝鲜语       | kr      |
+| 7   | にほんご                                 | 日语         | ja      |
+| 8   | 조선말                                    | 朝鲜语       | kr      |
 | 9   | Ελληνικά                                | 希腊语       | el      |
 | 10  | ру́сский язы́к                            | 俄语         | ru      |
 | 11  | Português                               | 葡萄牙语     | pt      |
 | 12  | Polski                                  | 波兰语       | pl      |
 | 13  | svenska                                 | 瑞典语       | sv      |
-| 14  | हिन्दी                                  | 印度语       | hi      |
+| 14  | हिन्दी                                     | 印度语       | hi      |
 | 15  | اَلْعَرَبِيَّةُ                                 | 阿拉伯语     | ar      |
-| 16  | עִבְרִית                                | 希伯来语     | he      |
+| 16  | עִבְרִית                                   | 希伯来语     | he      |
 | 46  | अवधी                                    | 阿瓦德语     | awa     |
+| 68  | བོད་སྐད།                                    | 藏文         | bo      |
 | 103 | čeština                                 | 捷克语       | cs      |
 | 108 | dansk                                   | 丹麦语       | da      |
 | 128 | eesti keel                              | 爱沙尼亚语   | et      |

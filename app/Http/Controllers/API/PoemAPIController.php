@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\StoreOwnerUploaderPoem;
 use App\Http\Requests\API\StorePoem;
+use App\Http\Requests\API\UpdatePoem;
 use App\Models\Author;
 use App\Models\Balance;
 use App\Models\Language;
@@ -500,6 +501,7 @@ class PoemAPIController extends Controller {
             'poet_author_url'        => $poetAuthorUrl,
             'translator_author_url'  => $translatorAuthorUrl,
             'source'                 => $poem->from,
+            'language_id'            => $poem->language_id
         ];
 
         // Attach original poem info when this is a translation with a valid original_id
@@ -652,6 +654,36 @@ class PoemAPIController extends Controller {
         $poem->delete();
 
         return $this->responseSuccess();
+    }
+
+    public function update($idOrFakeId, UpdatePoem $request): array {
+        $poem = $request->getPoemToChange();
+        if (empty($poem)) {
+            return $this->responseFail([], 'Poem not found', Controller::$CODE['not_found']);
+        }
+
+        $sanitized = $request->getSanitized();
+
+        if ($request->has('poem')) {
+            $request->validate([
+                'poem' => new NoDuplicatedPoem($poem->id),
+            ]);
+        }
+
+        if (isset($sanitized['poet_wikidata_id']) && is_numeric($sanitized['poet_wikidata_id']) && empty($sanitized['poet_id'])) {
+            $poetAuthor           = $this->authorRepository->getExistedAuthor($sanitized['poet_wikidata_id']);
+            $sanitized['poet_id'] = $poetAuthor->id;
+            $sanitized['poet']    = $poetAuthor->label;
+            $sanitized['poet_cn'] = $poetAuthor->label_cn;
+        }
+
+        $poem = $this->poemRepository->updatePoemWithRelations($poem, $sanitized);
+
+        return $this->responseSuccess([
+            'id'     => $poem->id,
+            'fakeId' => $poem->fakeId,
+            'url'    => $poem->url,
+        ]);
     }
 
     // TODO for mini program, generate and get poster image file should be in ONE request
@@ -912,6 +944,8 @@ class PoemAPIController extends Controller {
                 $item['poem']                  = $poem->firstLine;
                 $item['poem_contains_keyword'] = false;
             }
+            // TODO output full poem lines
+            // $item['lines'] = $poem->poem;
 
             $item['poet_is_v']        = $poem->poet_is_v;
             $item['poet_label']       = $poem->poet_label;

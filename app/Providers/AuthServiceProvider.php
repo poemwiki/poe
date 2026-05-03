@@ -39,7 +39,8 @@ class AuthServiceProvider extends ServiceProvider {
         });
         Gate::define('api.poem.update', function (User $user, Poem $poem) {
             // 如果是用户上传的原创作品，只有作者账号可更改
-            if ($poem->is_owner_uploaded === Poem::$OWNER['uploader']) {
+            if ($poem->is_owner_uploaded    === Poem::$OWNER['uploader']
+                || $poem->is_owner_uploaded === Poem::$OWNER['translatorUploader']) {
                 return $user->id === $poem->uploader->id ? Response::allow() : Response::deny('Not Allowed');
             }
 

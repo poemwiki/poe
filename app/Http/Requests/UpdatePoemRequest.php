@@ -33,6 +33,10 @@ class UpdatePoemRequest extends FormRequest {
         return Gate::allows('web.poem.change', $this->_poemToChange);
     }
 
+    public function getPoemToChange(): ?Poem {
+        return $this->_poemToChange;
+    }
+
     /**
      * Get the validation rules that apply to the request.
      * TODO merge with App\Http\Requests\CreatePoemRequest::rules().
@@ -62,7 +66,8 @@ class UpdatePoemRequest extends FormRequest {
             'need_confirm'       => ['nullable', 'boolean'],
             'is_lock'            => ['sometimes', 'boolean'],
             'content_id'         => ['nullable', 'integer'],
-            // 'original_id' => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
+            'original_id'        => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
+            'original_link'      => ['nullable', 'string'],
 
             'preface'                => ['nullable', 'string', 'max:10000'],
             'subtitle'               => ['nullable', 'string', 'max:128'],
@@ -127,7 +132,7 @@ class UpdatePoemRequest extends FormRequest {
         }
 
         // 译作提交空 original_link 视为取消 original_id 链接
-        if (!$sanitized['is_original'] && empty($sanitized['original_link'])) {
+        if (!$sanitized['is_original'] && empty($sanitized['original_link']) && !isset($sanitized['original_id'])) {
             $sanitized['original_id'] = 0;
         }
 
@@ -135,11 +140,13 @@ class UpdatePoemRequest extends FormRequest {
 
         // TODO 添加测试：译作改为原作，不管是否有 original_link 提交，都应将 original_id 置为自身的 poem.id
 
-        $sanitized['title'] = Str::trimSpaces($sanitized['title']);
-        if ($sanitized['subtitle']) {
+        if (isset($sanitized['title'])) {
+            $sanitized['title'] = Str::trimSpaces($sanitized['title']);
+        }
+        if (isset($sanitized['subtitle']) && $sanitized['subtitle']) {
             $sanitized['subtitle'] = Str::trimSpaces($sanitized['subtitle']);
         }
-        if ($sanitized['preface']) {
+        if (isset($sanitized['preface']) && $sanitized['preface']) {
             $sanitized['preface'] = Str::trimSpaces($sanitized['preface']);
         }
 

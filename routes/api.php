@@ -69,6 +69,7 @@ Route::middleware(['auth:api,web', 'api'])->group(static function () {
             Route::post('/info/{fakeId}', [\App\Http\Controllers\API\PoemAPIController::class, 'infoByFakeId'])->name('info-authed');
             Route::post('/store', [\App\Http\Controllers\API\PoemAPIController::class, 'store'])->name('store');
             Route::post('/create', [\App\Http\Controllers\API\PoemAPIController::class, 'create'])->name('create');
+            Route::post('/update/{idOrFakeId}', [\App\Http\Controllers\API\PoemAPIController::class, 'update'])->name('update');
             Route::get('/mine', [\App\Http\Controllers\API\PoemAPIController::class, 'mine'])->name('mine');
             Route::get('/delete/{poemId}', [\App\Http\Controllers\API\PoemAPIController::class, 'delete'])->name('delete');
             Route::get('/related', [\App\Http\Controllers\API\PoemAPIController::class, 'related'])->name('related');
