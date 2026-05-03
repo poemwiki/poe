@@ -312,6 +312,7 @@ class AuthorAPIController extends Controller {
             }
 
             return [
+                'url'         => $item['url']         ?? null,
                 'id'          => $item['author_id']   ?? $item['id'] ?? null,
                 'label'       => $item['label']       ?? ($item['name'] ?? null),
                 'wikidata_id' => $item['wikidata_id'] ?? null,

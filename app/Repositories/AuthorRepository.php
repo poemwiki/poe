@@ -65,6 +65,10 @@ class AuthorRepository extends BaseRepository {
                 $author   = Author::find($item['author_id']);
                 $wikidata = Wikidata::find($item['wikidata_id']);
 
+                $item['url'] = $item['author_id'] && $author
+                    ? $author->url
+                    : null;
+
                 $item['avatar_url'] = $item['author_id'] && $author
                     ? $author->avatarUrl
                     : ($wikidata ? $wikidata->first_pic_url : config('app.avatar.default'));
