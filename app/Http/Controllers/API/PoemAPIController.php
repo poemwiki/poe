@@ -994,10 +994,6 @@ class PoemAPIController extends Controller {
         $result = [];
         foreach ($poems as $poem) {
             try {
-                $poem['is_owner_uploaded'] = Poem::$OWNER['none'];
-                $poem['upload_user_id']    = $request->user()->id;
-                $poem['flag']              = Poem::$FLAG['botContentNeedConfirm'];
-
                 // Support poet_id in Q<wikidata_id> format: auto create / resolve author before validation
                 if (isset($poem['poet_id']) && is_string($poem['poet_id']) && Str::startsWith($poem['poet_id'], 'Q')) {
                     $wikidataId = (int) ltrim($poem['poet_id'], 'Q');
@@ -1016,16 +1012,30 @@ class PoemAPIController extends Controller {
                 $validator = Validator::make($poem, [
                     'title'            => 'required|string|max:255',
                     'poet'             => 'required_without:poet_id|string|max:255',
+                    'poet_cn'          => 'nullable|string',
                     'poem'             => ['required', new NoDuplicatedPoem(null), 'string', 'min:10', 'max:65500'],
                     'poet_id'          => ['nullable', 'integer', 'exists:' . \App\Models\Author::class . ',id'],
                     'original_id'      => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
                     'from'             => 'nullable|string|max:255',
                     'language_id'      => ['required', Rule::in(LanguageRepository::idsInUse())],
                     'genre_id'         => ['nullable', 'integer', 'exists:' . \App\Models\Genre::class . ',id'],
+                    'preface'          => 'nullable|string|max:10000',
+                    'subtitle'         => 'nullable|string|max:128',
+                    'year'             => 'nullable|string',
+                    'month'            => 'nullable|string',
+                    'date'             => 'nullable|string',
+                    'location'         => 'nullable|string',
+                    'dynasty'          => 'nullable|string',
+                    'nation'           => 'nullable|string',
                     'translator_ids'   => ['nullable', 'array'],
                     'translator_ids.*' => ['nullable'],
                 ]);
                 $validator->validate();
+                $poem = $validator->validated();
+
+                $poem['is_owner_uploaded'] = Poem::$OWNER['none'];
+                $poem['upload_user_id']    = $request->user()->id;
+                $poem['flag']              = Poem::$FLAG['botContentNeedConfirm'];
 
                 if (!isset($poem['original_id'])) {
                     $poem['original_id'] = 0;

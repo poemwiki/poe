@@ -13,6 +13,25 @@ class AuthorImportApiTest extends TestCase
     use ApiTestTrait, WithoutMiddleware;
 
     /** @test */
+    public function test_import_rejects_invalid_describe_locale()
+    {
+        $payload = [
+            'name' => 'Invalid Locale Author ' . uniqid(),
+            'describe' => 'A short description',
+            'describe_locale' => 'fr'
+        ];
+
+        $response = $this->json('POST', '/api/v1/author/import', $payload);
+
+        $response->assertStatus(200);
+        $body = json_decode($response->getContent(), true);
+
+        $this->assertSame('invalid', $body['message']);
+        $this->assertSame(422, $body['code']);
+        $this->assertArrayHasKey('describe_locale', $body['data']);
+    }
+
+    /** @test */
     public function test_create_new_author_by_name()
     {
         // Disable model events to prevent alias:importFromAuthor command execution

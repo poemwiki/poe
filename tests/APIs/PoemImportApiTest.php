@@ -122,7 +122,7 @@ class PoemImportApiTest extends TestCase {
 
         $importedPoem = Poem::query()->find($body['data'][0]['id']);
         $this->assertNotNull($importedPoem);
-        $this->assertEquals(0, $importedPoem->original_id);
+        $this->assertEquals($importedPoem->id, $importedPoem->original_id);
     }
 
     /** @test */
@@ -198,6 +198,50 @@ class PoemImportApiTest extends TestCase {
         $this->assertEquals($importedPoem->url, $body['data'][0]['url']);
         $this->assertEquals($originalPoem->id, $importedPoem->original_id);
         $this->assertEquals(0, $importedPoem->is_original);
+    }
+
+    /** @test */
+    public function test_import_supports_metadata_fields() {
+        $user = factory(User::class)->create();
+        $this->actingAs($user);
+        $suffix = uniqid();
+
+        $payload = [
+            'poems' => [[
+                'title'       => '元数据导入 ' . $suffix,
+                'poet'        => '作者 ' . $suffix,
+                'poet_cn'     => '作者中文名 ' . $suffix,
+                'poem'        => "元数据第一行 {$suffix}\n元数据第二行 {$suffix}",
+                'language_id' => $this->validLanguageId,
+                'subtitle'    => '副标题 ' . $suffix,
+                'preface'     => '题记 ' . $suffix,
+                'year'        => '2024',
+                'month'       => '08',
+                'date'        => '21',
+                'location'    => '杭州',
+                'dynasty'     => '当代',
+                'nation'      => '中国',
+            ]]
+        ];
+
+        $resp = $this->json('POST', '/api/v1/poem/import', $payload);
+        $resp->assertStatus(200);
+        $body = json_decode($resp->getContent(), true);
+
+        $this->assertEquals(0, $body['code']);
+        $this->assertArrayHasKey('id', $body['data'][0]);
+
+        $importedPoem = Poem::query()->find($body['data'][0]['id']);
+        $this->assertNotNull($importedPoem);
+        $this->assertEquals($payload['poems'][0]['poet_cn'], $importedPoem->poet_cn);
+        $this->assertEquals($payload['poems'][0]['subtitle'], $importedPoem->subtitle);
+        $this->assertEquals($payload['poems'][0]['preface'], $importedPoem->preface);
+        $this->assertEquals($payload['poems'][0]['year'], $importedPoem->year);
+        $this->assertEquals($payload['poems'][0]['month'], $importedPoem->month);
+        $this->assertEquals($payload['poems'][0]['date'], $importedPoem->date);
+        $this->assertEquals($payload['poems'][0]['location'], $importedPoem->location);
+        $this->assertEquals($payload['poems'][0]['dynasty'], $importedPoem->dynasty);
+        $this->assertEquals($payload['poems'][0]['nation'], $importedPoem->nation);
     }
 
     /** @test */

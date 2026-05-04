@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Poem;
 use App\Rules\ValidOriginalLink;
 
-// for web
+// for web user poem update form
 class WebUpdatePoemRequest extends UpdatePoemRequest {
     /**
      * Get the validation rules that apply to the request.

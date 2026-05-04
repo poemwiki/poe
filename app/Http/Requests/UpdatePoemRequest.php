@@ -49,6 +49,15 @@ class UpdatePoemRequest extends FormRequest {
             'title'              => ['nullable', 'string'],
             'language_id'        => Rule::in(LanguageRepository::ids()),
             'is_original'        => ['nullable', 'boolean'],
+            'original_id'        => ['nullable', 'integer', function ($attribute, $value, $fail) {
+                if ((int) $value === 0) {
+                    return;
+                }
+
+                if (!Poem::query()->whereKey($value)->exists()) {
+                    $fail(trans('validation.exists', ['attribute' => $attribute]));
+                }
+            }],
             'poet'               => ['nullable', 'string'],
             'poet_cn'            => ['nullable', 'string'],
             'bedtime_post_id'    => ['nullable', 'integer'],
@@ -66,8 +75,6 @@ class UpdatePoemRequest extends FormRequest {
             'need_confirm'       => ['nullable', 'boolean'],
             'is_lock'            => ['sometimes', 'boolean'],
             'content_id'         => ['nullable', 'integer'],
-            'original_id'        => ['nullable', 'integer', 'exists:' . \App\Models\Poem::class . ',id'],
-            'original_link'      => ['nullable', 'string'],
 
             'preface'                => ['nullable', 'string', 'max:10000'],
             'subtitle'               => ['nullable', 'string', 'max:128'],
@@ -131,14 +138,7 @@ class UpdatePoemRequest extends FormRequest {
             $sanitized['translator'] = json_encode($translatorsOrder, JSON_UNESCAPED_UNICODE);
         }
 
-        // 译作提交空 original_link 视为取消 original_id 链接
-        if (!$sanitized['is_original'] && empty($sanitized['original_link']) && !isset($sanitized['original_id'])) {
-            $sanitized['original_id'] = 0;
-        }
-
-        // TODO 添加测试：原作改为译作，未提交 original_link 时，original_id 应为0；提交 original_link 时，original_id 应为对应的 poem.id
-
-        // TODO 添加测试：译作改为原作，不管是否有 original_link 提交，都应将 original_id 置为自身的 poem.id
+        $sanitized = $this->normalizeOriginalRelation($sanitized);
 
         if (isset($sanitized['title'])) {
             $sanitized['title'] = Str::trimSpaces($sanitized['title']);
@@ -148,6 +148,18 @@ class UpdatePoemRequest extends FormRequest {
         }
         if (isset($sanitized['preface']) && $sanitized['preface']) {
             $sanitized['preface'] = Str::trimSpaces($sanitized['preface']);
+        }
+
+        return $sanitized;
+    }
+
+    protected function normalizeOriginalRelation(array $sanitized): array {
+        $hasIsOriginal = array_key_exists('is_original', $sanitized);
+        $isOriginal    = $hasIsOriginal ? (bool) $sanitized['is_original'] : null;
+        $originalLink  = $sanitized['original_link'] ?? null;
+
+        if ($hasIsOriginal && $isOriginal === false && empty($originalLink) && !isset($sanitized['original_id'])) {
+            $sanitized['original_id'] = 0;
         }
 
         return $sanitized;

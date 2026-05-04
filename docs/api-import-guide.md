@@ -7,6 +7,7 @@ API Documentation：[PoemWiki Open API Documentation](https://api-doc.poemwiki.o
 - 用户登录：`POST /user/login`
 - 作者搜索：`POST /author/search`
 - 作者导入：`POST /author/import` （暂不对外公开，因为导入诗歌的时候可以根据 wikidata QID 自动创建作者）
+- 作者更新：`POST /author/update/{id}`
 - 诗歌检索（仅支持 poem-select 模式）：`POST /poem/q` （`PoemAPIController@query`）
 - 诗歌批量导入：`POST /poem/import` 
 
@@ -128,17 +129,18 @@ curl -X POST "$WIKI_API_BASE/author/search" \
 > - 内部或受信任 Agent 在需要补充作者描述 / 手动歧义裁决时使用；
 > - 了解自动创建逻辑所依赖的最小字段结构。
 控制器：`AuthorAPIController@importSimple`
-请求 JSON 允许字段：
-- `name` (string, 1-50, 必填)：作者名称
-- `describe` (string, ≤2000，可选)：简介（将写入 `describe_lang` 的指定 locale）
-- `describe_locale` (string, ≤10，可选，默认系统 locale)
-- `wikidata_id` (integer，可选)：提供则尝试以 wikidata 导入或绑定
+请求 JSON 支持的公开字段见第 9 节“字段快速参考”中位置为 `author/import` 的条目。
 
 返回：
 
 - `status`: `created` | `existed` | `ambiguous`
 - `author`: { id,label,label_cn,label_en,wikidata_id,url,avatar_url } （`ambiguous` 时无 `author` 而是 `candidates`）
 - `candidates` (当 `status=ambiguous`)：带 `id,label,wikidata_id,poem_count,score` 的候选数组。
+
+校验与行为说明：
+
+- `describe_locale` 只允许 `zh-CN` 和 `en`
+- 未提交 `describe_locale` 时，默认按 `zh-CN` 写入简介
 
 判定逻辑摘要：
 
@@ -165,7 +167,63 @@ curl -X POST "$WIKI_API_BASE/author/import" \
   -d '{"name":"李白"}'
 ```
 
-### 3.4 POST /poem/q
+### 3.4 POST /author/update/{id}
+
+用途：更新一位已存在作者的基础信息。当前接口主要用于补充或修正作者名称、简介和生日字段。
+
+控制器：`AuthorAPIController@update`
+
+路径参数：
+
+- `id`: 已存在的 author id
+
+请求头：需要认证，建议 `Content-Type: application/json`。
+
+请求 JSON：支持部分字段更新；未提交字段通常保持原值。可用请求字段见第 9 节“字段快速参考”中位置为 `author/update` 的条目。
+
+示例：
+
+```json
+{
+  "name": {"zh-CN": "李白", "en": "Li Bai"},
+  "desc": {"zh-CN": "唐代诗人"},
+  "birth": "0701-02",
+  "birth_fields": "month"
+}
+```
+
+校验与行为说明：
+
+- 需要登录认证
+- `id` 找不到对应 author 时，返回失败响应
+- `name` 会直接写入 `author.name_lang`
+- `desc` 会直接写入 `author.describe_lang`
+- `birth_fields` 支持 `year`、`month`、`day`
+- `birth_fields = year` 时，`birth` 应为年份数字，例如 `0701`
+- `birth_fields = month` 时，`birth` 应为 `YYYY-MM`，例如 `0701-02`
+- `birth_fields = day` 时，`birth` 应为 `YYYY-MM-DD`，例如 `0701-02-28`
+- 当前接口不会清空未提交的生日分量；它只会按 `birth_fields` 覆盖对应的 `birth_year` / `birth_month` / `birth_day`
+
+成功返回：
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123
+  }
+}
+```
+
+示例 curl：
+
+```bash
+curl -X POST "$WIKI_API_BASE/author/update/123" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"name":{"zh-CN":"李白"},"desc":{"zh-CN":"唐代诗人"},"birth":"0701","birth_fields":"year"}'
+```
+
+### 3.5 POST /poem/q
 
 控制器：`PoemAPIController@query`
 说明：当前对外仅开放 `poem-select` 用途（检索诗歌用于导入前查重）。作者搜索请使用 `POST /author/search`，不要依赖 `/poem/q` 返回作者结果。
@@ -191,11 +249,13 @@ curl -X POST "$WIKI_API_BASE/poem/q?mode=poem-select" \
   -d '{"keyword":"举头望明月"}'
 ```
 
-### 3.5 POST /poem/import
+### 3.6 POST /poem/import
 
 控制器：`PoemAPIController@import`
 请求头：必须 `Content-Type: application/json`。
-请求 JSON（支持 `poet_id` 以及多译者 `translator_ids`）：
+请求 JSON：顶层为 `poems` 数组；每个 poem 对象支持的公开请求字段见第 9 节“字段快速参考”中位置为 `poem/import` 的条目。`is_owner_uploaded`、`upload_user_id`、`flag` 这类内部字段由服务端写入，调用方不需要也不应传入。
+
+示例：
 
 ```json
 {
@@ -237,11 +297,18 @@ curl -X POST "$WIKI_API_BASE/poem/q?mode=poem-select" \
 - `title`: required|string|max:255
 - `poet`: required_without:poet_id|string|max:255 （提供 poet_id 时可不填，但推荐保留 poet 原始名称供比对）
 - `poet_id`: nullable|integer|exists:author,id （现在额外支持以字符串 `Q<wikidata_id>` 形式传递 Wikidata QID，服务端会在自动创建/解析为对应的 author，把 `Q<wikidata_id>` 替换为 对应的 author id）
+- `poet_cn`: nullable|string
 - `poem`: required|string|min:10|max:65500 且通过 `NoDuplicatedPoem`
 - `original_id`: nullable|integer|exists:poem,id
 - `from`: nullable|string|max:255
 - `language_id`: required 且在 `LanguageRepository::idsInUse()` 集合内
 - `genre_id`: nullable|integer|exists:genre,id （参见附录 10.2）
+- `subtitle`: nullable|string|max:128
+- `preface`: nullable|string|max:10000
+- `year`: nullable|string
+- `month`: nullable|string
+- `date`: nullable|string
+- `location`: nullable|string
 - `translator_ids`: nullable|array （元素允许：现有作者数值 ID；任意非空字符串作为译者名；`Q<wikidata_id>` Wikidata ID——支持自动创建对应的 author）
 
 `translator_ids` 解析逻辑（已更新：支持按 Wikidata 自动创建缺失译者）：
@@ -261,7 +328,7 @@ curl -X POST "$WIKI_API_BASE/poem/import" \
   -d '{"poems":[{"title":"静夜思","poet":"李白","poet_id":123,"poem":"床前明月光\n疑是地上霜\n举头望明月\n低头思故乡","language_id":1,"translator_ids":[456,"张三","Q789"]}]}'
 ```
 
-### 3.6 POST /poem/update/{idOrFakeId}
+### 3.7 POST /poem/update/{idOrFakeId}
 
 用途：更新一首已存在的诗歌。该接口复用站内 poem update 的主要校验与更新逻辑，包括：重复诗歌校验、译者关系更新、原作链路更新、以及在修改顶层原作作者时同步更新译作作者。
 
@@ -275,28 +342,36 @@ curl -X POST "$WIKI_API_BASE/poem/import" \
 
 请求头：建议 `Content-Type: application/json`。
 
-请求 JSON：支持部分字段更新；未提交字段保持不变。常用字段示例：
+请求 JSON：支持部分字段更新；未提交字段保持不变。可用请求字段见第 9 节“字段快速参考”中位置为 `poem/update` 的条目。
+
+示例：
 
 ```json
 {
   "title": "新的标题",
   "poem": "更新后的正文第一行\n更新后的正文第二行",
   "from": "新的来源",
+  "language_id": 1,
+  "genre_id": 13,
+  "poet_id": 123,
   "original_id": 321,
-  "is_original": false,
-  "translator_ids": [456, "张三", "Q789"]
+  "is_original": 0,
+  "translator_ids": [456, "Q789", "某位译者"]
 }
 ```
+
+说明：API update 不接受 `original_link`；如需调整原作链路，请直接传 `original_id`（已有 `poem.id` 或 `0`）。
 
 校验与行为说明：
 
 - 需要登录认证
 - 路由中的 `idOrFakeId` 找不到对应 poem 时，返回 `Poem not found`
 - `poem` 若提交，会按更新场景执行 `NoDuplicatedPoem($currentPoemId)` 去重校验
-- `original_id` 若提交，必须是已存在的 `poem.id`
-- `translator_ids` 复用现有更新逻辑：Author ID / `Q<wikidata_id>` / 文本名称 都可用
+- `original_id` 若提交，可为已存在的 `poem.id`，也可显式传 `0` 表示解除原作关联或者译作没有原作
+- `is_original = 0` 且未提交 `original_id` 时，服务端会将 `original_id` 归一化为 `0`
+- `is_original = 1` 时，保存后 `original_id` 会归一化为当前 poem 自身的 id
+- `translator_ids` 在 update API 中支持现有 Author ID / `Q<wikidata_id>`，也支持直接传裸字符串文本名称；裸字符串会按文本译者处理
 - `translator_ids` 未提交时保持原有译者关系不变；若显式传 `[]`，当前也不会清空现有译者关系，仍沿用站内既有更新逻辑
-- 若提交 `poet_wikidata_id` 且未提供 `poet_id`，服务端会尝试复用现有作者解析逻辑自动绑定作者
 
 成功返回：
 
@@ -336,7 +411,7 @@ curl -X POST "$WIKI_API_BASE/poem/update/abc123" \
   -d '{"title":"新的标题","from":"新的来源"}'
 ```
 
-### 3.7 POST /poem/detect
+### 3.8 POST /poem/detect
 
 用途：根据提供文本自动检测语言，返回可直接用于 `poem/import` 的 `language_id`（如果系统支持且已启用）。
 
@@ -515,16 +590,30 @@ curl -X POST https://example.com/api/v1/poem/q?mode=poem-select \
 | 字段           | 位置          | 说明                                                                                                 |
 | -------------- | ------------- | ---------------------------------------------------------------------------------------------------- |
 | name           | author/import | 作者名称（多语言初始只写默认 locale）                                                                |
+| describe       | author/import | 作者简介，可选；写入 `describe_lang` 对应 locale                                                    |
+| describe_locale| author/import | 作者简介的 locale，可选；只允许 `zh-CN` 和 `en`，未提交时默认 `zh-CN`                              |
 | wikidata_id    | author/import | Wikidata 实体 ID                                                                                     |
-| title          | poem/import   | 诗歌标题                                                                                             |
-| poet           | poem/import   | 作者名（字符串，会在后续人工/系统归并到 author_id；与 poet_id 并存用于比对）                         |
-| poet_id        | poem/import   | 已存在作者 ID；也支持 `Q<wikidata_id>` 形式                                                          |
-| poem           | poem/import   | 正文（\n 分行）                                                                                      |
-| original_id    | poem/import   | 原作 poem.id，可选；提供后按译作导入                                                                 |
-| from           | poem/import   | 来源或出处，可选                                                                                     |
-| language_id    | poem/import   | 语言 ID，需在有效列表中                                                                              |
-| genre_id       | poem/import   | 体裁 ID，可选（参见附录 10.2）                                                                       |
-| translator_ids | poem/import   | 译者数组（作者 ID / `Q<wikidata_id>` / 文本名称）；`Q<wikidata_id>` 不存在时会自动创建作者；保持顺序 |
+| name           | author/update | 作者名称；直接写入 `author.name_lang`                                                               |
+| desc           | author/update | 作者简介；直接写入 `author.describe_lang`                                                           |
+| birth          | author/update | 作者生日输入值，可选；格式取决于 `birth_fields`                                                          |
+| birth_fields   | author/update | 生日精度，可选, 应该和 birth 同时出现；支持 `year`、`month`、`day`                                         |
+| title          | poem/import, poem/update | 诗歌标题, 导入时必填                                                                         |
+| poet           | poem/import, poem/update | 作者名文本；导入时与 `poet_id` 二选一，更新时可单独改作者名文本                               |
+| poet_id        | poem/import, poem/update | 作者 ID；导入时支持 `Q<wikidata_id>`，更新时支持现有 author id 或 `new`                     |
+| poet_cn        | poem/import, poem/update | 作者中文名文本                                                                                 |
+| poem           | poem/import, poem/update | 正文（\n 分行）；更新时提交会执行重复诗歌校验                                                |
+| original_id    | poem/import, poem/update | 原作 poem.id；导入时未提供默认写入 `0`，更新时也可显式传 `0` 表示解除原作关联或译作没有原作 |
+| is_original    | poem/update   | 是否原作；`1` 表示原作，`0` 表示译作                                                            |
+| from           | poem/import, poem/update | 来源或出处                                                                                    |
+| language_id    | poem/import, poem/update | 语言 ID，需在有效列表中                                                                       |
+| genre_id       | poem/import, poem/update | 体裁 ID，可选（参见附录 10.2）                                                                |
+| subtitle       | poem/import, poem/update | 副标题，可选                                                                                  |
+| preface        | poem/import, poem/update | 前言 / 题记，可选                                                                             |
+| year           | poem/import, poem/update | 写作年，可选                                                                                  |
+| month          | poem/import, poem/update | 写作月，可选                                                                                  |
+| date           | poem/import, poem/update | 写作日，可选                                                                                  |
+| location       | poem/import, poem/update | 写作地点，可选                                                                                |
+| translator_ids | poem/import, poem/update | 译者数组；支持作者 ID、`Q<wikidata_id>`、文本名称，保持顺序；导入时缺失的 `Q<wikidata_id>` 会自动创建作者 |
 
 ---
 

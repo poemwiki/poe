@@ -12,8 +12,10 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class AuthorAPIController extends Controller {
+    private const IMPORT_DESCRIBE_LOCALES = ['zh-CN', 'en'];
     private $_authorInfoFields = ['id', 'avatar_url', 'name_lang', 'describe_lang', 'is_v', 'birth', 'birth_fields', 'death', 'death_fields'];
 
     public function detail($id, Request $request): array {
@@ -123,7 +125,7 @@ class AuthorAPIController extends Controller {
         $validator = Validator::make($input, [
             'name'            => 'required|string|min:1|max:50',
             'describe'        => 'nullable|string|max:2000',
-            'describe_locale' => 'nullable|string|max:10',
+            'describe_locale' => ['nullable', 'string', 'max:10', Rule::in(self::IMPORT_DESCRIBE_LOCALES)],
             'wikidata_id'     => 'nullable|integer|min:1'
         ]);
 
@@ -136,8 +138,8 @@ class AuthorAPIController extends Controller {
             return $this->responseFail([], 'invalid name', Controller::$CODE['invalid'] ?? 422);
         }
 
-        $describe       = $input['describe']              ?? null;
-        $describeLocale = $input['describe_locale']       ?? config('app.locale', 'zh-CN');
+        $describe       = $input['describe']        ?? null;
+        $describeLocale = $input['describe_locale'] ?? 'zh-CN';
 
         // 1. wikidata branch
         if (!empty($input['wikidata_id'])) {
