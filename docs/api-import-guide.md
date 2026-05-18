@@ -10,6 +10,8 @@ API Documentation：[PoemWiki Open API Documentation](https://api-doc.poemwiki.o
 - 作者更新：`POST /author/update/{id}`
 - 诗歌检索（仅支持 poem-select 模式）：`POST /poem/q` （`PoemAPIController@query`）
 - 诗歌批量导入：`POST /poem/import` 
+- 获取诗歌详情数据：`GET /poem/info/{fakeId}` 详见 https://api-doc.poemwiki.org/poem-details-by-fakeid-357064434e0
+- Detect Language：`POST /poem/detect` 详见 https://api-doc.poemwiki.org/detect-language-270708886e0
 
 本文面向需要自动化批量向 PoemWiki 导入（或同步）作者与诗歌数据的智能体（AI Agent）或脚本开发者，介绍端到端流程、字段、校验、去重策略与错误处理。
 
