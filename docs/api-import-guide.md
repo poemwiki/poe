@@ -664,6 +664,7 @@ Supported Languages:
 | 436 | Українська мова                         | 乌克兰语     | uk      |
 | 487 | ئەرەب ھەرپلىرى ئاساسىدىكى ئۇيغۇر يېزىقى | 传统维文     | ug-arab |
 | 491 | 繁體中文                                | 繁体中文     | zh-hant |
+| 493 | Esperanto                               | 世界语       | eo      |
 
 ### 10.2 Poem Genres（Genre ID & Name）
 
