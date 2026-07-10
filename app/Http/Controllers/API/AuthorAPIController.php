@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Author;
+use App\Models\Dynasty;
+use App\Models\Nation;
 use App\Models\Wikidata;
 use App\Repositories\AuthorRepository;
 use App\Repositories\PoemRepository;
@@ -15,7 +17,11 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AuthorAPIController extends Controller {
-    private const IMPORT_DESCRIBE_LOCALES = ['zh-CN', 'en'];
+    private const IMPORT_DESCRIBE_LOCALES   = ['zh-CN', 'en'];
+    private const AUTHOR_RELATION_ID_MODELS = [
+        'dynasty_id' => Dynasty::class,
+        'nation_id'  => Nation::class,
+    ];
     private $_authorInfoFields = ['id', 'avatar_url', 'name_lang', 'describe_lang', 'is_v', 'birth', 'birth_fields', 'death', 'death_fields'];
 
     public function detail($id, Request $request): array {
@@ -80,6 +86,15 @@ class AuthorAPIController extends Controller {
             return $this->responseFail();
         }
 
+        $validator = Validator::make(
+            $request->only(array_keys($this->authorRelationIdRules())),
+            $this->authorRelationIdRules()
+        );
+
+        if ($validator->fails()) {
+            return $this->responseFail($validator->errors()->toArray(), 'invalid', Controller::$CODE['invalid'] ?? 422);
+        }
+
         switch ($birthFields) {
             case 'year':
                 if (is_numeric($birth)) {
@@ -108,38 +123,49 @@ class AuthorAPIController extends Controller {
                 break;
         }
 
-        $author->name_lang     = $request->input('name');
-        $author->describe_lang = $request->input('desc');
+        if ($request->has('name')) {
+            $author->name_lang = $request->input('name');
+        }
+        if ($request->has('desc')) {
+            $author->describe_lang = $request->input('desc');
+        }
+
+        $author->fill($validator->validated());
         $author->save();
 
         return $this->responseSuccess(['id' => $author->id]);
     }
 
     /**
-     * Import single author used by automated agents.
-     * Accepts minimal payload: name, describe, describe_locale, wikidata_id
+     * Import a single author without mutating an existing match.
      */
     public function importSimple(Request $request): array {
-        $input = $request->only(['name', 'describe', 'describe_locale', 'wikidata_id']);
+        $input = $request->only(array_merge(
+            ['name', 'describe', 'describe_locale', 'wikidata_id'],
+            array_keys(self::AUTHOR_RELATION_ID_MODELS)
+        ));
 
-        $validator = Validator::make($input, [
+        $validator = Validator::make($input, array_merge([
             'name'            => 'required|string|min:1|max:50',
             'describe'        => 'nullable|string|max:2000',
             'describe_locale' => ['nullable', 'string', 'max:10', Rule::in(self::IMPORT_DESCRIBE_LOCALES)],
             'wikidata_id'     => 'nullable|integer|min:1'
-        ]);
+        ], $this->authorRelationIdRules()));
 
         if ($validator->fails()) {
             return $this->responseFail($validator->errors()->toArray(), 'invalid', Controller::$CODE['invalid'] ?? 422);
         }
+
+        $input = $validator->validated();
 
         $name = trim($input['name']);
         if ($name === '' || preg_match('/^[\p{P}\p{S}0-9]+$/u', $name)) {
             return $this->responseFail([], 'invalid name', Controller::$CODE['invalid'] ?? 422);
         }
 
-        $describe       = $input['describe']        ?? null;
-        $describeLocale = $input['describe_locale'] ?? 'zh-CN';
+        $describe          = $input['describe']        ?? null;
+        $describeLocale    = $input['describe_locale'] ?? 'zh-CN';
+        $authorRelationIds = $this->extractAuthorRelationIds($input);
 
         // 1. wikidata branch
         if (!empty($input['wikidata_id'])) {
@@ -155,6 +181,11 @@ class AuthorAPIController extends Controller {
                 $author = $repo->importFromWikidata($wiki, optional($request->user())->id);
                 if ($describe) {
                     $author->setTranslation('describe_lang', $describeLocale, $describe);
+                }
+                if ($authorRelationIds !== []) {
+                    $author->fill($authorRelationIds);
+                }
+                if ($describe || $authorRelationIds !== []) {
                     $author->save();
                 }
 
@@ -162,11 +193,11 @@ class AuthorAPIController extends Controller {
             }
 
             // create minimal record if wikidata not found
-            $author = Author::create([
+            $author = Author::create(array_merge([
                 'name_lang'      => [$this->getDefaultLocale() => $name],
                 'wikidata_id'    => $wikidataId,
                 'upload_user_id' => optional($request->user())->id
-            ]);
+            ], $authorRelationIds));
 
             if ($describe) {
                 $author->setTranslation('describe_lang', $describeLocale, $describe);
@@ -181,10 +212,10 @@ class AuthorAPIController extends Controller {
         $candidates = $this->findCandidates($norm);
 
         if ($candidates->count() === 0) {
-            $author = Author::create([
+            $author = Author::create(array_merge([
                 'name_lang'      => [$this->getDefaultLocale() => $name],
                 'upload_user_id' => optional($request->user())->id
-            ]);
+            ], $authorRelationIds));
             if ($describe) {
                 $author->setTranslation('describe_lang', $describeLocale, $describe);
                 $author->save();
@@ -229,6 +260,19 @@ class AuthorAPIController extends Controller {
         })->values();
 
         return $this->responseSuccess(['status' => 'ambiguous', 'candidates' => $cands], 'Multiple authors match');
+    }
+
+    private function authorRelationIdRules(): array {
+        $rules = [];
+        foreach (self::AUTHOR_RELATION_ID_MODELS as $field => $model) {
+            $rules[$field] = ['nullable', 'integer', Rule::exists($model, 'id')->whereNull('deleted_at')];
+        }
+
+        return $rules;
+    }
+
+    private function extractAuthorRelationIds(array $input): array {
+        return array_intersect_key($input, self::AUTHOR_RELATION_ID_MODELS);
     }
 
     private function normalizeName(string $name): string {

@@ -143,6 +143,9 @@ curl -X POST "$WIKI_API_BASE/author/search" \
 
 - `describe_locale` 只允许 `zh-CN` 和 `en`
 - 未提交 `describe_locale` 时，默认按 `zh-CN` 写入简介
+- `dynasty_id`、`nation_id` 都是可选字段；若提交，必须分别引用已存在的 `dynasty.id`、`nation.id`
+- `dynasty_id`、`nation_id` 可显式传 `null`，表示新作者不设置对应关联
+- 当本次导入命中已有作者并返回 `status=existed` 时，不会覆盖已有作者的 `dynasty_id` / `nation_id`；如需补写或修正，请使用 `POST /author/update/{id}`
 
 判定逻辑摘要：
 
@@ -158,7 +161,7 @@ curl -X POST "$WIKI_API_BASE/author/search" \
 ```bash
 curl -X POST "$WIKI_API_BASE/author/import" \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"name":"Li Bai","wikidata_id":12345,"describe":"Tang dynasty poet"}'
+  -d '{"name":"Li Bai","wikidata_id":12345,"describe":"Tang dynasty poet","dynasty_id":48,"nation_id":1}'
 ```
 
 示例 curl（仅名称）：
@@ -171,7 +174,7 @@ curl -X POST "$WIKI_API_BASE/author/import" \
 
 ### 3.4 POST /author/update/{id}
 
-用途：更新一位已存在作者的基础信息。当前接口主要用于补充或修正作者名称、简介和生日字段。
+用途：更新一位已存在作者的基础信息。当前接口主要用于补充或修正作者名称、简介、生日字段，以及可选的朝代 / 国家 ID。
 
 控制器：`AuthorAPIController@update`
 
@@ -190,7 +193,9 @@ curl -X POST "$WIKI_API_BASE/author/import" \
   "name": {"zh-CN": "李白", "en": "Li Bai"},
   "desc": {"zh-CN": "唐代诗人"},
   "birth": "0701-02",
-  "birth_fields": "month"
+  "birth_fields": "month",
+  "dynasty_id": 48,
+  "nation_id": 1
 }
 ```
 
@@ -200,10 +205,13 @@ curl -X POST "$WIKI_API_BASE/author/import" \
 - `id` 找不到对应 author 时，返回失败响应
 - `name` 会直接写入 `author.name_lang`
 - `desc` 会直接写入 `author.describe_lang`
+- `dynasty_id`、`nation_id` 若提交，必须分别是已存在的 `dynasty.id`、`nation.id`
+- `dynasty_id`、`nation_id` 可显式传 `null`，表示清空对应关联
 - `birth_fields` 支持 `year`、`month`、`day`
 - `birth_fields = year` 时，`birth` 应为年份数字，例如 `0701`
 - `birth_fields = month` 时，`birth` 应为 `YYYY-MM`，例如 `0701-02`
 - `birth_fields = day` 时，`birth` 应为 `YYYY-MM-DD`，例如 `0701-02-28`
+- 未提交的 `name`、`desc`、`dynasty_id`、`nation_id` 会保持原值
 - 当前接口不会清空未提交的生日分量；它只会按 `birth_fields` 覆盖对应的 `birth_year` / `birth_month` / `birth_day`
 
 成功返回：
@@ -222,7 +230,7 @@ curl -X POST "$WIKI_API_BASE/author/import" \
 ```bash
 curl -X POST "$WIKI_API_BASE/author/update/123" \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"name":{"zh-CN":"李白"},"desc":{"zh-CN":"唐代诗人"},"birth":"0701","birth_fields":"year"}'
+  -d '{"name":{"zh-CN":"李白"},"desc":{"zh-CN":"唐代诗人"},"birth":"0701","birth_fields":"year","dynasty_id":48,"nation_id":1}'
 ```
 
 ### 3.5 POST /poem/q
@@ -594,6 +602,8 @@ curl -X POST https://example.com/api/v1/poem/q?mode=poem-select \
 | name           | author/import | 作者名称（多语言初始只写默认 locale）                                                                |
 | describe       | author/import | 作者简介，可选；写入 `describe_lang` 对应 locale                                                    |
 | describe_locale| author/import | 作者简介的 locale，可选；只允许 `zh-CN` 和 `en`，未提交时默认 `zh-CN`                              |
+| dynasty_id     | author/import, author/update | 朝代 ID，可选；需是已存在的 `dynasty.id`（见附录 10.3）                                  |
+| nation_id      | author/import, author/update | 国家 / 民族 ID，可选；需是已存在的 `nation.id`                                            |
 | wikidata_id    | author/import | Wikidata 实体 ID                                                                                     |
 | name           | author/update | 作者名称；直接写入 `author.name_lang`                                                               |
 | desc           | author/update | 作者简介；直接写入 `author.describe_lang`                                                           |
@@ -619,7 +629,7 @@ curl -X POST https://example.com/api/v1/poem/q?mode=poem-select \
 
 ---
 
-## 10. 附录：数据字典（Languages / Genres / …）
+## 10. 附录：数据字典（Languages / Genres / Dynasties / …）
 
 ### 10.1 Languages（Language ID / Locale）
 
@@ -698,3 +708,85 @@ Supported poem genres:
 | 11  | 词       |
 | 12  | 曲       |
 | 13  | 现代诗   |
+
+### 10.3 Dynasties（Dynasty ID & Name）
+
+Supported dynasties:
+
+| id | name |
+| -- | ---- |
+| 1 | 夏朝 |
+| 2 | 商朝 |
+| 3 | 西周 |
+| 4 | 东周 |
+| 5 | 春秋 |
+| 6 | 战国 |
+| 7 | 秦朝 |
+| 8 | 西汉 |
+| 9 | 东汉 |
+| 10 | 三国 |
+| 11 | 曹魏 |
+| 12 | 蜀汉 |
+| 13 | 孙吴 |
+| 14 | 西晋 |
+| 15 | 东晋 |
+| 16 | 十六国 |
+| 17 | 前赵（汉赵） |
+| 18 | 成汉 |
+| 19 | 前凉 |
+| 20 | 后赵 |
+| 21 | 前燕 |
+| 22 | 前秦 |
+| 23 | 后秦 |
+| 24 | 后燕 |
+| 25 | 西秦 |
+| 26 | 后凉 |
+| 27 | 南凉 |
+| 28 | 南燕 |
+| 29 | 西凉 |
+| 30 | 胡夏 |
+| 31 | 北燕 |
+| 32 | 北凉 |
+| 33 | 冉魏 |
+| 34 | 西燕 |
+| 35 | 西蜀（后蜀） |
+| 36 | 南北朝-北朝 |
+| 37 | 北魏 |
+| 38 | 东魏 |
+| 39 | 西魏 |
+| 40 | 北齐 |
+| 41 | 北周 |
+| 42 | 南北朝-南朝 |
+| 43 | 刘宋 |
+| 44 | 萧齐 |
+| 45 | 南朝梁 |
+| 46 | 南陈 |
+| 47 | 隋朝 |
+| 48 | 唐朝 |
+| 49 | 五代十国 |
+| 50 | 后梁 |
+| 51 | 后唐 |
+| 52 | 后晋 |
+| 53 | 后汉 |
+| 54 | 后周 |
+| 55 | 前蜀 |
+| 56 | 后蜀 |
+| 57 | 杨吴 |
+| 58 | 南唐 |
+| 59 | 吴越 |
+| 60 | 闽国 |
+| 61 | 马楚 |
+| 62 | 南汉 |
+| 63 | 南平 |
+| 64 | 北汉 |
+| 65 | 北宋 |
+| 66 | 南宋 |
+| 67 | 辽国 |
+| 68 | 大理 |
+| 69 | 西夏 |
+| 70 | 金朝 |
+| 71 | 元朝 |
+| 72 | 明朝 |
+| 73 | 清朝 |
+| 74 | 近代 |
+| 75 | 现代 |
