@@ -644,24 +644,38 @@ Supported Languages:
 | 15  | اَلْعَرَبِيَّةُ                                 | 阿拉伯语     | ar      |
 | 16  | עִבְרִית                                   | 希伯来语     | he      |
 | 46  | अवधी                                    | 阿瓦德语     | awa     |
+| 57  | Belarusian                              | 白俄罗斯语   | be      |
 | 60  | български език                          | 保加利亚语   | bg      |
 | 68  | བོད་སྐད།                                    | 藏文         | bo      |
+| 82  | Catalan                                 | 加泰罗尼亚语 | ca      |
 | 103 | čeština                                 | 捷克语       | cs      |
 | 108 | dansk                                   | 丹麦语       | da      |
 | 128 | eesti keel                              | 爱沙尼亚语   | et      |
 | 132 | زبان فارسی                              | 波斯語       | fa      |
+| 135 | Finnish                                 | 芬兰语       | fi      |
 | 160 | Galego                                  | 加利西亚语   | gl      |
+| 165 | Ancient Greek                           | 古希腊语     | grc     |
 | 178 | hrvatski jezik                          | 克罗地亚语   | hr      |
+| 190 | Icelandic                               | 冰岛语       | is      |
 | 229 | Latine                                  | 拉丁语       | la      |
+| 232 | Luxembourgish                           | 卢森堡语     | lb      |
+| 247 | Lithuanian                              | 立陶宛语     | lt      |
+| 251 | Latvian                                 | 拉脱维亚语   | lv      |
 | 263 | македонски јазик                        | 马其顿语     | mk      |
+| 274 | Maltese                                 | 马耳他语     | mt      |
 | 292 | Nederlands                              | 荷兰语       | nl      |
 | 294 | norsk                                   | 挪威语       | no      |
+| 306 | Occitan                                 | 奥克语       | oc      |
+| 347 | Romanian                                | 罗马尼亚语   | ro      |
 | 367 | Sängö                                   | 桑戈语       | sg      |
+| 379 | Slovak                                  | 斯洛伐克语   | sk      |
 | 381 | slovenščina                             | 斯洛文尼亚语 | sl      |
 | 391 | Gjuha shqipe                            | 阿尔巴尼亚语 | sq      |
+| 392 | Serbian                                 | 塞尔维亚语   | sr      |
 | 416 | Wikang Tagalog                          | 他加禄语     | tl      |
 | 421 | Türkçe                                  | 土耳其语     | tr      |
 | 436 | Українська мова                         | 乌克兰语     | uk      |
+| 466 | Yiddish                                 | 意第绪语     | yi      |
 | 487 | ئەرەب ھەرپلىرى ئاساسىدىكى ئۇيغۇر يېزىقى | 传统维文     | ug-arab |
 | 491 | 繁體中文                                | 繁体中文     | zh-hant |
 | 493 | Esperanto                               | 世界语       | eo      |
