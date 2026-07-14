@@ -688,6 +688,7 @@ Supported Languages:
 | 466 | Yiddish                                 | 意第绪语     | yi      |
 | 487 | ئەرەب ھەرپلىرى ئاساسىدىكى ئۇيغۇر يېزىقى | 传统维文     | ug-arab |
 | 491 | 繁體中文                                | 繁体中文     | zh-hant |
+| 492 | magyar                                  | 匈牙利语     | hu      |
 | 493 | Esperanto                               | 世界语       | eo      |
 
 ### 10.2 Poem Genres（Genre ID & Name）
