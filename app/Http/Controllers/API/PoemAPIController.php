@@ -483,6 +483,7 @@ class PoemAPIController extends Controller {
 
         $translatorsArr = $poem->translatorsApiArr;
         $item           = [
+            'id'                     => $poem->id,
             'fake_id'                => $poem->fake_id,
             'title'                  => $poem->title,
             'subtitle'               => $poem->subtitle,
@@ -512,6 +513,7 @@ class PoemAPIController extends Controller {
                 $topOriginal->loadMissing(['poetAuthor', 'translatorAuthor']);
 
                 $original = [
+                    'id'                         => $topOriginal->id,
                     'fake_id'                    => $topOriginal->fake_id,
                     'title'                      => $topOriginal->title,
                     'subtitle'                   => $poem->subtitle,

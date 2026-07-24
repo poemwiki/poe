@@ -10,7 +10,7 @@ API Documentation：[PoemWiki Open API Documentation](https://api-doc.poemwiki.o
 - 作者更新：`POST /author/update/{id}`
 - 诗歌检索（仅支持 poem-select 模式）：`POST /poem/q` （`PoemAPIController@query`）
 - 诗歌批量导入：`POST /poem/import` 
-- 获取诗歌详情数据：`GET /poem/info/{fakeId}` 详见 https://api-doc.poemwiki.org/poem-details-by-fakeid-357064434e0
+- 获取诗歌详情数据：`GET /poem/info/{fakeId}`；响应中的 `data.id` 可直接作为译作导入的 `original_id`。详见 https://api-doc.poemwiki.org/poem-details-by-fakeid-357064434e0
 - Detect Language：`POST /poem/detect` 详见 https://api-doc.poemwiki.org/detect-language-270708886e0
 
 本文面向需要自动化批量向 PoemWiki 导入（或同步）作者与诗歌数据的智能体（AI Agent）或脚本开发者，介绍端到端流程、字段、校验、去重策略与错误处理。
@@ -41,6 +41,7 @@ API Documentation：[PoemWiki Open API Documentation](https://api-doc.poemwiki.o
   - 标题、正文、语言；
   - `poet_id` 可为 数值类型的 author id 或 字符串 `Q<wikidata_id>`（自动解析/创建）；
   - `translator_ids` 同样支持 `Q<wikidata_id>` 自动创建。
+  - 若录入译作且已知原作 `fakeId`，先调用 `GET /poem/info/{fakeId}`，将响应的 `data.id` 写入译作的 `original_id`；响应中的 `data.original_poem.id` 也可用于关联该译作的顶层原作。
   - 可选：先用 `POST /poem/q?mode=poem-select` 通过关键句片段做重复探测，过滤明显重复。
 4. 聚合 ≤200 条为一批调用 `POST /poem/import`。
 5. 解析响应数组：成功元素为 URL；失败元素为 `{ errors: {...} }`，按 payload 的索引定位。
