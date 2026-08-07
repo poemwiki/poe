@@ -51,6 +51,7 @@ class UserBind extends Model {
         'wechat-scan' => 1, // 微信扫码登录
         'weapp'       => 2, // 微信小程序登录
     ];
+    public const OPEN_ID_LOCK_INDEX = 'user_bind_info_active_openid_lock_index';
 
     public function getActivitylogOptions(): LogOptions {
         return LogOptions::defaults()

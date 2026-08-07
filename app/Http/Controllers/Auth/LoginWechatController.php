@@ -9,8 +9,10 @@ use App\Models\UserBind;
 use App\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class LoginWechatController extends Controller {
     //    use RedirectsUsers;
@@ -28,43 +30,62 @@ class LoginWechatController extends Controller {
         // Log::info('Login from wechat webview, weixin server invoke login function.');
         $wechatUser = session('wechat.oauth_user.default'); // 拿到授权用户资料
 
-        // Log::info('wechat webview user info' . json_encode($wechatUser));
-        if ($userBind = $this->getUserBindInfoByOpenID($wechatUser->raw['openid'])) {
-            // 如果小程序绑定的开放平台账号变更，union_id 也会变更，所以需要将同一 user 的 weapp 和 wechat 的绑定记录的 union_id 同步变更
-            if ($wechatUser->raw['unionid'] && $userBind->union_id !== $wechatUser->raw['unionid']) {
-                UserBind::where('user_id', $userBind->user_id)
-                    ->whereIn('bind_ref', [
-                        UserBind::BIND_REF['weapp'],
-                        UserBind::BIND_REF['wechat'],
-                        UserBind::BIND_REF['wechat-scan']
-                    ])->update([
-                        ['union_id' => $wechatUser->raw['unionid']]
-                    ]);
+        $unionID = !empty($wechatUser->raw['unionid']) ? $wechatUser->raw['unionid'] : '';
+
+        // 对不存在的身份进行间隙加锁时，事务必须使用 REPEATABLE READ 隔离级别。
+        DB::statement('SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ');
+        $login = DB::transaction(function () use ($unionID, $wechatUser): array {
+            $unionBinds = $unionID !== ''
+                ? $this->getUserBindInfoByUnionID($unionID, null, true)
+                : collect();
+            $unionUserIDs = $unionBinds->pluck('user_id')->unique()->values();
+            if ($unionUserIDs->count() > 1) {
+                throw new RuntimeException('The WeChat unionid is bound to multiple users.');
             }
 
-            $this->guard()->login(User::find($userBind->user_id));
-        } else {
-            // 注册过小程序，还未用微信登录过web版，有相同 unionid 的 BIND_REF['weapp'] 的 userBind, 无 BIND_REF['wechat'] 的 userBind
-            $weappBind = $wechatUser->raw['unionid'] ? $this->getUserBindInfoByUnionID($wechatUser->raw['unionid'], UserBind::BIND_REF['weapp']) : null;
+            $userBind = $this->getUserBindInfoByOpenID(
+                $wechatUser->raw['openid'],
+                UserBind::BIND_REF['wechat'],
+                true
+            );
 
-            if ($weappBind) {
-                $newUser = $weappBind->user;
-            } else {
-                // TODO user.name should be unique
-                $newUser = User::create([
+            if ($userBind) {
+                if ($unionUserIDs->isNotEmpty() && $unionUserIDs->first() !== $userBind->user_id) {
+                    throw new RuntimeException('The WeChat openid and unionid resolve to different users.');
+                }
+
+                // 小程序迁移主体可能导致 union_id 变更，需要同步该用户所有微信渠道的绑定记录。
+                if ($unionID !== '' && $userBind->union_id !== $unionID) {
+                    UserBind::where('user_id', $userBind->user_id)
+                        ->whereIn('bind_ref', [
+                            UserBind::BIND_REF['weapp'],
+                            UserBind::BIND_REF['wechat'],
+                            UserBind::BIND_REF['wechat-scan']
+                        ])->update([
+                            'union_id'       => $unionID,
+                            'union_id_crc32' => Str::crc32($unionID),
+                        ]);
+                }
+
+                return ['user' => $userBind->user, 'registeredUser' => null];
+            }
+
+            // 当前微信网页渠道没有有效的 openid 绑定时，复用 unionid 在任意微信渠道绑定的用户；否则创建新用户。
+            $user = $unionUserIDs->isNotEmpty()
+                ? User::findOrFail($unionUserIDs->first())
+                : User::create([
                     'name'        => $wechatUser->nickname . '[from-wechat]',
                     'email'       => $wechatUser->email ?? '',
-                    'invite_code' => hash('crc32', sha1(2 . $wechatUser->email)),
+                    'invite_code' => hash('crc32', sha1(2 . ($wechatUser->email ?? ''))),
                     'invited_by'  => 2,
                     'password'    => '',
                     'avatar'      => $wechatUser->raw['headimgurl']
                 ]);
-                event(new Registered($newUser));
-            }
+
             UserBind::create([
                 'open_id'     => $wechatUser->raw['openid'],
-                'union_id'    => $wechatUser->raw['unionid'] ?? '',
-                'user_id'     => $newUser->id,
+                'union_id'    => $unionID,
+                'user_id'     => $user->id,
                 'bind_status' => 1,
                 'bind_ref'    => UserBind::BIND_REF['wechat'],
                 'nickname'    => $wechatUser->nickname,
@@ -73,9 +94,16 @@ class LoginWechatController extends Controller {
                 'info'        => json_encode($wechatUser)
             ]);
 
+            return [
+                'user'           => $user,
+                'registeredUser' => $unionUserIDs->isEmpty() ? $user : null,
+            ];
+        }, 5);
 
-            $this->guard()->login($newUser);
+        if ($login['registeredUser']) {
+            event(new Registered($login['registeredUser']));
         }
+        $this->guard()->login($login['user']);
 
         return redirect(request()->get('ref') ?? '');
     }
@@ -93,34 +121,47 @@ class LoginWechatController extends Controller {
     /**
      * @param $openID
      * @param $bindRef
-     * @TODO move it to BindInfoRepository
+     * @TODO 移至 BindInfoRepository。
      * @return UserBind|null
      */
-    public function getUserBindInfoByOpenID($openID, $bindRef = UserBind::BIND_REF['wechat']) {
-        try {
-            return UserBind::where([
-                'open_id_crc32' => Str::crc32($openID),
-                'open_id'       => $openID,
-                'bind_status'   => 1,
-                'bind_ref'      => $bindRef
-            ])
-                ->first();
-        } catch (\Exception $exception) {
-            return null;
+    public function getUserBindInfoByOpenID(
+        $openID,
+        $bindRef = UserBind::BIND_REF['wechat'],
+        bool $lockForUpdate = false
+    ) {
+        $query = UserBind::where([
+            'open_id_crc32' => Str::crc32($openID),
+            'open_id'       => $openID,
+            'bind_ref'      => $bindRef,
+            'bind_status'   => 1,
+        ]);
+        if ($lockForUpdate) {
+            $query->forceIndex(UserBind::OPEN_ID_LOCK_INDEX)->lockForUpdate();
         }
+
+        return $query->first();
     }
 
-    public function getUserBindInfoByUnionID($unionID, $bindRef = UserBind::BIND_REF['wechat']) {
-        try {
-            return UserBind::where([
-                'union_id_crc32' => Str::crc32($unionID),
-                'union_id'       => $unionID,
-                'bind_status'    => 1,
-                'bind_ref'       => $bindRef
-            ])
-                ->first();
-        } catch (\Exception $exception) {
-            return null;
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, UserBind>
+     */
+    public function getUserBindInfoByUnionID(
+        $unionID,
+        ?int $bindRef = UserBind::BIND_REF['wechat'],
+        bool $lockForUpdate = false
+    ) {
+        $query = UserBind::where([
+            'union_id_crc32' => Str::crc32($unionID),
+            'union_id'       => $unionID,
+            'bind_status'    => 1,
+        ]);
+        if (!is_null($bindRef)) {
+            $query->where('bind_ref', '=', $bindRef);
         }
+        if ($lockForUpdate) {
+            $query->lockForUpdate();
+        }
+
+        return $query->get();
     }
 }

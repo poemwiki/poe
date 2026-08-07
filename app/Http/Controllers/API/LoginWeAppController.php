@@ -9,8 +9,10 @@ use EasyWeChat\Factory;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class LoginWeAppController extends Controller {
     private \EasyWeChat\MiniProgram\Application $weApp;
@@ -63,55 +65,78 @@ class LoginWeAppController extends Controller {
         $email            = $request->email    ?? '';
         // $avatar = str_replace('/132', '/0', $request->avatar);//拿到分辨率高点的头像
 
-        // 找到 openid 对应的用户
-        // TODO 考虑同一unionid下不同openid的虚拟身份（欢乐马、神经蛙等）
-        // TODO 考虑解绑情况
-        $userBind = $weappOpenid ? $this->getUserBindInfoByOpenID($weappOpenid, UserBind::BIND_REF['weapp'], 1) : null;
+        $unionID = isset($data['unionid']) && !empty($data['unionid']) ? $data['unionid'] : '';
 
-        if ($userBind) {
-            // 由于小程序迁移主体，union_id 变更，需要将同一 user 的 weapp 和 wechat 的绑定记录的 union_id 同步变更
-            if (isset($data['unionid']) && !empty($data['unionid']) && $userBind->union_id !== $data['unionid']) {
-                UserBind::where('user_id', $userBind->user_id)
-                    ->whereIn('bind_ref', [
-                        UserBind::BIND_REF['weapp'],
-                        UserBind::BIND_REF['wechat'],
-                        UserBind::BIND_REF['wechat-scan']
-                    ])->update([
-                        'union_id' => $data['unionid']
-                    ]);
+        // 对不存在的身份进行间隙加锁时，事务必须使用 REPEATABLE READ 隔离级别。
+        DB::statement('SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ');
+        $login = DB::transaction(function () use (
+            $avatar,
+            $data,
+            $email,
+            $gender,
+            $nickName,
+            $unionID,
+            $weappOpenid,
+            $weixinSessionKey
+        ): array {
+            $unionBinds = $unionID !== ''
+                ? $this->getUserBindInfoByUnionID($unionID, null, true)
+                : collect();
+            $unionUserIDs = $unionBinds->pluck('user_id')->unique()->values();
+            if ($unionUserIDs->count() > 1) {
+                throw new RuntimeException('The WeChat unionid is bound to multiple users.');
             }
 
-            // 已经登录过小程序
-            $attributes = [
-                'updated_at'        => now(),
-                'open_id'           => $weappOpenid,
-                'nickname'          => $nickName,
-                'avatar'            => $avatar,
-                'gender'            => $gender,
-                'info'              => json_encode($data),
-                'weapp_session_key' => $weixinSessionKey
-            ];
-            if (isset($data['unionid']) && !empty($data['unionid'])) {
-                $attributes['union_id'] = $data['unionid'];
+            // 查找当前小程序渠道的有效 openid 绑定，bind_status = 0 的解绑记录不参与登录。
+            // TODO 当业务需要支持同一 unionid 下的多个虚拟身份（欢乐马、神经蛙等）时，需要重新定义用户归并规则。
+            $userBind = $this->getUserBindInfoByOpenID(
+                $weappOpenid,
+                UserBind::BIND_REF['weapp'],
+                true
+            );
+
+            if ($userBind) {
+                if ($unionUserIDs->isNotEmpty() && $unionUserIDs->first() !== $userBind->user_id) {
+                    throw new RuntimeException('The WeChat openid and unionid resolve to different users.');
+                }
+
+                // 小程序迁移主体可能导致 union_id 变更，需要同步该用户所有微信渠道的绑定记录。
+                if ($unionID !== '' && $userBind->union_id !== $unionID) {
+                    UserBind::where('user_id', $userBind->user_id)
+                        ->whereIn('bind_ref', [
+                            UserBind::BIND_REF['weapp'],
+                            UserBind::BIND_REF['wechat'],
+                            UserBind::BIND_REF['wechat-scan']
+                        ])->update([
+                            'union_id'       => $unionID,
+                            'union_id_crc32' => Str::crc32($unionID),
+                        ]);
+                }
+
+                $attributes = [
+                    'updated_at'        => now(),
+                    'open_id'           => $weappOpenid,
+                    'nickname'          => $nickName,
+                    'avatar'            => $avatar,
+                    'gender'            => $gender,
+                    'info'              => json_encode($data),
+                    'weapp_session_key' => $weixinSessionKey
+                ];
+                if ($unionID !== '') {
+                    $attributes['union_id'] = $unionID;
+                }
+                $userBind->update($attributes);
+
+                return ['userBind' => $userBind, 'registeredUser' => null];
             }
 
-            // 更新用户数据
-            $userBind->update($attributes);
-            $user = $userBind->user;
-            $user->save();
-        } else {
-            // 以下登录逻辑适用于：
-            // 1. 从未注册过的用户
-            // 2. 注册过网站，但还未用微信登录过，没有任何微信相关的 userBind
-            // 3. 用微信登录过web版，还未登录过小程序，有相同 unionid 且 BIND_REF['wechat'] 的 userBind, 无 BIND_REF['weapp'] 的 userBind
-
-            $wechatBind = isset($data['unionid']) && !empty($data['unionid']) ? $this->getUserBindInfoByUnionID($data['unionid'], UserBind::BIND_REF['wechat'], 1) : null;
-
-            if ($wechatBind) {
-                $newUser = $wechatBind->user;
-            } else {
-                // TODO user.name should be unique
-                $newUser = User::create([
+            // 当前小程序渠道没有有效的 openid 绑定：
+            // 1. unionid 已在任意微信渠道绑定时，复用对应用户。
+            // 2. unionid 没有有效绑定时，创建新用户。
+            // 随后为当前小程序渠道创建有效绑定。
+            $user = $unionUserIDs->isNotEmpty()
+                ? User::findOrFail($unionUserIDs->first())
+                : User::create([
                     'name'        => $nickName . '[from-weapp]',
                     'email'       => $email,
                     'nickname'    => $nickName,
@@ -121,14 +146,12 @@ class LoginWeAppController extends Controller {
                     'invited_by'  => 2,
                     'password'    => ''
                 ]);
-                event(new Registered($newUser));
-            }
 
             $userBind = UserBind::create([
                 'open_id'           => $weappOpenid,
-                'union_id'          => isset($data['unionid']) ? $data['unionid'] : '',
-                'user_id'           => $newUser->id,
-                'bind_status'       => 1, // TODO 暂无avatar nickname等详细信息时，暂为待绑状态 2
+                'union_id'          => $unionID,
+                'user_id'           => $user->id,
+                'bind_status'       => 1,
                 'bind_ref'          => UserBind::BIND_REF['weapp'],
                 'nickname'          => $nickName,
                 'avatar'            => $avatar,
@@ -136,7 +159,17 @@ class LoginWeAppController extends Controller {
                 'info'              => json_encode($data),
                 'weapp_session_key' => $weixinSessionKey
             ]);
-            // Log::info('new userBind from weapp:', $userBind->toArray());
+
+            return [
+                'userBind'       => $userBind,
+                'registeredUser' => $unionUserIDs->isEmpty() ? $user : null,
+            ];
+        }, 5);
+
+        /** @var UserBind $userBind */
+        $userBind = $login['userBind'];
+        if ($login['registeredUser']) {
+            event(new Registered($login['registeredUser']));
         }
 
         // 直接创建token并设置有效期
@@ -181,49 +214,52 @@ class LoginWeAppController extends Controller {
     }
 
     /**
-     * @param          $openID
-     * @param          $bindRef
-     * @param int|null $bindStatus
-     *                             TODO move it to BindInfoRepository
+     * TODO 移至 BindInfoRepository。
+     *
+     * @param $openID
+     * @param $bindRef
      * @return UserBind|null
      */
-    public function getUserBindInfoByOpenID($openID, $bindRef = UserBind::BIND_REF['weapp'], $bindStatus = null) {
-        try {
-            $q = UserBind::where([
-                'open_id_crc32' => Str::crc32($openID),
-                'open_id'       => $openID,
-                'bind_ref'      => $bindRef
-            ]);
-            if (!is_null($bindStatus)) {
-                $q->where('bind_status', '=', $bindStatus);
-            }
-
-            return $q->first();
-        } catch (\Exception $exception) {
-            return null;
+    public function getUserBindInfoByOpenID(
+        $openID,
+        $bindRef = UserBind::BIND_REF['weapp'],
+        bool $lockForUpdate = false
+    ) {
+        $q = UserBind::where([
+            'open_id_crc32' => Str::crc32($openID),
+            'open_id'       => $openID,
+            'bind_ref'      => $bindRef,
+            'bind_status'   => 1,
+        ]);
+        if ($lockForUpdate) {
+            $q->forceIndex(UserBind::OPEN_ID_LOCK_INDEX)->lockForUpdate();
         }
+
+        return $q->first();
     }
 
     /**
-     * @param          $unionID
-     * @param int      $bindRef
-     * @param int|null $bindStatus
-     * @return UserBind|null
+     * @param     $unionID
+     * @param int $bindRef
+     * @return \Illuminate\Database\Eloquent\Collection<int, UserBind>
      */
-    public function getUserBindInfoByUnionID($unionID, int $bindRef = UserBind::BIND_REF['weapp'], ?int $bindStatus = null) {
-        try {
-            $q = UserBind::where([
-                'union_id_crc32' => Str::crc32($unionID),
-                'union_id'       => $unionID,
-                'bind_ref'       => $bindRef
-            ]);
-            if (!is_null($bindStatus)) {
-                $q->where('bind_status', '=', $bindStatus);
-            }
-
-            return $q->first();
-        } catch (\Exception $exception) {
-            return null;
+    public function getUserBindInfoByUnionID(
+        $unionID,
+        ?int $bindRef = UserBind::BIND_REF['weapp'],
+        bool $lockForUpdate = false
+    ) {
+        $q = UserBind::where([
+            'union_id_crc32' => Str::crc32($unionID),
+            'union_id'       => $unionID,
+            'bind_status'    => 1,
+        ]);
+        if (!is_null($bindRef)) {
+            $q->where('bind_ref', '=', $bindRef);
         }
+        if ($lockForUpdate) {
+            $q->lockForUpdate();
+        }
+
+        return $q->get();
     }
 }
