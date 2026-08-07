@@ -67,9 +67,7 @@ class LoginWeAppController extends Controller {
 
         $unionID = isset($data['unionid']) && !empty($data['unionid']) ? $data['unionid'] : '';
 
-        // 对不存在的身份进行间隙加锁时，事务必须使用 REPEATABLE READ 隔离级别。
-        DB::statement('SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ');
-        $login = DB::transaction(function () use (
+        $loginTransaction = function () use (
             $avatar,
             $data,
             $email,
@@ -89,11 +87,16 @@ class LoginWeAppController extends Controller {
 
             // 查找当前小程序渠道的有效 openid 绑定，bind_status = 0 的解绑记录不参与登录。
             // TODO 当业务需要支持同一 unionid 下的多个虚拟身份（欢乐马、神经蛙等）时，需要重新定义用户归并规则。
-            $userBind = $this->getUserBindInfoByOpenID(
+            $openBinds = $this->getUserBindInfoByOpenID(
                 $weappOpenid,
                 UserBind::BIND_REF['weapp'],
                 true
             );
+            $openUserIDs = $openBinds->pluck('user_id')->unique()->values();
+            if ($openUserIDs->count() > 1) {
+                throw new RuntimeException('The WeChat openid is bound to multiple users.');
+            }
+            $userBind = $openBinds->first();
 
             if ($userBind) {
                 if ($unionUserIDs->isNotEmpty() && $unionUserIDs->first() !== $userBind->user_id) {
@@ -103,6 +106,7 @@ class LoginWeAppController extends Controller {
                 // 小程序迁移主体可能导致 union_id 变更，需要同步该用户所有微信渠道的绑定记录。
                 if ($unionID !== '' && $userBind->union_id !== $unionID) {
                     UserBind::where('user_id', $userBind->user_id)
+                        ->where('bind_status', 1)
                         ->whereIn('bind_ref', [
                             UserBind::BIND_REF['weapp'],
                             UserBind::BIND_REF['wechat'],
@@ -164,7 +168,19 @@ class LoginWeAppController extends Controller {
                 'userBind'       => $userBind,
                 'registeredUser' => $unionUserIDs->isEmpty() ? $user : null,
             ];
-        }, 5);
+        };
+
+        $previousIsolation = DB::selectOne(
+            'SELECT @@SESSION.transaction_isolation AS isolation_level'
+        )->isolation_level;
+
+        try {
+            // 对不存在的身份进行间隙加锁时，事务必须使用 REPEATABLE READ 隔离级别。
+            DB::statement('SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ');
+            $login = DB::transaction($loginTransaction, UserBind::LOGIN_TRANSACTION_ATTEMPTS);
+        } finally {
+            DB::statement('SET SESSION transaction_isolation = ?', [$previousIsolation]);
+        }
 
         /** @var UserBind $userBind */
         $userBind = $login['userBind'];
@@ -218,7 +234,7 @@ class LoginWeAppController extends Controller {
      *
      * @param $openID
      * @param $bindRef
-     * @return UserBind|null
+     * @return \Illuminate\Database\Eloquent\Collection<int, UserBind>
      */
     public function getUserBindInfoByOpenID(
         $openID,
@@ -235,7 +251,7 @@ class LoginWeAppController extends Controller {
             $q->forceIndex(UserBind::OPEN_ID_LOCK_INDEX)->lockForUpdate();
         }
 
-        return $q->first();
+        return $q->orderBy('id')->get();
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace Tests\APIs;
 
 use App\Http\Controllers\API\LoginWeAppController;
+use App\Http\Controllers\Auth\LoginWechatController;
 use App\Models\UserBind;
 use App\User;
 use Illuminate\Auth\Events\Registered;
@@ -140,6 +141,7 @@ class WeChatLoginConcurrencyTest extends TestCase {
     /** @test */
     public function a_binding_query_error_does_not_register_a_user(): void {
         Event::fake([Registered::class]);
+        DB::statement('SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED');
         $controller = $this->miniProgramController();
         $armed      = true;
 
@@ -158,6 +160,60 @@ class WeChatLoginConcurrencyTest extends TestCase {
             $this->assertSame('Forced binding lookup failure.', $exception->getMessage());
         }
 
+        Event::assertNotDispatched(Registered::class);
+        $this->assertSame('READ-COMMITTED', $this->sessionTransactionIsolation());
+    }
+
+    /** @test */
+    public function login_restores_the_connection_isolation_level_after_success(): void {
+        Event::fake([Registered::class]);
+        DB::statement('SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED');
+
+        $response = $this->miniProgramController()->login($this->miniProgramRequest());
+
+        $this->assertNotEmpty($response['data']['access_token']);
+        $this->assertSame('READ-COMMITTED', $this->sessionTransactionIsolation());
+        Event::assertDispatchedTimes(Registered::class, 1);
+    }
+
+    /** @test */
+    public function wechat_web_login_restores_the_connection_isolation_level_after_success(): void {
+        Event::fake([Registered::class]);
+        DB::statement('SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED');
+
+        $this->wechatWebController()->login();
+
+        $this->assertNotNull(auth()->id());
+        $this->assertSame('READ-COMMITTED', $this->sessionTransactionIsolation());
+        Event::assertDispatchedTimes(Registered::class, 1);
+    }
+
+    /** @test */
+    public function wechat_web_login_restores_the_connection_isolation_level_after_query_error(): void {
+        Event::fake([Registered::class]);
+        DB::statement('SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED');
+        $armed = true;
+
+        DB::listen(static function ($query) use (&$armed): void {
+            if ($armed && str_contains($query->sql, 'from `user_bind_info`')) {
+                $armed = false;
+
+                throw new RuntimeException('Forced web binding lookup failure.');
+            }
+        });
+
+        $exception = null;
+
+        try {
+            $this->wechatWebController()->login();
+        } catch (RuntimeException $caught) {
+            $exception = $caught;
+        }
+
+        $this->assertNotNull($exception, 'A web binding lookup failure must abort login.');
+        $this->assertSame('Forced web binding lookup failure.', $exception->getMessage());
+        $this->assertSame('READ-COMMITTED', $this->sessionTransactionIsolation());
+        $this->assertTrue(auth()->guest());
         Event::assertNotDispatched(Registered::class);
     }
 
@@ -194,6 +250,198 @@ class WeChatLoginConcurrencyTest extends TestCase {
         $this->expectExceptionMessage('The WeChat openid and unionid resolve to different users.');
 
         $this->miniProgramController()->login($this->miniProgramRequest());
+    }
+
+    /** @test */
+    public function login_rejects_an_active_openid_bound_to_multiple_users(): void {
+        Event::fake([Registered::class]);
+        $firstUser  = $this->createUser('first-openid-owner');
+        $secondUser = $this->createUser('second-openid-owner');
+
+        foreach ([$firstUser, $secondUser] as $user) {
+            UserBind::create([
+                'open_id'     => $this->openId,
+                'union_id'    => '',
+                'user_id'     => $user->id,
+                'bind_status' => 1,
+                'bind_ref'    => UserBind::BIND_REF['weapp'],
+                'nickname'    => '',
+                'avatar'      => '',
+                'gender'      => 0,
+                'info'        => null,
+            ]);
+        }
+
+        $exception = null;
+
+        try {
+            $this->miniProgramController()->login($this->miniProgramRequest());
+        } catch (RuntimeException $caught) {
+            $exception = $caught;
+        }
+
+        $this->assertNotNull($exception, 'An openid owned by multiple users must not log in.');
+        $this->assertSame('The WeChat openid is bound to multiple users.', $exception->getMessage());
+        Event::assertNotDispatched(Registered::class);
+        $this->assertSame(
+            0,
+            DB::table('oauth_access_tokens')->whereIn('user_id', [$firstUser->id, $secondUser->id])->count()
+        );
+    }
+
+    /** @test */
+    public function wechat_web_login_rejects_an_active_openid_bound_to_multiple_users(): void {
+        Event::fake([Registered::class]);
+        $firstUser  = $this->createUser('first-web-openid-owner');
+        $secondUser = $this->createUser('second-web-openid-owner');
+
+        foreach ([$firstUser, $secondUser] as $user) {
+            UserBind::create([
+                'open_id'     => $this->openId,
+                'union_id'    => '',
+                'user_id'     => $user->id,
+                'bind_status' => 1,
+                'bind_ref'    => UserBind::BIND_REF['wechat'],
+                'nickname'    => '',
+                'avatar'      => '',
+                'gender'      => 0,
+                'info'        => null,
+            ]);
+        }
+
+        $exception = null;
+
+        try {
+            $this->wechatWebController()->login();
+        } catch (RuntimeException $caught) {
+            $exception = $caught;
+        }
+
+        $this->assertNotNull($exception, 'A web openid owned by multiple users must not log in.');
+        $this->assertSame('The WeChat openid is bound to multiple users.', $exception->getMessage());
+        $this->assertTrue(auth()->guest());
+        Event::assertNotDispatched(Registered::class);
+    }
+
+    /** @test */
+    public function login_rejects_an_active_unionid_bound_to_multiple_users(): void {
+        Event::fake([Registered::class]);
+        $firstUser  = $this->createUser('first-unionid-owner');
+        $secondUser = $this->createUser('second-unionid-owner');
+
+        foreach ([$firstUser, $secondUser] as $index => $user) {
+            UserBind::create([
+                'open_id'     => $this->openId . '-union-owner-' . $index,
+                'union_id'    => $this->unionId,
+                'user_id'     => $user->id,
+                'bind_status' => 1,
+                'bind_ref'    => $index === 0 ? UserBind::BIND_REF['weapp'] : UserBind::BIND_REF['wechat'],
+                'nickname'    => '',
+                'avatar'      => '',
+                'gender'      => 0,
+                'info'        => null,
+            ]);
+        }
+
+        $exception = null;
+
+        try {
+            $this->miniProgramController()->login($this->miniProgramRequest());
+        } catch (RuntimeException $caught) {
+            $exception = $caught;
+        }
+
+        $this->assertNotNull($exception, 'A unionid owned by multiple users must not log in.');
+        $this->assertSame('The WeChat unionid is bound to multiple users.', $exception->getMessage());
+        Event::assertNotDispatched(Registered::class);
+        $this->assertSame(
+            0,
+            DB::table('oauth_access_tokens')->whereIn('user_id', [$firstUser->id, $secondUser->id])->count()
+        );
+    }
+
+    /** @test */
+    public function wechat_web_login_rejects_an_active_unionid_bound_to_multiple_users(): void {
+        Event::fake([Registered::class]);
+        $firstUser  = $this->createUser('first-web-unionid-owner');
+        $secondUser = $this->createUser('second-web-unionid-owner');
+
+        foreach ([$firstUser, $secondUser] as $index => $user) {
+            UserBind::create([
+                'open_id'     => $this->openId . '-web-union-owner-' . $index,
+                'union_id'    => $this->unionId,
+                'user_id'     => $user->id,
+                'bind_status' => 1,
+                'bind_ref'    => $index === 0 ? UserBind::BIND_REF['weapp'] : UserBind::BIND_REF['wechat'],
+                'nickname'    => '',
+                'avatar'      => '',
+                'gender'      => 0,
+                'info'        => null,
+            ]);
+        }
+
+        $exception = null;
+
+        try {
+            $this->wechatWebController()->login();
+        } catch (RuntimeException $caught) {
+            $exception = $caught;
+        }
+
+        $this->assertNotNull($exception, 'A web unionid owned by multiple users must not log in.');
+        $this->assertSame('The WeChat unionid is bound to multiple users.', $exception->getMessage());
+        $this->assertTrue(auth()->guest());
+        Event::assertNotDispatched(Registered::class);
+    }
+
+    /** @test */
+    public function login_does_not_rewrite_an_inactive_binding_when_unionid_changes(): void {
+        Event::fake([Registered::class]);
+        $user         = $this->createUser('unionid-migration-user');
+        $inactiveUser = $this->createUser('inactive-unionid-owner');
+
+        $activeBinding = UserBind::create([
+            'open_id'     => $this->openId,
+            'union_id'    => 'previous-active-unionid',
+            'user_id'     => $user->id,
+            'bind_status' => 1,
+            'bind_ref'    => UserBind::BIND_REF['weapp'],
+            'nickname'    => '',
+            'avatar'      => '',
+            'gender'      => 0,
+            'info'        => null,
+        ]);
+        $inactiveBinding = UserBind::create([
+            'open_id'     => $this->openId . '-inactive',
+            'union_id'    => 'repaired-inactive-unionid',
+            'user_id'     => $user->id,
+            'bind_status' => 0,
+            'bind_ref'    => UserBind::BIND_REF['wechat'],
+            'nickname'    => '',
+            'avatar'      => '',
+            'gender'      => 0,
+            'info'        => null,
+        ]);
+        $inactiveUnionIdCrc32 = $inactiveBinding->union_id_crc32;
+        UserBind::create([
+            'open_id'     => $this->openId . '-inactive-union-owner',
+            'union_id'    => $this->unionId,
+            'user_id'     => $inactiveUser->id,
+            'bind_status' => 0,
+            'bind_ref'    => UserBind::BIND_REF['wechat-scan'],
+            'nickname'    => '',
+            'avatar'      => '',
+            'gender'      => 0,
+            'info'        => null,
+        ]);
+
+        $response = $this->miniProgramController()->login($this->miniProgramRequest());
+
+        $this->assertSame($user->id, $response['data']['data']['id']);
+        $this->assertSame($this->unionId, $activeBinding->fresh()->union_id);
+        $this->assertSame('repaired-inactive-unionid', $inactiveBinding->fresh()->union_id);
+        $this->assertSame((string) $inactiveUnionIdCrc32, (string) $inactiveBinding->fresh()->union_id_crc32);
+        Event::assertNotDispatched(Registered::class);
     }
 
     private function releaseWorkersWhenReady(string $barrierDir, int $workerCount): void {
@@ -267,6 +515,22 @@ class WeChatLoginConcurrencyTest extends TestCase {
         return $controller;
     }
 
+    private function wechatWebController(): LoginWechatController {
+        session(['wechat.oauth_user.default' => (object) [
+            'raw' => [
+                'openid'     => $this->openId,
+                'unionid'    => $this->unionId,
+                'headimgurl' => '',
+                'sex'        => 0,
+            ],
+            'nickname' => '登录测试用户',
+            'email'    => '',
+            'avatar'   => '',
+        ]]);
+
+        return new LoginWechatController();
+    }
+
     private function miniProgramRequest(): Request {
         return Request::create('/api/v1/user/weapp-login', 'GET', [
             'code'     => 'verified-code',
@@ -285,6 +549,10 @@ class WeChatLoginConcurrencyTest extends TestCase {
         $this->createdUserIds[] = $user->id;
 
         return $user;
+    }
+
+    private function sessionTransactionIsolation(): string {
+        return DB::selectOne('SELECT @@SESSION.transaction_isolation AS isolation_level')->isolation_level;
     }
 }
 

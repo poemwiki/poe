@@ -53,6 +53,9 @@ class UserBind extends Model {
     ];
     public const OPEN_ID_LOCK_INDEX = 'user_bind_info_active_openid_lock_index';
 
+    // InnoDB 死锁时，Laravel 最多尝试执行登录事务的次数。
+    public const LOGIN_TRANSACTION_ATTEMPTS = 5;
+
     public function getActivitylogOptions(): LogOptions {
         return LogOptions::defaults()
             ->logFillable()

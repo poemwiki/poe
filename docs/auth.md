@@ -127,7 +127,7 @@ protected function create(array $data) {
 - 认证：按 `email` 查用户，验证密码哈希，成功后建立会话或等价登录状态。
 - 重定向：默认 `/poems/random`，支持 `ref` 覆盖。
 
-注：本文档仅覆盖 Web 侧“邮箱 + 密码”登录；API 登录与第三方（微信/小程序）不在范围内。
+注：以上内容仅覆盖 Web 侧“邮箱 + 密码”登录；微信/小程序的并发身份约束在文末单独说明，其他 API 登录不在本文档范围内。
 
 **TypeScript/Next.js 等价哈希（与 Laravel bcrypt 兼容）**
 - Laravel 使用 bcrypt 作为默认哈希算法：参见 `config/hashing.php` 中 `driver = 'bcrypt'`，轮数（成本因子）默认为 `BCRYPT_ROUNDS` 环境变量或 10。
@@ -185,3 +185,24 @@ export async function POST(req: NextRequest) {
 - 运行时选择：Next.js Edge Runtime 无法使用 Node 原生模块；如需 Edge，请改用 `bcryptjs`（纯 JS）或迁移到兼容的方案，但为与 Laravel 完全兼容，建议在 Node 运行时使用 `bcrypt`/`bcryptjs`。
 - 轮数一致性：确保 `ROUNDS` 与 Laravel 的 `BCRYPT_ROUNDS` 一致（默认 10），否则哈希成本差异会影响性能但不影响校验；兼容性校验不依赖相同轮数，只需保留数据库中的哈希原值。
 - `$2y$`/`$2b$` 前缀：Laravel 生成 `$2y$`；大多数 JS 库可直接校验。若出现不兼容，按示例进行前缀标准化再比较。
+
+## 微信登录并发约束
+
+小程序和微信网页登录共享以下身份不变量：
+
+- 只有 `bind_status = 1` 的绑定参与身份解析。
+- 同一 unionid 在所有微信渠道中只能解析到一个用户。
+- 同一渠道的 openid 只能解析到一个用户。
+- 登录事务始终先锁定跨渠道 unionid，再锁定当前渠道 openid，不得改变锁顺序。
+- 用户和绑定必须在同一事务内创建；`Registered` 事件、token 和 Web Session 必须在事务提交后创建。
+
+缺失身份的并发串行化依赖 MySQL InnoDB、`REPEATABLE READ`、`SELECT ... FOR UPDATE` 以及下列普通组合索引：
+
+```text
+openid:  (open_id_crc32, open_id, bind_ref, bind_status)
+unionid: (union_id_crc32, union_id, bind_status)
+```
+
+openid 索引由本仓库 migration 管理。unionid 索引由其他系统管理，本仓库不重复创建；部署、新建环境和灾备恢复时必须确认存在列顺序相同的普通索引，索引名称不作为运行契约。
+
+发布前使用 `SHOW INDEX FROM user_bind_info` 检查列顺序，并用与登录查询相同条件的 `EXPLAIN` 确认 unionid 查询选择上述组合索引。如果缺少合适索引，锁定读可能退化为大范围扫描和加锁，放大登录阻塞与死锁。
