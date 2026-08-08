@@ -117,15 +117,23 @@ EOF
 # 安装Node.js和包管理器
 RUN apk add --no-cache nodejs npm && npm install -g pnpm
 
-# 复制应用文件
-COPY --chown=application:application . /app
-
-# 安装依赖并构建
+# 先安装 PHP 依赖，避免业务代码变更使依赖层缓存失效
+COPY --chown=application:application composer.json composer.lock /app/
 USER application
-RUN if [ -f composer.json ]; then \
-        composer config --no-plugins allow-plugins.easywechat-composer/easywechat-composer true && \
-        composer install --optimize-autoloader --classmap-authoritative --no-dev; \
-    fi
+RUN composer install \
+        --no-dev \
+        --no-interaction \
+        --no-progress \
+        --prefer-dist \
+        --no-scripts \
+        --no-autoloader
+
+# 复制应用文件后生成生产环境 autoload
+COPY --chown=application:application . /app
+RUN composer dump-autoload \
+        --no-dev \
+        --no-interaction \
+        --classmap-authoritative
 
 RUN if [ -f package.json ]; then \
         pnpm install && \
