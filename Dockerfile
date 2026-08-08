@@ -114,11 +114,18 @@ server {
 }
 EOF
 
-# 安装Node.js和包管理器
-RUN apk add --no-cache nodejs npm && npm install -g pnpm
+# 安装 Node.js 和 npm
+RUN apk add --no-cache nodejs npm
 
-# 先安装 PHP 依赖，避免业务代码变更使依赖层缓存失效
-COPY --chown=application:application composer.json composer.lock /app/
+# 先复制依赖清单，避免业务代码变更使依赖层缓存失效
+COPY --chown=application:application \
+    composer.json composer.lock \
+    package.json pnpm-lock.yaml pnpm-workspace.yaml \
+    /app/
+
+# packageManager 是 pnpm 版本的唯一数据源
+RUN npm install --global "$(node --print "require('./package.json').packageManager")"
+
 USER application
 RUN composer install \
         --no-dev \
@@ -128,17 +135,16 @@ RUN composer install \
         --no-scripts \
         --no-autoloader
 
-# 复制应用文件后生成生产环境 autoload
+RUN pnpm install --frozen-lockfile
+
+# 复制应用文件后生成生产环境产物
 COPY --chown=application:application . /app
 RUN composer dump-autoload \
         --no-dev \
         --no-interaction \
         --classmap-authoritative
 
-RUN if [ -f package.json ]; then \
-        pnpm install && \
-        if grep -q '"build":' package.json; then pnpm run build; fi; \
-    fi
+RUN pnpm run build
 
 
 USER root

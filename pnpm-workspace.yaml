@@ -1,0 +1,4 @@
+allowBuilds:
+  '@coreui/coreui': true
+  '@parcel/watcher': true
+  core-js: false
