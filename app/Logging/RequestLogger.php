@@ -23,10 +23,9 @@ class RequestLogger extends RequestLoggerService {
 
         $content = $response->getContent();
         $this->logs->channel('requests')->info('request', [
-            'time'        => now()->toIso8601String(),
             'ip'          => $request->ip(),
             'method'      => $request->method(),
-            'url'         => $request->url(),
+            'path'        => $request->getBaseUrl() . $request->getPathInfo(),
             'status'      => $response->getStatusCode(),
             'duration_ms' => round(Benchmark::duration(config('advanced-logger.request.benchmark')) * 1000, 3),
             // Application body size, before web-server compression; streamed bodies are unknown.

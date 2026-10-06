@@ -30,12 +30,15 @@ class RequestLoggingTest extends TestCase {
         parent::tearDown();
     }
 
-    public function test_request_log_preserves_diagnostic_fields_in_one_json_record(): void {
+    public function test_request_log_preserves_diagnostic_fields_in_one_compact_record(): void {
         $request = Request::create('https://poemwiki.org/index.php/login?token=secret', 'POST', [
             'password' => 'private-password',
         ], [], [], [
             'REMOTE_ADDR'     => '203.0.113.7',
-            'HTTP_USER_AGENT' => "Scanner/1.0 \"quoted\" | forged\r\nentry",
+            'SCRIPT_FILENAME' => '/var/www/public/index.php',
+            'SCRIPT_NAME'     => '/index.php',
+            'PHP_SELF'        => '/index.php/login',
+            'HTTP_USER_AGENT' => "Scanner/1.0 \"quoted\" | %context% \\ forged\r\nentry",
             'HTTP_REFERER'    => 'https://example.com/article?token=secret',
         ]);
         $this->app->instance('request', $request);
@@ -46,19 +49,15 @@ class RequestLoggingTest extends TestCase {
         $this->assertCount(1, $files);
         $lines = file($files[0], FILE_IGNORE_NEW_LINES);
         $this->assertCount(1, $lines);
-        $record = json_decode($lines[0], true, 512, JSON_THROW_ON_ERROR);
-        $this->assertEqualsCanonicalizing([
-            'time', 'ip', 'method', 'url', 'status', 'duration_ms', 'response_bytes', 'ua', 'referer_host',
-        ], array_keys($record));
-        $this->assertSame('203.0.113.7', $record['ip']);
-        $this->assertSame('POST', $record['method']);
-        $this->assertSame('https://poemwiki.org/index.php/login', $record['url']);
-        $this->assertSame(429, $record['status']);
-        $this->assertSame(7, $record['response_bytes']);
-        $this->assertSame($request->userAgent(), $record['ua']);
-        $this->assertSame('example.com', $record['referer_host']);
-        $this->assertGreaterThanOrEqual(0, $record['duration_ms']);
-        $this->assertNotFalse(strtotime($record['time']));
+        $fields = $this->parseRecord($lines[0]);
+        $this->assertSame('203.0.113.7', json_decode($fields[2], true, 512, JSON_THROW_ON_ERROR));
+        $this->assertSame('POST /index.php/login', json_decode($fields[3], true, 512, JSON_THROW_ON_ERROR));
+        $this->assertSame('429', $fields[4]);
+        $this->assertGreaterThanOrEqual(0, (float) $fields[5]);
+        $this->assertSame('7', $fields[6]);
+        $this->assertSame($request->userAgent(), json_decode($fields[7], true, 512, JSON_THROW_ON_ERROR));
+        $this->assertSame('example.com', json_decode($fields[8], true, 512, JSON_THROW_ON_ERROR));
+        $this->assertNotFalse(strtotime($fields[1]));
     }
 
     public function test_application_errors_keep_their_context_and_destination_after_a_request(): void {
@@ -97,9 +96,11 @@ class RequestLoggingTest extends TestCase {
         });
         $this->recordRequest($response);
 
-        $record = json_decode(file_get_contents(glob($this->logDirectory . '/request-*.log')[0]), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertNull($record['response_bytes']);
-        $this->assertSame(200, $record['status']);
+        $fields = $this->parseRecord(trim(file_get_contents(glob($this->logDirectory . '/request-*.log')[0])));
+        $this->assertSame('-', $fields[6]);
+        $this->assertSame('200', $fields[4]);
+        $this->assertSame('-', json_decode($fields[7], true, 512, JSON_THROW_ON_ERROR));
+        $this->assertSame('-', json_decode($fields[8], true, 512, JSON_THROW_ON_ERROR));
     }
 
     /** @dataProvider disabledRequests */
@@ -118,8 +119,17 @@ class RequestLoggingTest extends TestCase {
 
     private function recordRequest(?Response $response = null): void {
         $request = Request::create('https://poemwiki.org/health');
+        $request->headers->remove('User-Agent');
         $this->app->instance('request', $request);
         Benchmark::start('application');
         $this->app['events']->dispatch(new RequestHandled($request, $response ?? new Response('ok')));
+    }
+
+    private function parseRecord(string $line): array {
+        $quoted  = '"(?:[^"\\\\]|\\\\.)*"';
+        $pattern = '/^\[([^\]]+)\] (' . $quoted . ') (' . $quoted . ') (\d{3}) ([\d.]+) (\d+|-) (' . $quoted . ') (' . $quoted . ')$/';
+        $this->assertSame(1, preg_match($pattern, $line, $fields), 'Log must follow the documented positional format.');
+
+        return $fields;
     }
 }

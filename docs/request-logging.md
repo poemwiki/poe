@@ -1,24 +1,35 @@
 # 请求日志与爬虫排查
 
-请求日志沿用 `storage/logs/request-YYYY-MM-DD.log`，每行是一条 JSON。请求记录通过 `RequestHandled` 事件写入独立的 `requests` 通道，不再替换应用错误日志的 handler，也不再重复附加 URL、IP、UA、请求参数和调用位置。
+请求日志沿用 `storage/logs/request-YYYY-MM-DD.log`，每行是一条固定顺序的文本，不重复写字段名、协议和站点域名。请求记录通过 `RequestHandled` 事件写入独立的 `requests` 通道，应用错误日志继续使用原配置。
 
-## 字段
+## 格式
 
-| 字段 | 含义 |
+```text
+[时间] "IP" "方法 路径" 状态码 耗时毫秒 正文字节数 "UA" "来源域名"
+```
+
+例如：
+
+```text
+[2026-10-06T09:29:35+00:00] "43.138.19.222" "GET /poems/contribution/MTA0NDY4MzYzNjM1NjEzMjU=" 200 279.383 4787 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" "poemwiki.org"
+```
+
+| 顺序 | 含义 |
 | --- | --- |
-| `time` | 带时区的记录时间；项目默认 UTC |
-| `ip` | Laravel 根据可信代理配置解析的客户端 IP |
-| `method` | 请求方法 |
-| `url` | 协议、域名和原始路径，保留 `/index.php`，不含查询参数 |
-| `status` | HTTP 响应状态码 |
-| `duration_ms` | 原有 application benchmark 的处理耗时，单位毫秒 |
-| `response_bytes` | 应用响应正文的字节数；流式或文件响应为 `null` |
-| `ua` | 完整 User-Agent；特殊字符按 JSON 转义 |
-| `referer_host` | Referer 的域名；没有时为 `null` |
+| 1 | 带时区的记录时间；项目默认 UTC |
+| 2 | Laravel 根据可信代理配置解析的客户端 IP |
+| 3 | 请求方法和原始路径，保留 `/index.php`，不含协议、站点域名、查询参数 |
+| 4 | HTTP 响应状态码 |
+| 5 | 原有 application benchmark 的处理耗时，单位毫秒 |
+| 6 | 应用响应正文的字节数；流式或文件响应为 `-` |
+| 7 | 完整 User-Agent |
+| 8 | Referer 的域名；没有时为 `"-"` |
+
+可变字符串使用双引号包围，并按 JSON 字符串规则转义引号、反斜杠和控制字符，例如换行写为 `\n`。每条记录始终只占一行，UA 中的空格和竖线不会混入其他字段。缺失的 IP、UA 或来源域名写为 `"-"`。格式化器直接写入各字段，不会将 UA 中的 `%context%` 等文本解释为模板。这里使用的是字符串转义规则，日志本身不再是 JSON 对象。
 
 不记录 Cookie、Authorization、GET/POST 参数或完整 Referer。这样仍能按 IP、UA、路径、频率、状态和响应大小排查采集与扫描，但无法从请求日志还原查询参数。应用异常日志仍使用原来的日志配置。
 
-`response_bytes` 是应用压缩前的正文大小，不是计费出口流量。核算带宽应使用 Nginx 的实际发送字节及云厂商统计；当前服务器还有部分静态资源未记录 access log。
+第 6 列是应用压缩前的正文大小，不是计费出口流量。核算带宽应使用 Nginx 的实际发送字节及云厂商统计；当前服务器还有部分静态资源未记录 access log。
 
 ## 保留期限
 
@@ -44,17 +55,32 @@ php artisan config:cache
 
 ## 查询示例
 
-新格式可直接用 `jq` 分析。切换当天可能混有旧格式，以下命令跳过无法解析为 JSON 的旧记录，因此只统计新格式部分；完整对比应分别解析旧记录，或选择切换后的完整日期。
+下面用 Python 标准库解析固定列并统计 IP、UA。切换当天可能混有旧文本和 JSON，示例只统计匹配新格式的记录；完整对比应分别解析旧格式，或选择切换后的完整日期。
 
 ```bash
-# Top client IPs.
-jq -Rr 'fromjson? | .ip' storage/logs/request-2026-10-07.log | sort | uniq -c | sort -nr | head -20
+python3 - storage/logs/request-2026-10-07.log <<'PY'
+import collections
+import json
+import re
+import sys
 
-# Top user agents.
-jq -Rr 'fromjson? | .ua | @json' storage/logs/request-2026-10-07.log | sort | uniq -c | sort -nr | head -20
-
-# Inspect one client without treating its UA as shell code.
-jq -R 'fromjson? | select(.ip == "203.0.113.7")' storage/logs/request-2026-10-07.log
+quoted = r'"(?:[^"\\]|\\.)*"'
+pattern = re.compile(
+    r'^\[([^\]]+)\] (' + quoted + r') (' + quoted +
+    r') (\d{3}) ([\d.]+) (\d+|-) (' + quoted + r') (' + quoted + r')$'
+)
+ips, agents = collections.Counter(), collections.Counter()
+with open(sys.argv[1], encoding='utf-8') as logs:
+    for line in logs:
+        match = pattern.fullmatch(line.rstrip('\n'))
+        if match:
+            ips[json.loads(match[2])] += 1
+            agents[json.loads(match[7])] += 1
+for label, counts in [('IP', ips), ('UA', agents)]:
+    print(label)
+    for value, count in counts.most_common(20):
+        print(count, json.dumps(value, ensure_ascii=False))
+PY
 ```
 
 反向代理/CDN 接入变化时，需要同步核对 Nginx 和 Laravel 的可信代理配置，不能直接信任任意来源提供的转发 IP 请求头。

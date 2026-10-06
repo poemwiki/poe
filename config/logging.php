@@ -45,11 +45,7 @@ return [
             'path'           => storage_path('logs/request.log'),
             'level'          => 'info',
             'days'           => (int) $requestLogDays,
-            'formatter'      => Monolog\Formatter\LineFormatter::class,
-            'formatter_with' => [
-                'format'                => "%context%\n",
-                'allowInlineLineBreaks' => false,
-            ],
+            'formatter'      => App\Logging\RequestLogFormatter::class,
         ],
 
         'stack' => [
