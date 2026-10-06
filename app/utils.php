@@ -451,7 +451,7 @@ if (!function_exists('isValidUrl')) {
 
 if (!function_exists('canonicalUrl')) {
     /**
-     * Replace URL host with canonical domain from config('app.canonical_domain').
+     * Replace URL host with the canonical domain and remove the front controller prefix.
      * Handles absolute and relative URLs. If URL is relative, build full URL using app URL then replace host.
      *
      * @param string $url
@@ -487,7 +487,7 @@ if (!function_exists('canonicalUrl')) {
             $newBase = $scheme . '://' . rtrim($canonicalHost, '/') . $port;
         }
 
-        $path     = $parts['path'] ?? '/';
+        $path     = preg_replace('#^/index\.php(?:/|$)#', '/', $parts['path'] ?? '/');
         $query    = isset($parts['query']) ? '?' . $parts['query'] : '';
         $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
 

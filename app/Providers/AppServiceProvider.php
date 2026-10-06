@@ -24,6 +24,9 @@ class AppServiceProvider extends ServiceProvider {
      * @return void
      */
     public function boot() {
+        // Do not propagate the front controller from incoming URLs into generated links.
+        URL::formatHostUsing(fn (string $root): string => preg_replace('#/index\.php$#', '', $root));
+
         if (config('app.env') !== 'local') {
             URL::forceScheme('https');
         }
