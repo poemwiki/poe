@@ -4,6 +4,11 @@ use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 
+$requestLogDays = env('REQUEST_LOG_DAYS', 14);
+if (is_bool($requestLogDays) || filter_var($requestLogDays, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]) === false) {
+    throw new InvalidArgumentException('REQUEST_LOG_DAYS must be a non-negative integer (0 means unlimited retention).');
+}
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -35,6 +40,18 @@ return [
     */
 
     'channels' => [
+        'requests' => [
+            'driver'         => 'daily',
+            'path'           => storage_path('logs/request.log'),
+            'level'          => 'info',
+            'days'           => (int) $requestLogDays,
+            'formatter'      => Monolog\Formatter\LineFormatter::class,
+            'formatter_with' => [
+                'format'                => "%context%\n",
+                'allowInlineLineBreaks' => false,
+            ],
+        ],
+
         'stack' => [
             'driver'            => 'stack',
             'channels'          => ['single'],

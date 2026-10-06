@@ -34,3 +34,11 @@ Disallow: /poems/create
 Disallow: /captcha/default
 Disallow: /poems/contribution
 Disallow: /query
+
+# Keep front-controller aliases subject to the same crawl restrictions.
+Disallow: /index.php/login
+Disallow: /index.php/new
+Disallow: /index.php/poems/create
+Disallow: /index.php/captcha/default
+Disallow: /index.php/poems/contribution
+Disallow: /index.php/query

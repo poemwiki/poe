@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
-use Illuminate\Support\Facades\URL;
 use Normalizer;
 
 class AppServiceProvider extends ServiceProvider {
@@ -15,6 +15,7 @@ class AppServiceProvider extends ServiceProvider {
      * @return void
      */
     public function register() {
+        $this->app->bind(\Brackets\AdvancedLogger\Services\RequestLoggerService::class, \App\Logging\RequestLogger::class);
     }
 
     /**
