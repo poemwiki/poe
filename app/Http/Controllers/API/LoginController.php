@@ -67,6 +67,11 @@ class LoginController extends Controller {
         }
 
         if ($this->attemptLogin($request)) {
+            $user = $this->guard()->user();
+            if ($user->password !== '' && !$user->hasVerifiedEmail()) {
+                $this->guard()->logout();
+                return $this->responseError('Email not verified', 403, ['error' => 'email_not_verified']);
+            }
             return $this->sendLoginResponse($request);
         }
 
