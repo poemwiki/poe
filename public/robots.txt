@@ -14,13 +14,13 @@
 #    (___)      |_|      (___)
 #    (___)  ___/___\___   | |
 #     | |  |           |  | |
-#     | |  |___________| /___\ 
+#     | |  |___________| /___\
 #    /___\  |||     ||| //   \\
 #   //   \\ |||     ||| \\   //
 #   \\   // |||     |||  \\ //
 #    \\ // ()__)   (__()
-#          ///       \\\ 
-#         ///         \\\ 
+#          ///       \\\
+#         ///         \\\
 #       _///___     ___\\\_
 #      |_______|   |_______|
 #
@@ -34,6 +34,7 @@ Disallow: /poems/create
 Disallow: /captcha/default
 Disallow: /poems/contribution
 Disallow: /query
+Disallow: /compare
 
 # Keep front-controller aliases subject to the same crawl restrictions.
 Disallow: /index.php/login
@@ -42,3 +43,4 @@ Disallow: /index.php/poems/create
 Disallow: /index.php/captcha/default
 Disallow: /index.php/poems/contribution
 Disallow: /index.php/query
+Disallow: /index.php/compare
