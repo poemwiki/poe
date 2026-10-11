@@ -43,7 +43,7 @@ $childrenCount = count($children);
 
     @if(!$isComparePage)
       @if($poemId !== $currentPageId)
-        <a class="btn-compare btn-compare-add" href="{{route('compare', implode(',', [$currentPageId, $poemId]))}}">+对照</a>
+        <a class="btn-compare btn-compare-add" href="{{urlOrLoginRef(route('compare', implode(',', [$currentPageId, $poemId])))}}">+对照</a>
       @endif
     @else
       @if(array_search($poemId, $idArr) === false)

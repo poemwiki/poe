@@ -113,11 +113,11 @@ $firstLine = $poem->firstLine;
 
               @if($log->description === 'updated' && $key===0)
                 <li title="{{$log->created_at}}"><a
-                    href="{{route('poems/contribution', $poem->fake_id)}}">@lang('poem.latest update'){{get_causer_name($log)}}</a></li>
+                    href="{{urlOrLoginRef(route('poems/contribution', $poem->fake_id))}}">@lang('poem.latest update'){{get_causer_name($log)}}</a></li>
 
               @elseif($log->description === 'created')
                 <li title="{{$log->created_at}}"><a
-                    href="{{route('poems/contribution', $poem->fake_id)}}">@lang('poem.initial upload'){{get_causer_name($log)}}</a></li>
+                    href="{{urlOrLoginRef(route('poems/contribution', $poem->fake_id))}}">@lang('poem.initial upload'){{get_causer_name($log)}}</a></li>
               @endif
 
             @endif
@@ -127,7 +127,7 @@ $firstLine = $poem->firstLine;
         <!-- for poems imported from bedtimepoem, they have no "created" log -->
           @if($showFakeInitLog)
             <li title="{{$poem->created_at}}"><a
-                href="{{route('poems/contribution', $poem->fake_id)}}">@lang('poem.initial upload')PoemWiki</a></li>
+                href="{{urlOrLoginRef(route('poems/contribution', $poem->fake_id))}}">@lang('poem.initial upload')PoemWiki</a></li>
           @endif
         </ol>
 
