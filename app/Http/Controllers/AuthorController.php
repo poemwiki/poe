@@ -8,8 +8,8 @@ use App\Models\Author;
 use App\Models\MediaFile;
 use App\Models\Nation;
 use App\Models\Poem;
-use App\Models\Relatable;
 use App\Models\Wikidata;
+use App\Query\AuthorPoems;
 use App\Repositories\AuthorRepository;
 use App\Repositories\DynastyRepository;
 use App\Repositories\LanguageRepository;
@@ -55,37 +55,36 @@ class AuthorController extends Controller {
                 ->values() :
             collect();
 
-        $sortType = $request->get('sort', 'hottest'); // 'hottest' or 'newest'
+        $input = $request->validate([
+            'sort' => 'sometimes|in:hottest,newest',
+            'type' => 'sometimes|in:original,translation',
+            'page' => 'sometimes|integer|min:1',
+        ]);
+        $sortType = $input['sort'] ?? 'hottest';
+        $type     = $input['type'] ?? 'original';
+        $page     = (int) ($input['page'] ?? 1);
+        $works    = new AuthorPoems();
 
-        $poemsAsPoet = Poem::where(['poet_id' => $id])->whereNotExists(function ($query) {
-            $query->select(DB::raw(1))
-                ->from('relatable')
-                ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem'])
-            ;
-        })->get();
+        if ($request->expectsJson()) {
+            $poems = $works->paginate($author, $type, $sortType, $page);
+            PoemRepository::preloadTranslatorsForPoems($poems->getCollection());
 
-        PoemRepository::preloadTranslatorsForPoems($poemsAsPoet);
-
-        $allOriginalPoems = $poemsAsPoet;
-        if ($author->user) {
-            $allOriginalPoems = $allOriginalPoems->concat($author->user->originalPoemsOwned);
+            return response()->json([
+                'html' => view('authors.poem-items', [
+                    'poems'        => $poems,
+                    'type'         => $type,
+                    'poetLabelMap' => $type === 'translation' ? PoemRepository::getPoetLabelsForPoems($poems->getCollection()) : [],
+                ])->render(),
+                'next_url' => $poems->nextPageUrl(),
+                'total'    => $poems->total(),
+            ]);
         }
 
-        $sortedOriginalPoems = PoemRepository::sortAuthorPoems($allOriginalPoems, $sortType);
-
-        // TODO poem.translator_id should be deprecated
-        $poemsAsTranslatorAuthor = Poem::where(['translator_id' => $id])->whereNotExists(function ($query) {
-            $query->select(DB::raw(1))
-                ->from('relatable')
-                ->whereRaw('relatable.start_id = poem.id and relatable.relation=' . Relatable::RELATION['merged_to_poem']);
-        })->get();
-        $poemsAsRelatedTranslator = $author->poemsAsTranslator()->get();
-        $poemsAsTranslator        = $poemsAsTranslatorAuthor->concat($poemsAsRelatedTranslator)->unique('id');
-
-        $sortedTranslationPoems = PoemRepository::sortAuthorPoems($poemsAsTranslator, $sortType);
-
-        // Optimize poet data loading for translator poems (for fallback cases)
-        $poetLabelMap = PoemRepository::getPoetLabelsForPoems($poemsAsTranslator);
+        $poemsAsPoet       = $works->paginate($author, 'original', $sortType, $type === 'original' ? $page : 1);
+        $poemsAsTranslator = $works->paginate($author, 'translation', $sortType, $type === 'translation' ? $page : 1);
+        PoemRepository::preloadTranslatorsForPoems($poemsAsPoet->getCollection());
+        PoemRepository::preloadTranslatorsForPoems($poemsAsTranslator->getCollection());
+        $poetLabelMap = PoemRepository::getPoetLabelsForPoems($poemsAsTranslator->getCollection());
 
         $lastOnlineAgo = '';
         if ($author->user) {
@@ -101,11 +100,12 @@ class AuthorController extends Controller {
             'author'            => $author,
             'alias'             => $aliasNames,
             'label'             => $author->label,
-            'poemsAsPoet'       => $sortedOriginalPoems,
-            'poemsAsTranslator' => $sortedTranslationPoems,
+            'poemsAsPoet'       => $poemsAsPoet,
+            'poemsAsTranslator' => $poemsAsTranslator,
             'poetLabelMap'      => $poetLabelMap,
             'lastOnline'        => $lastOnlineAgo,
-            'currentSort'       => $sortType
+            'currentSort'       => $sortType,
+            'currentType'       => $type
         ]);
     }
 
