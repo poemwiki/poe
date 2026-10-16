@@ -102,12 +102,13 @@
            href="{{ urlOrLoginRef(route('author/edit', $author->fakeId, false)) }}">@lang('poem.correct errors or edit')</a>
       </div>
 
-      @if($author->wikiData)
+      {{-- Render cached summaries only; remote fetching can block an otherwise paginated page. --}}
+      @if($author->wikiData && $author->wiki_desc_lang)
         <input type="radio" name="tabs" id="tab-desc-wikipedia">
         <label for="tab-desc-wikipedia">Wikipedia</label>
         <div class="tab">
           <p class="text-justify leading-loose">{{
-              t2s($author->wiki_desc_lang ?: $author->fetchWikiDesc())
+              t2s($author->wiki_desc_lang)
               }}
           </p>
           @if($author->wikiData->url)
@@ -132,40 +133,18 @@
 
         {{-- Author's Original Poems Tab --}}
         @php
-          $authorTabChecked = $poemsAsPoet->isNotEmpty() || $poemsAsTranslator->isEmpty();
+          $authorTabChecked = $poemsAsTranslator->isEmpty() || ($poemsAsPoet->isNotEmpty() && $currentType !== 'translation');
         @endphp
         <input type="radio" name="poem-tabs" id="tab-author-poem" {{ $authorTabChecked ? 'checked="checked"' : '' }}>
         <label class="text-lg" for="tab-author-poem">
-          @lang("Author's Poem", ['author' => $label])<span class="ml-3 text-sm font-normal text-gray-400">{{$poemsAsPoet->count()}}</span>
+          @lang("Author's Poem", ['author' => $label])<span class="ml-3 text-sm font-normal text-gray-400">{{$poemsAsPoet->total()}}</span>
         </label>
         <div class="tab">
           @if($poemsAsPoet->isNotEmpty())
             <ul class="poems-list">
-              @foreach($poemsAsPoet as $poem)
-                <li class="title-list-item">
-                  <a class="title font-song no-bg" href="{{$poem->url}}">
-                    {{trim($poem->title) ?: '无题'}}
-                  </a>
-                  <a class="first-line no-bg" href="{{$poem->url}}">
-                    {!!Str::of($poem->firstLine)->surround('span', function ($i) {
-                      return 'style="transition-delay:'.($i*20).'ms"';
-                    })!!}
-
-                    {{-- Poem metadata --}}
-                    @if(!$poem->isTranslated)
-                      @include('poems.fields.date', [
-                        'poem' => $poem,
-                        'class' => 'text-gray-400 float-right item-poem-author'
-                      ])
-                    @elseif($poem->translatorLabel)
-                      <span class="text-gray-400 float-right item-poem-author">
-                        @lang('Translated by', ['translator' => $poem->translatorsStr])
-                      </span>
-                    @endif
-                  </a>
-                </li>
-              @endforeach
+              @include('authors.poem-items', ['poems' => $poemsAsPoet, 'type' => 'original'])
             </ul>
+            @include('authors.poem-loader', ['poems' => $poemsAsPoet, 'tab' => 'tab-author-poem'])
           @endif
 
           <a href="{{urlOrLoginRef(route('poems/create', ['author_fake_id' => $author->fakeID], false))}}"
@@ -177,32 +156,17 @@
         {{-- Translation Works Tab --}}
         @if($poemsAsTranslator->isNotEmpty())
           @php
-            $translatorTabChecked = $poemsAsTranslator->isNotEmpty() && $poemsAsPoet->isEmpty();
+            $translatorTabChecked = !$authorTabChecked;
           @endphp
           <input type="radio" name="poem-tabs" id="tab-translator-poem" {{ $translatorTabChecked ? 'checked="checked"' : '' }}>
           <label class="text-lg" for="tab-translator-poem">
-            @lang("Translation Works", ['author' => $label])<span class="ml-3 text-sm font-normal text-gray-400">{{$poemsAsTranslator->count()}}</span>
+            @lang("Translation Works", ['author' => $label])<span class="ml-3 text-sm font-normal text-gray-400">{{$poemsAsTranslator->total()}}</span>
           </label>
           <div class="tab">
             <ul class="poems-list">
-              @foreach($poemsAsTranslator as $poem)
-                <li class="title-list-item">
-                  <a class="title font-song no-bg" href="{{$poem->url}}">
-                    {!!Str::of(trim($poem->title) ?: '无题')->surround('span')!!}
-                  </a>
-                  <a class="first-line no-bg" href="{{$poem->url}}">
-                    {!!Str::of($poem->firstLine)->surround('span', function ($i) {
-                      return 'style="transition-delay:'.($i*20).'ms"';
-                    })!!}
-
-                    {{-- Original author metadata --}}
-                    <span class="text-gray-400 float-right item-poem-author {{$poetLabelMap[$poem->id]['author_id'] ? 'poemwiki-link' : ''}}">
-                      {{$poetLabelMap[$poem->id]['name']}}
-                    </span>
-                  </a>
-                </li>
-              @endforeach
+              @include('authors.poem-items', ['poems' => $poemsAsTranslator, 'type' => 'translation'])
             </ul>
+            @include('authors.poem-loader', ['poems' => $poemsAsTranslator, 'tab' => 'tab-translator-poem'])
 
             <a href="{{urlOrLoginRef(route('poems/create', ['translator_fake_id' => $author->fakeID], false))}}"
                class="btn btn-wire mt-8">
@@ -220,6 +184,7 @@
 
 
 @push('scripts')
+  @include('authors.infinite-scroll')
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       // Simple toggle sort logic
@@ -230,6 +195,8 @@
           var next = current === 'hottest' ? 'newest' : 'hottest';
           var url = new URL(window.location.href);
           url.searchParams.set('sort', next);
+          url.searchParams.delete('page');
+          url.searchParams.delete('type');
           window.location.href = url.toString();
         });
       }
