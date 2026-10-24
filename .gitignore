@@ -35,3 +35,6 @@ fields_sample.json
 public/index-cn.html
 storage/framework/maintenance.php
 .env.testing
+
+# Local-only operational material
+/.private/

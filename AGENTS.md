@@ -55,6 +55,10 @@ Docker 部署可参考 `README.md` 中的 `docker build` 与 `docker run` 命令
 
 ## Agent 技能
 
+### 公开发布前的隐私检查（优先规则）
+
+运维与安全资料默认私有保存，公开前须检查全部待推送提交及正文、附件并脱敏，披露真实信息须获用户明确授权，此规则优先于自动建 Issue、文档和 PR 的流程。
+
 ### Issue 追踪器
 
 事项通过 GitHub Issues 管理（`star8ks/poe`）。参见 `docs/agents/issue-tracker.md`。
