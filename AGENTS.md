@@ -36,6 +36,7 @@ Docker 部署可参考 `README.md` 中的 `docker build` 与 `docker run` 命令
 本工作流基于 [Matt Pocock Engineering Skills](https://github.com/mattpocock/skills/tree/main/skills/engineering) 中的几个 skill，如果当前环境中还没有这些 skill，需要先把这些 skill 安装到项目目录。
 
 默认采用轻量闭环：`grill-with-docs → to-spec → TDD → Review → PR`。先通过 `grill-with-docs` 与 agent 澄清需求、术语和边界，必要时沉淀 `CONTEXT.md` 或 ADR；再使用 `to-spec` 将已讨论内容整理为规格并创建 GitHub Issue。实现时优先以可观察行为为边界，按 TDD 的小步循环推进。
+简单需求不需要走完整的流程，直接依据要求实现即可。
 
 仅在规格确实需要拆分为多个可独立验证、依赖关系明确的工作项时，才使用 `to-tickets`。无依赖的工作项可以交由 subagent 并行处理；简单需求直接依据规格实现，不为流程而拆分。
 
@@ -58,6 +59,10 @@ Docker 部署可参考 `README.md` 中的 `docker build` 与 `docker run` 命令
 ### 公开发布前的隐私检查（优先规则）
 
 运维与安全资料默认私有保存，公开前须检查全部待推送提交及正文、附件并脱敏，披露真实信息须获用户明确授权，此规则优先于自动建 Issue、文档和 PR 的流程。
+
+### 线上安全与流量防护
+
+涉及 IP 封禁、UA 规则、WAF/ESA、真实客户端 IP 或流量排查的任务，先阅读 [线上流量防护与安全策略](docs/security-policy.md)，并核对实际线上配置。该文档记录已实施规则、豁免、验证与回滚流程，以及尚未批准的草案；策略变更后同步更新。线上 Nginx 文件修改与 reload/restart 仍分别需要用户确认。
 
 ### Issue 追踪器
 
