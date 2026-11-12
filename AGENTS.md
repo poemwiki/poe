@@ -68,6 +68,10 @@ Docker 部署可参考 `README.md` 中的 `docker build` 与 `docker run` 命令
 
 事项通过 GitHub Issues 管理（`star8ks/poe`）。参见 `docs/agents/issue-tracker.md`。
 
+### 需求登记
+
+需求编号及处理结果维护在 `docs/requirements.md`；已有需求的澄清和调整沿用原编号。
+
 ### 领域文档
 
 采用单一上下文布局：根目录 `CONTEXT.md` 与 `docs/adr/`。参见 `docs/agents/domain.md`。

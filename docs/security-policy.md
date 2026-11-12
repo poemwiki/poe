@@ -204,6 +204,12 @@ curl --compressed --max-time 20 -sS \
 
 需要同时核对正文是否为挑战页面；HTTP 200 本身不是通过测试的标准。用新 Cookie/UA/IP 排查也不能据此认定原日志中的客户端没有通过过挑战。
 
+## 独立渲染服务的 HTTPS 入口
+
+2026-11-11（北京时间），需求 r15 的 `render.poemwiki.com` 已配置 Cloudflare 代理 DNS，并新增仅匹配该 Host 的 `render-https-origin` 配置规则，使用 Strict HTTPS 回源。`poemwiki.com` 全站原有 SSL 模式及其他域名规则未修改；本节不改变上述 `poemwiki.org` 的 ESA 策略。
+
+用户已明确确认公开该域名的图片生成接口且不加认证。没有新增公网 18080 入站规则；渲染容器端口仅绑定服务器内网。公网健康接口、目标提交号及 PNG 生成均已验证。旧渲染服务保留至用户验收；入口依赖和恢复清单保存在本机私有部署记录中。
+
 ## 官方参考
 
 - [ESA 自定义规则与 JS 挑战语义](https://help.aliyun.com/zh/edge-security-acceleration/esa/user-guide/waf-custom-rules/)
