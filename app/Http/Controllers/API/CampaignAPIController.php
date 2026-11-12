@@ -107,11 +107,13 @@ class CampaignAPIController extends Controller {
         if ($cacheCampaignCollection) {
             $latestCampaign = $cacheCampaignCollection->first();
             if (empty($latestCampaign)) {
+                CampaignRepository::clearCampaignIndexCache();
+
                 return;
             }
             $latestCampaignId = $latestCampaign['id'] ?? 0;
             if ($id > $latestCampaignId) {
-                Cache::tags(['campaign-index'])->flush();
+                CampaignRepository::clearCampaignIndexCache();
             }
         }
     }
