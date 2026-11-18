@@ -132,6 +132,8 @@ Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like 
 
 ## 源站真实 IP
 
+2026-11-19 已同步服务商最新回源名单。先扩展信任范围，确认新名单生效后移除退役网段，并复测回源及访客 IP。执行细节及名单快照保存在私有运维记录。
+
 2026-10-11 已分别确认写入、校验及平滑 reload，并用经过 ESA、直连和伪造标头的无登录 GET 验证两种日志得到真实出口 IP。
 
 ESA 已开启：
@@ -145,7 +147,7 @@ Nginx 文件：
 /www/server/panel/vhost/nginx/extension/poemwiki.org/esa-realip.conf
 ```
 
-站点配置通过该目录的 `*.conf` include 加载。文件中的 `set_real_ip_from` 只信任当次 ESA 官方导出的 149 条 IPv4、109 条 IPv6 回源 CIDR，然后设置：
+站点配置通过该目录的 `*.conf` include 加载。2026-10-11 首次配置时，`set_real_ip_from` 只信任当日 ESA 官方导出的 149 条 IPv4、109 条 IPv6 回源 CIDR，然后设置：
 
 ```nginx
 real_ip_header ali-real-client-ip;
