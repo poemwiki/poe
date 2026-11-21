@@ -451,7 +451,8 @@ class PoemAPIController extends Controller {
             }
         }
 
-        $res['related'] = $this->_relatedPoems($poem);
+        $res['related']            = $this->_relatedPoems($poem);
+        $res['translation_family'] = $this->poemRepository->getTranslationFamily($poem);
 
         $res['nft_unlistable'] = $poem->nft && $poem->nft->listing && $poem->nft->listing->isUnlistable;
         $res['nft_id']         = $poem->nft ? $poem->nft->id : null;

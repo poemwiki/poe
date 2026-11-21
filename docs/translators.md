@@ -61,7 +61,7 @@
 ### 翻译树缓存
 - `PoemRepository::getTranslatedPoemsTree($poem)` 以顶层原作为根，调用 `collectAllPoemsInTranslationTree()` 广度优先抓取多层译作，并对整棵树执行 `preloadTranslatorsForPoems()`。
 - 构建过程中 `translatorStr` 来自 `Poem->translatorsStr`，因此需要确保缓存或关系已经就绪。
-- `Poem::clearTranslatedPoemsTreeCache()` 在 `created`、`updated`、`deleted` 事件里被触发，用以失效 `translated_poems_tree_{topOriginalId}`；如果未来重构需要在“仅修改译者关联”时刷新缓存，需记得在对应 mutation 中重复这一逻辑。
+- `Poem::clearTranslatedPoemsTreeCache()` 在 `created`、`updated`、`deleted` 事件里被触发，用以失效 `translated_poems_tree_v2_{topOriginalId}`；如果未来重构需要在“仅修改译者关联”时刷新缓存，需记得在对应 mutation 中重复这一逻辑。
 
 ## 展示与 API 输出
 - 前台诗歌详情 `resources/views/poems/fields/translator.blade.php` 迭代 `Poem->translators`，对 `Author` 输出作者页链接，对 `Entry` 输出站内搜索链接；若译者集合为空，则回退到 `translatorLabel`。

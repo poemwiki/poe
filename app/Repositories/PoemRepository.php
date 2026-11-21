@@ -964,7 +964,7 @@ class PoemRepository extends BaseRepository {
     public function getTranslatedPoemsTree($poem) {
         // topOriginalPoem can be null if original_id chain is broken; fall back to current poem
         $topOriginal = $poem->topOriginalPoem ?? $poem;
-        $cacheKey    = "translated_poems_tree_{$topOriginal->id}";
+        $cacheKey    = self::translationTreeCacheKey($topOriginal->id);
 
         return Cache::remember($cacheKey, 360000, function() use ($topOriginal) {
 
@@ -976,8 +976,45 @@ class PoemRepository extends BaseRepository {
             $poetLabelMap = self::getPoetLabelsForPoems($allPoemsInTree);
 
             // Build hierarchical structure
-            return $this->buildTranslationTree($topOriginal, $allPoemsInTree, $poetLabelMap);
+            // Excluding the root from its own descendants also breaks malformed cycles.
+            $childrenBySource = $allPoemsInTree->where('id', '!=', $topOriginal->id)->groupBy('original_id');
+
+            return $this->buildTranslationTree($topOriginal, $childrenBySource, $poetLabelMap);
         });
+    }
+
+    public function getTranslationFamily(Poem $poem): array {
+        $tree         = $this->getTranslatedPoemsTree($poem);
+        $original     = null;
+        $translations = [];
+        $stack        = [$tree];
+
+        while ($stack !== []) {
+            $version    = array_pop($stack);
+            $isOriginal = (bool) $version['isOriginal'];
+            if ($version['id'] !== $poem->id) {
+                $summary = [
+                    'id'       => $version['id'],
+                    'title'    => (string) $version['title'],
+                    'language' => (string) $version['language'],
+                    'credit'   => (string) ($isOriginal ? $version['poetLabel'] : $version['translatorStr']),
+                ];
+                if ($isOriginal && $version['id'] === $tree['id']) {
+                    $original = $summary;
+                } else {
+                    $translations[] = $summary;
+                }
+            }
+            foreach (array_reverse($version['translatedPoems']) as $child) {
+                $stack[] = $child;
+            }
+        }
+
+        return ['original' => $original, 'translations' => $translations];
+    }
+
+    private static function translationTreeCacheKey(int $id): string {
+        return "translated_poems_tree_v2_{$id}";
     }
 
     /**
@@ -988,27 +1025,27 @@ class PoemRepository extends BaseRepository {
         if (!$topOriginal) {
             return;
         }
-        $cacheKey = "translated_poems_tree_{$topOriginal->id}";
+        $cacheKey = self::translationTreeCacheKey($topOriginal->id);
         Cache::forget($cacheKey);
     }
 
     /**
      * Optimized method to collect all poems in a translation tree with minimal queries
      */
-    private function collectAllPoemsInTranslationTree($topOriginal, $maxDepth = 4) {
-        // Use recursive CTE or find all poems that belong to this translation tree
-        // We'll use a breadth-first approach with batched queries
+    private function collectAllPoemsInTranslationTree($topOriginal) {
+        // Collect every reachable version with one query per level.
+        $topOriginal->loadMissing('lang');
 
         $allPoems        = collect([$topOriginal]);
         $currentLevelIds = collect([$topOriginal->id]);
         $processedIds    = collect([$topOriginal->id]);
-        $currentDepth    = 1;
 
-        while ($currentLevelIds->isNotEmpty() && $currentDepth <= $maxDepth) {
+        while ($currentLevelIds->isNotEmpty()) {
             // Get all direct translations for all poems in current level in one query
             $nextLevelPoems = Poem::whereIn('original_id', $currentLevelIds->toArray())
                 ->whereRaw('original_id <> id')
                 ->whereNotIn('id', $processedIds->toArray())
+                ->with('lang')
                 ->get();
 
             if ($nextLevelPoems->isEmpty()) {
@@ -1019,7 +1056,6 @@ class PoemRepository extends BaseRepository {
             $allPoems        = $allPoems->concat($nextLevelPoems);
             $currentLevelIds = $nextLevelPoems->pluck('id');
             $processedIds    = $processedIds->concat($currentLevelIds);
-            $currentDepth++;
         }
 
         return $allPoems;
@@ -1028,11 +1064,8 @@ class PoemRepository extends BaseRepository {
     /**
      * Recursively build translation tree structure
      */
-    private function buildTranslationTree($poem, $allPoems, $poetLabelMap) {
-        // Get direct translations of this poem
-        $directTranslations = $allPoems->filter(function($p) use ($poem) {
-            return $p->original_id == $poem->id && $p->id !== $poem->id;
-        })->sortBy('language_id');
+    private function buildTranslationTree($poem, $childrenBySource, $poetLabelMap) {
+        $directTranslations = $childrenBySource->get($poem->id, collect())->sortBy('language_id');
 
         // Build the poem structure
         $poemData = [
@@ -1045,13 +1078,13 @@ class PoemRepository extends BaseRepository {
             'title'           => $poem->title,
             'url'             => $poem->url,
             'isOriginal'      => $poem->is_original,
-            'poetLabel'       => $poem->is_original ? $poetLabelMap[$poem->id]['name'] : '',
+            'poetLabel'       => $poem->is_original ? ($poetLabelMap[$poem->id]['name'] ?? '') : '',
             'translatedPoems' => []
         ];
 
         // Recursively add translated poems
         foreach ($directTranslations as $translation) {
-            $poemData['translatedPoems'][] = $this->buildTranslationTree($translation, $allPoems, $poetLabelMap);
+            $poemData['translatedPoems'][] = $this->buildTranslationTree($translation, $childrenBySource, $poetLabelMap);
         }
 
         return $poemData;
