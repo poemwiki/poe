@@ -984,10 +984,11 @@ class PoemRepository extends BaseRepository {
     }
 
     public function getTranslationFamily(Poem $poem): array {
-        $tree         = $this->getTranslatedPoemsTree($poem);
-        $original     = null;
-        $translations = [];
-        $stack        = [$tree];
+        $tree            = $this->getTranslatedPoemsTree($poem);
+        $currentLanguage = '';
+        $original        = null;
+        $translations    = [];
+        $stack           = [$tree];
 
         while ($stack !== []) {
             $version    = array_pop($stack);
@@ -1004,13 +1005,15 @@ class PoemRepository extends BaseRepository {
                 } else {
                     $translations[] = $summary;
                 }
+            } else {
+                $currentLanguage = (string) $version['language'];
             }
             foreach (array_reverse($version['translatedPoems']) as $child) {
                 $stack[] = $child;
             }
         }
 
-        return ['original' => $original, 'translations' => $translations];
+        return ['current_language' => $currentLanguage, 'original' => $original, 'translations' => $translations];
     }
 
     private static function translationTreeCacheKey(int $id): string {

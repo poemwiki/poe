@@ -2,6 +2,7 @@
 
 namespace Tests\APIs;
 
+use App\Models\Language;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\Concerns\BuildsPoems;
@@ -11,15 +12,29 @@ class PoemTranslationFamilyApiTest extends TestCase {
     use BuildsPoems, DatabaseTransactions;
 
     public function test_original_and_translation_details_expose_all_related_versions(): void {
-        $user     = factory(User::class)->create();
-        $original = $this->makePoem($user, ['is_original' => 1]);
+        $user             = factory(User::class)->create();
+        $originalLanguage = factory(Language::class)->create([
+            'locale'     => 'en-x-r22',
+            'name_lang'  => ['zh-CN' => '英语'],
+            'sort_order' => 1,
+        ]);
+        $translationLanguage = factory(Language::class)->create([
+            'locale'     => 'fr-x-r22',
+            'name_lang'  => ['zh-CN' => '法语'],
+            'sort_order' => 2,
+        ]);
+        $original = $this->makePoem($user, ['is_original' => 1, 'language_id' => $originalLanguage->id]);
         $original->update(['original_id' => $original->id]);
 
         $sibling  = $this->makePoem($user, ['is_original' => 0, 'original_id' => $original->id]);
         $versions = [$sibling->id];
         $source   = $original;
         for ($depth = 0; $depth < 5; $depth++) {
-            $source     = $this->makePoem($user, ['is_original' => 0, 'original_id' => $source->id]);
+            $source = $this->makePoem($user, [
+                'is_original' => 0,
+                'original_id' => $source->id,
+                'language_id' => $translationLanguage->id,
+            ]);
             $versions[] = $source->id;
         }
 
@@ -27,6 +42,7 @@ class PoemTranslationFamilyApiTest extends TestCase {
             ->assertOk()
             ->assertJsonPath('code', 0)
             ->assertJsonPath('data.translation_family.original', null)
+            ->assertJsonPath('data.translation_family.current_language', '英语')
             ->json('data.translation_family');
         $this->assertEqualsCanonicalizing($versions, array_column($originalFamily['translations'], 'id'));
 
@@ -34,6 +50,7 @@ class PoemTranslationFamilyApiTest extends TestCase {
             ->assertOk()
             ->assertJsonPath('code', 0)
             ->assertJsonPath('data.translation_family.original.id', $original->id)
+            ->assertJsonPath('data.translation_family.current_language', '法语')
             ->json('data.translation_family');
         $this->assertEqualsCanonicalizing(array_slice($versions, 0, -1), array_column($translationFamily['translations'], 'id'));
     }

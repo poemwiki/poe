@@ -85,7 +85,7 @@ Workflow:
 - `random()`, `randomNft()`, `detail()`, and `infoByFakeId()` rely on `translatorsStr`, `translatorsApiArr`, and `translator_avatar_true` flags. These endpoints expect preloading to have run to avoid null translators when only legacy fields are populated.
 - `query()` uses translator strings to flag keyword matches and surfaces translation data in search results.
 
-小程序的 `GET/POST /api/v1/poem/detail/{id}` 通过 `translation_family` 提供原作入口和扁平译作列表。原作不存在或当前作品本身是原作时，`original` 为 `null`。每条版本包含 `id`、`title`、`language`、`credit`，列表排除当前作品。沿用网页的翻译链，覆盖所有可达层级。
+小程序的 `GET/POST /api/v1/poem/detail/{id}` 通过 `translation_family` 提供原作入口和扁平译作列表。原作不存在或当前作品本身是原作时，`original` 为 `null`。每条版本包含 `id`、`title`、`language`、`credit`，列表排除当前作品。`current_language` 提供当前作品的语言名称，与各版本的 `language` 使用相同来源。沿用网页的翻译链，覆盖所有可达层级。
 
 ### Web views (`resources/views/poems/*`)
 - The poem detail blade expects `translatedPoemsTree` containing the cached hierarchy to render the translation graph and label translators or poets per node.
